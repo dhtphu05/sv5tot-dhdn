@@ -907,7 +907,6 @@ export function loadPortalStateFromDisk(): boolean {
     if (Array.isArray(parsed.auditLogs)) {
       portalState.auditLogs = parsed.auditLogs;
     }
-    savePortalStateToDisk();
     return true;
   } catch {
     return false;

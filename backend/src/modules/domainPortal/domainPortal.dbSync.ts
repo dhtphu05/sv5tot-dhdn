@@ -37,6 +37,7 @@ let schemaReadyPromise: Promise<void> | null = null;
 let initialHydrationPromise: Promise<boolean> | null = null;
 let syncTimer: NodeJS.Timeout | null = null;
 let activeSyncPromise: Promise<void> | null = null;
+const lastSyncedPayloadHash = new Map<string, string>();
 
 export function isNeonDbSyncEnabled(): boolean {
   if (process.env.NODE_ENV === 'test') return false;
@@ -76,8 +77,12 @@ async function upsertPersistentRecord(
   collection: string,
   recordKey: string,
   payload: unknown
-): Promise<void> {
+): Promise<boolean> {
+  const cacheKey = `${collection}:${recordKey}`;
   const jsonText = JSON.stringify(payload ?? {});
+  if (lastSyncedPayloadHash.get(cacheKey) === jsonText) {
+    return false;
+  }
   await prisma.$executeRawUnsafe(
     `
       INSERT INTO "portal_persistent_records" ("collection", "record_key", "payload", "updated_at")
@@ -89,6 +94,8 @@ async function upsertPersistentRecord(
     recordKey,
     jsonText
   );
+  lastSyncedPayloadHash.set(cacheKey, jsonText);
+  return true;
 }
 
 function mapReviewStageEnum(
@@ -610,8 +617,14 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
       // 2. Student Applications (JSONB + Relational Tables)
       const currentAppIds = Object.keys(portalState.studentApplications);
       for (const [appId, app] of Object.entries(portalState.studentApplications)) {
-        await upsertPersistentRecord(prisma, 'student_application', appId, app);
-        await syncStudentApplicationToRelationalTables(prisma, app).catch(() => {});
+        const appChanged = await upsertPersistentRecord(prisma, 'student_application', appId, app);
+        const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === appId);
+        const relCacheKey = `rel_sync:${appId}`;
+        const relSnapshot = JSON.stringify({ app, staffRec: staffRec ?? null });
+        if (appChanged || lastSyncedPayloadHash.get(relCacheKey) !== relSnapshot) {
+          await syncStudentApplicationToRelationalTables(prisma, app).catch(() => {});
+          lastSyncedPayloadHash.set(relCacheKey, relSnapshot);
+        }
       }
       if (currentAppIds.length === 0) {
         await prisma
@@ -686,6 +699,7 @@ export function schedulePortalStateNeonDbSync(): void {
 }
 
 export async function clearPortalPersistentRecordsInNeonDb(): Promise<void> {
+  lastSyncedPayloadHash.clear();
   if (!isNeonDbSyncEnabled()) return;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -723,6 +737,10 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               ? JSON.parse(row.payload)
               : row.payload;
           if (!data) continue;
+          lastSyncedPayloadHash.set(
+            `${row.collection}:${row.record_key}`,
+            JSON.stringify(data)
+          );
 
           switch (row.collection) {
             case 'registered_student':
