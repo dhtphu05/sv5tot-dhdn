@@ -34,6 +34,7 @@ import {
   applyUpdateDeclarationInlineMutation,
   applyAddDeclarationInlineMutation,
   applyDeleteDeclarationMutation,
+  findCriterionAndRequirementById,
   findEvidenceContextInApplication,
   calculateStudentApplicationSummaryStats,
   computeCriteriaAdvisoryStatuses,
@@ -46,6 +47,7 @@ import { StudentApplicationTopBanners } from '../../widgets/student-application/
 import { StudentApplicationBodySection } from '../../widgets/student-application/StudentApplicationBodySection';
 import { StudentApplicationInspectorsAndModals } from '../../widgets/student-application/StudentApplicationInspectorsAndModals';
 import { isBackendMode } from '../../shared/config/executionMode';
+import { resolveDomainServices } from '../../entities/services';
 import { mergeStudentProfileSnapshots } from '../profile/StudentProfileView';
 
 export interface StudentApplicationWorkspaceProps {
@@ -779,26 +781,92 @@ export const StudentApplicationWorkspace: React.FC<
               }
               onUpdateDeclaration={(reqId, declarationId, updated) => {
                 hasLocalMutationRef.current = true;
-                setApplication((prev) =>
-                  applyUpdateDeclarationInlineMutation(
+                setApplication((prev) => {
+                  const nextApp = applyUpdateDeclarationInlineMutation(
                     prev,
                     reqId,
                     declarationId,
                     updated
-                  )
-                );
+                  );
+                  if (isBackendMode() && nextApp.applicationId) {
+                    const { criterion, requirement } =
+                      findCriterionAndRequirementById(nextApp, reqId);
+                    const decl = requirement?.declarations.find(
+                      (d) => d.id === declarationId
+                    );
+                    if (criterion && decl) {
+                      resolveDomainServices()
+                        .individual.saveDeclaration({
+                          applicationId: nextApp.applicationId,
+                          criterionId: criterion.id,
+                          requirementId: reqId,
+                          declaration: decl,
+                          actor: {
+                            id: nextApp.student?.studentId || 'student',
+                            name: nextApp.student?.fullName || 'Sinh viên',
+                            email: nextApp.student?.email,
+                            role: 'STUDENT',
+                          },
+                        })
+                        .catch(() => {});
+                    }
+                  }
+                  return nextApp;
+                });
               }}
               onAddDeclaration={(reqId, newDecl) => {
                 hasLocalMutationRef.current = true;
-                setApplication((prev) =>
-                  applyAddDeclarationInlineMutation(prev, reqId, newDecl)
-                );
+                setApplication((prev) => {
+                  const nextApp = applyAddDeclarationInlineMutation(
+                    prev,
+                    reqId,
+                    newDecl
+                  );
+                  if (isBackendMode() && nextApp.applicationId) {
+                    const { criterion } = findCriterionAndRequirementById(
+                      nextApp,
+                      reqId
+                    );
+                    if (criterion) {
+                      resolveDomainServices()
+                        .individual.saveDeclaration({
+                          applicationId: nextApp.applicationId,
+                          criterionId: criterion.id,
+                          requirementId: reqId,
+                          declaration: newDecl,
+                          actor: {
+                            id: nextApp.student?.studentId || 'student',
+                            name: nextApp.student?.fullName || 'Sinh viên',
+                            email: nextApp.student?.email,
+                            role: 'STUDENT',
+                          },
+                        })
+                        .catch(() => {});
+                    }
+                  }
+                  return nextApp;
+                });
               }}
               onDeleteDeclaration={(reqId, declId) => {
                 hasLocalMutationRef.current = true;
-                setApplication((prev) =>
-                  applyDeleteDeclarationMutation(prev, reqId, declId)
-                );
+                setApplication((prev) => {
+                  if (isBackendMode() && prev.applicationId) {
+                    resolveDomainServices()
+                      .individual.deleteDeclaration?.({
+                        applicationId: prev.applicationId,
+                        requirementId: reqId,
+                        declarationId: declId,
+                        actor: {
+                          id: prev.student?.studentId || 'student',
+                          name: prev.student?.fullName || 'Sinh viên',
+                          email: prev.student?.email,
+                          role: 'STUDENT',
+                        },
+                      })
+                      .catch(() => {});
+                  }
+                  return applyDeleteDeclarationMutation(prev, reqId, declId);
+                });
                 showToast('Đã xóa kê khai');
               }}
               onOpenRegulation={handleOpenRegulation}
@@ -886,9 +954,24 @@ export const StudentApplicationWorkspace: React.FC<
         }}
         onDeleteDeclaration={(reqId, declId) => {
           hasLocalMutationRef.current = true;
-          setApplication((prev) =>
-            applyDeleteDeclarationMutation(prev, reqId, declId)
-          );
+          setApplication((prev) => {
+            if (isBackendMode() && prev.applicationId) {
+              resolveDomainServices()
+                .individual.deleteDeclaration?.({
+                  applicationId: prev.applicationId,
+                  requirementId: reqId,
+                  declarationId: declId,
+                  actor: {
+                    id: prev.student?.studentId || 'student',
+                    name: prev.student?.fullName || 'Sinh viên',
+                    email: prev.student?.email,
+                    role: 'STUDENT',
+                  },
+                })
+                .catch(() => {});
+            }
+            return applyDeleteDeclarationMutation(prev, reqId, declId);
+          });
           showToast('Đã xóa kê khai');
         }}
         addEvidenceModalState={addEvidenceModalState}

@@ -851,8 +851,6 @@ export default function App() {
       staffRouteId: '',
       staffUserOverride: null,
       collectiveUserEmail: '',
-      mutatedApplication: null,
-      mutatedNotifications: null,
     });
     updateBrowserUrl('/login');
     if (typeof window !== 'undefined') {

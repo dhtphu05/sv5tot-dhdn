@@ -1223,17 +1223,33 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       return;
     }
 
+    const actor = resolveSessionActor(req);
+    const inferredStudentCode = id.replace(/^APP-\d{4}-DN-/, '');
+    const savedProfile = resolveSavedStudentProfileFromPortalState({
+      userId: actor.authenticated ? actor.id : undefined,
+      studentCode: inferredStudentCode,
+      email: actor.email || undefined,
+    });
     const app =
-      portalState.studentApplications[id] ||
-      (portalState.studentApplications['APP-2026-DN-00142']
-        ? structuredClone(portalState.studentApplications['APP-2026-DN-00142'])
-        : {
-            applicationId: id,
-            status: 'draft',
-            reviewStage: 'SCHOOL',
-            criteria: createDefaultCriteriaList(),
-            supplementRequests: [],
-          });
+      portalState.studentApplications[id] || {
+        applicationId: id,
+        season: 'Năm học 2025–2026',
+        level: 'Cấp Đại học Đà Nẵng',
+        status: 'draft',
+        reviewStage: 'SCHOOL',
+        applicantProfileSnapshot: savedProfile || undefined,
+        student: {
+          fullName: savedProfile?.fullName || actor.name || 'Sinh viên ĐHĐN',
+          studentId: inferredStudentCode,
+          university:
+            savedProfile?.institutionName || 'Trường Đại học Bách khoa – ĐHĐN',
+          class: savedProfile?.className || '',
+          email: savedProfile?.email || actor.email || `${inferredStudentCode}@sv.udn.vn`,
+          academicYear: 'Năm học 2025–2026',
+        },
+        criteria: createDefaultCriteriaList(),
+        supplementRequests: [],
+      };
     app.applicationId = id;
     if (!Array.isArray(app.criteria) || app.criteria.length === 0) {
       app.criteria = createDefaultCriteriaList();
@@ -1325,7 +1341,6 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     syncStaffRecordFromStudentApplication(app, { createIfMissing: false });
     savePortalStateToDisk();
 
-    const actor = resolveSessionActor(req);
     appendPortalAuditLog({
       track: 'INDIVIDUAL',
       applicationId: id,
@@ -1416,16 +1431,13 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     const incomingApp = (req.body?.application || undefined) as Record<string, any> | undefined;
     const baseApp =
       portalState.studentApplications[id] ||
-      incomingApp ||
-      (portalState.studentApplications['APP-2026-DN-00142']
-        ? structuredClone(portalState.studentApplications['APP-2026-DN-00142'])
-        : {
-            applicationId: id,
-            status: 'under_review',
-            reviewStage: 'SCHOOL',
-            criteria: createDefaultCriteriaList(),
-            supplementRequests: [],
-          });
+      incomingApp || {
+        applicationId: id,
+        status: 'under_review',
+        reviewStage: 'SCHOOL',
+        criteria: createDefaultCriteriaList(),
+        supplementRequests: [],
+      };
     const app: Record<string, any> = incomingApp
       ? { ...baseApp, ...incomingApp, applicationId: id }
       : { ...baseApp, applicationId: id };

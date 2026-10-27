@@ -26,6 +26,39 @@ import {
   findCriterionAndRequirementById,
 } from '../../entities/application/studentApplicationMutators';
 import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
+import { isBackendMode } from '../../shared/config/executionMode';
+import { resolveDomainServices } from '../../entities/services';
+
+function syncSingleDeclarationToBackend(
+  nextApp: StudentApplicationData,
+  reqId: string,
+  targetDeclId?: string
+): void {
+  if (!isBackendMode() || !nextApp.applicationId) return;
+  const { criterion, requirement } = findCriterionAndRequirementById(
+    nextApp,
+    reqId
+  );
+  if (!criterion || !requirement) return;
+  const decl = targetDeclId
+    ? requirement.declarations.find((d) => d.id === targetDeclId)
+    : requirement.declarations[requirement.declarations.length - 1];
+  if (!decl) return;
+  resolveDomainServices()
+    .individual.saveDeclaration({
+      applicationId: nextApp.applicationId,
+      criterionId: criterion.id,
+      requirementId: reqId,
+      declaration: decl,
+      actor: {
+        id: nextApp.student?.studentId || 'student',
+        name: nextApp.student?.fullName || 'Sinh viên',
+        email: nextApp.student?.email,
+        role: 'STUDENT',
+      },
+    })
+    .catch(() => {});
+}
 
 interface UseStudentDeclarationAndEvidenceModalsParams {
   initialData: StudentApplicationData;
@@ -203,16 +236,18 @@ export function useStudentDeclarationAndEvidenceModals({
     existingDeclId?: string
   ) => {
     const isSupplementActive = submissionState === 'supplement_required';
-    setApplication((prev) =>
-      applySaveDeclarationMutation(
+    setApplication((prev) => {
+      const nextApp = applySaveDeclarationMutation(
         prev,
         reqId,
         declData,
         evidenceFiles,
         existingDeclId,
         isSupplementActive
-      )
-    );
+      );
+      syncSingleDeclarationToBackend(nextApp, reqId, existingDeclId);
+      return nextApp;
+    });
 
     if (existingDeclId) {
       recordSupplementDeclarationEdit(
@@ -241,15 +276,17 @@ export function useStudentDeclarationAndEvidenceModals({
         : f.isNewlyAddedSupplement,
     }));
 
-    setApplication((prev) =>
-      applyAppendEvidenceFilesMutation(
+    setApplication((prev) => {
+      const nextApp = applyAppendEvidenceFilesMutation(
         prev,
         reqId,
         declId,
         taggedFiles,
         (isSupplementActive ? 'supplement' : 'ready') as RequirementStatus
-      )
-    );
+      );
+      syncSingleDeclarationToBackend(nextApp, reqId, declId);
+      return nextApp;
+    });
 
     recordSupplementEvidenceAdded(reqId, declId, taggedFiles);
     showToast(`Đã thêm ${newFiles.length} minh chứng`);
@@ -301,9 +338,16 @@ export function useStudentDeclarationAndEvidenceModals({
       title: decl?.value || requirement?.title || 'Minh chứng đính kèm',
     });
 
-    setApplication((prev) =>
-      applyAppendEvidenceFilesMutation(prev, reqId, declId, newFiles)
-    );
+    setApplication((prev) => {
+      const nextApp = applyAppendEvidenceFilesMutation(
+        prev,
+        reqId,
+        declId,
+        newFiles
+      );
+      syncSingleDeclarationToBackend(nextApp, reqId, declId);
+      return nextApp;
+    });
   };
 
   const handleDeleteEvidence = (
@@ -312,30 +356,34 @@ export function useStudentDeclarationAndEvidenceModals({
     fileId: string
   ) => {
     let removedFileName = '';
-    setApplication((prev) => ({
-      ...prev,
-      criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({
-        ...req,
-        declarations: req.declarations.map((d) => {
-          if (d.id !== declId) return d;
-          const targetFile = d.evidenceFiles.find((f) => f.id === fileId);
-          if (
-            submissionState === 'supplement_required' &&
-            targetFile &&
-            !targetFile.isNewlyAddedSupplement
-          ) {
-            return d;
-          }
-          if (targetFile) {
-            removedFileName = targetFile.name;
-          }
-          return {
-            ...d,
-            evidenceFiles: d.evidenceFiles.filter((f) => f.id !== fileId),
-          };
-        }),
-      })),
-    }));
+    setApplication((prev) => {
+      const nextApp = {
+        ...prev,
+        criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({
+          ...req,
+          declarations: req.declarations.map((d) => {
+            if (d.id !== declId) return d;
+            const targetFile = d.evidenceFiles.find((f) => f.id === fileId);
+            if (
+              submissionState === 'supplement_required' &&
+              targetFile &&
+              !targetFile.isNewlyAddedSupplement
+            ) {
+              return d;
+            }
+            if (targetFile) {
+              removedFileName = targetFile.name;
+            }
+            return {
+              ...d,
+              evidenceFiles: d.evidenceFiles.filter((f) => f.id !== fileId),
+            };
+          }),
+        })),
+      };
+      syncSingleDeclarationToBackend(nextApp, reqId, declId);
+      return nextApp;
+    });
 
     recordSupplementEvidenceRemoved(removedFileName);
   };
