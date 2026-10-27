@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Canonical Student Application Domain Data & Criteria Builder
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Canonical Student Application Domain Data & Criteria Builder
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import {

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Automated Test Suite for AI Committee Secretary ("AI Thư ký Hội đồng")
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Automated Test Suite for AI Committee Secretary ("AI Thư ký Hội đồng")
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Validates AI-REVIEW-H1 Committee Extension:
  * 1. Verdict-first preliminary advisory report ("AI sơ bộ: ...")
@@ -29,7 +29,7 @@ import {
 } from '../staff/fixtures/committeeFixtures';
 import { CommitteeCaseDetail } from '../staff/committeeTypes';
 
-describe('5TOT Đà Nẵng — AI Committee Secretary ("AI Thư ký Hội đồng")', () => {
+describe('5TOT ĐHĐN — AI Committee Secretary ("AI Thư ký Hội đồng")', () => {
   // Test case 1: Flagged Application (Nguyễn Minh Anh — APP-2026-DN-102220123)
   const appFlagged = INITIAL_STAFF_APPLICATIONS.find(
     (a) => a.applicationId === 'APP-2026-DN-102220123'

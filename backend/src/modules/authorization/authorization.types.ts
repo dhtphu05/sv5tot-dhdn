@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authorization Types & Policy Contracts (Backend V2)
+ * 5TOT ĐHĐN — Authorization Types & Policy Contracts (Backend V2)
  * Defines authenticated actor context, domain capabilities, and scope boundaries.
  */
 

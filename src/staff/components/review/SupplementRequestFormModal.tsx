@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Scoped Supplement Request Form & Confirmation Dialog
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Scoped Supplement Request Form & Confirmation Dialog
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 32, 34, 40–49, 108, 112:
  * - Targets exact selected scope (Criterion -> Requirement -> Declaration).
@@ -271,7 +271,7 @@ export const SupplementRequestFormModal: React.FC<
                   Thời gian nhận bổ sung hiện đã kết thúc.
                 </div>
                 <p className="text-[12px] mt-1 text-[#7F1D1D]">
-                  Cổng tiếp nhận bổ sung hồ sơ cấp Thành phố đã đóng theo mốc thời gian của đợt xét chọn. Cán bộ không thể tạo yêu cầu bổ sung mới.
+                  Cổng tiếp nhận bổ sung hồ sơ cấp Đại học Đà Nẵng đã đóng theo mốc thời gian của đợt xét chọn. Cán bộ không thể tạo yêu cầu bổ sung mới.
                 </p>
               </div>
             </div>
@@ -496,7 +496,7 @@ export const SupplementRequestFormModal: React.FC<
                 className="w-full h-[36px] px-3 text-[12.5px] text-[#172A3A] bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none focus:border-[#0D78AE] focus:bg-white tabular-nums"
               />
               <p className="text-[11px] text-[#607483]">
-                Đây là hạn đề nghị phản hồi cho yêu cầu này (nằm trong thời hạn nhận bổ sung chung của Thành phố).
+                Đây là hạn đề nghị phản hồi cho yêu cầu này (nằm trong thời hạn nhận bổ sung chung của Đại học Đà Nẵng).
               </p>
             </div>
 

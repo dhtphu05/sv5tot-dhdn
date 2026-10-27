@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — useAiReviewCopilot Hook
+ * 5TOT ĐHĐN — useAiReviewCopilot Hook
  * Coordinates AI Review Copilot state, Demo vs Real Mode execution, and Inspector lifecycle.
  *
  * Requirements:
@@ -185,7 +185,7 @@ export function useAiReviewCopilot({
         id: 'real-task-3',
         stage: 'match_regulations',
         title: 'Quy chế xét chọn',
-        description: 'Quy chế SV5T cấp Thành phố 2025–2026.',
+        description: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026.',
         status: 'completed',
         completedAt: 'Vừa xong',
       },

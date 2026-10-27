@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — VirtualAiReviewReport Component
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — VirtualAiReviewReport Component
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Section 3, 4, 5, 6, 7, 8:
  * - Conversational AI Assistant presentation: Interleaved paragraphs and rich interactive cards.
@@ -128,7 +128,7 @@ export const VirtualAiReviewReport: React.FC<VirtualAiReviewReportProps> = ({
 
     if (suggestionId === 'fu-why-insuff') {
       answer =
-        'Hồ sơ của ứng viên hiện có 02 điểm nghẽn chính: 1) Văn bản Chiến dịch Mùa hè xanh xác nhận 04 ngày thực tế trong khi kê khai 05 ngày; 2) Bảng điểm học tập chỉ có Học kỳ 1, chưa đủ điểm cả năm học theo Điều 5.1 Quy chế SV5T cấp Thành phố.';
+        'Hồ sơ của ứng viên hiện có 02 điểm nghẽn chính: 1) Văn bản Chiến dịch Mùa hè xanh xác nhận 04 ngày thực tế trong khi kê khai 05 ngày; 2) Bảng điểm học tập chỉ có Học kỳ 1, chưa đủ điểm cả năm học theo Điều 5.1 Quy chế SV5T cấp Đại học Đà Nẵng.';
       extraBlock = {
         type: 'next_action_card',
         id: 'fu-action-supp',
@@ -154,7 +154,7 @@ export const VirtualAiReviewReport: React.FC<VirtualAiReviewReportProps> = ({
         title: 'Quy đổi: Mùa hè xanh (4 ngày) + Hiến máu (1 ngày)',
         declaredText: 'Kê khai: 05 ngày tình nguyện',
         evidenceText: '04 ngày MHX + 01 ngày hiến máu quy đổi = 05 ngày',
-        analysis: 'Hội đồng Thành Đoàn chấp nhận quy đổi hiến máu sang ngày hoạt động tình nguyện.',
+        analysis: 'Hội đồng xét chọn Đại học Đà Nẵng chấp nhận quy đổi hiến máu sang ngày hoạt động tình nguyện.',
         discrepancySeverity: 'info',
         actionLabel: 'Xem quy chế quy đổi',
       };
@@ -177,7 +177,7 @@ export const VirtualAiReviewReport: React.FC<VirtualAiReviewReportProps> = ({
         actionLabel: 'Sử dụng bản nháp bổ sung',
       };
     } else {
-      answer = `Về câu hỏi "${prompt}": Hệ thống đã đối chiếu với Quy chế Sinh viên 5 tốt cấp Thành phố Đà Nẵng niên khóa 2025–2026. Mọi đánh giá đã được trích dẫn cụ thể tại các thẻ minh chứng bên dưới.`;
+      answer = `Về câu hỏi "${prompt}": Hệ thống đã đối chiếu với Quy chế Sinh viên 5 tốt cấp Đại học Đà Nẵng niên khóa 2025–2026. Mọi đánh giá đã được trích dẫn cụ thể tại các thẻ minh chứng bên dưới.`;
     }
 
     setActiveFollowUpResponse({ prompt, answer, extraBlock });
@@ -227,7 +227,7 @@ export const VirtualAiReviewReport: React.FC<VirtualAiReviewReportProps> = ({
                   Trợ lý Thẩm định AI · Báo cáo Thẩm định Chuyên sâu
                 </h2>
                 <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-[#E0F2FE] text-[#0369A1] border border-[#BAE6FD]">
-                  Hội đồng Thành Đoàn
+                  Hội đồng xét chọn Đại học Đà Nẵng
                 </span>
               </div>
               <p className="text-[11.5px] text-[#607483] truncate mt-0.5">

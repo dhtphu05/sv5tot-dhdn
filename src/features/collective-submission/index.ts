@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Direct City Submission (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Direct City Submission (FSD Features Layer)
  * Encapsulates direct submission of Collective applications to the City Student Association.
  */
 

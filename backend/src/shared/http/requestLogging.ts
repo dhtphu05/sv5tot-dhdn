@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — HTTP Request Instrumentation Middleware
+ * 5TOT ĐHĐN — HTTP Request Instrumentation Middleware
  * Logs incoming request method, path, status, and duration (ms).
  */
 

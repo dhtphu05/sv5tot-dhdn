@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Database Client Manager
+ * 5TOT ĐHĐN — Prisma Database Client Manager
  * Manages singleton lifecycle, connection timeouts, slow query logging, and graceful disconnection.
  */
 

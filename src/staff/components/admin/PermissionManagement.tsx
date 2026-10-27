@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Role & Capability Matrix (Quyền truy cập)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Role & Capability Matrix (Quyền truy cập)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 Sections 74–79:
  * - Clear role-to-capability inspection matrix.
@@ -35,7 +35,7 @@ export const PermissionManagement: React.FC = () => {
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            Kiểm soát quyền hạn · Hội Sinh viên TP. Đà Nẵng
+            Kiểm soát quyền hạn · Hội Sinh viên Đại học Đà Nẵng
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <ShieldCheck size={20} className="text-[#0D78AE]" />
@@ -43,7 +43,7 @@ export const PermissionManagement: React.FC = () => {
           </h1>
           <p className="text-[12.5px] text-[#526B7C] mt-1">
             Tra cứu và giám sát phạm vi quyền truy cập của 04 nhóm vai trò chuyên
-            trách trong quy trình xét chọn Sinh viên 5 tốt cấp Thành phố.
+            trách trong quy trình xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng.
           </p>
         </div>
       </div>

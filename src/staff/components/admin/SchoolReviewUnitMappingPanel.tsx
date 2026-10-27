@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Unit Mapping Panel (Phân tuyến Đơn vị xét sơ tuyển cấp Trường)
+ * 5TOT ĐHĐN — School Review Unit Mapping Panel (Phân tuyến Đơn vị xét sơ tuyển cấp Trường)
  * Extracted subcomponent for InstitutionManagement.tsx to keep file size modular (<1,000 lines).
  *
  * Enforces ADMIN-REVAMP Section 9:

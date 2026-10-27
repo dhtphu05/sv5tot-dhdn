@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Demo AI Review Copilot Synthetic Fixtures
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Demo AI Review Copilot Synthetic Fixtures
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Section 12: 5 Realistic Synthetic Demo Scenarios:
  * 1. Normal application — no critical discrepancy (ethics / integration)
@@ -52,7 +52,7 @@ export const DEMO_AI_FINDINGS: Record<string, AiFinding> = {
     observationDetail:
       'Văn bản xác nhận ghi nhận sinh viên tham gia đội hình từ ngày 12/07 đến hết ngày 15/07/2026 (tổng cộng 04 ngày công tác), trong khi phần kê khai ghi 05 ngày. Cần cán bộ đối chiếu lại số ngày thực tế hoặc yêu cầu giấy xác nhận bổ trợ.',
     applicableRegulation:
-      'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 7.1): Tối thiểu 05 ngày tình nguyện trong năm học hoặc hoàn thành 01 chiến dịch trọn vẹn được công nhận tương đương.',
+      'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 7.1): Tối thiểu 05 ngày tình nguyện trong năm học hoặc hoàn thành 01 chiến dịch trọn vẹn được công nhận tương đương.',
     severity: 'discrepancy',
     suggestedAction: 'inspect',
     draftSupplementMessage:
@@ -83,13 +83,13 @@ export const DEMO_AI_FINDINGS: Record<string, AiFinding> = {
       highlightRegionId: 'transcript-gpa',
     },
     observationDetail:
-      'Tệp bảng điểm tải lên là bảng điểm học kỳ 1 năm học 2025–2026. Quy chế xét chọn cấp Thành phố yêu cầu xác nhận điểm trung bình chung cả năm học hoặc bảng điểm cả 2 học kỳ có dấu đỏ của Phòng Đào tạo.',
+      'Tệp bảng điểm tải lên là bảng điểm học kỳ 1 năm học 2025–2026. Quy chế xét chọn cấp Đại học Đà Nẵng yêu cầu xác nhận điểm trung bình chung cả năm học hoặc bảng điểm cả 2 học kỳ có dấu đỏ của Phòng Đào tạo.',
     applicableRegulation:
-      'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 5.1): Điểm học tập đạt từ 3.4/4.0 (hoặc 8.5/10) tính trên toàn bộ năm học xét chọn.',
+      'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 5.1): Điểm học tập đạt từ 3.4/4.0 (hoặc 8.5/10) tính trên toàn bộ năm học xét chọn.',
     severity: 'missing_evidence',
     suggestedAction: 'supplement_draft',
     draftSupplementMessage:
-      'Kính gửi sinh viên, tệp minh chứng bạn tải lên hiện là bảng điểm Học kỳ 1. Để đảm bảo điều kiện xét chọn danh hiệu cấp Thành phố, đề nghị bạn bổ sung Bảng điểm chính thức cả năm học 2025–2026 có xác nhận của Phòng Đào tạo trước thời hạn quy định.',
+      'Kính gửi sinh viên, tệp minh chứng bạn tải lên hiện là bảng điểm Học kỳ 1. Để đảm bảo điều kiện xét chọn danh hiệu cấp Đại học Đà Nẵng, đề nghị bạn bổ sung Bảng điểm chính thức cả năm học 2025–2026 có xác nhận của Phòng Đào tạo trước thời hạn quy định.',
   },
 
   // Scenario 5: Ambiguous information in physical criterion
@@ -118,7 +118,7 @@ export const DEMO_AI_FINDINGS: Record<string, AiFinding> = {
     observationDetail:
       'Văn bản ghi nhận thành tích hoàn thành cự ly 5km trong giải chạy phong trào. Cần cán bộ thẩm định xem xét quy đổi sang tiêu chuẩn Sinh viên khỏe theo Phụ lục hướng dẫn thi đua thể chất.',
     applicableRegulation:
-      'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 6.2): Sinh viên đạt huy chương hoặc hoàn thành cự ly chuẩn giải chạy việt dã cấp thành phố được tính quy đổi tương đương tiêu chuẩn Sinh viên khỏe.',
+      'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 6.2): Sinh viên đạt huy chương hoặc hoàn thành cự ly chuẩn giải chạy việt dã cấp thành phố được tính quy đổi tương đương tiêu chuẩn Sinh viên khỏe.',
     severity: 'unclear',
     suggestedAction: 'inspect',
     draftSupplementMessage:
@@ -151,7 +151,7 @@ export const DEMO_AI_FINDINGS: Record<string, AiFinding> = {
     observationDetail:
       'Văn bản có đầy đủ chữ ký Trưởng phòng CTSV và con dấu tròn đỏ. Mốc thời gian năm học chuẩn xác, không có ghi nhận vi phạm kỷ luật.',
     applicableRegulation:
-      'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 4.1): Điểm rèn luyện đạt từ 90/100 điểm trở lên.',
+      'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 4.1): Điểm rèn luyện đạt từ 90/100 điểm trở lên.',
     severity: 'info',
     suggestedAction: 'confirm',
   },
@@ -179,9 +179,9 @@ export const DEMO_AI_FINDINGS: Record<string, AiFinding> = {
       highlightRegionId: 'ielts-score',
     },
     observationDetail:
-      'Bản scan Test Report Form rõ nét, mã TRF xác thực hợp lệ. Thời hạn hiệu lực 2 năm kéo dài đến 15/03/2027, vượt ngưỡng quy định tối thiểu 5.5 của Thành Đoàn.',
+      'Bản scan Test Report Form rõ nét, mã TRF xác thực hợp lệ. Thời hạn hiệu lực 2 năm kéo dài đến 15/03/2027, vượt ngưỡng quy định tối thiểu 5.5 của Hội Sinh viên Đại học Đà Nẵng.',
     applicableRegulation:
-      'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 8.2): Đạt chứng chỉ IELTS từ 5.5 hoặc TOEIC từ 650 điểm trở lên còn hạn tại thời điểm xét chọn.',
+      'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 8.2): Đạt chứng chỉ IELTS từ 5.5 hoặc TOEIC từ 650 điểm trở lên còn hạn tại thời điểm xét chọn.',
     severity: 'info',
     suggestedAction: 'confirm',
   },
@@ -274,7 +274,7 @@ export const DEMO_AI_AGENT_TASKS: AiAgentTask[] = [
     id: 'task-4-match-regulations',
     stage: 'match_regulations',
     title: '4. Tìm tiêu chí và quy định áp dụng',
-    description: 'Áp dụng Quy chế số 18-QĐ/TĐTN-TTNTH năm học 2025–2026 cấp Thành phố.',
+    description: 'Áp dụng Quy chế số 12-QĐ/ĐHĐN-HSV năm học 2025–2026 cấp Đại học Đà Nẵng.',
     status: 'completed',
     artifactCount: 5,
     artifactLabel: 'Quy chế 2025–2026',
@@ -315,7 +315,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Tình nguyện tốt',
       headline: 'Bước 1: Xác định Tiêu chí Tình nguyện tốt',
       explanation: 'Quy chế yêu cầu tối thiểu 05 ngày tình nguyện trong năm học hoặc hoàn thành 01 chiến dịch cấp thành phố/trường.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 7.1)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 7.1)',
       actionLabel: 'Đến kê khai sinh viên',
     },
     {
@@ -355,7 +355,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       finding: DEMO_AI_FINDINGS['finding-vol-days-mismatch'],
       headline: 'Bước 4: Soi chiếu Quy chế SV5T 2025–2026',
       explanation: 'Điều 7.1 quy định: Cần đủ 05 ngày tình nguyện. Nếu sinh viên có thêm 01 ngày hiến máu hoặc hoạt động tình nguyện khác, có thể cộng gộp.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 7.1)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 7.1)',
       actionLabel: 'Chuyển về biểu mẫu thẩm định',
     },
     {
@@ -381,7 +381,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Học tập tốt',
       headline: 'Bước 1: Tiêu chuẩn Điểm trung bình học tập',
       explanation: 'Quy chế yêu cầu điểm trung bình chung học tập cả năm học từ 3.4/4.0 (hoặc 8.5/10) trở lên.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 5.1)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 5.1)',
       actionLabel: 'Kiểm tra bảng điểm',
     },
     {
@@ -408,7 +408,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Học tập tốt',
       finding: DEMO_AI_FINDINGS['finding-acad-transcript-incomplete'],
       headline: 'Bước 3: Quy định thẩm định điểm cả năm',
-      explanation: 'Cấp Thành phố không chấp nhận bảng điểm tạm 1 học kỳ. Cần yêu cầu sinh viên bổ sung bảng điểm tích lũy cả năm có dấu của Phòng Đào tạo.',
+      explanation: 'Cấp Đại học Đà Nẵng không chấp nhận bảng điểm tạm 1 học kỳ. Cần yêu cầu sinh viên bổ sung bảng điểm tích lũy cả năm có dấu của Phòng Đào tạo.',
       actionLabel: 'Tạo bản nháp bổ sung',
     },
     {
@@ -432,7 +432,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Thể lực tốt',
       headline: 'Bước 1: Tiêu chuẩn Thể lực tốt',
       explanation: 'Quy chế yêu cầu sinh viên đạt danh hiệu Sinh viên khỏe hoặc đạt giải/chứng nhận thể thao theo quy định.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 6.1)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 6.1)',
       actionLabel: 'Kiểm tra kê khai thể thao',
     },
     {
@@ -459,8 +459,8 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Thể lực tốt',
       finding: DEMO_AI_FINDINGS['finding-phys-sports-scope'],
       headline: 'Bước 3: Xác nhận quy chuẩn quy đổi tương đương',
-      explanation: 'Cần cán bộ thẩm định xem xét quy đổi theo Phụ lục hướng dẫn thi đua thể chất của Ban Chấp hành Thành Đoàn.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 6.2)',
+      explanation: 'Cần cán bộ thẩm định xem xét quy đổi theo Phụ lục hướng dẫn thi đua thể chất của Ban Thư ký Hội Sinh viên Đại học Đà Nẵng.',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 6.2)',
       actionLabel: 'Chuyển về biểu mẫu',
     },
     {
@@ -484,7 +484,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Đạo đức tốt',
       headline: 'Bước 1: Tiêu chuẩn Điểm rèn luyện',
       explanation: 'Quy chế yêu cầu điểm rèn luyện trung bình cả năm học đạt từ 90/100 điểm trở lên (loại Xuất sắc) và không vi phạm kỷ luật.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 4.1)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 4.1)',
       actionLabel: 'Kiểm tra điểm rèn luyện',
     },
     {
@@ -522,7 +522,7 @@ export const DEMO_GUIDED_STEPS: Record<CriterionId, AiGuidedReviewStep[]> = {
       criterionName: 'Hội nhập tốt',
       headline: 'Bước 1: Tiêu chuẩn Chứng chỉ ngoại ngữ',
       explanation: 'Quy chế yêu cầu đạt chứng chỉ tiếng Anh quốc tế tối thiểu IELTS 5.5, TOEIC 650 hoặc chứng chỉ ngoại ngữ tương đương còn hạn.',
-      regulationCitation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 8.2)',
+      regulationCitation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 8.2)',
       actionLabel: 'Kiểm tra chứng chỉ',
     },
     {
@@ -693,7 +693,7 @@ export const AI_DEMO_SCENARIOS: Record<AiDemoScenarioId, AiDemoScenarioConfig> =
     expectedVerdict: 'preliminary_meets',
     displayBadge: 'Có cơ sở ĐẠT',
     summaryHeadline: 'AI đã rà soát 5 tiêu chí. Toàn bộ thông tin đối chiếu sơ bộ có căn cứ phù hợp quy chế.',
-    summaryDetail: 'Hồ sơ có đầy đủ minh chứng đối chiếu cho 5 tiêu chí theo Quy chế SV5T cấp Thành phố 2025–2026. Nhận định tham khảo của AI · Cán bộ quyết định chính thức.',
+    summaryDetail: 'Hồ sơ có đầy đủ minh chứng đối chiếu cho 5 tiêu chí theo Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026. Nhận định tham khảo của AI · Cán bộ quyết định chính thức.',
     findings: [
       DEMO_AI_FINDINGS['finding-ethics-compliant'],
       DEMO_AI_FINDINGS['finding-integration-ielts'],
@@ -732,7 +732,7 @@ export const AI_DEMO_SCENARIOS: Record<AiDemoScenarioId, AiDemoScenarioConfig> =
           pageNumber: 1,
         },
         observationDetail: 'Tài liệu bảng điểm chính thức cả năm học xác nhận điểm trung bình 2.80/4.0. Tiêu chuẩn bắt buộc quy chế yêu cầu tối thiểu 3.20/4.0.',
-        applicableRegulation: 'Quy chế SV5T cấp Thành phố 2025–2026 (Điều 5.1): Điểm học tập đạt từ 3.2/4.0 trở lên.',
+        applicableRegulation: 'Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026 (Điều 5.1): Điểm học tập đạt từ 3.2/4.0 trở lên.',
         severity: 'discrepancy',
         suggestedAction: 'inspect',
       },

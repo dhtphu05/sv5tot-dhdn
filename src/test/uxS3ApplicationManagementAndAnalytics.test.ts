@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — UX-S3 Application Management, Analytics & Excel Reporting Test Suite
+ * 5TOT ĐHĐN — UX-S3 Application Management, Analytics & Excel Reporting Test Suite
  * Covers UX3-01 through UX3-25:
  * 1. Accurate Human Review Progress & "Đạt bao nhiêu" Calculation Engine
  * 2. Criteria Met Filtering (met_5, met_4, met_3, met_1_2, met_0, fully_reviewed, partially_reviewed)
@@ -25,7 +25,7 @@ import {
 } from '../staff/export/exportTypes';
 import { StaffApplicationRecord, StaffUser } from '../staff/types';
 
-describe('5TOT Đà Nẵng — UX-S3 Application Management & Analytics Suite', () => {
+describe('5TOT ĐHĐN — UX-S3 Application Management & Analytics Suite', () => {
   // Mock Staff Application Records
   const mockHeroApplication = {
     applicationId: 'APP-2026-DN-102220123',
@@ -141,8 +141,8 @@ describe('5TOT Đà Nẵng — UX-S3 Application Management & Analytics Suite', 
     email: 'binhlt@thanhdoan.danang.gov.vn',
     primaryRole: 'CITY_OFFICER',
     roles: ['CITY_OFFICER'],
-    roleLabel: 'Cán bộ thẩm định Thành phố',
-    unitLabel: 'Tổ thẩm định Thành phố',
+    roleLabel: 'Cán bộ thẩm định cấp Đại học Đà Nẵng',
+    unitLabel: 'Tổ thẩm định cấp Đại học Đà Nẵng',
   } as unknown as StaffUser;
 
   /* -------------------------------------------------------------

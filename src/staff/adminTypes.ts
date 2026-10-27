@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Admin Control Plane Domain Types
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Admin Control Plane Domain Types
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 & ADMIN-REVAMP / ADMIN-REVAMP.1:
  * - Admin is a SYSTEM / CONFIGURATION role (not reviewer, manager, committee, or student impersonator).
@@ -29,7 +29,7 @@ export type InstitutionType =
   | 'other';      // Đơn vị đào tạo khác
 
 export type InstitutionEligibilityMode =
-  | 'DIRECT_CITY'         // Nộp trực tiếp cấp Thành phố
+  | 'DIRECT_CITY'         // Nộp trực tiếp cấp Đại học Đà Nẵng
   | 'UDN_PREREQUISITE';   // Yêu cầu xác nhận điều kiện trước khi nộp
 
 export type InstitutionStatus =

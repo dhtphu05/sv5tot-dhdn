@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin & System Settings Master Fixture Dataset
+ * 5TOT ĐHĐN — Admin & System Settings Master Fixture Dataset
  * Re-exports modular entities across institutions, school review units, staff accounts, and configurations.
  */
 

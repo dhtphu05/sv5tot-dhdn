@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Security Headers Middleware
+ * 5TOT ĐHĐN — Security Headers Middleware
  * Standard security baseline: HSTS, Clickjacking protection, MIME-sniffing prevention.
  */
 

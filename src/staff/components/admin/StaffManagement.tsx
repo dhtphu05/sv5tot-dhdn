@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Staff & User Access Control Management (Người dùng & cán bộ)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Staff & User Access Control Management (Người dùng & cán bộ)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 Sections 21–32, 111, 120, 127:
  * - Admin manages official staff accounts across all 4 roles:
@@ -331,7 +331,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            Phân quyền hệ thống · Hội Sinh viên TP. Đà Nẵng
+            Phân quyền hệ thống · Hội Sinh viên Đại học Đà Nẵng
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <Users size={20} className="text-[#0D78AE]" />

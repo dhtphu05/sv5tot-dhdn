@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Collective Review Route Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Staff Collective Review Route Widget (FSD Widgets Layer)
  */
 
 import React from 'react';
@@ -127,7 +127,7 @@ export const StaffCollectiveReviewRoute: React.FC<
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <Users size={20} className="text-[#0D78AE]" />
-            <span>Xét Tập thể Sinh viên 5 tốt cấp Thành phố</span>
+            <span>Xét Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng</span>
           </h1>
         </div>
 

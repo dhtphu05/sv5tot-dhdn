@@ -363,7 +363,7 @@ export const CollectiveCommitteeCriterionDetail: React.FC<CollectiveCommitteeCri
           <div className="flex items-center justify-between">
             <div className="font-bold text-[#1E293B] flex items-center gap-1.5">
               <Info size={15} className="text-[#0D78AE]" />
-              <span>Đánh giá của Cán bộ Thành phố:</span>
+              <span>Đánh giá của Cán bộ cấp Đại học Đà Nẵng:</span>
             </div>
             <div>{getJudgmentBadge(cityReview?.judgment)}</div>
           </div>
@@ -411,7 +411,7 @@ export const CollectiveCommitteeCriterionDetail: React.FC<CollectiveCommitteeCri
             LỚP 3 — KẾT LUẬN CỦA HỘI ĐỒNG XÉT CHỌN
           </h3>
           <span className="text-[11px] text-[#607483]">
-            (Kết luận chính thức của Hội đồng Thành phố dựa trên 2 lớp trước)
+            (Kết luận chính thức của Hội đồng cấp Đại học Đà Nẵng dựa trên 2 lớp trước)
           </span>
         </div>
 

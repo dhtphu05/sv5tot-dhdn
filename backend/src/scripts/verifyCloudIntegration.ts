@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Neon Database & Cloudflare R2 Live Integration Verification Script
+ * 5TOT ĐHĐN — Neon Database & Cloudflare R2 Live Integration Verification Script
  * Chạy lệnh: npm run verify:cloud (trong thư mục /backend) sau khi điền .env
  */
 

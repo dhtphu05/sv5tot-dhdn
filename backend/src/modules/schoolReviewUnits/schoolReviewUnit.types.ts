@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — School Review Unit Domain Types (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — School Review Unit Domain Types (Backend V2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements authoritative review unit contracts:
  * - Two-tier review architecture (Level 1: School Review Unit -> Level 2: City Review).

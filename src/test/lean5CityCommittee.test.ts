@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — LEAN-5: City Review, Committee Decision UX, Status Simplification & Responsive Harmonization Suite
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — LEAN-5: City Review, Committee Decision UX, Status Simplification & Responsive Harmonization Suite
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Test Specifications:
  * - C01–C10: City Reviewer Shared Queue & Independent Review Authority
@@ -71,14 +71,14 @@ function createMockWorkspaceState(appId: string = 'app-lean5-test'): Application
   };
 }
 
-describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status Simplification Suite', () => {
+describe('5TOT ĐHĐN — LEAN-5 City Review, Committee Decision & Status Simplification Suite', () => {
   // Test users
   const cityOfficerUser: StaffUser = {
     id: 'staff-off-nam',
     fullName: 'Trần Hoàng Nam',
     email: 'nam.th@danang.gov.vn',
     primaryRole: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ Ban Thanh thiếu nhi Trường học Thành Đoàn',
+    roleLabel: 'Cán bộ Ban Phong trào Hội Sinh viên Đại học Đà Nẵng',
     unitLabel: 'Tổ Thẩm định',
     roles: ['CITY_OFFICER'],
     explicitCapabilities: ['REVIEW_CRITERIA', 'REQUEST_SUPPLEMENT'],
@@ -89,7 +89,7 @@ describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status S
     fullName: 'Lê Thị Hoa',
     email: 'hoa.lt@danang.gov.vn',
     primaryRole: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ Ban Thanh thiếu nhi Trường học Thành Đoàn',
+    roleLabel: 'Cán bộ Ban Phong trào Hội Sinh viên Đại học Đà Nẵng',
     unitLabel: 'Tổ Thẩm định',
     roles: ['CITY_OFFICER'],
     explicitCapabilities: ['REVIEW_CRITERIA', 'REQUEST_SUPPLEMENT'],
@@ -100,8 +100,8 @@ describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status S
     fullName: 'Lê Quang Minh',
     email: 'minh.lq@danang.gov.vn',
     primaryRole: 'CITY_COMMITTEE',
-    roleLabel: 'Ủy viên Thường vụ Thành Đoàn Đà Nẵng',
-    unitLabel: 'Hội đồng xét chọn Cấp Thành phố',
+    roleLabel: 'Ủy viên Ban Thư ký Hội Sinh viên Đại học Đà Nẵng',
+    unitLabel: 'Hội đồng xét chọn Cấp Đại học Đà Nẵng',
     roles: ['CITY_COMMITTEE'],
     explicitCapabilities: ['VIEW_COMMITTEE_QUEUE', 'FINALIZE_RESULTS'],
   };
@@ -340,7 +340,7 @@ describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status S
 
     it('C24: Committee decision metadata maps strictly to authoritative Vietnamese labels', () => {
       const recognized = getCommitteeDecisionOutcomeMeta('recognized');
-      assert.equal(recognized.label, 'Được công nhận Sinh viên 5 tốt cấp Thành phố');
+      assert.equal(recognized.label, 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng');
       assert.equal(recognized.shortLabel, 'Được công nhận');
       assert.equal(recognized.tone, 'success');
 
@@ -457,14 +457,14 @@ describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status S
       recordCommitteeDecision(
         col.id,
         'recognized',
-        'Hội đồng thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố.',
+        'Hội đồng thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
         { name: committeeUser.fullName, role: committeeUser.roleLabel }
       );
       const updated = getCollectiveApplicationById(col.id);
       assert.equal(updated?.committeeOutcome, 'recognized');
       assert.equal(
         updated?.committeeNotes,
-        'Hội đồng thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố.'
+        'Hội đồng thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.'
       );
     });
   });
@@ -508,12 +508,12 @@ describe('5TOT Đà Nẵng — LEAN-5 City Review, Committee Decision & Status S
       assert.ok('isAllMet' in proj.criteriaOutcome);
     });
 
-    it('C43: getRoleAwareStatusProjection derives schoolPreliminary dimension (Chưa kết luận, Đề nghị, Không đề nghị, Đã gửi Thành phố)', () => {
+    it('C43: getRoleAwareStatusProjection derives schoolPreliminary dimension (Chưa kết luận, Đề nghị, Không đề nghị, Đã gửi cấp ĐHĐN)', () => {
       const fwdApp: StaffApplicationRecord = {
         ...INITIAL_STAFF_APPLICATIONS[0],
         schoolPreliminaryStatus: 'forwarded_to_city',
       };
-      assert.equal(getRoleAwareStatusProjection(fwdApp).schoolPreliminary.label, 'Đã gửi Thành phố');
+      assert.equal(getRoleAwareStatusProjection(fwdApp).schoolPreliminary.label, 'Đã gửi cấp ĐHĐN');
 
       const recApp: StaffApplicationRecord = {
         ...INITIAL_STAFF_APPLICATIONS[0],

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Development / QA Mode Guard Hook
+ * 5TOT ĐHĐN — Development / QA Mode Guard Hook
  *
  * Per Prompt 14.9 Sections 36 & 37 ("DEV TOOLS VS DEMO TOOLS" & "REMOVE OLD DEV CONTROLS"):
  * - Stakeholders must NEVER see Dev tooling (QA Public Entry, Debug Grid,

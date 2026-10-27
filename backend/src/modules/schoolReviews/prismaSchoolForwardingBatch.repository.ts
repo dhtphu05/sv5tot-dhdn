@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Prisma Implementation of School Forwarding Batch Repository (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Prisma Implementation of School Forwarding Batch Repository (Backend V2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import type { ISchoolForwardingBatchRepository } from './schoolForwardingBatch.repository';
@@ -369,7 +369,7 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
 
       if (app.forwardingBatchId) {
         invalidIds.push(appId);
-        reasons.push(`Hồ sơ ${appId} đã được chuyển lên cấp Thành phố trước đó`);
+        reasons.push(`Hồ sơ ${appId} đã được chuyển lên cấp Đại học Đà Nẵng trước đó`);
         continue;
       }
 
@@ -489,7 +489,7 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
 
     const blockingReasons: string[] = [];
     if (selected === 0) {
-      blockingReasons.push('Chưa có hồ sơ nào được đơn vị đề xuất chuyển cấp Thành phố.');
+      blockingReasons.push('Chưa có hồ sơ nào được đơn vị đề xuất chuyển cấp Đại học Đà Nẵng.');
     }
     if (!existingBatch?.decisionFileId) {
       blockingReasons.push('Chưa đính kèm văn bản đề nghị chính thức của đơn vị.');

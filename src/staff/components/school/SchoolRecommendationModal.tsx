@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Human Recommendation Modal (LEAN-4 Step 2)
+ * 5TOT ĐHĐN — School Human Recommendation Modal (LEAN-4 Step 2)
  * Allows School Officer to record authoritative preliminary recommendation (Đề nghị / Không đề nghị / Chưa kết luận).
  */
 
@@ -120,10 +120,10 @@ export const SchoolRecommendationModal: React.FC<SchoolRecommendationModalProps>
               <div>
                 <div className="font-bold text-[13px] text-[#15803D] flex items-center gap-1.5">
                   <CheckCircle2 size={14} />
-                  Đề xuất chuyển lên Thành phố
+                  Đề xuất chuyển lên cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[11.5px] text-[#526B7C] mt-0.5">
-                  Đủ điều kiện tiêu chuẩn sơ tuyển, hồ sơ minh chứng đầy đủ, đề nghị Hội đồng cấp Thành phố xét duyệt.
+                  Đủ điều kiện tiêu chuẩn sơ tuyển, hồ sơ minh chứng đầy đủ, đề nghị Hội đồng cấp Đại học Đà Nẵng xét duyệt.
                 </div>
               </div>
             </label>
@@ -146,10 +146,10 @@ export const SchoolRecommendationModal: React.FC<SchoolRecommendationModalProps>
               <div>
                 <div className="font-bold text-[13px] text-[#B91C1C] flex items-center gap-1.5">
                   <AlertCircle size={14} />
-                  Không đề xuất chuyển lên Thành phố
+                  Không đề xuất chuyển lên cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[11.5px] text-[#526B7C] mt-0.5">
-                  Không đạt chuẩn hoặc chưa đáp ứng tiêu chí theo quy chế Sinh viên 5 tốt cấp Thành phố.
+                  Không đạt chuẩn hoặc chưa đáp ứng tiêu chí theo quy chế Sinh viên 5 tốt cấp Đại học Đà Nẵng.
                 </div>
               </div>
             </label>
@@ -206,7 +206,7 @@ export const SchoolRecommendationModal: React.FC<SchoolRecommendationModalProps>
             value={recNotes}
             onChange={(e) => onChangeNotes(e.target.value)}
             rows={2}
-            placeholder="Ghi chú đối chiếu, lưu ý hồ sơ gửi Thành phố..."
+            placeholder="Ghi chú đối chiếu, lưu ý hồ sơ gửi cấp Đại học Đà Nẵng..."
             className="w-full p-2.5 rounded-[8px] bg-white border border-[#DCE7EE] text-[12.5px] text-[#172A3A] focus:outline-none focus:border-[#0D78AE]"
           />
         </div>

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN Review UX Correction Tests
+ * 5TOT ĐHĐN — LEAN Review UX Correction Tests
  * Validates:
  * 1. Removal of redundant "Cán bộ thẩm định" column from application tables
  * 2. Default expansion of all 5 criteria across dossiers
@@ -49,8 +49,8 @@ const mockCityOfficer: StaffUser = {
   email: 'nam.th@danang.gov.vn',
   primaryRole: 'CITY_OFFICER',
   roles: ['CITY_OFFICER'],
-  roleLabel: 'Cán bộ Ban Thanh thiếu nhi Trường học Thành Đoàn',
-  unitLabel: 'Ban Thanh thiếu nhi Trường học Thành Đoàn',
+  roleLabel: 'Cán bộ Ban Phong trào Hội Sinh viên Đại học Đà Nẵng',
+  unitLabel: 'Ban Phong trào Hội Sinh viên Đại học Đà Nẵng',
 };
 
 const mockSchoolOfficer: StaffUser = {
@@ -252,7 +252,7 @@ test('UX-CORR-08: School and City criterion conclusions maintain distinct audit 
     ws,
     'volunteer',
     'pass',
-    'Đã đối soát danh sách cấp Thành phố',
+    'Đã đối soát danh sách cấp Đại học Đà Nẵng',
     mockCityOfficer,
     'CITY'
   ).nextWorkspace;
@@ -260,5 +260,5 @@ test('UX-CORR-08: School and City criterion conclusions maintain distinct audit 
   assert.equal(ws.criterionConclusions?.volunteer?.stage, 'CITY');
   assert.equal(ws.criterionConclusions?.volunteer?.actorName, 'Trần Hoàng Nam');
   assert.ok(ws.historyEvents.some((e) => e.description.includes('Cấp Trường') && e.actorName === 'Lê Văn An'));
-  assert.ok(ws.historyEvents.some((e) => e.description.includes('Cấp Thành phố') && e.actorName === 'Trần Hoàng Nam'));
+  assert.ok(ws.historyEvents.some((e) => e.description.includes('Cấp Đại học Đà Nẵng') && e.actorName === 'Trần Hoàng Nam'));
 });

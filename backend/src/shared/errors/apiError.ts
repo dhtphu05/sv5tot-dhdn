@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — RFC 7807 Compliant API Problem Details Error
+ * 5TOT ĐHĐN — RFC 7807 Compliant API Problem Details Error
  */
 
 export interface InvalidParamDetail {

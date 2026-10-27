@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Identity Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Identity Domain Service (Backend V2)
  * Orchestrates user identity lifecycle, role assignments, and account status validation.
  */
 

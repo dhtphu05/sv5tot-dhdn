@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Workspace (FSD Modular Composition)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Collective Application Workspace (FSD Modular Composition)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * Niên khóa áp dụng: Năm học 2025–2026
  *
  * Implements Prompt S4.8.7A-R2:

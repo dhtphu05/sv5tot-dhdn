@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Quiet & Useful AI Section (SRW-4 Section 16)
+ * 5TOT ĐHĐN — Officer Review Quiet & Useful AI Section (SRW-4 Section 16)
  * - Default state: Collapsed (zero intrusion)
  * - Preferred entry: "AI hỗ trợ thẩm định"
  * - On request: Displays preliminary verdict, material findings, links to evidence

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Portal Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — Student Portal Page (FSD Pages Layer)
  * Composes AppShell, StudentHomeView, EvidenceLibraryView, StudentNotificationsView,
  * FinalResultView, StudentApplicationWorkspace, DesignPlayground, and PrototypeDemoToolbar.
  */

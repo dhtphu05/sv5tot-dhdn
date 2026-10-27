@@ -1,13 +1,13 @@
 /**
- * 5TOT Đà Nẵng — Dedicated City Committee Collective Workspace
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Dedicated City Committee Collective Workspace
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements S4.8.6 Collective Committee Workspace:
  * - Desktop-first high-density review interface for City Committee members.
  * - Displays 3 distinct data layers for all 4 criteria:
  *   + LAYER A: Kê khai của tập thể (Submitted declarations, calculations & evidence)
- *   + LAYER B: Kết quả thẩm định của Cán bộ Thành phố (City Officer judgments, notes & supplement history)
+ *   + LAYER B: Kết quả thẩm định của Cán bộ cấp Đại học Đà Nẵng (City Officer judgments, notes & supplement history)
  *   + LAYER C: Kết luận của Hội đồng (Deliberation, attributed decision notes & outcomes)
  * - Original documents and supplementary documents inspection via DocumentViewer.
  * - Distinct handling for favorable and unfavorable cases (e.g. TT03 below 20%).
@@ -78,7 +78,7 @@ export const CollectiveCommitteeWorkspace: React.FC<CollectiveCommitteeWorkspace
   );
   const [notes, setNotes] = useState<string>(
     appData.committeeNotes ||
-      'Hội đồng thống nhất thông qua kết luận đạt tiêu chuẩn Tập thể Sinh viên 5 tốt cấp Thành phố.'
+      'Hội đồng thống nhất thông qua kết luận đạt tiêu chuẩn Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.'
   );
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [actionErrorMsg, setActionErrorMsg] = useState<string | null>(null);
@@ -284,7 +284,7 @@ export const CollectiveCommitteeWorkspace: React.FC<CollectiveCommitteeWorkspace
                 <span>•</span>
                 <span>Năm học: {appData.academicYear}</span>
                 <span>•</span>
-                <span className="text-[#15803D]">Nộp trực tiếp Thành phố: {appData.submittedDirectlyToCityAt ? new Date(appData.submittedDirectlyToCityAt).toLocaleDateString('vi-VN') : '04/10/2026'}</span>
+                <span className="text-[#15803D]">Nộp trực tiếp cấp ĐHĐN: {appData.submittedDirectlyToCityAt ? new Date(appData.submittedDirectlyToCityAt).toLocaleDateString('vi-VN') : '04/10/2026'}</span>
               </div>
             </div>
           </div>
@@ -369,7 +369,7 @@ export const CollectiveCommitteeWorkspace: React.FC<CollectiveCommitteeWorkspace
             {/* City Officer Assignment & Findings Summary Card */}
             <div className="mt-4 p-3.5 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[10px] space-y-1.5 text-[12px]">
               <div className="text-[11px] font-bold text-[#526B7C] uppercase tracking-wide">
-                Cán bộ xét duyệt Thành phố
+                Cán bộ xét duyệt cấp Đại học Đà Nẵng
               </div>
               <div className="font-bold text-[#172A3A]">
                 {appData.assignedOfficerName || 'Trần Hoàng Nam'}

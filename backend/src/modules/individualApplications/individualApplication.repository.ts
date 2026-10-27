@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Individual Application Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Individual Application Repository Interface (Backend V2)
  */
 
 import type {

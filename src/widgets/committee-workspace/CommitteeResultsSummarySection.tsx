@@ -1,8 +1,8 @@
 /**
- * 5TOT Đà Nẵng — Committee Review Results Summary Section (SRW-4 Section 10 Part 2)
+ * 5TOT ĐHĐN — Committee Review Results Summary Section (SRW-4 Section 10 Part 2)
  * Summarizes the 5 criteria distinguishing:
- * 1. Cấp Trường (School preliminary review): Đạt sơ tuyển / Đề xuất Thành phố
- * 2. Cán bộ Thành phố (City Officer review): Đạt yêu cầu 5/5
+ * 1. Cấp Trường (School preliminary review): Đạt sơ tuyển / Đề xuất cấp ĐHĐN
+ * 2. Cán bộ cấp Đại học Đà Nẵng (City Officer review): Đạt yêu cầu 5/5
  * 3. AI Thư ký (Advisory only on demand)
  */
 
@@ -65,7 +65,7 @@ export const CommitteeResultsSummarySection: React.FC<
             </span>
           </div>
           <p className="text-[12px] text-[#526B7C] mt-0.5">
-            Phân định rõ kết quả sơ tuyển cấp Trường, đánh giá độc lập của Cán bộ Thành phố và nhận định tư vấn AI.
+            Phân định rõ kết quả sơ tuyển cấp Trường, đánh giá độc lập của Cán bộ cấp Đại học Đà Nẵng và nhận định tư vấn AI.
           </p>
         </div>
 

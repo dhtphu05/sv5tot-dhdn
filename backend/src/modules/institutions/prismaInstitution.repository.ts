@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Institution Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Institution Repository Implementation (Backend V2)
  * Connects to PostgreSQL via Prisma ORM.
  * Throws 503 DATABASE_OFFLINE when in offline development mode.
  */

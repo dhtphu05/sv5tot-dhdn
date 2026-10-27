@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — 4-Step Admin Operational Workflow Guide Banner
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — 4-Step Admin Operational Workflow Guide Banner
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Gives non-technical Student Association Administrators a clear, step-by-step
  * roadmap for preparing, opening, operating, and hotfixing a 5TOT award season.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Forwarding Unified Table Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Forwarding Unified Table Widget (FSD Widgets Layer)
  * LEAN-4.1 Correction: Direct School Finalization — Select, Attach and Forward
  * Displays single unified table of applications with actual 5-criterion human assessment outcomes.
  * Checkbox selection is the direct authorized finalization input. No secondary recommendation workflow.
@@ -494,7 +494,7 @@ export const SchoolForwardingTable: React.FC<SchoolForwardingTableProps> = ({
                             )}
                           </button>
                         ) : isForwarded ? (
-                          <span title="Đã chuyển lên cấp Thành phố">
+                          <span title="Đã chuyển lên cấp Đại học Đà Nẵng">
                             <Check size={16} className="text-[#16A34A] mx-auto" />
                           </span>
                         ) : hasActiveSupplement ? (
@@ -558,7 +558,7 @@ export const SchoolForwardingTable: React.FC<SchoolForwardingTableProps> = ({
                       <td className="py-3 px-3 text-center whitespace-nowrap">
                         {isForwarded ? (
                           <span className="text-[12px] font-bold text-[#7E22CE]">
-                            Đã gửi Thành phố
+                            Đã gửi cấp ĐHĐN
                           </span>
                         ) : batchStatus === 'FORWARDED' ? (
                           <span className="text-[12px] font-medium text-[#64748B]">

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — ReviewCopilotPanel
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — ReviewCopilotPanel
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * 
  * Contextual AI Review Copilot for Officer & Committee Inspection:
  * - Direct real-time analysis powered by Google GenAI (gemini-3.8-flash).
@@ -206,7 +206,7 @@ export const ReviewCopilotPanel: React.FC<ReviewCopilotPanelProps> = ({
       borderColor: '#FECDD3',
       textColor: '#9F1239',
       icon: AlertCircle,
-      description: 'Chưa đạt ngưỡng quy định của danh hiệu Sinh viên 5 tốt cấp Thành phố.',
+      description: 'Chưa đạt ngưỡng quy định của danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
     },
   }[analysis?.suggestedVerdict || 'SATISFIED'];
 
@@ -224,7 +224,7 @@ export const ReviewCopilotPanel: React.FC<ReviewCopilotPanelProps> = ({
               <span className="text-[11px] font-semibold text-[#0D78AE]">· Gemini 3.8 Flash</span>
             </div>
             <div className="text-[11px] text-[#607483]">
-              Quy chế số 18-QĐ/TĐTN-TTNTH · Năm học 2025–2026
+              Quy chế số 12-QĐ/ĐHĐN-HSV · Năm học 2025–2026
             </div>
           </div>
         </div>

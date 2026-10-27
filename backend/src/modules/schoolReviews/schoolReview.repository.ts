@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — School Review Repository Interface (Backend V2)
  */
 
 import type { PaginatedResult } from '../../shared/query/pagination';

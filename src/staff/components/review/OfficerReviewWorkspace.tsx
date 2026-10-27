@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Workspace Coordinator (Simplified for SRW-4)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Officer Review Workspace Coordinator (Simplified for SRW-4)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements SRW-4 Sections 4, 5, 6, 16:
  * - Direct inspection of the canonical Student dossier (SharedStudentDossier in review mode)
@@ -670,12 +670,12 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
               <strong className="font-bold">
                 {isSchoolStage
                   ? 'Đã hoàn tất xét sơ tuyển 05 tiêu chí cấp Trường.'
-                  : 'Đã hoàn tất thẩm định 05 tiêu chí cấp Thành phố.'}
+                  : 'Đã hoàn tất thẩm định 05 tiêu chí cấp Đại học Đà Nẵng.'}
               </strong>{' '}
               <span>
                 {isSchoolStage
-                  ? 'Hồ sơ đã sẵn sàng để ghi nhận Kết luận đề xuất chuyển Thành phố tại danh sách hồ sơ sơ tuyển.'
-                  : 'Hồ sơ đã được chuyển sang bước trình Hội đồng xét chọn cấp Thành phố.'}
+                  ? 'Hồ sơ đã sẵn sàng để ghi nhận Kết luận đề xuất chuyển cấp ĐHĐN tại danh sách hồ sơ sơ tuyển.'
+                  : 'Hồ sơ đã được chuyển sang bước trình Hội đồng xét chọn cấp Đại học Đà Nẵng.'}
               </span>
             </div>
           </div>

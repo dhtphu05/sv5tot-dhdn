@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Canonical Student Domain Selectors
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng — Năm học 2026–2027
+ * 5TOT ĐHĐN — Canonical Student Domain Selectors
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
  *
  * Implements Prompt 15 Sections 4–9, 13–18, 43–46, 51–58, 94–96:
  * - Centralizes Student-facing status mapping, next-action selection,

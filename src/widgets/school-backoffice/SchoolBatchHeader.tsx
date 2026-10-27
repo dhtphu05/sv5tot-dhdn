@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Batch Forwarding Header Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Batch Forwarding Header Widget (FSD Widgets Layer)
  * Renders Review Unit title, season code, natural status badge, and alerts.
  */
 

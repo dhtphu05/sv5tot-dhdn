@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Supplement Queue Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — School Supplement Queue Page (FSD Pages Layer)
  * Manages school-level supplement requests and student responses.
  */
 

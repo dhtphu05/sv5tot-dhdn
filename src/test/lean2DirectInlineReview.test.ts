@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-2 Direct Inline Human Review & Simplified Dossier Assessment Suite
+ * 5TOT ĐHĐN — LEAN-2 Direct Inline Human Review & Simplified Dossier Assessment Suite
  * Covers IR01–IR35 for production direct inline human review and 5-dimension decoupling.
  */
 
@@ -53,7 +53,7 @@ function mockScope(scopeKey: string, status: StaffItemReviewStatus, note = ''): 
   };
 }
 
-describe('5TOT Đà Nẵng — LEAN-2 Direct Inline Review & Decoupled Assessment (IR01–IR35)', () => {
+describe('5TOT ĐHĐN — LEAN-2 Direct Inline Review & Decoupled Assessment (IR01–IR35)', () => {
   // IR01: Full continuous dossier presentation
   test('IR01: Canonical 5 criteria definitions are fully available in sequence 1 to 5', () => {
     assert.equal(CRITERIA_LIST.length, 5);

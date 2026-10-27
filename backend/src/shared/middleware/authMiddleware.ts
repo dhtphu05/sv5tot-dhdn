@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Zero-Trust Authentication Middleware (Backend V2)
+ * 5TOT ĐHĐN — Zero-Trust Authentication Middleware (Backend V2)
  * Verifies Bearer JWT access tokens, validates persistent session status,
  * enforces dynamic account state, and overrides stale JWT role claims with current server state.
  */

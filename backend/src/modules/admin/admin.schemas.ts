@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Control Plane Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Admin Control Plane Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Center Criterion Review Panel (Prompt 17 & 20)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Center Criterion Review Panel (Prompt 17 & 20)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Refactored into modular sub-components under ./criterion/:
  * - CriterionHeroHeader: Level 1 criterion title, status, volunteer aggregation, and actions

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Password Reset Domain Types (Backend V2)
+ * 5TOT ĐHĐN — Password Reset Domain Types (Backend V2)
  * Single-use reset tokens with cryptographically secure hash persistence.
  */
 

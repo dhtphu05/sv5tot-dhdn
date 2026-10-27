@@ -59,9 +59,9 @@ export const CollectiveOverviewTab: React.FC<CollectiveOverviewTabProps> = ({
       <div className="p-4 bg-[#EAF6FC] border border-[#CFE3F0] rounded-[14px] flex items-start gap-3.5 text-[13px] text-[#0B64A0]">
         <ShieldCheck size={20} className="shrink-0 text-[#0D78AE] mt-0.5" />
         <div className="space-y-1 leading-relaxed">
-          <span className="font-bold text-[13.5px]">Quy chế nộp hồ sơ trực tiếp cấp Thành phố (2025–2026):</span>
+          <span className="font-bold text-[13.5px]">Quy chế nộp hồ sơ trực tiếp cấp Đại học Đà Nẵng (2025–2026):</span>
           <p>
-            Hồ sơ Tập thể sau khi hoàn thành 04 tiêu chuẩn và đính kèm đầy đủ minh chứng sẽ được <strong>nộp trực tiếp</strong> lên Hội Sinh viên Việt Nam TP. Đà Nẵng để phân công cán bộ thẩm định, <strong>không qua khâu xác nhận trung gian của Trường</strong>.
+            Hồ sơ Tập thể sau khi hoàn thành 04 tiêu chuẩn và đính kèm đầy đủ minh chứng sẽ được <strong>nộp trực tiếp</strong> lên Hội Sinh viên Việt Nam Đại học Đà Nẵng để phân công cán bộ thẩm định, <strong>không qua khâu xác nhận trung gian của Trường</strong>.
           </p>
         </div>
       </div>
@@ -177,12 +177,12 @@ export const CollectiveOverviewTab: React.FC<CollectiveOverviewTabProps> = ({
             <div className="text-[12px] font-semibold text-[#728391]">Trạng thái hồ sơ hiện tại</div>
             <div className="text-[16px] font-bold text-[#172A3A]">
               {status === 'draft' && 'Đang hoàn thiện kê khai (Chưa nộp)'}
-              {status === 'city_unassigned' && 'Đã nộp trực tiếp lên Thành phố (Chờ tiếp nhận)'}
-              {status === 'city_assigned' && `Thành phố đã tiếp nhận và phân công cán bộ (${currentApp.assignedOfficerName || 'Cán bộ'})`}
-              {status === 'city_in_review' && 'Cán bộ Thành phố đang thẩm định hồ sơ'}
-              {status === 'city_supplement_pending' && 'Cán bộ Thành phố yêu cầu bổ sung minh chứng'}
+              {status === 'city_unassigned' && 'Đã nộp trực tiếp lên cấp Đại học Đà Nẵng (Chờ tiếp nhận)'}
+              {status === 'city_assigned' && `Cấp Đại học Đà Nẵng đã tiếp nhận và phân công cán bộ (${currentApp.assignedOfficerName || 'Cán bộ'})`}
+              {status === 'city_in_review' && 'Cán bộ cấp Đại học Đà Nẵng đang thẩm định hồ sơ'}
+              {status === 'city_supplement_pending' && 'Cán bộ cấp Đại học Đà Nẵng yêu cầu bổ sung minh chứng'}
               {status === 'city_supplement_returned' && 'Tập thể đã gửi bổ sung (Đang xét lại)'}
-              {status === 'city_review_completed' && 'Cán bộ Thành phố đã hoàn tất xét duyệt 4 tiêu chuẩn'}
+              {status === 'city_review_completed' && 'Cán bộ cấp Đại học Đà Nẵng đã hoàn tất xét duyệt 4 tiêu chuẩn'}
               {status === 'published' && 'Đã công bố quyết định khen thưởng chính thức'}
             </div>
           </div>

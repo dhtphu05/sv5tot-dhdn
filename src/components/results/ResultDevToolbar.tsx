@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Final Result QA Scenario Toolbar
+ * 5TOT ĐHĐN — Final Result QA Scenario Toolbar
  * Implements Prompt 11 Sections 54, 55, 56, 57, 70, 72
  * Discrete, collapsible QA bar at the bottom of Kết quả xét chọn.
  */
@@ -29,7 +29,7 @@ export const RESULT_SCENARIO_OPTIONS: ResultScenarioOption[] = [
     id: 'recognized_hero',
     label: '1. Được công nhận (Hero)',
     description:
-      'Nguyễn Minh Anh · Sinh viên 5 tốt cấp Thành phố · 5/5 tiêu chí đã hoàn tất xét.',
+      'Nguyễn Minh Anh · Sinh viên 5 tốt cấp Đại học Đà Nẵng · 5/5 tiêu chí đã hoàn tất xét.',
   },
   {
     id: 'not_recognized',

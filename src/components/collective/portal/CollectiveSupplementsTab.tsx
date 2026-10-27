@@ -18,10 +18,10 @@ export const CollectiveSupplementsTab: React.FC<CollectiveSupplementsTabProps> =
     <div className="p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-5 animate-in fade-in duration-150">
       <div>
         <h2 className="text-[20px] font-extrabold text-[#172A3A]">
-          Yêu cầu bổ sung từ Cán bộ Thành phố
+          Yêu cầu bổ sung từ Cán bộ cấp Đại học Đà Nẵng
         </h2>
         <p className="text-[12.5px] text-[#607483] mt-0.5">
-          Tương tác bổ sung trực tiếp với Cán bộ Hội Sinh viên TP. Đà Nẵng phụ trách thẩm định
+          Tương tác bổ sung trực tiếp với Cán bộ Hội Sinh viên Đại học Đà Nẵng phụ trách thẩm định
         </p>
       </div>
 
@@ -55,7 +55,7 @@ export const CollectiveSupplementsTab: React.FC<CollectiveSupplementsTabProps> =
               </div>
 
               <div className="p-3.5 bg-[#FEF6EB] border border-[#FADDB6] rounded-[10px] text-[13px] text-[#8C3A19] space-y-1">
-                <div className="font-bold">Nội dung yêu cầu từ Cán bộ Thành phố:</div>
+                <div className="font-bold">Nội dung yêu cầu từ Cán bộ cấp Đại học Đà Nẵng:</div>
                 <p>{supp.reason}</p>
                 <div className="text-[11.5px] font-semibold text-[#B75B00] pt-1">
                   Hạn chót bổ sung: {supp.deadline}
@@ -75,7 +75,7 @@ export const CollectiveSupplementsTab: React.FC<CollectiveSupplementsTabProps> =
                 </div>
               ) : (
                 <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] text-[12px] text-[#607483]">
-                  Tập thể đã gửi bổ sung lúc {supp.returnedAt || 'vừa xong'}. Cán bộ Thành phố đang thẩm định lại.
+                  Tập thể đã gửi bổ sung lúc {supp.returnedAt || 'vừa xong'}. Cán bộ cấp Đại học Đà Nẵng đang thẩm định lại.
                 </div>
               )}
             </div>
@@ -86,7 +86,7 @@ export const CollectiveSupplementsTab: React.FC<CollectiveSupplementsTabProps> =
           <CheckCircle2 size={36} className="mx-auto text-[#16A34A]" />
           <div className="font-bold text-[14px] text-[#172A3A]">Không có yêu cầu bổ sung nào</div>
           <p className="text-[12.5px]">
-            Hồ sơ của tập thể không có yêu cầu chỉnh sửa hoặc bổ sung minh chứng từ Thành phố.
+            Hồ sơ của tập thể không có yêu cầu chỉnh sửa hoặc bổ sung minh chứng từ cấp Đại học Đà Nẵng.
           </p>
         </div>
       )}

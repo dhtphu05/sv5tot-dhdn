@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Collective Pre-Submission Audit Dialog
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Collective Pre-Submission Audit Dialog
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v2 Sections 38, 39, 40:
  * - Checks 4 requirements completeness before sending to responsible institution.
@@ -130,7 +130,7 @@ export const CollectivePreSubmitDialog: React.FC<CollectivePreSubmitDialogProps>
               <Building2 size={16} className="shrink-0 mt-0.5 text-[#0D78AE]" />
               <div className="leading-relaxed">
                 <p className="text-[#172A3A]">
-                  Bạn đang nộp hồ sơ của <strong>{application.collectiveName}</strong> năm học <strong>{application.academicYear}</strong> trực tiếp đến <strong>Hội Sinh viên Việt Nam thành phố Đà Nẵng</strong> để xét chọn.
+                  Bạn đang nộp hồ sơ của <strong>{application.collectiveName}</strong> năm học <strong>{application.academicYear}</strong> trực tiếp đến <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong> để xét chọn.
                 </p>
                 <p className="mt-1 text-[#4A6275]">
                   Sau khi nộp, thông tin hồ sơ sẽ được khóa chỉnh sửa thông thường. Bạn chỉ có thể bổ sung hoặc điều chỉnh nội dung trong phạm vi yêu cầu bổ sung hợp lệ.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Notifications, Deadlines & Officer/Manager Application Queue Widgets (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Staff Notifications, Deadlines & Officer/Manager Application Queue Widgets (FSD Widgets Layer)
  */
 
 import React, { useState } from 'react';
@@ -727,7 +727,7 @@ export const StaffApplicationQueueRouteView: React.FC<
                       {isRecommended && (
                         <div className="text-[11px] text-[#0B64A0] font-bold mt-1 flex items-center gap-1">
                           <CheckCircle2 size={12} className="text-[#0D78AE]" />
-                          <span>Đề xuất Thành phố (Đã kèm văn bản PDF)</span>
+                          <span>Đề xuất cấp ĐHĐN (Đã kèm văn bản PDF)</span>
                         </div>
                       )}
                     </div>

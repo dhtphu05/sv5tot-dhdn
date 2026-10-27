@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Health Routes Registration
+ * 5TOT ĐHĐN — Health Routes Registration
  */
 
 import { Router } from 'express';

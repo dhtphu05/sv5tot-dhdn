@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Searchable Participating Institution Combobox
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Searchable Participating Institution Combobox
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 14 Sections 32–39, 62, 64–68, 94:
  * - Searchable combobox loaded from isolated registry source.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Compact Student Declaration Editor Modal (LEAN-1)
+ * 5TOT ĐHĐN — Compact Student Declaration Editor Modal (LEAN-1)
  * Inspired by the Central Youth Union award submission workflow:
  * "Make declaring an achievement feel as simple as adding an item to a list"
  *

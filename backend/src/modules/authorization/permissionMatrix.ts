@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authoritative Permission Matrix & Security Registry (Backend V2)
+ * 5TOT ĐHĐN — Authoritative Permission Matrix & Security Registry (Backend V2)
  * Formalizes all operational permissions, required role assignments, and workflow constraints.
  * Canonical authority rules (BE2-A3):
  * 1. ADMIN cannot deliberate in Committee or fabricate official recognition decisions.

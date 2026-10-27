@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Criteria Controller (Backend V2)
+ * 5TOT ĐHĐN — Criteria Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

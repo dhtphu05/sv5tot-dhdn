@@ -25,7 +25,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCE7EE] pb-3">
         <div>
           <div className="text-[12px] font-bold text-[#0D78AE] uppercase tracking-wide">
-            Hội Sinh viên Việt Nam TP. Đà Nẵng · Năm học {currentApp.academicYear}
+            Hội Sinh viên Việt Nam Đại học Đà Nẵng · Năm học {currentApp.academicYear}
           </div>
           <h2 className="text-[20px] font-extrabold text-[#172A3A] mt-0.5">
             KẾT QUẢ XÉT CHỌN TẬP THỂ SINH VIÊN 5 TỐT
@@ -52,7 +52,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
                   CHÚC MỪNG TẬP THỂ ĐÃ ĐƯỢC CÔNG NHẬN
                 </h3>
                 <p className="text-[13.5px] text-[#4A6275] mt-0.5">
-                  Danh hiệu: <strong className="text-[#15803D]">Tập thể Sinh viên 5 tốt cấp Thành phố Đà Nẵng</strong>
+                  Danh hiệu: <strong className="text-[#15803D]">Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng</strong>
                 </p>
               </div>
             </div>
@@ -65,7 +65,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
                 <div>• Đơn vị: <strong>{currentApp.institutionName}</strong></div>
                 <div>• Quyết định công nhận số: <strong>{currentApp.finalResult?.decisionNumber || '86/QĐ-HSV-TP'}</strong></div>
                 <div>• Ngày ban hành: <strong>{currentApp.finalResult?.decisionDate || '24/10/2026'}</strong></div>
-                <div>• Cơ quan ban hành: <strong>Hội Sinh viên Việt Nam Thành phố Đà Nẵng</strong></div>
+                <div>• Cơ quan ban hành: <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong></div>
                 <div>
                   • Thời điểm công bố trên hệ thống: <strong>{currentApp.finalResult?.publishedAt ? new Date(currentApp.finalResult.publishedAt).toLocaleString('vi-VN') : '24/10/2026'}</strong>
                 </div>
@@ -99,7 +99,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
                   CHƯA ĐƯỢC CÔNG NHẬN TRONG ĐỢT XÉT NÀY
                 </h3>
                 <p className="text-[13px] text-[#64748B] mt-0.5">
-                  Hồ sơ của tập thể <strong>{currentApp.collectiveName}</strong> chưa đáp ứng đủ 04 điều kiện để công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố năm học {currentApp.academicYear}.
+                  Hồ sơ của tập thể <strong>{currentApp.collectiveName}</strong> chưa đáp ứng đủ 04 điều kiện để công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học {currentApp.academicYear}.
                 </p>
               </div>
             </div>
@@ -110,7 +110,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
                 <div>• Tên tập thể: <strong>{currentApp.collectiveName}</strong></div>
                 <div>• Đơn vị: <strong>{currentApp.institutionName}</strong></div>
                 <div>• Ngày thông báo kết quả: <strong>{currentApp.finalResult?.decisionDate || '24/10/2026'}</strong></div>
-                <div>• Cơ quan thông báo: <strong>Hội đồng xét chọn — Hội Sinh viên TP. Đà Nẵng</strong></div>
+                <div>• Cơ quan thông báo: <strong>Hội đồng xét chọn — Hội Sinh viên Đại học Đà Nẵng</strong></div>
               </div>
 
               <div className="pt-2 border-t border-[#CBD5E1] space-y-1">
@@ -147,14 +147,14 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
             <h3 className="text-[17px] font-extrabold text-[#172A3A]">
               {status === 'finalized'
                 ? 'Đang chờ công bố kết quả chính thức'
-                : 'Hồ sơ đang trong quá trình xem xét của Thành phố'}
+                : 'Hồ sơ đang trong quá trình xem xét của cấp Đại học Đà Nẵng'}
             </h3>
             <p className="text-[13px] text-[#607483] max-w-lg mx-auto mt-1 leading-relaxed">
               {status === 'finalized'
-                ? 'Hội đồng xét chọn đã hoàn tất quy trình xem xét hồ sơ. Kết quả chính thức đang được chuẩn bị để công bố theo quyết định của Ban Thư ký Hội Sinh viên Thành phố.'
+                ? 'Hội đồng xét chọn đã hoàn tất quy trình xem xét hồ sơ. Kết quả chính thức đang được chuẩn bị để công bố theo quyết định của Ban Thư ký Hội Sinh viên Đại học Đà Nẵng.'
                 : status === 'committee_pending'
-                ? 'Hồ sơ đã hoàn tất phần thẩm định của Cán bộ và đang được trình Hội đồng xét chọn cấp Thành phố xem xét kết luận.'
-                : 'Hồ sơ tập thể đang được xử lý theo quy trình xét chọn cấp Thành phố. Khi có quyết định chính thức, kết quả sẽ được công bố và thông báo trực tiếp đến tài khoản này.'}
+                ? 'Hồ sơ đã hoàn tất phần thẩm định của Cán bộ và đang được trình Hội đồng xét chọn cấp Đại học Đà Nẵng xem xét kết luận.'
+                : 'Hồ sơ tập thể đang được xử lý theo quy trình xét chọn cấp Đại học Đà Nẵng. Khi có quyết định chính thức, kết quả sẽ được công bố và thông báo trực tiếp đến tài khoản này.'}
             </p>
           </div>
           <div className="pt-2 text-[12px] text-[#728391]">

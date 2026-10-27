@@ -1,10 +1,10 @@
 /**
- * 5TOT Đà Nẵng — City-Level Staff Backoffice Domain Types
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — City-Level Staff Backoffice Domain Types
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 16 Sections 1–4, 18–20, 31–33, 50–60, 108:
- * - Strictly City-level scope ("Cấp Thành phố Đà Nẵng").
+ * - Strictly City-level scope ("Cấp Đại học Đà Nẵng").
  * - No school/university/UDN review levels.
  * - Capability-based authorization model supporting composite permissions.
  * - Shares conceptual Application, Criterion, and SupplementRequest semantics with Student product.
@@ -89,7 +89,7 @@ export interface StaffUser {
   primaryRole: StaffRole;
   /** Vietnamese role title shown in UI (Section 2 & 10) */
   roleLabel: string;
-  /** Department / operational unit within HSV TP. Đà Nẵng */
+  /** Department / operational unit within HSV ĐH Đà Nẵng */
   unitLabel: string;
   /** Assigned School Review Unit ID for SCHOOL_OFFICER */
   schoolReviewUnitId?: SchoolReviewUnitId;
@@ -218,7 +218,7 @@ export interface StaffApplicationRecord {
     officialName: string;
   };
   schoolYear: string;
-  levelLabel: string; // Always "Cấp Thành phố Đà Nẵng"
+  levelLabel: string; // Always "Cấp Đại học Đà Nẵng"
   submittedAt: string;
   submittedDateSortKey: string;
   updatedAt: string;

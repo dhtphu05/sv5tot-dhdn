@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Health Check Controller
+ * 5TOT ĐHĐN — Health Check Controller
  * Implements lightweight liveness probes and bounded dependency readiness probes.
  */
 

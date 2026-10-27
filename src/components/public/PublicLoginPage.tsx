@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Official Student Login Page
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Official Student Login Page
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 14 Sections 18–26, 55, 57–64, 71–72, 92, 98B:
  * - Fits cleanly at 1366×768 without scrolling (~436px width).
@@ -368,7 +368,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
 
       {/* Quiet Institutional Footer */}
       <footer className="text-center text-[12px] text-[#607483]">
-        Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Thành phố · Hội Sinh viên Việt Nam TP. Đà Nẵng
+        Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · Hội Sinh viên Việt Nam Đại học Đà Nẵng
       </footer>
     </div>
   );

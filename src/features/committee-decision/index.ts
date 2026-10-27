@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Committee Decision (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Committee Decision (FSD Features Layer)
  * Encapsulates Council deliberation outcome recording and finalization.
  */
 

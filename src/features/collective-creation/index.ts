@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Collective Application Creation (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Collective Application Creation (FSD Features Layer)
  * Encapsulates creation of a new Collective SV5T application and its modal trigger.
  */
 

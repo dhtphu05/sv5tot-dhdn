@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Staff Backoffice Route Dispatcher (Refactored into FSD Widgets)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Staff Backoffice Route Dispatcher (Refactored into FSD Widgets)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import React, { useState, useMemo } from 'react';

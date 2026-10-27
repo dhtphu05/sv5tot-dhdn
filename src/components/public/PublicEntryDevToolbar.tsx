@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Dev-Only Public Entry Switcher
+ * 5TOT ĐHĐN — Dev-Only Public Entry Switcher
  *
  * Per Sections 31 & 32 ("REMOVE CURRENT VISUAL SLOP" & "REMOVE DEV UI"):
  * - Hidden by default on the official public page so that no floating
@@ -36,7 +36,7 @@ const PRESET_OPTIONS: {
     id: 'screenshot_a_landing',
     code: 'A',
     label: 'A · Trang chủ công khai (1440×900)',
-    description: 'Cổng thông tin xét duyệt Sinh viên 5 tốt cấp Thành phố',
+    description: 'Cổng thông tin xét duyệt Sinh viên 5 tốt cấp Đại học Đà Nẵng',
   },
   {
     id: 'screenshot_b_login',

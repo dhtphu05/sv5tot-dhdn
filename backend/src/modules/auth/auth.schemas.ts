@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authentication Zod Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Authentication Zod Validation Schemas (Backend V2)
  * Strictly validates all input payloads for zero-trust authentication endpoints.
  */
 

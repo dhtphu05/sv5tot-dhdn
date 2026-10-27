@@ -1,11 +1,11 @@
 /**
- * 5TOT Đà Nẵng — Authoritative Committee Decision Dialog (DecisionDialog)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Authoritative Committee Decision Dialog (DecisionDialog)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 40–48, 94, 113:
  * - Deliberate two-step workflow:
- *   1. Select outcome ("Được công nhận Sinh viên 5 tốt cấp Thành phố" vs "Chưa được công nhận trong đợt xét này")
+ *   1. Select outcome ("Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng" vs "Chưa được công nhận trong đợt xét này")
  *      and optional internal Committee note.
  *   2. Explicit confirmation step ("Xác nhận kết luận xét chọn?") before saving.
  * - Never uses "PASS", "FAIL", "Approve", "Reject", or "Trượt".
@@ -74,7 +74,7 @@ export const DecisionDialog: React.FC<DecisionDialogProps> = ({
 
   const outcomeLabel =
     selectedOutcome === 'recognized'
-      ? 'Được công nhận Sinh viên 5 tốt cấp Thành phố'
+      ? 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng'
       : 'Chưa được công nhận trong đợt xét này';
 
   const handleProceedToConfirm = (e: React.FormEvent) => {
@@ -121,7 +121,7 @@ export const DecisionDialog: React.FC<DecisionDialogProps> = ({
                   : 'Xác nhận kết luận xét chọn?'}
               </h2>
               <p className="text-[12px] text-[#526B7C]">
-                Hội đồng xét chọn cấp Thành phố Đà Nẵng · {application.schoolYear}
+                Hội đồng xét chọn cấp Đại học Đà Nẵng · {application.schoolYear}
               </p>
             </div>
           </div>
@@ -202,7 +202,7 @@ export const DecisionDialog: React.FC<DecisionDialogProps> = ({
                 />
                 <div className="min-w-0">
                   <div className="text-[13.5px] font-bold text-[#0F2335]">
-                    Được công nhận Sinh viên 5 tốt cấp Thành phố
+                    Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng
                   </div>
                   <div className="text-[12px] text-[#4A6275] mt-0.5">
                     Sinh viên đáp ứng đầy đủ tiêu chuẩn 05 tiêu chí theo Quy chế xét chọn năm học 2026–2027.
@@ -230,7 +230,7 @@ export const DecisionDialog: React.FC<DecisionDialogProps> = ({
                     Chưa được công nhận trong đợt xét này
                   </div>
                   <div className="text-[12px] text-[#4A6275] mt-0.5">
-                    Hồ sơ chưa được công nhận danh hiệu trong đợt xét chọn cấp Thành phố hiện tại.
+                    Hồ sơ chưa được công nhận danh hiệu trong đợt xét chọn cấp Đại học Đà Nẵng hiện tại.
                   </div>
                 </div>
               </label>

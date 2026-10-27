@@ -1,11 +1,11 @@
 /**
- * 5TOT Đà Nẵng — Official Final Result View ("Kết quả xét chọn")
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng — Năm học 2026–2027
+ * 5TOT ĐHĐN — Official Final Result View ("Kết quả xét chọn")
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
  *
  * Implements Prompt 11 Sections 1–72:
  * - Authoritative final result destination (`Kết quả xét chọn`) separate from 5-criteria review completion.
  * - Primary Demo (`recognized`): Official Recognition Hero Card for Nguyễn Minh Anh (MSSV: 102220123),
- *   Trường Đại học Bách khoa - Đại học Đà Nẵng, Sinh viên 5 tốt cấp Thành phố, 24/10/2026.
+ *   Trường Đại học Bách khoa - Đại học Đà Nẵng, Sinh viên 5 tốt cấp Đại học Đà Nẵng, 24/10/2026.
  * - 5-Criteria Process Summary ("Đã hoàn tất xét" across all 5 canonical criteria, no fake scores).
  * - Submitted Application Snapshot & Optional Official Decision Document ("Văn bản công bố").
  * - Second Demo (`not_recognized`): Dignified, respectful institutional notice ("Chưa được công nhận trong đợt xét này"),
@@ -397,7 +397,7 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
           <div className="bg-white rounded-[16px] border border-[#DCE7EE] p-10 shadow-2xs">
             <ErrorState
               title="Chưa thể tải kết quả lúc này"
-              description="Hệ thống chưa thể tải thông tin kết quả xét chọn từ máy chủ Hội Sinh viên Việt Nam TP. Đà Nẵng. Hồ sơ đã nộp của bạn vẫn được lưu trữ an toàn."
+              description="Hệ thống chưa thể tải thông tin kết quả xét chọn từ máy chủ Hội Sinh viên Việt Nam Đại học Đà Nẵng. Hồ sơ đã nộp của bạn vẫn được lưu trữ an toàn."
               onRetry={() => setScenario('recognized_hero')}
             />
             <div className="mt-4 flex justify-center">

@@ -15,7 +15,7 @@ export interface OfficialCertificateModalProps {
 /**
  * OfficialCertificateModal Component (Prompt 11 Sections 15, 19, 20, 34)
  * Provides a dignified, realistic institutional document viewer for:
- * 1) Giấy chứng nhận Sinh viên 5 tốt cấp Thành phố (Electronic Certificate)
+ * 1) Giấy chứng nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng (Electronic Certificate)
  * 2) Quyết định công bố kết quả xét chọn (Official Decision Document PDF preview)
  */
 export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> = ({
@@ -29,9 +29,9 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
 
   const isCertificate = mode === 'certificate';
   const docTitle = isCertificate
-    ? 'Giấy chứng nhận Sinh viên 5 tốt cấp Thành phố'
+    ? 'Giấy chứng nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng'
     : resultData.decisionDocument?.title ||
-      'Quyết định công bố kết quả xét chọn Sinh viên 5 tốt cấp Thành phố';
+      'Quyết định công bố kết quả xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng';
   const docFileName = isCertificate
     ? `Giay_chung_nhan_SV5T_TP_${resultData.student.studentId}.pdf`
     : resultData.decisionDocument?.fileName ||
@@ -198,7 +198,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                   <div className="space-y-1 text-[#466474]">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#EAFBF1] text-[#136F3A] font-bold text-[11.5px]">
                       <CheckCircle2 size={13} />
-                      Đã xác thực trên Hệ thống 5TOT Đà Nẵng
+                      Đã xác thực trên Hệ thống 5TOT ĐHĐN
                     </div>
                     <p className="mt-2">
                       Mã hồ sơ công nhận:{' '}
@@ -226,7 +226,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                       TM. BAN THƯ KÝ HỘI SINH VIÊN TP. ĐÀ NẴNG
                     </p>
                     <div className="my-3 inline-flex items-center justify-center px-3 py-1.5 rounded border border-dashed border-[#0D78AE]/40 bg-[#F0F9FF] text-[#0D78AE] text-[11.5px] font-bold">
-                      Chữ ký số & Dấu xác nhận Hội Sinh viên TP. Đà Nẵng
+                      Chữ ký số & Dấu xác nhận Hội Sinh viên Đại học Đà Nẵng
                     </div>
                   </div>
                 </div>
@@ -279,12 +279,12 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                   BAN THƯ KÝ HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
                 </p>
                 <p>
-                  - Căn cứ Quy chế xét chọn danh hiệu “Sinh viên 5 tốt” cấp Thành phố năm học{' '}
-                  {resultData.schoolYear} của Ban Thư ký Hội Sinh viên Việt Nam Thành phố Đà Nẵng;
+                  - Căn cứ Quy chế xét chọn danh hiệu “Sinh viên 5 tốt” cấp Đại học Đà Nẵng năm học{' '}
+                  {resultData.schoolYear} của Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng;
                 </p>
                 <p>
-                  - Căn cứ kết quả họp Hội đồng xét chọn danh hiệu “Sinh viên 5 tốt” cấp Thành phố năm học{' '}
-                  {resultData.schoolYear} và đề nghị của Văn phòng Hội Sinh viên Thành phố;
+                  - Căn cứ kết quả họp Hội đồng xét chọn danh hiệu “Sinh viên 5 tốt” cấp Đại học Đà Nẵng năm học{' '}
+                  {resultData.schoolYear} và đề nghị của Văn phòng Hội Sinh viên Đại học Đà Nẵng;
                 </p>
                 <p className="font-bold text-[#172A3A] pt-1">QUYẾT ĐỊNH:</p>
                 <p>

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Centralized Authorization Service (Backend V2)
+ * 5TOT ĐHĐN — Centralized Authorization Service (Backend V2)
  * Enforces Zero-Trust default-deny authorization across roles, scopes, and target resources.
  * Authoritative Principles (BE2-A3):
  * 1. Current server-side role assignments override stale JWT claims.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Mock Supplement Requests & Scenarios
+ * 5TOT ĐHĐN — Mock Supplement Requests & Scenarios
  * Implements Prompt 10 Requirements (Sections 7, 14, 15, 20, 30, 31, 32, 39, 54-60, 68, 69, 70)
  */
 
@@ -367,7 +367,7 @@ export const SUPPLEMENT_REQUIRED_ACTIVITIES: TrackingActivity[] = [
   {
     id: 'act-sup-req-4',
     timestamp: '12/10/2026 · 14:32',
-    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên TP. Đà Nẵng.',
+    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng.',
   },
 ];
 

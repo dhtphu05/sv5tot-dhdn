@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Mutations Hook
+ * 5TOT ĐHĐN — Officer Review Mutations Hook
  * Extracted mutation handlers for OfficerReviewWorkspace:
  * - Start review session
  * - Update scope status
@@ -284,7 +284,7 @@ export function useOfficerReviewMutations({
     );
     showToast(
       isSchoolStage
-        ? 'Đã hoàn tất xét sơ tuyển cấp Trường. Hồ sơ đã được cập nhật sang danh sách Chờ đề xuất chuyển Thành phố.'
+        ? 'Đã hoàn tất xét sơ tuyển cấp Trường. Hồ sơ đã được cập nhật sang danh sách Chờ đề xuất chuyển cấp ĐHĐN.'
         : 'Đã hoàn tất phần xét hồ sơ. Hồ sơ đã được chuyển sang bước xử lý tiếp theo.'
     );
     return true;

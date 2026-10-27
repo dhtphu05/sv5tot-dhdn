@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — In-Memory Rate Limiting Foundation
+ * 5TOT ĐHĐN — In-Memory Rate Limiting Foundation
  * Sliding-window rate limiter per client IP. Returns RFC 7807 problem details with 429.
  */
 

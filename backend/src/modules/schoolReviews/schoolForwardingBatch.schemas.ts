@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Forwarding Batch Zod Schemas (Backend V2)
+ * 5TOT ĐHĐN — School Forwarding Batch Zod Schemas (Backend V2)
  */
 
 import { z } from 'zod';

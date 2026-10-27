@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Identity Repository Interface
+ * 5TOT ĐHĐN — Identity Repository Interface
  * Defines persistent identity access contracts decoupled from database engine.
  */
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Automated Compliance Test Suite for 2025–2026 Academic Year
+ * 5TOT ĐHĐN — Automated Compliance Test Suite for 2025–2026 Academic Year
  * Verifies all 5 Criteria rules, pathways, thresholds, aggregation, and search discoverability.
  */
 
@@ -402,7 +402,7 @@ console.log('================================================================');
 if (process.env.VITEST) {
   const vitestPkg = 'vitest';
   const { describe, it, expect } = await import(vitestPkg);
-  describe('5TOT Đà Nẵng — Regulatory Compliance Suite (2025–2026)', () => {
+  describe('5TOT ĐHĐN — Regulatory Compliance Suite (2025–2026)', () => {
     it('passes all 38 regulatory compliance assertions', () => {
       expect(testsFailed).toBe(0);
       expect(testsPassed).toBeGreaterThanOrEqual(38);

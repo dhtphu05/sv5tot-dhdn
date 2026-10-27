@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-4.2 Test Suite:
+ * 5TOT ĐHĐN — LEAN-4.2 Test Suite:
  * School Navigation & Workflow Deduplication — PDF-Only Official Document Upload
  * Covers all 18 Document tests and 28 Navigation & Workflow Deduplication tests.
  */
@@ -595,9 +595,9 @@ describe('LEAN-4.2: School Navigation & Workflow Deduplication (28 Tests)', () =
   it('22. Pre-validation bar displays single concise contextual error message when invalid (no applications selected)', () => {
     const selectedCount = 0;
     const resolvedError = selectedCount === 0
-      ? 'Chưa chọn hồ sơ nào để gửi lên Thành phố.'
+      ? 'Chưa chọn hồ sơ nào để gửi lên cấp Đại học Đà Nẵng.'
       : 'Vui lòng đính kèm tệp văn bản PDF đề nghị của đơn vị để tiếp tục.';
-    assert.equal(resolvedError, 'Chưa chọn hồ sơ nào để gửi lên Thành phố.');
+    assert.equal(resolvedError, 'Chưa chọn hồ sơ nào để gửi lên cấp Đại học Đà Nẵng.');
   });
 
   it('23. Pre-validation bar displays single concise contextual error message when invalid (no PDF attached)', () => {
@@ -609,7 +609,7 @@ describe('LEAN-4.2: School Navigation & Workflow Deduplication (28 Tests)', () =
     assert.equal(resolvedError, 'Vui lòng đính kèm tệp văn bản PDF đề nghị của đơn vị để tiếp tục.');
   });
 
-  it('24. Pre-validation bar directly enables the "Gửi danh sách lên Thành phố" button when valid', () => {
+  it('24. Pre-validation bar directly enables the "Gửi danh sách lên cấp Đại học Đà Nẵng" button when valid', () => {
     const canForwardBatch = true;
     assert.equal(canForwardBatch, true);
   });

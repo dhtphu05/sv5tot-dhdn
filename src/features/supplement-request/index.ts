@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: City Supplement Request & Scope Composer (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: City Supplement Request & Scope Composer (FSD Features Layer)
  */
 
 export { requestCitySupplement } from '../../staff/collective/collectiveDecisionOperations';

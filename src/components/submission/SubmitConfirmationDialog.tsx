@@ -69,10 +69,10 @@ export const SubmitConfirmationDialog: React.FC<SubmitConfirmationDialogProps> =
               id="submit-dialog-title"
               className="text-[19px] font-bold text-[#172A3A] tracking-tight leading-snug"
             >
-              Gửi hồ sơ cấp Thành phố?
+              Gửi hồ sơ cấp Đại học Đà Nẵng?
             </h3>
             <span className="text-[12.5px] text-[#607483] mt-0.5">
-              Hội Sinh viên Việt Nam TP. Đà Nẵng
+              Hội Sinh viên Việt Nam Đại học Đà Nẵng
             </span>
           </div>
           {!isSubmitting && (
@@ -92,7 +92,7 @@ export const SubmitConfirmationDialog: React.FC<SubmitConfirmationDialogProps> =
           <p>
             Sau khi gửi, hồ sơ sẽ được chuyển đến quy trình xét của{' '}
             <strong className="text-[#172A3A] font-semibold">
-              Hội Sinh viên Việt Nam TP. Đà Nẵng
+              Hội Sinh viên Việt Nam Đại học Đà Nẵng
             </strong>.
           </p>
           <p className="text-[13px] text-[#607483]">

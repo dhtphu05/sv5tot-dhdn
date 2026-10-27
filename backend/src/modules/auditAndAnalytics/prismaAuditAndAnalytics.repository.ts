@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Audit, Notifications & Analytics Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Audit, Notifications & Analytics Repository Implementation (Backend V2)
  *
  * Implements authoritative queries for:
  * - Immutable append-only audit log inspection.

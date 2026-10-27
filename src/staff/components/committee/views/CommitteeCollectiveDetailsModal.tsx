@@ -65,7 +65,7 @@ export const CommitteeCollectiveDetailsModal: React.FC<CommitteeCollectiveDetail
               <div className="font-bold text-[#172A3A] mt-0.5">
                 {collective.submittedAt
                   ? new Date(collective.submittedAt).toLocaleString('vi-VN')
-                  : 'Nộp trực tiếp lên Thành phố'}
+                  : 'Nộp trực tiếp lên cấp Đại học Đà Nẵng'}
               </div>
             </div>
           </div>

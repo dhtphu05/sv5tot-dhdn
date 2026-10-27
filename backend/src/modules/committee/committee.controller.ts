@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Controller (Backend V2)
+ * 5TOT ĐHĐN — Committee Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

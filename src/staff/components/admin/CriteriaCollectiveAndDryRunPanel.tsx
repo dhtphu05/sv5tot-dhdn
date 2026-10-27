@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Criteria (TT01–TT04) & Dry-Run Evaluator Panel
+ * 5TOT ĐHĐN — Collective Criteria (TT01–TT04) & Dry-Run Evaluator Panel
  * Extracted subcomponent for CriteriaManagement.tsx to keep file size modular (<1,000 lines).
  */
 
@@ -70,7 +70,7 @@ export const CriteriaCollectiveAndDryRunPanel: React.FC<
               </span>
             </div>
             <p className="text-[12px] text-[#526B7C] mt-0.5">
-              Hồ sơ Tập thể nộp trực tiếp lên cấp Thành phố (nhánh T04). Hai
+              Hồ sơ Tập thể nộp trực tiếp lên cấp Đại học Đà Nẵng (nhánh T04). Hai
               tiêu chuẩn TT02 (100%) và TT03 (≥ 20%) dùng chung mẫu số{' '}
               <strong>Tổng số sinh viên của tập thể (totalMembers)</strong>.
             </p>

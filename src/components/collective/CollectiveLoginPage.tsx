@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Dedicated Collective Login Page (/collective/login)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Dedicated Collective Login Page (/collective/login)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v3 Section 4:
  * - Dedicated login endpoint for authorized Collective Portal accounts.
@@ -80,7 +80,7 @@ export const CollectiveLoginPage: React.FC<CollectiveLoginPageProps> = ({
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#4A6275] hover:text-[#0D78AE] transition-colors cursor-pointer"
         >
           <ArrowLeft size={15} />
-          <span>Trang chủ 5TOT Đà Nẵng</span>
+          <span>Trang chủ 5TOT ĐHĐN</span>
         </button>
 
         <button
@@ -109,7 +109,7 @@ export const CollectiveLoginPage: React.FC<CollectiveLoginPageProps> = ({
             Cổng Kê khai Tập thể "Sinh viên 5 tốt"
           </h1>
           <p className="text-[12.5px] text-[#607483] max-w-sm mt-1">
-            Dành cho Chi hội, Liên Chi hội, Chi đoàn và các Ban Cán sự tập thể sinh viên đăng ký xét chọn cấp Thành phố
+            Dành cho Chi hội, Liên Chi hội, Chi đoàn và các Ban Cán sự tập thể sinh viên đăng ký xét chọn cấp Đại học Đà Nẵng
           </p>
         </div>
 
@@ -171,13 +171,13 @@ export const CollectiveLoginPage: React.FC<CollectiveLoginPageProps> = ({
 
         {/* Regulatory note */}
         <div className="mt-4 text-center text-[11.5px] text-[#607483] leading-relaxed">
-          Theo quy chế xét chọn 2025–2026, hồ sơ Tập thể sau khi kê khai sẽ được <strong>nộp trực tiếp</strong> lên Hội Sinh viên Thành phố Đà Nẵng, không qua khâu duyệt của Trường.
+          Theo quy chế xét chọn 2025–2026, hồ sơ Tập thể sau khi kê khai sẽ được <strong>nộp trực tiếp</strong> lên Hội Sinh viên Việt Nam Đại học Đà Nẵng, không qua khâu duyệt của Trường.
         </div>
       </main>
 
       {/* Footer */}
       <footer className="text-center text-[12px] text-[#728391]">
-        Hệ thống xét duyệt Sinh viên 5 tốt cấp Thành phố · Hội Sinh viên Việt Nam TP. Đà Nẵng
+        Hệ thống xét duyệt Sinh viên 5 tốt cấp Đại học Đà Nẵng · Hội Sinh viên Việt Nam Đại học Đà Nẵng
       </footer>
     </div>
   );

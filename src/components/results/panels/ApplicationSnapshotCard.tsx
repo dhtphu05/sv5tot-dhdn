@@ -133,9 +133,9 @@ export const ApplicationSnapshotCard: React.FC<ApplicationSnapshotCardProps> = (
           <Info size={16} className="text-[#0D78AE] shrink-0 mt-0.5" />
           <div className="text-[12px] text-[#466474] leading-relaxed">
             <strong className="font-bold text-[#172A3A]">
-              Ghi nhận trên hệ thống Hội Sinh viên TP. Đà Nẵng:
+              Ghi nhận trên hệ thống Hội Sinh viên Đại học Đà Nẵng:
             </strong>{' '}
-            Kết quả xét chọn chính thức được đồng bộ trực tiếp từ Hội đồng xét chọn cấp Thành phố năm học {activeResult.schoolYear}. Sinh viên không cần nộp lại bản cứng hồ sơ đã kê khai trực tuyến.
+            Kết quả xét chọn chính thức được đồng bộ trực tiếp từ Hội đồng xét chọn cấp Đại học Đà Nẵng năm học {activeResult.schoolYear}. Sinh viên không cần nộp lại bản cứng hồ sơ đã kê khai trực tuyến.
           </div>
         </section>
       )}

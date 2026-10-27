@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Application Deep-Link Resolution Hook (FSD Features Layer)
+ * 5TOT ĐHĐN — Student Application Deep-Link Resolution Hook (FSD Features Layer)
  * Synchronizes incoming notification/home deep-links with application state,
  * supplement mode, evidence viewer, expanded criteria, and scroll/focus targets.
  */

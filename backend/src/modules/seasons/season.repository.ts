@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Award Season Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Award Season Repository Interface (Backend V2)
  */
 
 import type {

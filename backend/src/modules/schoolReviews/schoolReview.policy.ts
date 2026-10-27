@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Pure Domain Policies & Validation Engine (Backend V2)
+ * 5TOT ĐHĐN — School Review Pure Domain Policies & Validation Engine (Backend V2)
  *
  * Implements authoritative business invariants:
  * - Scope: UDN Hub (8 member institutions) routes to unit-udn; independent institutions isolated.
@@ -63,7 +63,7 @@ export class SchoolReviewPolicy {
       application.currentReviewStage === 'COMPLETED'
     ) {
       throw ApiError.badRequest(
-        'Hồ sơ đã được chuyển lên cấp Thành phố. Dữ liệu xét sơ cấp Trường đã bị khóa và chỉ dùng để tra cứu lịch sử.',
+        'Hồ sơ đã được chuyển lên cấp Đại học Đà Nẵng. Dữ liệu xét sơ cấp Trường đã bị khóa và chỉ dùng để tra cứu lịch sử.',
         'APPLICATION_ALREADY_FORWARDED'
       );
     }
@@ -142,7 +142,7 @@ export class SchoolReviewPolicy {
       application.schoolPreliminaryStatus === 'FORWARDED_TO_CITY' ||
       application.currentReviewStage === 'CITY_REVIEW'
     ) {
-      blockingReasons.push('Hồ sơ đã được chuyển lên cấp Thành phố. Không thể thay đổi kết luận đề xuất.');
+      blockingReasons.push('Hồ sơ đã được chuyển lên cấp Đại học Đà Nẵng. Không thể thay đổi kết luận đề xuất.');
     }
 
     // Must evaluate all 5 criteria
@@ -182,7 +182,7 @@ export class SchoolReviewPolicy {
   ): void {
     if (schoolForwardingCloseAt && new Date() > new Date(schoolForwardingCloseAt)) {
       throw ApiError.forbidden(
-        'Đã hết thời hạn cấp Trường gửi danh sách đề nghị lên Thành phố (T03).',
+        'Đã hết thời hạn cấp Trường gửi danh sách đề nghị lên cấp Đại học Đà Nẵng (T03).',
         'SCHOOL_FORWARDING_WINDOW_CLOSED'
       );
     }
@@ -197,14 +197,14 @@ export class SchoolReviewPolicy {
 
     if (application.schoolPreliminaryStatus === 'NOT_ELIGIBLE_AT_SCHOOL') {
       throw ApiError.badRequest(
-        'Hồ sơ có kết luận "Không đề xuất" từ Cán bộ xét sơ, không đủ điều kiện chuyển giao lên Thành phố.',
+        'Hồ sơ có kết luận "Không đề xuất" từ Cán bộ xét sơ, không đủ điều kiện chuyển giao lên cấp Đại học Đà Nẵng.',
         'NOT_RECOMMENDED_FOR_CITY'
       );
     }
 
     if (application.schoolPreliminaryStatus !== 'ELIGIBLE_FOR_CITY') {
       throw ApiError.badRequest(
-        'Hồ sơ chưa có kết luận đề xuất chuyển giao ("Đề xuất chuyển Thành phố") từ Cán bộ xét sơ.',
+        'Hồ sơ chưa có kết luận đề xuất chuyển giao ("Đề xuất chuyển cấp ĐHĐN") từ Cán bộ xét sơ.',
         'RECOMMENDATION_REQUIRED'
       );
     }

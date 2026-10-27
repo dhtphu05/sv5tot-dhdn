@@ -186,7 +186,7 @@ export const RegulationInspectorContent: React.FC<RegulationInspectorContentProp
             </span>
           </div>
           <span className="text-[11.5px] text-[#607483] mt-0.5">
-            Hội Sinh viên Việt Nam TP. Đà Nẵng
+            Hội Sinh viên Việt Nam Đại học Đà Nẵng
           </span>
         </div>
       </div>

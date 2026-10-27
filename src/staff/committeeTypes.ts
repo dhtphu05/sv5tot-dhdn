@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Committee Review & Authoritative Decision Domain Types
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Committee Review & Authoritative Decision Domain Types
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 10–12, 20, 22–50, 58–81, 98–103:
  * - Strictly separates Officer review completion, Committee consideration,
@@ -65,7 +65,7 @@ export type CommitteeDecisionOutcome = 'recognized' | 'not_recognized';
 export interface CommitteeAuthoritativeDecision {
   outcome: CommitteeDecisionOutcome;
   outcomeLabel:
-    | 'Được công nhận Sinh viên 5 tốt cấp Thành phố'
+    | 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng'
     | 'Chưa được công nhận trong đợt xét này';
   recordedBy: string;
   recordedByRoleLabel: string;

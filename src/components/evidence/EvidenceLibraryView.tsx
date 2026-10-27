@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Personal Evidence Library ("Kho minh chứng")
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng — Năm học 2026–2027
+ * 5TOT ĐHĐN — Personal Evidence Library ("Kho minh chứng")
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
  *
  * Implements Prompt 15 Sections 4, 5, 17, 19, 20, 84–88, 93, 130:
  * - Derives evidence items from the live shared StudentApplication so counts and

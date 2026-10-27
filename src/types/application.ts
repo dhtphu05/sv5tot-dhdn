@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Canonical Application Type Re-exports
+ * 5TOT ĐHĐN — Canonical Application Type Re-exports
  */
 
 import { CriterionDefinition } from '../tokens';

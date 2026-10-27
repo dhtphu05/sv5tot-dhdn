@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authentication Application Service (Backend V2)
+ * 5TOT ĐHĐN — Authentication Application Service (Backend V2)
  * High-level orchestration for user registration, credential authentication, session tokens, and security audits.
  */
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Supplement Dev Scenario Toolbar
+ * 5TOT ĐHĐN — Supplement Dev Scenario Toolbar
  * Implements Prompt 10 Section 68: Development Demo States
  * Discrete QA control panel for verifying all 6+ supplement edge cases.
  */

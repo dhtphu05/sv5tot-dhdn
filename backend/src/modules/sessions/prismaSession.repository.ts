@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Session Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Session Repository Implementation (Backend V2)
  * Maps session persistence, refresh token rotation, and family revocation to PostgreSQL.
  * Automatically enforces offline guard when BACKEND_DATABASE_MODE === 'offline'.
  */

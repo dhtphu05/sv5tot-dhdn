@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Centered Submission Success Confirmation Dialog
+ * 5TOT ĐHĐN — Centered Submission Success Confirmation Dialog
  * Implements Lean UX Feedback Fix 03:
  * - Centered modal dialog with backdrop
  * - Soothing large green checkmark icon
@@ -95,7 +95,7 @@ export const SubmissionSuccessDialog: React.FC<SubmissionSuccessDialogProps> = (
           <p className="text-[13.5px] text-[#4A6275] leading-relaxed max-w-[420px] mx-auto">
             Hồ sơ của bạn đã được ghi nhận và gửi thành công đến{' '}
             <strong className="text-[#0F2335] font-semibold">
-              Hội Sinh viên Việt Nam TP. Đà Nẵng
+              Hội Sinh viên Việt Nam Đại học Đà Nẵng
             </strong>
             . Toàn bộ thông tin kê khai và minh chứng đính kèm đã được bảo lưu an toàn.
           </p>

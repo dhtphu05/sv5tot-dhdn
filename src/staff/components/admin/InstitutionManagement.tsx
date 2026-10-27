@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Institution Registry Management (Đơn vị đào tạo)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Institution Registry Management (Đơn vị đào tạo)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 Sections 10–20, 110, 126:
  * - Authoritative Da Nang institution registry (universities, academies, colleges).
@@ -299,7 +299,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            Quản trị danh mục · Cấp Thành phố Đà Nẵng
+            Quản trị danh mục · Cấp Đại học Đà Nẵng
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <Building2 size={20} className="text-[#0D78AE]" />

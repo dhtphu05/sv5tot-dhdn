@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Level 3: Declaration Card AI Assistance Component (Feature C & Section 6, 8, 12)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Level 3: Declaration Card AI Assistance Component (Feature C & Section 6, 8, 12)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Feature C & Section 8 & 12:
  * - Subtle inline observation row inside each declaration card.

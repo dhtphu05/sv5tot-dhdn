@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Pagination & Keyset Query Utilities
+ * 5TOT ĐHĐN — Pagination & Keyset Query Utilities
  * Enforces bounded limits and stable sorting across large datasets.
  */
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Unit Analytics & Statistics Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — School Unit Analytics & Statistics Page (FSD Pages Layer)
  * Implements Lean UX Feedback Fix 07:
  * Resolves routing bug where clicking "school_analytics" or "Thống kê tiến độ"
  * defaulted to the general registry table. Provides comprehensive operational
@@ -131,7 +131,7 @@ export const SchoolAnalyticsPage: React.FC<SchoolAnalyticsPageProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#DCE7EE] pb-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C] flex items-center gap-1.5">
-            <span>5TOT Đà Nẵng</span>
+            <span>5TOT ĐHĐN</span>
             <span>·</span>
             <span className="text-[#0D78AE] font-bold">Thống kê tiến độ sơ tuyển</span>
             <span>·</span>
@@ -192,7 +192,7 @@ export const SchoolAnalyticsPage: React.FC<SchoolAnalyticsPageProps> = ({
 
         <div className="bg-white rounded-[14px] border border-[#DCE7EE] p-5 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-[#526B7C]">
-            <span className="text-[12.5px] font-semibold">Đề xuất chuyển Thành phố</span>
+            <span className="text-[12.5px] font-semibold">Đề xuất chuyển cấp ĐHĐN</span>
             <FileCheck2 size={18} className="text-[#2563EB]" />
           </div>
           <div className="text-[28px] font-black text-[#2563EB] tabular-nums">

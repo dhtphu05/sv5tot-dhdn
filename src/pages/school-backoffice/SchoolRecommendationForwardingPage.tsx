@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Consolidated Batch Forwarding Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — School Consolidated Batch Forwarding Page (FSD Pages Layer)
  * LEAN-4.1 Correction: Direct School Finalization — Select, Attach and Forward
  * One Review Unit + One Season = One Consolidated List + One Decision Document + One Final Submission
  * The School Reviewer operating this page is the authorized person responsible for finalizing the proposed list.

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Officer Application Review Header (ReviewApplicationHeader)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Officer Application Review Header (ReviewApplicationHeader)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 8, 9, 10, 11, 77, 101:
  * - Sticky compact header showing Student identity, MSSV, school, school year,
@@ -106,7 +106,7 @@ export const ReviewApplicationHeader: React.FC<ReviewApplicationHeaderProps> = (
           <div className="flex items-center gap-2">
             <span className="font-bold text-[13.5px]">Lưu ý:</span>
             <span>
-              Hồ sơ này đã được chuyển giao lên cấp Thành phố. Toàn bộ thông tin xét sơ tuyển cấp Trường được lưu trữ để tra cứu lịch sử (chế độ chỉ đọc).
+              Hồ sơ này đã được chuyển giao lên cấp Đại học Đà Nẵng. Toàn bộ thông tin xét sơ tuyển cấp Trường được lưu trữ để tra cứu lịch sử (chế độ chỉ đọc).
             </span>
           </div>
           <span className="text-[12px] font-bold px-2.5 py-1 rounded-full bg-[#DBEAFE] text-[#1D4ED8] shrink-0">
@@ -197,7 +197,7 @@ export const ReviewApplicationHeader: React.FC<ReviewApplicationHeaderProps> = (
                   ? applicationRecord.schoolReviewSummary?.recommendingOfficerName ||
                     applicationRecord.assignment?.officerName ||
                     'Tổ sơ tuyển cấp Trường'
-                  : applicationRecord.assignment?.officerName || 'Tổ thẩm định Thành phố'}
+                  : applicationRecord.assignment?.officerName || 'Tổ thẩm định cấp Đại học Đà Nẵng'}
               </strong>
             </span>
             <span>·</span>

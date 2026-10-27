@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Domain Service (Backend V2)
+ * 5TOT ĐHĐN — School Review Domain Service (Backend V2)
  *
  * Implements business logic for School Preliminary review:
  * - Scoped queue retrieval with UDN / independent institution boundaries.

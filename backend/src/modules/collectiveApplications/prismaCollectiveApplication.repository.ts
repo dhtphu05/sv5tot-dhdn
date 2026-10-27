@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Collective Application Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Collective Application Repository Implementation (Backend V2)
  *
  * Implements authoritative PostgreSQL queries via Prisma for:
  * - Collective applications with optimistic concurrency locking.

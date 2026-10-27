@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Supplement Confirmation Dialog
+ * 5TOT ĐHĐN — Supplement Confirmation Dialog
  * Implements Prompt 10: Section 26 & Section 33
  */
 

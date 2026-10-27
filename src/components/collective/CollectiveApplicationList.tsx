@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Collective Applications Registry & Management View
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Collective Applications Registry & Management View
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v2 Section 10:
  * - Table/card view of Collective applications for authorized preparer.
@@ -72,11 +72,11 @@ export const CollectiveApplicationList: React.FC<CollectiveApplicationListProps>
       case 'draft':
         return { label: 'Đang kê khai', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
       case 'city_unassigned':
-        return { label: 'Đã nộp Thành phố · Chờ phân công', style: 'text-[#16A34A] bg-[#EDF9F1] border-[#C6EED5]' };
+        return { label: 'Đã nộp cấp ĐHĐN · Chờ phân công', style: 'text-[#16A34A] bg-[#EDF9F1] border-[#C6EED5]' };
       case 'city_assigned':
         return { label: 'Đã phân công cán bộ', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
       case 'city_in_review':
-        return { label: 'Thành phố đang xét', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
+        return { label: 'Cấp ĐHĐN đang xét', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
       case 'city_supplement_pending':
         return { label: 'Cần bổ sung hồ sơ', style: 'text-[#D97706] bg-[#FEF6EB] border-[#FADDB6]' };
       case 'city_supplement_returned':
@@ -103,7 +103,7 @@ export const CollectiveApplicationList: React.FC<CollectiveApplicationListProps>
               Hồ sơ Tập thể Sinh viên 5 tốt
             </h1>
             <p className="text-[13px] text-[#607483] mt-0.5">
-              Quản lý danh sách hồ sơ đăng ký xét chọn Tập thể SV5T cấp Thành phố · Năm học 2025–2026
+              Quản lý danh sách hồ sơ đăng ký xét chọn Tập thể SV5T cấp Đại học Đà Nẵng · Năm học 2025–2026
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export const CollectiveApplicationList: React.FC<CollectiveApplicationListProps>
                       <span>·</span>
                       <span>Đơn vị theo dõi: <strong>{app.schoolReviewUnitName}</strong></span>
                       <span>·</span>
-                      <span>Đích nộp: <strong>Hội Sinh viên TP. Đà Nẵng</strong></span>
+                      <span>Đích nộp: <strong>Hội Sinh viên Đại học Đà Nẵng</strong></span>
                       <span>·</span>
                       <span>Năm học: <strong>{app.academicYear}</strong></span>
                     </div>

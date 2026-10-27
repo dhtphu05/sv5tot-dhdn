@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Strict CORS Allowlist Middleware
+ * 5TOT ĐHĐN — Strict CORS Allowlist Middleware
  * Validates origin against configured allowlist; denies wildcards in production.
  */
 

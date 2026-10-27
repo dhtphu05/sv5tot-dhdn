@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Flagged Items Section (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Committee Flagged Items Section (FSD Widgets Layer)
  */
 
 import React from 'react';

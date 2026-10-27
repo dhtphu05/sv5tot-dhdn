@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Central-Style Award Selection Timeline & Season Source of Truth (@5tot/contracts)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Central-Style Award Selection Timeline & Season Source of Truth (@5tot/contracts)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Canonical contract for:
  * 1. Academic year normalization & idempotent Vietnamese label formatting (zero "Năm học Năm học" duplication).
@@ -58,18 +58,18 @@ export interface SeasonTimelineConfig {
   schoolReviewEndAt?: string;
   schoolReviewOpenAt?: string;
   schoolReviewCloseAt?: string;
-  /** T03: Hạn gửi danh sách & văn bản đề nghị cấp Trường lên Thành phố */
+  /** T03: Hạn gửi danh sách & văn bản đề nghị cấp Trường lên cấp Đại học Đà Nẵng */
   schoolForwardingCloseAt: string;
-  /** T04: Tiếp nhận hồ sơ Tập thể (luồng song song gửi trực tiếp về Thành phố) */
+  /** T04: Tiếp nhận hồ sơ Tập thể (luồng song song gửi trực tiếp về cấp Đại học Đà Nẵng) */
   collectiveSubmissionOpenAt: string;
   collectiveSubmissionCloseAt: string;
-  /** T05: Thẩm định cấp Thành phố */
+  /** T05: Thẩm định cấp Đại học Đà Nẵng */
   cityReviewStartAt?: string;
   cityReviewEndAt?: string;
   cityReviewOpenAt?: string;
   cityReviewCloseAt?: string;
   supplementDeadlineAt?: string;
-  /** T06: Họp Hội đồng xét chọn cấp Thành phố */
+  /** T06: Họp Hội đồng xét chọn cấp Đại học Đà Nẵng */
   committeeMeetingStartAt?: string;
   committeeMeetingEndAt?: string;
   committeeSessionAt?: string;
@@ -402,9 +402,9 @@ export function buildCentralTimelineMilestones(config: Partial<SeasonTimelineCon
       stageCode: 'T03_SCHOOL_FORWARDING',
       shortCode: 'T03',
       orderIndex: 3,
-      titleVi: 'Gửi danh sách & văn bản đề nghị cấp Trường lên Thành phố',
+      titleVi: 'Gửi danh sách & văn bản đề nghị cấp Trường lên cấp Đại học Đà Nẵng',
       shortLabelVi: 'Trường gửi danh sách lên TP',
-      descriptionVi: 'Mỗi Đơn vị xét duyệt cấp Trường chọn sinh viên đủ điều kiện, đính kèm 01 văn bản PDF chung và gửi 01 đợt duy nhất lên Thành phố.',
+      descriptionVi: 'Mỗi Đơn vị xét duyệt cấp Trường chọn sinh viên đủ điều kiện, đính kèm 01 văn bản PDF chung và gửi 01 đợt duy nhất lên cấp Đại học Đà Nẵng.',
       trackScope: 'SCHOOL_UNIT',
       badgeVi: 'Khóa gửi tự động',
       enforcementMode: 'HARD_WINDOW',
@@ -420,7 +420,7 @@ export function buildCentralTimelineMilestones(config: Partial<SeasonTimelineCon
       orderIndex: 4,
       titleVi: 'Tiếp nhận hồ sơ Tập thể Sinh viên 5 Tốt (TT01–TT04)',
       shortLabelVi: 'Nộp hồ sơ Tập thể',
-      descriptionVi: 'Đơn vị lập hồ sơ Tập thể kê khai TT01–TT04 và gửi trực tiếp về Thành phố (không qua bước lập danh sách cấp Trường).',
+      descriptionVi: 'Đơn vị lập hồ sơ Tập thể kê khai TT01–TT04 và gửi trực tiếp về cấp Đại học Đà Nẵng (không qua bước lập danh sách cấp Trường).',
       trackScope: 'COLLECTIVE',
       badgeVi: 'Khóa cổng tự động',
       enforcementMode: 'HARD_WINDOW',
@@ -434,9 +434,9 @@ export function buildCentralTimelineMilestones(config: Partial<SeasonTimelineCon
       stageCode: 'T05_CITY_REVIEW',
       shortCode: 'T05',
       orderIndex: 5,
-      titleVi: 'Thẩm định độc lập cấp Thành phố',
-      shortLabelVi: 'Thẩm định cấp Thành phố',
-      descriptionVi: 'Tổ thẩm định Thành phố rà soát độc lập hồ sơ Cá nhân (đã được Trường đề nghị) và hồ sơ Tập thể.',
+      titleVi: 'Thẩm định độc lập cấp Đại học Đà Nẵng',
+      shortLabelVi: 'Thẩm định cấp Đại học Đà Nẵng',
+      descriptionVi: 'Tổ thẩm định cấp Đại học Đà Nẵng rà soát độc lập hồ sơ Cá nhân (đã được Trường đề nghị) và hồ sơ Tập thể.',
       trackScope: 'CITY',
       badgeVi: 'Mốc điều phối',
       enforcementMode: 'OPERATIONAL_GUIDANCE',
@@ -450,9 +450,9 @@ export function buildCentralTimelineMilestones(config: Partial<SeasonTimelineCon
       stageCode: 'T06_COMMITTEE_DECISION',
       shortCode: 'T06',
       orderIndex: 6,
-      titleVi: 'Họp Hội đồng xét chọn cấp Thành phố',
+      titleVi: 'Họp Hội đồng xét chọn cấp Đại học Đà Nẵng',
       shortLabelVi: 'Hội đồng xét chọn',
-      descriptionVi: 'Hội đồng xét chọn cấp Thành phố xem xét kết quả thẩm định và ra quyết định công nhận chính thức.',
+      descriptionVi: 'Hội đồng xét chọn cấp Đại học Đà Nẵng xem xét kết quả thẩm định và ra quyết định công nhận chính thức.',
       trackScope: 'COMMITTEE',
       badgeVi: 'Thẩm quyền Hội đồng',
       enforcementMode: 'MANUAL_AUTHORITY_GATED',
@@ -468,7 +468,7 @@ export function buildCentralTimelineMilestones(config: Partial<SeasonTimelineCon
       orderIndex: 7,
       titleVi: 'Công bố kết quả chính thức',
       shortLabelVi: 'Công bố kết quả',
-      descriptionVi: 'Ban Thư ký Hội Sinh viên Thành phố phát hành quyết định và công bố kết quả chính thức.',
+      descriptionVi: 'Ban Thư ký Hội Sinh viên Đại học Đà Nẵng phát hành quyết định và công bố kết quả chính thức.',
       trackScope: 'SYSTEM',
       badgeVi: 'Ban Thư ký công bố',
       enforcementMode: 'MANUAL_AUTHORITY_GATED',
@@ -549,7 +549,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
       code: 'MISSING_SCHOOL_FORWARDING_CLOSE',
       field: 'schoolForwardingCloseAt',
       stageCode: 'T03_SCHOOL_FORWARDING',
-      messageVi: 'Chưa thiết lập hạn cấp Trường gửi danh sách đề nghị lên Thành phố.',
+      messageVi: 'Chưa thiết lập hạn cấp Trường gửi danh sách đề nghị lên cấp Đại học Đà Nẵng.',
     });
   }
   if (t01Close && t03Close && new Date(t03Close).getTime() < new Date(t01Close).getTime()) {
@@ -557,7 +557,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
       code: 'SCHOOL_FORWARDING_BEFORE_INDIVIDUAL_CLOSE',
       field: 'schoolForwardingCloseAt',
       stageCode: 'T03_SCHOOL_FORWARDING',
-      messageVi: 'Hạn cấp Trường gửi danh sách lên Thành phố không được sớm hơn hạn đóng nộp hồ sơ Cá nhân.',
+      messageVi: 'Hạn cấp Trường gửi danh sách lên cấp Đại học Đà Nẵng không được sớm hơn hạn đóng nộp hồ sơ Cá nhân.',
     });
   }
 
@@ -591,7 +591,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
       code: 'INVALID_CITY_REVIEW_WINDOW',
       field: 'cityReviewEndAt',
       stageCode: 'T05_CITY_REVIEW',
-      messageVi: 'Thời hạn kết thúc thẩm định cấp Thành phố không được sớm hơn thời điểm bắt đầu thẩm định.',
+      messageVi: 'Thời hạn kết thúc thẩm định cấp Đại học Đà Nẵng không được sớm hơn thời điểm bắt đầu thẩm định.',
     });
   }
 
@@ -600,7 +600,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
       code: 'CITY_REVIEW_ENDS_BEFORE_SCHOOL_FORWARDING',
       field: 'cityReviewEndAt',
       stageCode: 'T05_CITY_REVIEW',
-      messageVi: 'Thời hạn kết thúc thẩm định cấp Thành phố không được sớm hơn hạn Trường gửi danh sách đề nghị.',
+      messageVi: 'Thời hạn kết thúc thẩm định cấp Đại học Đà Nẵng không được sớm hơn hạn Trường gửi danh sách đề nghị.',
     });
   }
 
@@ -609,7 +609,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
       code: 'CITY_REVIEW_ENDS_BEFORE_COLLECTIVE_CLOSE',
       field: 'cityReviewEndAt',
       stageCode: 'T05_CITY_REVIEW',
-      messageVi: 'Thời hạn kết thúc thẩm định cấp Thành phố không được sớm hơn hạn đóng tiếp nhận hồ sơ Tập thể.',
+      messageVi: 'Thời hạn kết thúc thẩm định cấp Đại học Đà Nẵng không được sớm hơn hạn đóng tiếp nhận hồ sơ Tập thể.',
     });
   }
 
@@ -620,7 +620,7 @@ export function validateSeasonTimeline(config: Partial<SeasonTimelineConfig>): T
         code: 'COMMITTEE_BEFORE_SCHOOL_FORWARDING',
         field: 'committeeMeetingStartAt',
         stageCode: 'T06_COMMITTEE_DECISION',
-        messageVi: 'Thời gian họp Hội đồng xét chọn không được sớm hơn hạn Trường gửi danh sách lên Thành phố.',
+        messageVi: 'Thời gian họp Hội đồng xét chọn không được sớm hơn hạn Trường gửi danh sách lên cấp Đại học Đà Nẵng.',
       });
     }
   }
@@ -670,10 +670,10 @@ export function evaluateTimelineWindow(
   const stageTitleMap: Record<TimelineStageCode, string> = {
     T01_INDIVIDUAL_SUBMISSION: 'tiếp nhận hồ sơ Cá nhân',
     T02_SCHOOL_PRELIMINARY_REVIEW: 'thẩm định sơ khảo cấp Trường',
-    T03_SCHOOL_FORWARDING: 'cấp Trường gửi danh sách đề nghị lên Thành phố',
+    T03_SCHOOL_FORWARDING: 'cấp Trường gửi danh sách đề nghị lên cấp Đại học Đà Nẵng',
     T04_COLLECTIVE_SUBMISSION: 'tiếp nhận hồ sơ Tập thể',
-    T05_CITY_REVIEW: 'thẩm định cấp Thành phố',
-    T06_COMMITTEE_DECISION: 'họp Hội đồng xét chọn cấp Thành phố',
+    T05_CITY_REVIEW: 'thẩm định cấp Đại học Đà Nẵng',
+    T06_COMMITTEE_DECISION: 'họp Hội đồng xét chọn cấp Đại học Đà Nẵng',
     T07_RESULT_ANNOUNCEMENT: 'công bố kết quả chính thức',
   };
   const label = stageTitleMap[stageCode];

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — LEAN-6 Full End-to-End Integration & Security Acceptance Suite
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — LEAN-6 Full End-to-End Integration & Security Acceptance Suite
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Covers:
  * - ST01–ST11: Student Journey (Registration, Profile, Declarations, Numbering, Evidence, ONE_OF, Submit, Immutability)
@@ -66,7 +66,7 @@ import type {
 } from '../staff/types';
 import type { StudentApplicationData } from '../entities/application/studentApplicationTypes';
 
-describe('5TOT Đà Nẵng — LEAN-6 Full End-to-End System Integration Suite', () => {
+describe('5TOT ĐHĐN — LEAN-6 Full End-to-End System Integration Suite', () => {
 
   // =========================================================================
   // 1. ST01–ST11: Student Journey & Lifecycle
@@ -341,7 +341,7 @@ describe('5TOT Đà Nẵng — LEAN-6 Full End-to-End System Integration Suite',
         schoolReviewUnitId: 'unit-udn',
         status: 'DRAFT' as const,
         decisionNumber: '182/QĐ-ĐHĐN',
-        decisionTitle: 'Quyết định công nhận và giới thiệu Sinh viên 5 tốt cấp Thành phố',
+        decisionTitle: 'Quyết định công nhận và giới thiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng',
         decisionDate: '2026-10-20',
         decisionFileName: '182_QD_DHDN_Danh_sach_gioi_thieu_SV5T_2026.pdf',
         selectedApplicationIds: ['app-1', 'app-2', 'app-3'],
@@ -491,7 +491,7 @@ describe('5TOT Đà Nẵng — LEAN-6 Full End-to-End System Integration Suite',
       };
 
       const proj = getRoleAwareStatusProjection(appRecord, 'CITY_COMMITTEE');
-      assert.strictEqual(proj.schoolPreliminary.label, 'Đã gửi Thành phố');
+      assert.strictEqual(proj.schoolPreliminary.label, 'Đã gửi cấp ĐHĐN');
       assert.strictEqual(proj.cityReview.label, 'Đã thẩm định');
       assert.strictEqual(proj.committeeDecision.label, 'Chờ quyết định');
     });

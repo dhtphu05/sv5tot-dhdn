@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Create Season Modal with Copy Previous Season & 1-Click Auto-Schedule
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Create Season Modal with Copy Previous Season & 1-Click Auto-Schedule
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import React, { useState } from 'react';
@@ -45,7 +45,7 @@ export const SeasonCreateModal: React.FC<SeasonCreateModalProps> = ({
     return {
       schoolYear: '2026–2027',
       title:
-        'Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Thành phố Năm học 2026–2027',
+        'Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Đại học Đà Nẵng Năm học 2026–2027',
       copyFromSeasonId: defaultCopyFromSeasonId || 'season-2025-2026',
       ...autoDates,
       criteriaVersionId: 'crit-ver-2026-2027-draft',
@@ -144,7 +144,7 @@ export const SeasonCreateModal: React.FC<SeasonCreateModalProps> = ({
                   setCreateForm({
                     ...createForm,
                     schoolYear: yr,
-                    title: `Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Thành phố ${formatAcademicYearLabel(yr)}`,
+                    title: `Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Đại học Đà Nẵng ${formatAcademicYearLabel(yr)}`,
                   });
                 }}
                 placeholder="2026–2027"

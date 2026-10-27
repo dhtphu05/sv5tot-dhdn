@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Student Home ("Trang chủ" — Calm Orientation & Next-Action Hub)
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng — Năm học 2026–2027
+ * 5TOT ĐHĐN — Student Home ("Trang chủ" — Calm Orientation & Next-Action Hub)
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
  *
  * Refactored into Feature-Sliced Widgets under src/widgets/student-home/:
  * - StudentHomeHeroBanner: Deterministic Single Primary Action Selector across all 14 states
@@ -138,7 +138,7 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-[12px] font-bold text-[#0D78AE] uppercase tracking-wider">
-            <span>Hội Sinh viên Việt Nam TP. Đà Nẵng</span>
+            <span>Hội Sinh viên Việt Nam Đại học Đà Nẵng</span>
             <span>·</span>
             <span>Năm học {application?.student?.academicYear || MOCK_STUDENT.schoolYear}</span>
           </div>
@@ -175,7 +175,7 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
                 <span>
                   Đơn vị xét duyệt:{' '}
                   <strong className="text-[#15803D]">
-                    Hội Sinh viên Việt Nam TP. Đà Nẵng
+                    Hội Sinh viên Việt Nam Đại học Đà Nẵng
                   </strong>
                 </span>
               </>

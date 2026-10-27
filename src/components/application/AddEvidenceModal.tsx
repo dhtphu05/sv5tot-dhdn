@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Add / Manage Evidence Modal
+ * 5TOT ĐHĐN — Add / Manage Evidence Modal
  * Dedicated desktop modal for attaching or managing evidence files on an EXISTING declaration.
  * Implements Prompt 10 Sections 19, 20, 21, 22, 46, 63:
  * - Shows existing evidence ("Đã có trong hồ sơ") and newly added supplement evidence ("Mới bổ sung")

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-4.1 Automated Test Suite
+ * 5TOT ĐHĐN — LEAN-4.1 Automated Test Suite
  * DIRECT SCHOOL FINALIZATION — SELECT, ATTACH AND FORWARD
  * Verifies that selection + official forwarding constitutes the School's recommendation finalization,
  * without a second per-student recommendation approval step or mandatory Fail mutation for unselected students.
@@ -15,7 +15,7 @@ import {
   getApplicationCriteriaSummary,
 } from '../staff/schoolSelectors';
 
-describe('5TOT Đà Nẵng — LEAN-4.1 Direct School Finalization Specification Suite', () => {
+describe('5TOT ĐHĐN — LEAN-4.1 Direct School Finalization Specification Suite', () => {
   const udnOfficer = STAFF_DEMO_USERS.SCHOOL_OFFICER;
 
   beforeEach(() => {

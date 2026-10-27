@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Pure Domain Mutators (FSD Entities Layer)
+ * 5TOT ĐHĐN — Officer Review Pure Domain Mutators (FSD Entities Layer)
  * Pure state transition builders for Individual Officer Review Workspace.
  */
 
@@ -723,7 +723,7 @@ export function buildCompleteApplicationMutation(
       : undefined,
     nextAssignmentStatus: 'completed',
     nextOperationalNote: isSchoolStage
-      ? 'Đã hoàn tất xét sơ tuyển 05 tiêu chí cấp Trường · Chờ đề xuất chuyển Thành phố'
+      ? 'Đã hoàn tất xét sơ tuyển 05 tiêu chí cấp Trường · Chờ đề xuất chuyển cấp ĐHĐN'
       : 'Đã hoàn tất phần xét 05 tiêu chí · Chờ bước xử lý tiếp theo',
   };
 }
@@ -780,7 +780,7 @@ export function buildRecordCriterionConclusionMutation(
       : r
   );
 
-  const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Thành phố';
+  const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Đại học Đà Nẵng';
   const outcomeLabel = conclusion === 'pass' ? 'Đạt tiêu chí' : 'Không đạt tiêu chí';
   const nextHistory: ReviewHistoryEvent = {
     id: `hist-crit-conclusion-${Date.now()}`,
@@ -838,7 +838,7 @@ export function buildRevokeCriterionConclusionMutation(
     [critId]: false,
   };
 
-  const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Thành phố';
+  const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Đại học Đà Nẵng';
   const nextHistory: ReviewHistoryEvent = {
     id: `hist-crit-revoke-${Date.now()}`,
     timestamp: nowStr,
@@ -879,7 +879,7 @@ export function buildReopenApplicationReviewMutation(
     .getHours()
     .toString()
     .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-  const stageLabel = isSchoolStage ? 'Cấp Trường' : 'Cấp Thành phố';
+  const stageLabel = isSchoolStage ? 'Cấp Trường' : 'Cấp Đại học Đà Nẵng';
 
   const nextHistory: ReviewHistoryEvent = {
     id: `hist-reopen-${Date.now()}`,
@@ -904,7 +904,7 @@ export function buildReopenApplicationReviewMutation(
     nextAssignmentStatus: 'in_progress',
     nextOperationalNote: isSchoolStage
       ? 'Đã hoàn tác chốt sơ tuyển · Đang mở lại xét sơ tuyển cấp Trường'
-      : 'Đã hoàn tác chốt thẩm định · Đang mở lại thẩm định cấp Thành phố',
+      : 'Đã hoàn tác chốt thẩm định · Đang mở lại thẩm định cấp Đại học Đà Nẵng',
   };
 }
 

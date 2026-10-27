@@ -397,7 +397,7 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
           <p className="text-[13px] text-[#4A6275] mt-0.5">
             {isDecisionQueuePage
               ? 'Tất cả các hồ sơ đã hoàn tất phần thẩm định 05/05 tiêu chí và sẵn sàng để Hội đồng ghi nhận kết luận chính thức.'
-              : 'Hồ sơ đã qua sơ tuyển từ cơ sở và thẩm định độc lập cấp Thành phố, sẵn sàng để Hội đồng xem xét và ghi nhận quyết định.'}
+              : 'Hồ sơ đã qua sơ tuyển từ cơ sở và thẩm định độc lập cấp Đại học Đà Nẵng, sẵn sàng để Hội đồng xem xét và ghi nhận quyết định.'}
           </p>
         </div>
       </div>
@@ -562,12 +562,12 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
                                 ? 'Không đề xuất'
                                 : app.schoolPreliminaryStatus === 'recommended_forwarding' ||
                                   app.schoolPreliminaryStatus === 'forwarded_to_city'
-                                ? 'Đề xuất Thành phố'
+                                ? 'Đề xuất cấp ĐHĐN'
                                 : 'Chưa kết luận'}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-[11.5px] text-[#607483]">
-                            <span>Thẩm định Thành phố:</span>
+                            <span>Thẩm định cấp ĐHĐN:</span>
                             <span className="font-bold text-[#136F3A]">
                               {(() => {
                                 const prg = deriveApplicationCriteriaReviewProgress(app);

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Cloudflare R2 S3-Compatible Object Storage Client (Backend V2)
+ * 5TOT ĐHĐN — Cloudflare R2 S3-Compatible Object Storage Client (Backend V2)
  *
  * Implements zero-buffer AWS Signature V4 (S3-compatible) operations for Cloudflare R2:
  * - Presigned PUT URLs for direct browser-to-R2 uploads (PDF, JPEG, PNG, WEBP).

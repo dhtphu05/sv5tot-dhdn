@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Prototype Demo Launcher (/demo)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Prototype Demo Launcher (/demo)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 14.9 Sections 6–10 + Prompt 17 Section 130:
  * - Clean internal presentation surface using the 5TOT design system.
@@ -144,7 +144,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 THÀNH ĐOÀN ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM TP. ĐÀ NẴNG
               </span>
               <span className="text-[14.5px] font-extrabold text-[#0B64A0] tracking-tight truncate">
-                Hệ thống xét duyệt Sinh viên 5 tốt cấp Thành phố
+                Hệ thống xét duyệt Sinh viên 5 tốt cấp Đại học Đà Nẵng
               </span>
             </div>
           </div>
@@ -210,15 +210,15 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[6px] bg-[#E5F4FC] text-[#0B64A0] text-[11.5px] font-bold mb-2">
-              <span>5TOT Đà Nẵng</span>
+              <span>5TOT ĐHĐN</span>
               <span>·</span>
               <span>Năm học 2026–2027</span>
             </div>
             <h1 className="text-[24px] sm:text-[26px] font-extrabold text-[#0F2335] tracking-tight leading-tight">
-              5TOT Đà Nẵng — Chế độ trình diễn
+              5TOT ĐHĐN — Chế độ trình diễn
             </h1>
             <p className="text-[14px] text-[#4A6275] mt-1">
-              Chọn kịch bản của Hội đồng xét chọn, Cán bộ xét duyệt hoặc Sinh viên để kiểm thử đầy đủ quy trình cấp Thành phố.
+              Chọn kịch bản của Hội đồng xét chọn, Cán bộ xét duyệt hoặc Sinh viên để kiểm thử đầy đủ quy trình cấp Đại học Đà Nẵng.
             </p>
           </div>
 
@@ -453,7 +453,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 </h2>
               </div>
               <span className="text-[12px] font-semibold text-[#526B7C]">
-                Quy trình Nộp trực tiếp lên Thành phố · 04 Tiêu chuẩn TT01–TT04
+                Quy trình Nộp trực tiếp lên cấp Đại học Đà Nẵng · 04 Tiêu chuẩn TT01–TT04
               </span>
             </div>
 
@@ -473,7 +473,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                       </span>
                     </div>
                     <p className="text-[13px] text-[#526B7C] mt-0.5 leading-snug">
-                      Phụ trách: Nguyễn Thị Mai (mai.nt@dut.udn.vn) · Kê khai TT01 (Cấp trường), TT02 (100% phong trào), TT03 (21.43% SV5T trường), TT04 (Không vi phạm) và nộp trực tiếp Thành phố.
+                      Phụ trách: Nguyễn Thị Mai (mai.nt@dut.udn.vn) · Kê khai TT01 (Cấp trường), TT02 (100% phong trào), TT03 (21.43% SV5T trường), TT04 (Không vi phạm) và nộp trực tiếp cấp ĐHĐN.
                     </p>
                   </div>
                 </div>
@@ -577,7 +577,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 </h2>
               </div>
               <span className="text-[12px] font-semibold text-[#526B7C]">
-                Toàn quyền cấu hình · 32 Đơn vị đào tạo · 05 Tiêu chí cấp Thành phố
+                Toàn quyền cấu hình · 32 Đơn vị đào tạo · 05 Tiêu chí cấp Đại học Đà Nẵng
               </span>
             </div>
 
@@ -598,7 +598,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 {
                   routeId: 'admin_users' as StaffRouteId,
                   code: 'CÁN BỘ',
-                  title: 'Người dùng & Phân quyền cán bộ cấp Thành phố',
+                  title: 'Người dùng & Phân quyền cán bộ cấp Đại học Đà Nẵng',
                   desc: 'Quản lý 18 tài khoản cán bộ xét duyệt, quản lý, hội đồng; kích hoạt an toàn, kiểm tra phụ trách hồ sơ trước khi đổi quyền.',
                 },
                 {

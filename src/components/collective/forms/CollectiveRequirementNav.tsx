@@ -62,10 +62,10 @@ export const CollectiveRequirementNav: React.FC<CollectiveRequirementNavProps> =
       <div className="mt-auto p-4 bg-white border border-[#DCE7EE] rounded-[12px] text-[12px] space-y-1.5 shadow-2xs">
         <div className="font-bold text-[#172A3A] flex items-center gap-1.5">
           <Building2 size={14} className="text-[#0D78AE]" />
-          <span>Cơ chế xét duyệt trực tiếp Thành phố</span>
+          <span>Cơ chế xét duyệt trực tiếp cấp ĐHĐN</span>
         </div>
         <p className="text-[#607483] leading-relaxed">
-          Hồ sơ Tập thể nộp trực tiếp đến Hội Sinh viên TP. Đà Nẵng để thẩm định độc lập 4 tiêu chuẩn TT01–TT04, không qua khâu duyệt trung gian cấp Trường.
+          Hồ sơ Tập thể nộp trực tiếp đến Hội Sinh viên Đại học Đà Nẵng để thẩm định độc lập 4 tiêu chuẩn TT01–TT04, không qua khâu duyệt trung gian cấp Trường.
         </p>
       </div>
     </div>

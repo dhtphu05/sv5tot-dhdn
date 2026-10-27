@@ -89,7 +89,7 @@ describe('Backend V2: School Review Unit Domain Service Unit Tests', () => {
     const res = await service.resolveUnitForInstitution('inst-dut', 'COLLECTIVE');
     assert.equal(res.resolved, false);
     assert.equal(res.errorCode, 'COLLECTIVE_NOT_APPLICABLE');
-    assert.ok(res.errorMessage?.includes('nộp trực tiếp Cấp Thành phố'));
+    assert.ok(res.errorMessage?.includes('nộp trực tiếp Cấp Đại học Đà Nẵng'));
   });
 
   it('enforces officer review scope and denies cross-unit access', () => {
@@ -349,7 +349,7 @@ describe('Backend V2: School Review Unit Domain Service Unit Tests', () => {
       },
       (err: any) => {
         assert.equal(err.status, 403);
-        assert.ok(err.detail.includes('Hồ sơ Tập thể nộp trực tiếp Cấp Thành phố'));
+        assert.ok(err.detail.includes('Hồ sơ Tập thể nộp trực tiếp Cấp Đại học Đà Nẵng'));
         return true;
       }
     );

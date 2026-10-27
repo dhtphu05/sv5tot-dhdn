@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Session Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Session Domain Service (Backend V2)
  * Manages Zero-Trust session lifecycles, JWT signing, refresh token rotation, and replay attack detection.
  */
 

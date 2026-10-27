@@ -59,7 +59,7 @@ export const CollectiveCompleteReviewDialog: React.FC<CollectiveCompleteReviewDi
             </div>
 
             <p className="text-[13px] text-[#334E68] leading-relaxed">
-              Bạn đã hoàn tất việc xét duyệt hồ sơ <strong>Tập thể Sinh viên 5 tốt</strong> tại cấp Thành phố.
+              Bạn đã hoàn tất việc xét duyệt hồ sơ <strong>Tập thể Sinh viên 5 tốt</strong> tại cấp Đại học Đà Nẵng.
               Kết quả xét và nhận xét của cán bộ sẽ được lưu để phục vụ bước xem xét của Hội đồng.
               <span className="block mt-1 font-semibold text-[#8C3A19]">
                 Đây chưa phải kết quả công nhận chính thức.

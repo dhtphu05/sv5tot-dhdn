@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: City Manager Assignment (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: City Manager Assignment (FSD Features Layer)
  * Encapsulates City Manager officer assignment and reassignment with audit trail.
  */
 

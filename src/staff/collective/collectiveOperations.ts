@@ -342,8 +342,8 @@ export interface CollectiveSubmissionResult {
 }
 
 /**
- * Nộp hồ sơ trực tiếp lên Thành phố (Prompt S4.8.2 Sections 44–49)
- * - Nộp trực tiếp lên Hội Sinh viên Việt Nam TP. Đà Nẵng
+ * Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng (Prompt S4.8.2 Sections 44–49)
+ * - Nộp trực tiếp lên Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * - KHÔNG qua khâu xác nhận hoặc phê duyệt của Trường
  * - Kiểm tra tính toàn vẹn và đảm bảo tính Idempotent
  */
@@ -360,7 +360,7 @@ export function submitCollectiveDirectlyToCity(
   if (app.status === 'city_unassigned' || app.status === 'city_assigned' || app.status === 'city_in_review') {
     return {
       success: true,
-      message: 'Hồ sơ đã được nộp lên Thành phố trước đó.',
+      message: 'Hồ sơ đã được nộp lên cấp Đại học Đà Nẵng trước đó.',
       application: app,
       alreadySubmitted: true,
     };
@@ -396,11 +396,11 @@ export function submitCollectiveDirectlyToCity(
       ...app.auditHistory,
       {
         id: `aud-${Date.now()}`,
-        action: 'Nộp hồ sơ trực tiếp lên Thành phố',
+        action: 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng',
         actorName: actor.name,
         actorRole: actor.role || 'Người lập hồ sơ tập thể',
         timestamp: now,
-        details: 'Hồ sơ đã được nộp trực tiếp đến Hội Sinh viên Việt Nam thành phố Đà Nẵng để tiếp nhận và xét chọn (không qua khâu trung gian của Trường).',
+        details: 'Hồ sơ đã được nộp trực tiếp đến Hội Sinh viên Việt Nam Đại học Đà Nẵng để tiếp nhận và xét chọn (không qua khâu trung gian của Trường).',
       },
     ],
   };
@@ -408,7 +408,7 @@ export function submitCollectiveDirectlyToCity(
   saveCollectiveApplication(updatedApp);
   return {
     success: true,
-    message: 'Nộp hồ sơ trực tiếp lên Thành phố thành công!',
+    message: 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng thành công!',
     application: updatedApp,
   };
 }
@@ -531,18 +531,18 @@ export function confirmAndForwardToCity(
       schoolReviewUnitName: actor.unitName,
       institutionId: app.institutionId,
       institutionName: app.institutionName,
-      forwardingDestination: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
-      signOffNote: 'Xác nhận hồ sơ tập thể hợp lệ, chuyển Thành phố xét duyệt.',
+      forwardingDestination: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
+      signOffNote: 'Xác nhận hồ sơ tập thể hợp lệ, chuyển cấp ĐHĐN xét duyệt.',
     },
     auditHistory: [
       ...app.auditHistory,
       {
         id: `aud-${Date.now()}`,
-        action: 'Đơn vị xác nhận & Chuyển Thành phố',
+        action: 'Đơn vị xác nhận & Chuyển cấp ĐHĐN',
         actorName: actor.name,
         actorRole: actor.role,
         timestamp: now,
-        details: `Đơn vị ${actor.unitName} đã ký xác nhận và chuyển hồ sơ lên Hội Sinh viên Thành phố Đà Nẵng.`,
+        details: `Đơn vị ${actor.unitName} đã ký xác nhận và chuyển hồ sơ lên Hội Sinh viên Việt Nam Đại học Đà Nẵng.`,
       },
     ],
   };

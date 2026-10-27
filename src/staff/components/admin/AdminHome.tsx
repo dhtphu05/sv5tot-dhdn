@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Admin Home (Tổng quan Quản trị hệ thống)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Admin Home (Tổng quan Quản trị hệ thống)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements ADMIN-REVAMP Section 5A:
  * - Active award season (dynamic via formatAcademicYearLabel / formatShortAcademicYear)
@@ -109,7 +109,7 @@ export const AdminHome: React.FC<AdminHomeProps> = ({
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            {seasonFullLabel} · Cấp Thành phố Đà Nẵng
+            {seasonFullLabel} · Cấp Đại học Đà Nẵng
           </div>
           <h1 className="text-[22px] font-extrabold text-[#0F2335] mt-0.5">
             Quản trị hệ thống
@@ -117,7 +117,7 @@ export const AdminHome: React.FC<AdminHomeProps> = ({
           <p className="text-[13px] text-[#526B7C] mt-1 max-w-[720px]">
             Quản lý cấu hình mùa xét, đơn vị đào tạo &amp; phân tuyến sơ tuyển,
             tài khoản cán bộ và khung tiêu chuẩn phục vụ quy trình xét chọn Sinh
-            viên 5 Tốt cấp Thành phố Đà Nẵng.
+            viên 5 Tốt cấp Đại học Đà Nẵng.
           </p>
         </div>
 

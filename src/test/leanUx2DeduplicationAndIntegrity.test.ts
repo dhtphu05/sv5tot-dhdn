@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-UX.2 Automated Test Suite
+ * 5TOT ĐHĐN — LEAN-UX.2 Automated Test Suite
  * Cross-Role UX Deduplication, Evidence Review Integrity, Status Consistency & Compact Review Workspaces
  *
  * Verifies:

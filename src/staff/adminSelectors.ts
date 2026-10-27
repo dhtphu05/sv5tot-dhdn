@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Central Admin Selectors & Validation Services
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Central Admin Selectors & Validation Services
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 & ADMIN-REVAMP / ADMIN-REVAMP.1:
  * - Centralizes all business rules, timeline validators, and season readiness checklists.
@@ -735,7 +735,7 @@ export function validateDeadlineSequence(deadlines: DeadlineConfigItem[]): {
     warnings.push('Hạn đóng tiếp nhận hồ sơ Cá nhân (T01) phải sau thời điểm mở tiếp nhận.');
   }
   if (subEnd && revEnd && new Date(revEnd).getTime() < new Date(subEnd).getTime()) {
-    warnings.push('Hạn cấp Trường gửi danh sách lên Thành phố (T03) không được sớm hơn hạn đóng tiếp nhận hồ sơ Cá nhân.');
+    warnings.push('Hạn cấp Trường gửi danh sách lên cấp Đại học Đà Nẵng (T03) không được sớm hơn hạn đóng tiếp nhận hồ sơ Cá nhân.');
   }
   if (revEnd && comDate && new Date(comDate).getTime() < new Date(revEnd).getTime()) {
     warnings.push('Thời gian họp Hội đồng xét chọn (T06) không được sớm hơn hạn cấp Trường gửi danh sách đề nghị (T03).');

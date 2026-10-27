@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Audit, Notifications & Analytics Express Routes (Backend V2)
+ * 5TOT ĐHĐN — Audit, Notifications & Analytics Express Routes (Backend V2)
  */
 
 import { Router } from 'express';

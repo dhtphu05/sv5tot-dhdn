@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Forwarded Immutable Summary Banner Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Forwarded Immutable Summary Banner Widget (FSD Widgets Layer)
  * Renders read-only batch metadata after successful atomic forwarding to City level.
  */
 

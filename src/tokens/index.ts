@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Design Tokens & Core Primitives
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Design Tokens & Core Primitives
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 export interface CriterionDefinition {
@@ -90,8 +90,8 @@ export type ApplicationStatus =
   | 'under_review'        // Đang xét hồ sơ
   | 'supplement_required' // Cần bổ sung minh chứng
   | 'waiting_final'       // Đã hoàn tất xét 5 tiêu chí · Đang chờ kết quả chính thức
-  | 'final_awarded'       // Đạt danh hiệu Sinh viên 5 tốt cấp Thành phố
-  | 'final_not_awarded';  // Chưa đạt chuẩn cấp Thành phố năm nay
+  | 'final_awarded'       // Đạt danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng
+  | 'final_not_awarded';  // Chưa đạt chuẩn cấp Đại học Đà Nẵng năm nay
 
 export const APPLICATION_STATUS_MAP: Record<ApplicationStatus, { label: string; tone: 'neutral' | 'brand' | 'amber' | 'green' }> = {
   draft: { label: 'Đang hoàn thiện', tone: 'neutral' },

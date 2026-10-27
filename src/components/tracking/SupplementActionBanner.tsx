@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Next Best Action Banner (Supplement Request)
+ * 5TOT ĐHĐN — Next Best Action Banner (Supplement Request)
  * Placed directly below the tracking summary.
  * Implements Prompt 10: Sections 4, 25, 29, 30, 31, 32, 39, 40
  */

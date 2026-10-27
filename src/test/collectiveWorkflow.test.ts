@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Automated Verification Suite for Collective Workflow (Prompt S4.8.2 Section 70)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Automated Verification Suite for Collective Workflow (Prompt S4.8.2 Section 70)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Covers:
  * 1. Collective ownership and role authorization (preparer vs student)
@@ -238,7 +238,7 @@ const assignSuccess = assignCityOfficer(
   app.id,
   'staff-off-nam',
   'Trần Hoàng Nam',
-  { name: 'Lê Hoàng Yến', role: 'Cán bộ điều phối cấp Thành phố' }
+  { name: 'Lê Hoàng Yến', role: 'Cán bộ điều phối cấp Đại học Đà Nẵng' }
 );
 assert(assignSuccess.success === true, 'Assigning city officer must succeed');
 const assignedApp = getCollectiveApplicationById(app.id)!;
@@ -370,7 +370,7 @@ completeCityReview(
 const decSuccess = recordCommitteeDecision(
   app.id,
   'recognized',
-  'Hội đồng biểu quyết 100% nhất trí thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố.',
+  'Hội đồng biểu quyết 100% nhất trí thông qua danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
   { name: 'Lê Hoàng Yến', role: 'Thành viên Hội đồng' }
 );
 assert(decSuccess === true, 'Committee decision recording must succeed');
@@ -388,7 +388,7 @@ console.log('Test 21: Publishing Official Collective Recognition Decision...');
 const pubSuccess = publishCollectiveResult(
   app.id,
   '86/QĐ-HSV-TP',
-  { name: 'Nguyễn Bá Duẩn', role: 'Chủ tịch Hội Sinh viên Thành phố' }
+  { name: 'Nguyễn Bá Duẩn', role: 'Chủ tịch Hội Sinh viên Đại học Đà Nẵng' }
 );
 assert(pubSuccess === true, 'Publish collective result must succeed');
 const publishedApp = getCollectiveApplicationById(app.id)!;
@@ -396,7 +396,7 @@ assert(publishedApp.status === 'published', 'Status must transition to published
 assert(publishedApp.finalResult !== undefined, 'finalResult must be populated');
 assert(publishedApp.finalResult?.isPublished === true, 'finalResult.isPublished must be true');
 assert(publishedApp.finalResult?.decisionNumber === '86/QĐ-HSV-TP', 'Decision number must match');
-assert(publishedApp.finalResult?.awardTitle === 'Tập thể Sinh viên 5 tốt cấp Thành phố', 'Award title must match');
+assert(publishedApp.finalResult?.awardTitle === 'Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng', 'Award title must match');
 assert(
   publishedApp.auditHistory.some((h) => h.action.includes('Công bố')),
   'Audit history must capture publication event'
@@ -407,7 +407,7 @@ console.log('--- ALL COLLECTIVE WORKFLOW TESTS PASSED SUCCESSFULLY! ---');
 if (process.env.VITEST) {
   const vitestPkg = 'vitest';
   const { describe, it, expect } = await import(vitestPkg);
-  describe('5TOT Đà Nẵng — Collective End-to-End Workflow Suite', () => {
+  describe('5TOT ĐHĐN — Collective End-to-End Workflow Suite', () => {
     it('executes all 21 collective workflow tests without error', () => {
       expect(publishedApp.status).toBe('published');
       expect(publishedApp.finalResult?.isPublished).toBe(true);

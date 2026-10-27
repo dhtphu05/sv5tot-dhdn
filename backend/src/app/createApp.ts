@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Express Application Factory (Backend V2)
+ * 5TOT ĐHĐN — Express Application Factory (Backend V2)
  * Creates and configures the production Express app with complete security,
  * observability middlewares, and runtime route-to-service-to-Prisma dependency wiring.
  */

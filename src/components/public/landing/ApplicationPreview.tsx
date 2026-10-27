@@ -1,14 +1,14 @@
 /**
- * 5TOT Đà Nẵng — Simplified Application Preview (Approved Visual Reference + Real Product Semantics)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Simplified Application Preview (Approved Visual Reference + Real Product Semantics)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Sections 25, 26, 27, 28, 48:
  * - Large soft container with a subtle blue-tinted frame matching the approved visual reference.
  * - Left mini sidebar:
  *   Tổng quan | Hồ sơ của tôi | Kho minh chứng | Kết quả xét chọn
  * - Main workspace surface:
- *   Hồ sơ Sinh viên 5 tốt · Cấp Thành phố
+ *   Hồ sơ Sinh viên 5 tốt · Cấp Đại học Đà Nẵng
  *   Nguyễn Minh Anh · Trường ĐH Bách khoa – ĐHĐN · Năm học 2026–2027
  *   Status: Đang hoàn thiện
  * - Strict adherence to Section 26 & 27:
@@ -199,7 +199,7 @@ export const ApplicationPreview: React.FC<ApplicationPreviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#ECF3F8]">
               <div className="min-w-0">
                 <div className="text-[16.5px] sm:text-[18.5px] font-extrabold text-[#0F2335] tracking-tight">
-                  Hồ sơ Sinh viên 5 tốt · Cấp Thành phố
+                  Hồ sơ Sinh viên 5 tốt · Cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[13px] text-[#526B7E] font-medium mt-0.5 truncate">
                   Nguyễn Minh Anh · Trường ĐH Bách khoa – ĐHĐN · MSSV: 102220123 · Năm học 2026–2027

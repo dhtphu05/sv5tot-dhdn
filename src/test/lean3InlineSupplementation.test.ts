@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation Test Suite
+ * 5TOT ĐHĐN — LEAN-3 Production Inline Supplementation Test Suite
  * Matrix S01–S40:
  * Block A (S01–S08): Contextual Supplement Request Creation & Boundaries
  * Block B (S09–S16): Scoped Student In-Dossier Editing Integrity
@@ -27,7 +27,7 @@ import {
   SelectedReviewScope,
 } from '../staff/reviewTypes';
 
-describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S40)', () => {
+describe('5TOT ĐHĐN — LEAN-3 Production Inline Supplementation (S01–S40)', () => {
   // Helper to clone a fresh test dossier
   function createTestApplication(): StudentApplicationData {
     return structuredClone(STUDENT_APPLICATION_FIXTURE);
@@ -122,8 +122,8 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
 
       assert.equal(requestWithoutDeadline.deadline, undefined);
       // Graceful fallback display
-      const displayDeadline = requestWithoutDeadline.deadline || 'Theo lịch chung của Thành phố';
-      assert.equal(displayDeadline, 'Theo lịch chung của Thành phố');
+      const displayDeadline = requestWithoutDeadline.deadline || 'Theo lịch chung của Đại học Đà Nẵng';
+      assert.equal(displayDeadline, 'Theo lịch chung của Đại học Đà Nẵng');
     });
 
     it('S06: Sending supplement request transitions application to supplement_required', () => {
@@ -337,7 +337,7 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
         email: 'canbo@danang.gov.vn',
         primaryRole: 'CITY_OFFICER',
         roleLabel: 'Cán bộ Ban Thanh niên Trường học',
-        unitLabel: 'Thành đoàn Đà Nẵng',
+        unitLabel: 'Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng',
         roles: ['CITY_OFFICER'],
       };
 
@@ -411,7 +411,7 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
         email: 'canbo@danang.gov.vn',
         primaryRole: 'CITY_OFFICER',
         roleLabel: 'Cán bộ Ban Thanh niên Trường học',
-        unitLabel: 'Thành đoàn Đà Nẵng',
+        unitLabel: 'Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng',
         roles: ['CITY_OFFICER'],
       };
 
@@ -510,7 +510,7 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
         email: 'canbo@danang.gov.vn',
         primaryRole: 'CITY_OFFICER',
         roleLabel: 'Cán bộ Ban Thanh niên Trường học',
-        unitLabel: 'Thành đoàn Đà Nẵng',
+        unitLabel: 'Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng',
         roles: ['CITY_OFFICER'],
       };
 
@@ -672,15 +672,15 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
         criterionName: 'Hội nhập tốt',
         actionType: 'addEvidence',
         allowedActions: ['addEvidence'],
-        message: 'Yêu cầu từ Cán bộ Thành phố',
+        message: 'Yêu cầu từ Cán bộ cấp Đại học Đà Nẵng',
         status: 'active',
         scopeLevel: 'requirement',
         requestedAt: 'now',
-        requestedBy: 'Cán bộ Thành đoàn Đà Nẵng',
+        requestedBy: 'Cán bộ Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng',
       };
 
       assert.ok(schoolRequest.requestedBy?.includes('Trường'));
-      assert.ok(cityRequest.requestedBy?.includes('Thành đoàn'));
+      assert.ok(cityRequest.requestedBy?.includes('Đại học Đà Nẵng'));
     });
 
     it('S32: School review unit batch forwarding correctly detects active supplements as blocking forwarding', () => {
@@ -794,7 +794,7 @@ describe('5TOT Đà Nẵng — LEAN-3 Production Inline Supplementation (S01–S
         email: 'canbo@danang.gov.vn',
         primaryRole: 'CITY_OFFICER',
         roleLabel: 'Cán bộ Ban Thanh niên Trường học',
-        unitLabel: 'Thành đoàn Đà Nẵng',
+        unitLabel: 'Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng',
         roles: ['CITY_OFFICER'],
       };
 

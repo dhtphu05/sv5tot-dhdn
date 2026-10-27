@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Award Season Controller (Backend V2)
+ * 5TOT ĐHĐN — Award Season Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

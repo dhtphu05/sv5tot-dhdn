@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Initial URL & Session Resolver (FSD App Layer)
+ * 5TOT ĐHĐN — Initial URL & Session Resolver (FSD App Layer)
  * Resolves initial TopLevelViewMode, active scenario, and coherent store from URL path, query params, and session storage.
  */
 

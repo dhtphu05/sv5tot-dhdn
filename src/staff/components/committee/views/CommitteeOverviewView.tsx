@@ -327,7 +327,7 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
           <div className="flex items-center gap-2">
             <BarChart3 size={17} className="text-[#0D78AE]" />
             <h3 className="text-[13.5px] font-bold text-[#0F2335]">
-              Phân bố kết quả thẩm định 05 tiêu chí cấp Thành phố
+              Phân bố kết quả thẩm định 05 tiêu chí cấp Đại học Đà Nẵng
             </h3>
             <span className="text-[11.5px] text-[#64748B]">
               (Dữ liệu thực tế từ cán bộ thẩm định, chưa phải kết luận công nhận của Hội đồng)

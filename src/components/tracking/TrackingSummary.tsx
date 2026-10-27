@@ -59,8 +59,8 @@ export const TrackingSummary: React.FC<TrackingSummaryProps> = ({
   const canonicalStages = [
     { label: 'Gửi hồ sơ', short: 'Gửi hồ sơ', full: '01. Hoàn thiện và gửi hồ sơ' },
     { label: 'Xét sơ cấp Trường', short: 'Xét sơ cấp Trường', full: '02. Xét sơ tuyển cấp Trường' },
-    { label: 'Chuyển Thành phố', short: 'Chuyển Thành phố', full: '03. Đề xuất và chuyển Thành phố' },
-    { label: 'Xét duyệt Thành phố', short: 'Xét duyệt Thành phố', full: '04. Xét duyệt cấp Thành phố' },
+    { label: 'Chuyển cấp ĐHĐN', short: 'Chuyển cấp ĐHĐN', full: '03. Đề xuất và chuyển cấp ĐHĐN' },
+    { label: 'Xét duyệt cấp ĐHĐN', short: 'Xét duyệt cấp ĐHĐN', full: '04. Xét duyệt cấp Đại học Đà Nẵng' },
     { label: 'Kết quả chính thức', short: 'Kết quả', full: '05. Kết quả xét chọn' },
   ];
 
@@ -113,20 +113,20 @@ export const TrackingSummary: React.FC<TrackingSummaryProps> = ({
     message = `Hồ sơ đã được gửi đến ${schoolReviewUnitName} và đang chờ tiếp nhận xét sơ tuyển.`;
     progressBadge = 'Chờ tiếp nhận xét sơ';
   } else if (isNotRecommended) {
-    statusTitle = 'Chưa đề xuất chuyển lên cấp Thành phố';
-    message = `Hồ sơ chưa được đơn vị xét sơ (${schoolReviewUnitName}) đề xuất chuyển lên cấp Thành phố trong đợt này.`;
+    statusTitle = 'Chưa đề xuất chuyển lên cấp Đại học Đà Nẵng';
+    message = `Hồ sơ chưa được đơn vị xét sơ (${schoolReviewUnitName}) đề xuất chuyển lên cấp Đại học Đà Nẵng trong đợt này.`;
     progressBadge = 'Không đề xuất chuyển';
   } else if (schoolPreliminaryStatus === 'recommended_forwarding' || (schoolRecommendation === 'recommended' && !isSchoolForwarded)) {
-    statusTitle = 'Đã đề xuất chuyển lên Thành phố';
-    message = `Đơn vị xét sơ (${schoolReviewUnitName}) đã hoàn tất xét sơ và đề xuất chuyển lên Hội Sinh viên Thành phố. Đang chờ xác nhận chuyển chính thức.`;
-    progressBadge = 'Chờ chuyển Thành phố';
+    statusTitle = 'Đã đề xuất chuyển lên cấp Đại học Đà Nẵng';
+    message = `Đơn vị xét sơ (${schoolReviewUnitName}) đã hoàn tất xét sơ và đề xuất chuyển lên Hội Sinh viên Đại học Đà Nẵng. Đang chờ xác nhận chuyển chính thức.`;
+    progressBadge = 'Chờ chuyển cấp ĐHĐN';
   } else if (isSchoolForwarded || (reviewStage === 'CITY' && submissionState !== 'result_published')) {
-    statusTitle = 'Đã chuyển hồ sơ lên cấp Thành phố';
-    message = 'Hội Sinh viên Thành phố đã tiếp nhận hồ sơ từ đơn vị xét sơ và đang thực hiện thẩm định độc lập.';
-    progressBadge = 'Cấp Thành phố xét duyệt';
+    statusTitle = 'Đã chuyển hồ sơ lên cấp Đại học Đà Nẵng';
+    message = 'Hội Sinh viên Đại học Đà Nẵng đã tiếp nhận hồ sơ từ đơn vị xét sơ và đang thực hiện thẩm định độc lập.';
+    progressBadge = 'Cấp Đại học Đà Nẵng xét duyệt';
   } else if (submissionState === 'supplement_required' || hasSupplement) {
     const isCitySupp = reviewStage === 'CITY';
-    statusTitle = `Cần bổ sung hồ sơ (${isCitySupp ? 'Cấp Thành phố' : 'Cấp Trường'})`;
+    statusTitle = `Cần bổ sung hồ sơ (${isCitySupp ? 'Cấp Đại học Đà Nẵng' : 'Cấp Trường'})`;
     message = `Các tiêu chí khác vẫn giữ nguyên. Chỉ phạm vi được cán bộ đề nghị tại ${supplementCriterionName} đang mở để bạn bổ sung.`;
     progressBadge = `${reviewedCriteriaCount}/${totalCriteriaCount} tiêu chí đã xem xét`;
   } else if (submissionState === 'supplement_sent') {
@@ -143,7 +143,7 @@ export const TrackingSummary: React.FC<TrackingSummaryProps> = ({
     progressBadge = 'Chờ kết quả chính thức';
   } else if (submissionState === 'result_published') {
     statusTitle = 'Đã có kết quả xét chọn chính thức';
-    message = 'Hồ sơ đã hoàn tất toàn bộ quy trình hai cấp và có quyết định công nhận chính thức từ Thành phố.';
+    message = 'Hồ sơ đã hoàn tất toàn bộ quy trình hai cấp và có quyết định công nhận chính thức từ cấp Đại học Đà Nẵng.';
     progressBadge = '5/5 tiêu chí đã hoàn tất xét';
   }
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Award Season Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Award Season Domain Service (Backend V2)
  * Manages official award season lifecycle, Central-style 5TOT timeline (T01..T07),
  * season context resolution, copy-from-previous-season, and submission window guards.
  */
@@ -265,7 +265,7 @@ export class SeasonService {
 
     if (nowMs > endMs) {
       throw ApiError.badRequest(
-        `Đã quá hạn nộp hồ sơ Tập thể SV5T trực tiếp về cấp Thành phố (T04 kết thúc lúc ${formatVietnamTimestampVi(season.collectiveSubmissionEnd)}).`,
+        `Đã quá hạn nộp hồ sơ Tập thể SV5T trực tiếp về cấp Đại học Đà Nẵng (T04 kết thúc lúc ${formatVietnamTimestampVi(season.collectiveSubmissionEnd)}).`,
         'COLLECTIVE_SUBMISSION_WINDOW_CLOSED'
       );
     }

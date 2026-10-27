@@ -9,7 +9,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách toàn bộ hồ sơ đã nộp',
     shortLabel: 'Toàn bộ hồ sơ đã nộp',
     description:
-      'Tổng hợp toàn bộ hồ sơ sinh viên đã nộp trong mùa xét chọn cấp Thành phố năm học 2026–2027.',
+      'Tổng hợp toàn bộ hồ sơ sinh viên đã nộp trong mùa xét chọn cấp Đại học Đà Nẵng năm học 2026–2027.',
     fileSlug: 'HoSoDaNop',
     requiredCapabilities: ['EXPORT_APPLICATIONS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [
@@ -213,7 +213,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách sinh viên được công nhận',
     shortLabel: 'Danh sách được công nhận',
     description:
-      'Danh sách sinh viên có kết luận chính thức “Được công nhận Sinh viên 5 tốt cấp Thành phố”.',
+      'Danh sách sinh viên có kết luận chính thức “Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng”.',
     fileSlug: 'DanhSachDuocCongNhan',
     requiredCapabilities: ['EXPORT_RESULTS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [
@@ -282,7 +282,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách phân công cán bộ',
     shortLabel: 'Phân công xét duyệt',
     description:
-      'Danh sách phân công hồ sơ theo từng Cán bộ xét duyệt cấp Thành phố.',
+      'Danh sách phân công hồ sơ theo từng Cán bộ xét duyệt cấp Đại học Đà Nẵng.',
     fileSlug: 'DanhSachPhanCongCanBo',
     requiredCapabilities: ['EXPORT_ASSIGNMENTS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [
@@ -324,7 +324,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách hồ sơ tập thể đã nộp',
     shortLabel: 'Tập thể đã nộp',
     description:
-      'Tổng hợp toàn bộ hồ sơ đăng ký danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố (Liên chi hội, Chi hội, CLB/Đội/Nhóm).',
+      'Tổng hợp toàn bộ hồ sơ đăng ký danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng (Liên chi hội, Chi hội, CLB/Đội/Nhóm).',
     fileSlug: 'TapTheDaNop',
     requiredCapabilities: ['EXPORT_APPLICATIONS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [
@@ -355,7 +355,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách tập thể được công nhận danh hiệu',
     shortLabel: 'Tập thể được công nhận',
     description:
-      'Danh sách các tập thể được công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Thành phố Đà Nẵng.',
+      'Danh sách các tập thể được công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
     fileSlug: 'TapTheDuocCongNhan',
     requiredCapabilities: ['EXPORT_RESULTS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [
@@ -384,7 +384,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách tập thể đã có kết luận xét chọn',
     shortLabel: 'Tập thể đã có kết luận',
     description:
-      'Tổng hợp các hồ sơ tập thể đã được Hội đồng xét chọn cấp Thành phố kết luận chính thức.',
+      'Tổng hợp các hồ sơ tập thể đã được Hội đồng xét chọn cấp Đại học Đà Nẵng kết luận chính thức.',
     fileSlug: 'TapTheDaCoKetLuan',
     requiredCapabilities: ['EXPORT_RESULTS'],
     requiresUnpublishedResultAccess: true,

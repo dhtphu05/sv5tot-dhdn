@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Application Top Status Banners Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Student Application Top Status Banners Widget (FSD Widgets Layer)
  * Renders deep-link return bar, final result announcement, tracking progress, and supplement banner.
  */
 
@@ -93,7 +93,7 @@ export const StudentApplicationTopBanners: React.FC<
       {submissionState === 'result_published' && onNavigateToResults && (
         <ResultAnnouncementBanner
           resultState={publishedResultState}
-          awardTitle="Sinh viên 5 tốt cấp Thành phố"
+          awardTitle="Sinh viên 5 tốt cấp Đại học Đà Nẵng"
           schoolYear="2026–2027"
           publishedAt="24/10/2026"
           onViewResult={onNavigateToResults}

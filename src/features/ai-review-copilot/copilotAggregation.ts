@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AI Finding Aggregation Engine (Section 13 & 14)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AI Finding Aggregation Engine (Section 13 & 14)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements typed bottom-up aggregation:
  * Level 4 (Evidence) -> Level 3 (Declaration) -> Level 2 (Criterion) -> Level 1 (Application Overview).
@@ -496,7 +496,7 @@ export function evaluateCriterionPreliminaryAssessment(
     unsupportedRequirements: unsupportedReqs,
     insufficientRequirements: insufficientReqs,
     contradictions,
-    regulatoryCitation: `Quy chế SV5T cấp Thành phố ${policySeason}`,
+    regulatoryCitation: `Quy chế SV5T cấp Đại học Đà Nẵng ${policySeason}`,
     policyVersionId: policySeason,
     policyVersionValid: isPolicyValid,
     policyVersionMessage: policyMessage,
@@ -592,7 +592,7 @@ export function evaluateApplicationPreliminaryVerdict(
 
   if (overallVerdict === 'preliminary_meets') {
     headline = 'AI đã rà soát 5 tiêu chí. Toàn bộ thông tin đối chiếu sơ bộ có căn cứ phù hợp quy chế.';
-    detail = 'Hồ sơ có đầy đủ minh chứng đối chiếu cho 5 tiêu chí theo Quy chế SV5T cấp Thành phố 2025–2026.';
+    detail = 'Hồ sơ có đầy đủ minh chứng đối chiếu cho 5 tiêu chí theo Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026.';
   } else if (overallVerdict === 'preliminary_not_meets') {
     headline = `AI phát hiện có tiêu chí chưa đáp ứng quy chuẩn bắt buộc theo Quy chế SV5T ${policySeason}.`;
     detail = 'Có điều kiện bắt buộc không đạt ngưỡng quy chuẩn hoặc có ghi nhận vi phạm.';

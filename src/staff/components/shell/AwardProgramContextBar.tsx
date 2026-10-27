@@ -1,11 +1,11 @@
 /**
- * 5TOT Đà Nẵng — Level 1 Award Program Context Bar
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Level 1 Award Program Context Bar
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Phase UX-S4 Sections 5 & 6:
  * - LEVEL 1 — Award Program Context:
- *   + Chương trình: "Danh hiệu Sinh viên 5 tốt" (Cấp Thành phố Đà Nẵng).
+ *   + Chương trình: "Danh hiệu Sinh viên 5 tốt" (Cấp Đại học Đà Nẵng).
  *   + Mùa xét hiện hành (Năm học 2026–2027 · Đang tiếp nhận & Thẩm định).
  *   + Hạng mục xét: Cá nhân (05 Tiêu chí chuẩn) & Tập thể (TT01–TT04).
  * - LEVEL 2 — Workspace Bridge:

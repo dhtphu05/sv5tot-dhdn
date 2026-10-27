@@ -79,7 +79,7 @@ export const RecognizedResultPanel: React.FC<RecognizedResultPanelProps> = ({
                 Đạt danh hiệu {activeResult.awardTitle}
               </p>
               <p className="text-[#334E68] text-[12.5px] leading-relaxed">
-                Hội đồng xét chọn Hội Sinh viên TP. Đà Nẵng quyết định công nhận sau khi thẩm tra đầy đủ 5 tiêu chuẩn chuẩn tắc niên khóa {activeResult.schoolYear}.
+                Hội đồng xét chọn Hội Sinh viên Đại học Đà Nẵng quyết định công nhận sau khi thẩm tra đầy đủ 5 tiêu chuẩn chuẩn tắc niên khóa {activeResult.schoolYear}.
               </p>
             </div>
           </div>

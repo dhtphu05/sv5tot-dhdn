@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — SRW-3 Automated Test Suite
+ * 5TOT ĐHĐN — SRW-3 Automated Test Suite
  * School Batch Forwarding UI: One Consolidated List, One Decision Document, One Final Submission
  * Tests all 15 Deterministic Scenarios (S3-01 through S3-15) and Business Invariants
  */
@@ -22,7 +22,7 @@ import {
   getApplicationsForSchoolOfficer,
 } from '../staff/schoolSelectors';
 
-describe('5TOT Đà Nẵng — SRW-3 School Batch Forwarding Specification Suite', () => {
+describe('5TOT ĐHĐN — SRW-3 School Batch Forwarding Specification Suite', () => {
   const udnOfficer = STAFF_DEMO_USERS.SCHOOL_OFFICER;
   const dtuOfficer = {
     ...STAFF_DEMO_USERS.SCHOOL_OFFICER,

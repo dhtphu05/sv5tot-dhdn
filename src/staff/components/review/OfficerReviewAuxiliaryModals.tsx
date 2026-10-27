@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Auxiliary Modals
+ * 5TOT ĐHĐN — Officer Review Auxiliary Modals
  * Modularized auxiliary modals extracted from OfficerReviewWorkspace to respect source size limits:
  * - CompleteReviewDialog
  * - ReviewHistoryDrawer

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Private Evidence Storage & Pipeline Types (Backend V2)
+ * 5TOT ĐHĐN — Private Evidence Storage & Pipeline Types (Backend V2)
  */
 
 export type EvidenceScanStatus =

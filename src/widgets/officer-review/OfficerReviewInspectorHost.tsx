@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Responsive Inspector Host Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Officer Review Responsive Inspector Host Widget (FSD Widgets Layer)
  * Renders ReviewInspector in both 2xl sticky sidebar and <2xl slide-over overlay without duplicated prop wiring.
  */
 

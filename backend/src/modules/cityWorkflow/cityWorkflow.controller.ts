@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — City Workflow Controller (Backend V2)
+ * 5TOT ĐHĐN — City Workflow Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';
@@ -42,7 +42,7 @@ export class CityWorkflowController {
   public assignOfficer: RequestHandler = asyncHandler(async (req: Request, _res: Response): Promise<void> => {
     if (!req.actor) throw ApiError.unauthorized('Yêu cầu xác thực tài khoản.');
     throw ApiError.badRequest(
-      'Quy trình phân công cá nhân bắt buộc đã được bãi bỏ theo mô hình hàng đợi thẩm định chung cấp Thành phố (Shared City Review Queue). Cán bộ Thành Đoàn có thể trực tiếp thẩm định các hồ sơ trong hàng đợi.',
+      'Quy trình phân công cá nhân bắt buộc đã được bãi bỏ theo mô hình hàng đợi thẩm định chung cấp Đại học Đà Nẵng (Shared City Review Queue). Cán bộ Hội Sinh viên Đại học Đà Nẵng có thể trực tiếp thẩm định các hồ sơ trong hàng đợi.',
       'ASSIGNMENT_WORKFLOW_RETIRED'
     );
   });

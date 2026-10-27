@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Centralized RFC 7807 Error Handler
+ * 5TOT ĐHĐN — Centralized RFC 7807 Error Handler
  * Translates errors into safe, structured problem details without leaking secrets or SQL traces.
  */
 

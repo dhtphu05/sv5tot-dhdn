@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Committee Review, Decision & Publication Fixtures
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Committee Review, Decision & Publication Fixtures
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 16, 17, 28–31, 71–78, 98–103:
  * - Provides 5 canonical Committee demo scenarios led by Lê Minh Quân (Hội đồng xét chọn).
@@ -70,7 +70,7 @@ export const COMMITTEE_DEMO_SCENARIOS: CommitteeDemoScenarioConfig[] = [
     label: 'Đã công bố kết quả',
     shortToolbarLabel: 'Đã công bố',
     description:
-      'Kết quả xét chọn cấp Thành phố đã được công bố chính thức. Hồ sơ bất biến và đồng bộ trực tiếp sang màn hình Kết quả của Sinh viên.',
+      'Kết quả xét chọn cấp Đại học Đà Nẵng đã được công bố chính thức. Hồ sơ bất biến và đồng bộ trực tiếp sang màn hình Kết quả của Sinh viên.',
     defaultRoute: 'results',
   },
 ];
@@ -244,7 +244,7 @@ function buildInitialFlaggedItemsForApp(
         escalatedAt: '16/10/2026 · 10:28',
         status: allResolved ? 'considered' : 'pending_consideration',
         committeeResolutionNote: allResolved
-          ? 'Đủ 05 ngày tình nguyện theo quy định đối với chiến dịch cao điểm cấp Thành phố.'
+          ? 'Đủ 05 ngày tình nguyện theo quy định đối với chiến dịch cao điểm cấp Đại học Đà Nẵng.'
           : undefined,
         consideredBy: allResolved ? 'Lê Minh Quân' : undefined,
         consideredAt: allResolved ? '17/10/2026 · 10:35' : undefined,
@@ -391,7 +391,7 @@ export function buildCommitteeScenarioBundle(
         status: 'reviewed',
         noteSummary:
           crit.noteSummary ||
-          'Đạt điều kiện tiêu chí theo quy chế cấp Thành phố.',
+          'Đạt điều kiện tiêu chí theo quy chế cấp Đại học Đà Nẵng.',
       };
     });
 
@@ -414,14 +414,14 @@ export function buildCommitteeScenarioBundle(
           outcome,
           outcomeLabel:
             outcome === 'recognized'
-              ? ('Được công nhận Sinh viên 5 tốt cấp Thành phố' as const)
+              ? ('Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng' as const)
               : ('Chưa được công nhận trong đợt xét này' as const),
           recordedBy: 'Lê Minh Quân',
           recordedByRoleLabel: 'Hội đồng xét chọn',
           recordedAt: '18/10/2026 · 10:15',
           internalNote:
             outcome === 'recognized'
-              ? 'Hồ sơ đáp ứng đầy đủ 05 tiêu chí Sinh viên 5 tốt cấp Thành phố.'
+              ? 'Hồ sơ đáp ứng đầy đủ 05 tiêu chí Sinh viên 5 tốt cấp Đại học Đà Nẵng.'
               : 'Chưa đủ điều kiện công nhận đồng thời cả 05 tiêu chí trong đợt xét này.',
         }
       : null;
@@ -486,7 +486,7 @@ export function buildCommitteeScenarioBundle(
         timestamp: app.submittedAt,
         actorName: app.student.fullName,
         actorRoleLabel: 'Sinh viên',
-        description: 'Nộp hồ sơ trực tuyến lên hệ thống xét duyệt cấp Thành phố.',
+        description: 'Nộp hồ sơ trực tuyến lên hệ thống xét duyệt cấp Đại học Đà Nẵng.',
         tone: 'neutral',
       },
       {

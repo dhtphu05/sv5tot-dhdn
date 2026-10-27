@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Session Domain Types & Token Contracts (Backend V2)
+ * 5TOT ĐHĐN — Session Domain Types & Token Contracts (Backend V2)
  * Reflects authoritative PostgreSQL Prisma AuthSession schema.
  */
 

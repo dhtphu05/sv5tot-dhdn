@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Overlays & Floating Demo Bar Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Officer Review Overlays & Floating Demo Bar Widget (FSD Widgets Layer)
  * Encapsulates floating demo scenario switcher, QA toggles, unsaved note dialog, and school history modal.
  */
 
@@ -170,7 +170,7 @@ export const OfficerReviewOverlaysAndDemoBar: React.FC<
                   </div>
                   <div>
                     <span className="text-[#607483] block text-[11px]">
-                      Ngày chuyển Thành phố:
+                      Ngày chuyển cấp ĐHĐN:
                     </span>
                     <span className="font-semibold tabular-nums text-[#172A3A]">
                       {applicationRecord.schoolReviewSummary?.forwardedAt ||
@@ -182,7 +182,7 @@ export const OfficerReviewOverlaysAndDemoBar: React.FC<
                       Kết luận sơ tuyển:
                     </span>
                     <span className="font-bold text-[#15803D]">
-                      Đề xuất chuyển Thành phố
+                      Đề xuất chuyển cấp ĐHĐN
                     </span>
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export const OfficerReviewOverlaysAndDemoBar: React.FC<
               <div className="p-3 rounded-[12px] bg-[#EFF6FF] border border-[#BFDBFE] text-[12px] text-[#1D4ED8] flex items-start gap-2">
                 <Info size={15} className="shrink-0 mt-0.5" />
                 <span>
-                  Lưu ý nghiệp vụ: Toàn bộ thông tin xét sơ tuyển mang tính chất tham khảo chuyên môn. Cán bộ xét duyệt cấp Thành phố chịu trách nhiệm thẩm định độc lập và đưa ra kết luận riêng.
+                  Lưu ý nghiệp vụ: Toàn bộ thông tin xét sơ tuyển mang tính chất tham khảo chuyên môn. Cán bộ xét duyệt cấp Đại học Đà Nẵng chịu trách nhiệm thẩm định độc lập và đưa ra kết luận riêng.
                 </span>
               </div>
             </div>

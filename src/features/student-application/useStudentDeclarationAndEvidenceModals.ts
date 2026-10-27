@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Declaration & Evidence Modal / Upload Feature Hook (FSD Features Layer)
+ * 5TOT ĐHĐN — Student Declaration & Evidence Modal / Upload Feature Hook (FSD Features Layer)
  * Manages add/edit declaration modal state, add evidence modal state,
  * inline evidence upload/delete, and evidence confirmation actions.
  */

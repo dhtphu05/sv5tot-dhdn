@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Friendly Vietnamese Calendar Date & Time Picker
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Friendly Vietnamese Calendar Date & Time Picker
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Replaces raw text inputs ("01/10/2026 · 08:00") with:
  * - Native Calendar Date Picker (<input type="date">)

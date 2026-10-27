@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Control Plane Backend V2 Sync Helper
+ * 5TOT ĐHĐN — Admin Control Plane Backend V2 Sync Helper
  * Bridges `useAdminControlPlane` with Backend V2 (`/api/v2/admin/*`, `/api/v2/seasons/*`,
  * `/api/v2/institutions/*`, `/api/v2/school-review-units/*`) when running in Real Backend Mode.
  */

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Decision & Publication Types (Backend V2)
+ * 5TOT ĐHĐN — Committee Decision & Publication Types (Backend V2)
  */
 
 import type { PaginatedResult } from '../../shared/query/pagination';

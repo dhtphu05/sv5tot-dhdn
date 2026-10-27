@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Reusable ConfirmationDialog (FSD Shared UI Layer)
+ * 5TOT ĐHĐN — Reusable ConfirmationDialog (FSD Shared UI Layer)
  * Domain-independent accessible confirmation modal for high-consequence actions.
  */
 

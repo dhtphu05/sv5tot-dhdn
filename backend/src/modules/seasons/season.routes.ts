@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Award Season Routes (Backend V2)
+ * 5TOT ĐHĐN — Award Season Routes (Backend V2)
  */
 
 import { Router } from 'express';

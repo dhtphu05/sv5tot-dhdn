@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Anti-Spoofing Identity Guard Middleware
+ * 5TOT ĐHĐN — Anti-Spoofing Identity Guard Middleware
  * Strictly rejects any untrusted client-asserted identity headers on Backend V2 endpoints.
  * Enforces Zero-Trust: Real identity must come strictly from authenticated session/JWT (BE2).
  */

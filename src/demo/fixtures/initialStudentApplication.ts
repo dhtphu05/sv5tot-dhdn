@@ -344,8 +344,8 @@ export const INITIAL_STUDENT_APPLICATION: StudentApplicationData = {
               declarations: [
                 {
                   id: 'decl-paper',
-                  value: 'Bằng khen BCH Thành Đoàn Đà Nẵng – Đạt Giải Nhất Cuộc thi Startup Runway 2026',
-                  detail: 'Quyết định số 155-QĐ/TĐTN ngày 07/09/2026 của BCH Thành Đoàn Đà Nẵng',
+                  value: 'Bằng khen BCH Hội Sinh viên Đại học Đà Nẵng – Đạt Giải Nhất Cuộc thi Startup Runway 2026',
+                  detail: 'Quyết định số 155-QĐ/ĐHĐN-HSV ngày 07/09/2026 của BCH Hội Sinh viên Đại học Đà Nẵng',
                   date: '07/09/2026',
                   evidenceFiles: [
                     {

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Export Menu, Column Selector & Export Confirmation Dialog
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Export Menu, Column Selector & Export Confirmation Dialog
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 20 Sections 52–60, 72, 78, 79, 85, 86, 117:
  * - Primary export action: Excel (.xlsx), secondary: CSV (.csv) and Print View (Bản in).

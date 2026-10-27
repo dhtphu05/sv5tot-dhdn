@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — School Preliminary Review Demo Scenarios & Fixture Factory (Prompt S2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — School Preliminary Review Demo Scenarios & Fixture Factory (Prompt S2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S2 Sections 72–77:
  * - 9 Canonical School Officer Scenarios (A through I)
@@ -141,7 +141,7 @@ export const SCHOOL_DEMO_SCENARIOS: SchoolDemoScenarioConfig[] = [
     code: 'ST-08',
     label: 'Đã hoàn tất xét sơ tuyển',
     shortLabel: 'Đã hoàn tất xét',
-    description: 'Hồ sơ đã hoàn tất quy trình xét sơ cấp Trường (5/5 tiêu chí), sẵn sàng chuyển sang bước đề xuất chuyển Thành phố.',
+    description: 'Hồ sơ đã hoàn tất quy trình xét sơ cấp Trường (5/5 tiêu chí), sẵn sàng chuyển sang bước đề xuất chuyển cấp ĐHĐN.',
     schoolStatus: 'preliminary_completed',
     defaultCriterionId: 'volunteer',
     defaultRequirementId: 'volunteer-activities',
@@ -630,8 +630,8 @@ export function buildSchoolScenarioWorkspace(
           timestamp: '15/10/2026 · 11:00',
           actorName: reviewerName,
           actorRoleLabel: 'Cán bộ xét duyệt cấp Trường',
-          description: 'Hồ sơ đã được chuyển giao lên Hội đồng xét chọn cấp Thành phố Đà Nẵng.',
-          scopeBadge: 'Đã chuyển Thành phố',
+          description: 'Hồ sơ đã được chuyển giao lên Hội đồng xét chọn cấp Đại học Đà Nẵng.',
+          scopeBadge: 'Đã chuyển cấp ĐHĐN',
           tone: 'brand',
         },
       ];

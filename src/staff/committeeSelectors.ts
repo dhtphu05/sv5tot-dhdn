@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Central Business Selectors for Committee Review & Publication
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Central Business Selectors for Committee Review & Publication
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 17, 19, 20, 39–57, 61–66, 79–82, 115, 116:
  * - Centralizes all Committee eligibility, queue filtering, status display,
@@ -118,7 +118,7 @@ export function getCommitteeDecisionOutcomeMeta(
 ): CommitteeStatusMeta {
   if (outcome === 'recognized') {
     return {
-      label: 'Được công nhận Sinh viên 5 tốt cấp Thành phố',
+      label: 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng',
       shortLabel: 'Được công nhận',
       tone: 'success',
       dotColor: '#1A934E',
@@ -519,7 +519,7 @@ export function getPublicationReadiness(
   let blockingMessage: string | null = null;
   if (!hasPermission) {
     blockingMessage =
-      'Tài khoản hiện tại không có quyền Công bố kết quả xét chọn cấp Thành phố.';
+      'Tài khoản hiện tại không có quyền Công bố kết quả xét chọn cấp Đại học Đà Nẵng.';
   } else if (summary.isResultSetPublished) {
     blockingMessage = 'Kết quả đợt xét này đã được công bố chính thức.';
   } else if (undecidedCount > 0) {

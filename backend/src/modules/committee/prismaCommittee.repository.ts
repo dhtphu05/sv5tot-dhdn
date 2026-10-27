@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Committee Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Committee Repository Implementation (Backend V2)
  *
  * Implements authoritative queries for:
  * - Committee Queue (Individual & Collective dossiers pending decision).

@@ -32,7 +32,7 @@ export const MOCK_PERSONAL_LIBRARY_EVIDENCE: PersonalLibraryItem[] = [
   {
     id: 'lib-ev-2',
     name: 'Quyet_dinh_cong_nhan_thanh_tich_nghien_cuu_khoa_hoc_sinh_vien_cap_thanh_pho_2026.pdf',
-    title: 'Quyết định công nhận thành tích NCKH cấp Thành phố',
+    title: 'Quyết định công nhận thành tích NCKH cấp Đại học Đà Nẵng',
     criterionId: 'academic',
     criterionName: 'Học tập tốt',
     fileType: 'pdf',
@@ -76,7 +76,7 @@ export const MOCK_PERSONAL_LIBRARY_EVIDENCE: PersonalLibraryItem[] = [
   {
     id: 'lib-ev-6',
     name: 'Huy_chuong_bac_bong_chuyen.pdf',
-    title: 'Chứng nhận Huy chương Bạc Giải bóng chuyền sinh viên cấp Thành phố',
+    title: 'Chứng nhận Huy chương Bạc Giải bóng chuyền sinh viên cấp Đại học Đà Nẵng',
     criterionId: 'physical',
     criterionName: 'Thể lực tốt',
     fileType: 'pdf',

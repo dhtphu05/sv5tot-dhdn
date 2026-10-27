@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Criteria Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Criteria Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

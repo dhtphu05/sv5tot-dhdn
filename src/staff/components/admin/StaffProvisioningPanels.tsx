@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Provisioning & First-Admin Bootstrap Panels
+ * 5TOT ĐHĐN — Staff Provisioning & First-Admin Bootstrap Panels
  * Extracted subcomponent for StaffManagement.tsx to keep file size modular (<1,000 lines).
  *
  * Implements ADMIN-REVAMP Sections 10 & 11:

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff, Officer, School & Committee Workflow Coordination Hook (FSD Features Layer)
+ * 5TOT ĐHĐN — Staff, Officer, School & Committee Workflow Coordination Hook (FSD Features Layer)
  * Manages cross-role state and actions for City Officer, School Officer, City Manager, and City Committee.
  */
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-1 Automated Test Suite
+ * 5TOT ĐHĐN — LEAN-1 Automated Test Suite
  * Production Student Declaration Simplification, Smart Evidence Attachment & Automatic Numbering
  * Verifies Test Scenarios D01 through D24 as specified in Prompt Section 19.
  */
@@ -25,7 +25,7 @@ import {
 } from '../entities/application/studentApplicationMutators';
 import { CRITERIA_LIST } from '../tokens';
 
-describe('5TOT Đà Nẵng — LEAN-1 Student Declaration Simplification Suite (D01–D24)', () => {
+describe('5TOT ĐHĐN — LEAN-1 Student Declaration Simplification Suite (D01–D24)', () => {
   // Fresh fixture helper
   const getCleanApp = (): StudentApplicationData =>
     JSON.parse(JSON.stringify(INITIAL_STUDENT_APPLICATION));

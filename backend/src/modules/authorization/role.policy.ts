@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Role Policy Definitions (Backend V2)
+ * 5TOT ĐHĐN — Role Policy Definitions (Backend V2)
  * Enforces role-based capabilities consistent with the canonical 7 roles.
  * Authoritative single source of truth: PermissionMatrix.
  */

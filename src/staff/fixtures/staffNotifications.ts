@@ -19,7 +19,7 @@ export const STAFF_NOTIFICATIONS_FIXTURE: StaffNotificationItem[] = [
     targetRoles: ['CITY_OFFICER'],
     title: 'Bạn vừa được phân công 12 hồ sơ trong đợt xét chọn',
     summary:
-      'Quản lý xét duyệt Nguyễn Thu Hà đã phân công 12 hồ sơ cấp Thành phố năm học 2026–2027 cho bạn.',
+      'Quản lý xét duyệt Nguyễn Thu Hà đã phân công 12 hồ sơ cấp Đại học Đà Nẵng năm học 2026–2027 cho bạn.',
     timestamp: '15/10/2026 · 14:00',
     isUnread: true,
     categoryLabel: 'Phân công mới',
@@ -77,7 +77,7 @@ export const STAFF_NOTIFICATIONS_FIXTURE: StaffNotificationItem[] = [
   {
     id: 'snotif-7',
     targetRoles: ['ADMIN'],
-    title: 'Đồng bộ danh mục 14 đơn vị đào tạo cấp Thành phố hoàn tất',
+    title: 'Đồng bộ danh mục 14 đơn vị đào tạo cấp Đại học Đà Nẵng hoàn tất',
     summary:
       'Hệ thống đã khóa cấu hình 05 tiêu chí chuẩn và mốc thời gian năm học 2026–2027.',
     timestamp: '01/10/2026 · 08:00',

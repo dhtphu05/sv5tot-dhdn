@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Batch Forwarding Summary Metrics Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Batch Forwarding Summary Metrics Widget (FSD Widgets Layer)
  * Renders 4 actionable metric cards: Total applications, Recommended, Awaiting recommendation, Not recommended.
  * Avoids visual clutter, keeps focus on the reviewer's active workflow.
  */
@@ -72,7 +72,7 @@ export const SchoolBatchSummaryMetrics: React.FC<SchoolBatchSummaryMetricsProps>
             {recommendedCount}
           </div>
           <div className="text-[11px] text-[#166534] mt-0.5 truncate">
-            {batchStatus === 'FORWARDED' ? 'Đã gửi Thành phố' : 'Đủ điều kiện xét chọn'}
+            {batchStatus === 'FORWARDED' ? 'Đã gửi cấp ĐHĐN' : 'Đủ điều kiện xét chọn'}
           </div>
         </button>
 

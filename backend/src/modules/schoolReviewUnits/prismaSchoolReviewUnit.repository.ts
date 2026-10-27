@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma School Review Unit Repository (Backend V2)
+ * 5TOT ĐHĐN — Prisma School Review Unit Repository (Backend V2)
  * Throws 503 DATABASE_OFFLINE in offline development mode.
  */
 

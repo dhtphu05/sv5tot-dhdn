@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Forwarding Pre-Validation & Final Action Bar Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Forwarding Pre-Validation & Final Action Bar Widget (FSD Widgets Layer)
  * LEAN-4.2: Simplified validation bar without the 4 large green cards.
  * Displays a single concise contextual error message when invalid, and enables the button directly when valid.
  */

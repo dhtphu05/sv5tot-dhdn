@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Supplement Request Card
+ * 5TOT ĐHĐN — Supplement Request Card
  * Scoped request message block rendered INSIDE the targeted declaration / requirement.
  * Implements Prompt 10: Sections 10, 17, 29, 30, 31, 32
  */

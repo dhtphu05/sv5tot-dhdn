@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Collective Application Repository Interface (Backend V2)
  */
 
 import type { PaginatedResult } from '../../shared/query/pagination';

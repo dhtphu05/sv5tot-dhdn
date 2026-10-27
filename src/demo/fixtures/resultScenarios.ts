@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Authoritative Final Result Fixtures
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng — Năm học 2026–2027
+ * 5TOT ĐHĐN — Authoritative Final Result Fixtures
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
  * Implements Prompt 11 Sections 8, 12, 16, 17, 21-29, 54-57, 70, 72.
  */
 

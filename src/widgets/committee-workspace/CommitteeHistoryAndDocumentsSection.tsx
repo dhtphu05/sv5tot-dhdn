@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee History and Documents Section (SRW-4 Section 10 Part 5 & Section 11)
+ * 5TOT ĐHĐN — Committee History and Documents Section (SRW-4 Section 10 Part 5 & Section 11)
  * Renders:
  * - School forwarding batch & common decision document ("Quyết định đề nghị xét chọn — Đại học Đà Nẵng")
  * - City assessment history
@@ -117,7 +117,7 @@ export const CommitteeHistoryAndDocumentsSection: React.FC<
             <span className="text-[#64748B]">Tình trạng văn bản:</span>
             <div className="font-bold text-[#16A34A] flex items-center gap-1">
               <CheckCircle2 size={12} />
-              <span>Đã tiếp nhận hợp lệ cấp Thành phố</span>
+              <span>Đã tiếp nhận hợp lệ cấp Đại học Đà Nẵng</span>
             </div>
           </div>
         </div>

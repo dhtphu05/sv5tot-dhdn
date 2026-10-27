@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Criterion Content & Read-Only Evidence Drawer (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Committee Criterion Content & Read-Only Evidence Drawer (FSD Widgets Layer)
  */
 
 import React from 'react';

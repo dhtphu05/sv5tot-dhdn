@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Session Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Session Repository Interface (Backend V2)
  * Decouples session persistence and token family lifecycle from database driver.
  */
 

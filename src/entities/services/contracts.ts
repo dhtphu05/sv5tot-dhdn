@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Typed Domain Service Contracts (Dual-Mode Architecture)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Typed Domain Service Contracts (Dual-Mode Architecture)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Shared contract layer consumed identically by both:
  * - DemoAdapter (Interactive Demo Mode — isolated in-memory/localStorage fixtures)

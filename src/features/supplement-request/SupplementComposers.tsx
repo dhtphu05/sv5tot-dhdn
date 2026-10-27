@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Reusable Supplement Scope Editor & Request Composer (FSD Features Layer)
+ * 5TOT ĐHĐN — Reusable Supplement Scope Editor & Request Composer (FSD Features Layer)
  */
 
 import React from 'react';

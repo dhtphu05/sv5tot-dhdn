@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Application Lifecycle & Graceful Shutdown
+ * 5TOT ĐHĐN — Application Lifecycle & Graceful Shutdown
  */
 
 import type { Server } from 'node:http';

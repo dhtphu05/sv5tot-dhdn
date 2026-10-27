@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Lean UX Feedback Consolidation Test Suite
+ * 5TOT ĐHĐN — Lean UX Feedback Consolidation Test Suite
  * Validates Fix 01 through Fix 10:
  * - Fix 01: Table column alignment (.app-table-grid, px-6, inset box-shadow)
  * - Fix 02: De-duplication of "+" symbol in buttons (+ + Thêm -> Thêm)
@@ -51,7 +51,7 @@ const mockSchoolOfficer: StaffUser = {
   roles: ['SCHOOL_OFFICER'],
 };
 
-describe('5TOT Đà Nẵng — Lean UX Feedback Consolidation (Fix 01–Fix 10)', () => {
+describe('5TOT ĐHĐN — Lean UX Feedback Consolidation (Fix 01–Fix 10)', () => {
   // ---------------------------------------------------------------------------
   // FIX 01: Table Column Alignment & Padding
   // ---------------------------------------------------------------------------
@@ -87,7 +87,7 @@ describe('5TOT Đà Nẵng — Lean UX Feedback Consolidation (Fix 01–Fix 10)'
   // FIX 04: Redundant Top-Header Actions Removal
   // ---------------------------------------------------------------------------
   it('Fix 04: Top header action buttons are cleanly removed to reduce visual clutter', () => {
-    // In StaffOverviewAndWorkload: redundant "Hồ sơ xét duyệt cấp Thành phố" and "Mở thẩm định" removed
+    // In StaffOverviewAndWorkload: redundant "Hồ sơ xét duyệt cấp Đại học Đà Nẵng" and "Mở thẩm định" removed
     // In SchoolOverviewPage: redundant "Hồ sơ sơ tuyển" and "Tiếp tục xét sơ" removed
     assert.ok(true, 'Top header action buttons removed in favor of direct metric strip navigation');
   });

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Role Authorization Middleware (Backend V2)
+ * 5TOT ĐHĐN — Role Authorization Middleware (Backend V2)
  * Enforces role membership on protected routes with default-deny semantics.
  */
 

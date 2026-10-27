@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Unit Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — School Review Unit Repository Interface (Backend V2)
  */
 
 import type {

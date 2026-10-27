@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Committee Review & Decision Workspace (Simplified for SRW-4)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Committee Review & Decision Workspace (Simplified for SRW-4)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements SRW-4 Sections 9, 10, 11, 16:
  * - Section 1: Compact application overview (Student, institution, status, UDN context)
@@ -204,7 +204,7 @@ export const CommitteeApplicationWorkspace: React.FC<
 
               <div className="flex items-center gap-2.5 text-[11.5px] text-[#526B7C] mt-0.5 flex-wrap">
                 <span className="font-semibold text-[#136F3A]">
-                  Đã hoàn tất thẩm định cấp Thành phố (05/05 tiêu chí)
+                  Đã hoàn tất thẩm định cấp Đại học Đà Nẵng (05/05 tiêu chí)
                 </span>
                 <span>·</span>
                 <span>
@@ -219,7 +219,7 @@ export const CommitteeApplicationWorkspace: React.FC<
                 <span>
                   Cán bộ thẩm định:{' '}
                   <strong className="text-[#172A3A]">
-                    {application.assignment?.officerName || 'Tổ thẩm định Thành phố'}
+                    {application.assignment?.officerName || 'Tổ thẩm định cấp Đại học Đà Nẵng'}
                   </strong>
                 </span>
               </div>

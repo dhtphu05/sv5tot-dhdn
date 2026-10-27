@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — 5 Criteria Configuration & Versioning Management
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — 5 Criteria Configuration & Versioning Management
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 21 Sections 46–67, 113:
  * - EXACTLY FIVE CANONICAL CRITERIA:
@@ -212,7 +212,7 @@ export const CriteriaManagement: React.FC<CriteriaManagementProps> = ({
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            Chuẩn hóa tiêu chuẩn xét chọn · Hội Sinh viên TP. Đà Nẵng
+            Chuẩn hóa tiêu chuẩn xét chọn · Hội Sinh viên Đại học Đà Nẵng
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <Sliders size={20} className="text-[#0D78AE]" />
@@ -576,7 +576,7 @@ export const CriteriaManagement: React.FC<CriteriaManagementProps> = ({
                   </label>
                   <div className="p-2.5 rounded-[8px] bg-[#F8FBFD] border border-[#E2EDF5] text-[11.5px] text-[#526B7C]">
                     {selectedRequirementInfo.requirement.regulationSnippet ||
-                      'Áp dụng theo quy chế xét chọn danh hiệu Sinh viên 5 tốt cấp Thành phố Đà Nẵng.'}
+                      'Áp dụng theo quy chế xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng.'}
                   </div>
                 </div>
 

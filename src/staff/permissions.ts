@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Centralized Capability & Permission Engine
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Centralized Capability & Permission Engine
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 16 Sections 2, 3, 11–20, 89, 90, 110, 111:
  * - Maps roles to granular capabilities in ONE central registry.

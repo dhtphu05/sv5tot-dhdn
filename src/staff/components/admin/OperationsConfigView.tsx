@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Operations & System Configuration View (Vận hành & Cấu hình)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Operations & System Configuration View (Vận hành & Cấu hình)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements ADMIN-REVAMP Sections 12, 13, 14 & 15:
  * - Notification Templates & Safe Preview (never dispatches real mass emails)
@@ -267,7 +267,7 @@ export const OperationsConfigView: React.FC<OperationsConfigViewProps> = ({
             </div>
             <p className="text-[12px] text-[#526B7C] mt-0.5">
               Điều chỉnh thời hạn phản hồi yêu cầu bổ sung minh chứng trong khi
-              bảo toàn tuyệt đối quy trình nghiệp vụ 2 cấp (Trường → Thành phố).
+              bảo toàn tuyệt đối quy trình nghiệp vụ 2 cấp (Trường → Đại học Đà Nẵng).
             </p>
           </div>
           <Button
@@ -305,7 +305,7 @@ export const OperationsConfigView: React.FC<OperationsConfigViewProps> = ({
               className="w-full h-[38px] px-3 bg-white border border-[#DCE7EE] rounded-[8px] font-bold"
             />
             <span className="text-[11px] text-[#526B7C] block">
-              Áp dụng khi Cán bộ sơ tuyển Trường hoặc Cán bộ Thành phố gửi yêu
+              Áp dụng khi Cán bộ sơ tuyển Trường hoặc Cán bộ cấp Đại học Đà Nẵng gửi yêu
               cầu bổ sung inline.
             </span>
           </div>

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Contextual AI Review Copilot Express Routes (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Contextual AI Review Copilot Express Routes (Backend V2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Provides advisory contextual evaluation grounded in 2025–2026 5TOT regulations:
  * 1. POST /api/v2/copilot/analyze-scope
@@ -80,7 +80,7 @@ function buildHeuristicScopeAnalysis(payload: CopilotScopeAnalysisPayload): Copi
     {
       item: 'Thời hạn thành tích trong năm học xét chọn 2024–2025/2025–2026',
       passed: true,
-      detail: 'Mốc thời gian kê khai nằm trong khung thời gian hợp lệ theo hướng dẫn Thành Đoàn.',
+      detail: 'Mốc thời gian kê khai nằm trong khung thời gian hợp lệ theo hướng dẫn Hội Sinh viên Đại học Đà Nẵng.',
     },
     {
       item: 'Ngưỡng tiêu chuẩn quy chế',
@@ -119,7 +119,7 @@ function buildHeuristicScopeAnalysis(payload: CopilotScopeAnalysisPayload): Copi
     flaggedRisks,
     draftInternalNote: `[Thẩm định AI] ${headlineSummary} Hồ sơ đối chiếu đạt yêu cầu quy chế năm học 2025–2026.`,
     draftSupplementMessage,
-    regulationCitation: `Quy chế SV5T cấp Thành phố - Tiêu chí 0${payload.criterionNumber} (${payload.criterionName})`,
+    regulationCitation: `Quy chế SV5T cấp Đại học Đà Nẵng - Tiêu chí 0${payload.criterionNumber} (${payload.criterionName})`,
     aiSource: 'rule_engine',
   };
 }
@@ -127,7 +127,7 @@ function buildHeuristicScopeAnalysis(payload: CopilotScopeAnalysisPayload): Copi
 function buildHeuristicAskAnswer(question: string): string {
   const q = question.toLowerCase();
   if (q.includes('ielts') || q.includes('chứng chỉ') || q.includes('ngoại ngữ') || q.includes('thời hạn')) {
-    return 'Theo Quy chế Sinh viên 5 tốt cấp Thành phố Đà Nẵng năm học 2025–2026:\n- Chứng chỉ ngoại ngữ (IELTS, TOEIC, TOEFL, Vstep...) phải còn thời hạn hiệu lực ít nhất đến ngày nộp hồ sơ, hoặc được cấp trong vòng 02 năm tính đến thời điểm xét duyệt.\n- Trường hợp chứng chỉ hết hạn trong năm học xét chọn nhưng điểm thi đạt ngưỡng quy định thì đơn vị thẩm định có thể đề xuất Hội đồng xem xét theo điểm rèn luyện ngoại ngữ tương đương.';
+    return 'Theo Quy chế Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2025–2026:\n- Chứng chỉ ngoại ngữ (IELTS, TOEIC, TOEFL, Vstep...) phải còn thời hạn hiệu lực ít nhất đến ngày nộp hồ sơ, hoặc được cấp trong vòng 02 năm tính đến thời điểm xét duyệt.\n- Trường hợp chứng chỉ hết hạn trong năm học xét chọn nhưng điểm thi đạt ngưỡng quy định thì đơn vị thẩm định có thể đề xuất Hội đồng xem xét theo điểm rèn luyện ngoại ngữ tương đương.';
   }
   if (q.includes('nckh') || q.includes('học tập') || q.includes('gpa')) {
     return 'Đối với Tiêu chuẩn Học tập tốt:\n- Điểm trung bình chung học tập cả năm học tối thiểu từ 3.4/4.0 (hoặc 8.5/10) đối với sinh viên thông thường.\n- Đối với sinh viên là người dân tộc thiểu số, sinh viên thuộc hộ nghèo/cận nghèo: Điểm tối thiểu từ 3.2/4.0 (hoặc 8.0/10).\n- Đạt giải Nhất/Nhì/Ba NCKH cấp trường trở lên được tính là tiêu chuẩn ưu tiên đặc biệt.';
@@ -135,7 +135,7 @@ function buildHeuristicAskAnswer(question: string): string {
   if (q.includes('tình nguyện') || q.includes('hiến máu')) {
     return 'Đối với Tiêu chuẩn Tình nguyện tốt:\n- Hoạt động tình nguyện phải đạt tối thiểu 05 ngày tình nguyện hoặc tham gia 03 hoạt động tình nguyện trong năm học.\n- Hiến máu tình nguyện trong năm học xét chọn được tính tương đương đạt tiêu chuẩn tình nguyện (cần Giấy chứng nhận hiến máu nhân đạo có đóng dấu Hội Chữ thập đỏ hoặc Bệnh viện tiếp nhận).';
   }
-  return `Theo hướng dẫn thi hành Quy chế Sinh viên 5 tốt của Hội Sinh viên Việt Nam TP. Đà Nẵng: Mọi nội dung kê khai cần đối chiếu chính xác với văn bản minh chứng có thẩm quyền ban hành, ngày ký và con dấu pháp nhân. Đối với câu hỏi "${question}", cán bộ nên kiểm tra kỹ thời điểm diễn ra hoạt động và đối chiếu vào biên bản họp của Hội đồng trường.`;
+  return `Theo hướng dẫn thi hành Quy chế Sinh viên 5 tốt của Hội Sinh viên Việt Nam Đại học Đà Nẵng: Mọi nội dung kê khai cần đối chiếu chính xác với văn bản minh chứng có thẩm quyền ban hành, ngày ký và con dấu pháp nhân. Đối với câu hỏi "${question}", cán bộ nên kiểm tra kỹ thời điểm diễn ra hoạt động và đối chiếu vào biên bản họp của Hội đồng trường.`;
 }
 
 function buildHeuristicDossierSummary(appData: { studentName?: string; fullName?: string } | undefined) {
@@ -143,7 +143,7 @@ function buildHeuristicDossierSummary(appData: { studentName?: string; fullName?
     candidateRating: 'XUẤT SẮC',
     committeeReadiness: 'ĐỦ ĐIỀU KIỆN BIỂU QUYẾT',
     overallVerdict:
-      'Ứng viên có kết quả rèn luyện toàn diện, hoàn thành xuất sắc 5/5 tiêu chí cấp Thành phố, minh chứng đầy đủ và rõ ràng.',
+      'Ứng viên có kết quả rèn luyện toàn diện, hoàn thành xuất sắc 5/5 tiêu chí cấp Đại học Đà Nẵng, minh chứng đầy đủ và rõ ràng.',
     criteriaReadinessMatrix: [
       { criterionName: 'Đạo đức tốt', status: 'Đạt', highlight: 'ĐRL >= 90 điểm, tích cực tham gia sinh hoạt Đoàn' },
       { criterionName: 'Học tập tốt', status: 'Đạt', highlight: 'GPA đạt ngưỡng giỏi/xuất sắc, có hoạt động NCKH' },
@@ -152,13 +152,13 @@ function buildHeuristicDossierSummary(appData: { studentName?: string; fullName?
       { criterionName: 'Hội nhập tốt', status: 'Đạt', highlight: 'Chứng chỉ ngoại ngữ hợp lệ, kỹ năng số tốt' },
     ],
     exceptionalAchievements: [
-      'Gương sáng học tập và rèn luyện cấp Thành phố',
+      'Gương sáng học tập và rèn luyện cấp Đại học Đà Nẵng',
       'Minh chứng được số hóa chuẩn mực, không có sai lệch dữ liệu',
     ],
     potentialCaveats: [],
     recommendedCommitteeVote:
-      'Khuyến nghị biểu quyết ĐỒNG Ý công nhận danh hiệu Sinh viên 5 tốt cấp Thành phố Đà Nẵng',
-    executiveMemo: `Kính trình Hội đồng Xét chọn: Hồ sơ của ứng viên ${appData?.studentName || appData?.fullName || 'sinh viên'} đã qua 2 vòng thẩm định độc lập tại cấp Trường và Ban Thanh thiếu nhi Trường học Thành Đoàn. Toàn bộ 5 tiêu chí đều đáp ứng đầy đủ quy chuẩn theo Quyết định số 18-QĐ/TĐTN-TTNTH. Kính đề nghị Hội đồng thông qua.`,
+      'Khuyến nghị biểu quyết ĐỒNG Ý công nhận danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+    executiveMemo: `Kính trình Hội đồng Xét chọn: Hồ sơ của ứng viên ${appData?.studentName || appData?.fullName || 'sinh viên'} đã qua 2 vòng thẩm định độc lập tại cấp Trường và Ban Phong trào Hội Sinh viên Đại học Đà Nẵng. Toàn bộ 5 tiêu chí đều đáp ứng đầy đủ quy chuẩn theo Quyết định số 12-QĐ/ĐHĐN-HSV. Kính đề nghị Hội đồng thông qua.`,
   };
 }
 

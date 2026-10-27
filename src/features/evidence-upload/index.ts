@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Evidence Upload & Management (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Evidence Upload & Management (FSD Features Layer)
  * Encapsulates persistent evidence upload, removal, and preview across Individual & Collective workflows.
  */
 

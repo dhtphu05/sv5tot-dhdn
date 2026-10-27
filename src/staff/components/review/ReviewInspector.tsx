@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Right-Side Officer Review Inspector (ReviewInspector)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Right-Side Officer Review Inspector (ReviewInspector)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 31–38, 46, 49–57, 70–76, 80–84, 113:
  * - Clearly displays selected scope context (Criterion -> Requirement -> Declaration).

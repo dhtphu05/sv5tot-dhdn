@@ -25,7 +25,7 @@ const DEFAULT_ACTIVITIES: TrackingActivity[] = [
   {
     id: 'act-1',
     timestamp: '12/10/2026 · 14:32',
-    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên TP. Đà Nẵng.',
+    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng.',
   },
 ];
 

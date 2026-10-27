@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Participating Institution Registry Service & Fixture
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Participating Institution Registry Service & Fixture
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 14 Sections 32–38, 65–68, 94:
  * - Isolated and replaceable data source (never hardcoded inside UI components).

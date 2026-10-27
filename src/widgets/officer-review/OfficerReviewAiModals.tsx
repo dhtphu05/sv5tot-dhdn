@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review AI Modals & Companion Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Officer Review AI Modals & Companion Widget (FSD Widgets Layer)
  * Isolates AI Companion, Feedback Modal, Explainability Modal, and Virtual AI Review Report.
  */
 

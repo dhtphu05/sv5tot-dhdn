@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Centralized Officer Review Business Logic & Selectors
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Centralized Officer Review Business Logic & Selectors
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 4, 13, 14, 46, 49, 58–63, 90, 127:
  * - Single source of truth for access control, review statuses, supplement eligibility,
@@ -146,7 +146,7 @@ export function canOfficerReviewApplication(
       allowed: false,
       canMutate: false,
       reason: 'not_assigned_to_officer',
-      message: 'Tài khoản không có thẩm quyền truy cập hồ sơ xét duyệt cấp Thành phố.',
+      message: 'Tài khoản không có thẩm quyền truy cập hồ sơ xét duyệt cấp Đại học Đà Nẵng.',
     };
   }
 
@@ -180,7 +180,7 @@ export function canOfficerReviewApplication(
       isReadOnly: true,
       reason: 'not_forwarded_yet' as any,
       message:
-        'Hồ sơ đang ở cấp Trường (chưa chuyển giao lên Thành phố). Cán bộ Thành phố chỉ xem chế độ tra cứu.',
+        'Hồ sơ đang ở cấp Trường (chưa chuyển giao lên cấp Đại học Đà Nẵng). Cán bộ cấp Đại học Đà Nẵng chỉ xem chế độ tra cứu.',
     };
   }
 

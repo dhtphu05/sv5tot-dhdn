@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authoritative Central-Style Season & Timeline Helper (Backend V2)
+ * 5TOT ĐHĐN — Authoritative Central-Style Season & Timeline Helper (Backend V2)
  * Timezone: Asia/Ho_Chi_Minh (UTC+07:00)
  * Enforces:
  * - Idempotent academic year formatting ("Năm học YYYY–YYYY", never "Năm học Năm học ...")
@@ -198,7 +198,7 @@ export function buildCentralMilestonesForSeason(
       code: 'T03_SCHOOL_OFFICIAL_FORWARDING',
       order: 3,
       labelVi: 'Hạn chót cấp Trường gửi Công văn & Danh sách đề xuất',
-      actorResponsibilityVi: 'Đơn vị xét sơ tuyển đính kèm 01 PDF Công văn/Tờ trình và khóa danh sách gửi Thành phố',
+      actorResponsibilityVi: 'Đơn vị xét sơ tuyển đính kèm 01 PDF Công văn/Tờ trình và khóa danh sách gửi cấp Đại học Đà Nẵng',
       track: 'INDIVIDUAL',
       openAt: season.individualSubmissionStart,
       closeAt: season.schoolForwardingDeadline,
@@ -207,7 +207,7 @@ export function buildCentralMilestonesForSeason(
       code: 'T04_COLLECTIVE_DIRECT_SUBMISSION',
       order: 4,
       labelVi: 'Mở cổng & Hạn nộp hồ sơ Tập thể SV5T (TT01–TT04)',
-      actorResponsibilityVi: 'Người lập hồ sơ Tập thể nộp trực tiếp lên cấp Thành phố (không qua bước chuyển trường)',
+      actorResponsibilityVi: 'Người lập hồ sơ Tập thể nộp trực tiếp lên cấp Đại học Đà Nẵng (không qua bước chuyển trường)',
       track: 'COLLECTIVE',
       openAt: season.collectiveSubmissionStart,
       closeAt: season.collectiveSubmissionEnd,
@@ -215,8 +215,8 @@ export function buildCentralMilestonesForSeason(
     {
       code: 'T05_CITY_INDEPENDENT_REVIEW',
       order: 5,
-      labelVi: 'Thẩm định độc lập cấp Thành phố',
-      actorResponsibilityVi: 'Tổ Thư ký / Cán bộ Thành phố phân công và thẩm định độc lập hồ sơ Cá nhân & Tập thể',
+      labelVi: 'Thẩm định độc lập cấp Đại học Đà Nẵng',
+      actorResponsibilityVi: 'Tổ Thư ký / Cán bộ cấp Đại học Đà Nẵng phân công và thẩm định độc lập hồ sơ Cá nhân & Tập thể',
       track: 'SHARED',
       openAt: season.cityReviewStartAt ?? season.schoolForwardingDeadline,
       closeAt: season.cityReviewEndAt ?? null,
@@ -224,7 +224,7 @@ export function buildCentralMilestonesForSeason(
     {
       code: 'T06_COMMITTEE_FINAL_DECISION',
       order: 6,
-      labelVi: 'Họp Hội đồng xét chọn cấp Thành phố',
+      labelVi: 'Họp Hội đồng xét chọn cấp Đại học Đà Nẵng',
       actorResponsibilityVi: 'Hội đồng xét chọn chính thức biểu quyết và ghi nhận quyết định công nhận',
       track: 'SHARED',
       openAt: season.committeeMeetingStartAt ?? null,
@@ -234,7 +234,7 @@ export function buildCentralMilestonesForSeason(
       code: 'T07_RESULT_ANNOUNCEMENT',
       order: 7,
       labelVi: 'Công bố Quyết định công nhận chính thức',
-      actorResponsibilityVi: 'Ban Thư ký Hội Sinh viên TP Đà Nẵng ban hành Quyết định và công bố kết quả',
+      actorResponsibilityVi: 'Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng ban hành Quyết định và công bố kết quả',
       track: 'SHARED',
       openAt: season.resultAnnouncementAt ?? null,
       closeAt: null,
@@ -302,15 +302,15 @@ export function validateCentralTimelineDates(input: {
   }
 
   if (input.cityReviewStartAt && input.cityReviewEndAt && input.cityReviewStartAt > input.cityReviewEndAt) {
-    errors.push('Thời gian bắt đầu thẩm định cấp Thành phố (T05) phải trước thời gian kết thúc thẩm định cấp Thành phố.');
+    errors.push('Thời gian bắt đầu thẩm định cấp Đại học Đà Nẵng (T05) phải trước thời gian kết thúc thẩm định cấp Đại học Đà Nẵng.');
   }
 
   if (input.cityReviewEndAt && input.schoolForwardingDeadline > input.cityReviewEndAt) {
-    errors.push('Thời hạn kết thúc thẩm định cấp Thành phố (T05) phải sau hạn chót Trường gửi danh sách đề xuất (T03).');
+    errors.push('Thời hạn kết thúc thẩm định cấp Đại học Đà Nẵng (T05) phải sau hạn chót Trường gửi danh sách đề xuất (T03).');
   }
 
   if (input.cityReviewEndAt && input.committeeMeetingStartAt && input.cityReviewEndAt > input.committeeMeetingStartAt) {
-    errors.push('Thời điểm họp Hội đồng xét chọn (T06) phải diễn ra sau hoặc bằng thời hạn hoàn tất thẩm định cấp Thành phố (T05).');
+    errors.push('Thời điểm họp Hội đồng xét chọn (T06) phải diễn ra sau hoặc bằng thời hạn hoàn tất thẩm định cấp Đại học Đà Nẵng (T05).');
   }
 
   if (

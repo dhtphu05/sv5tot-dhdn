@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — DossierAiSummaryModal (Feature Section 18: Non-Blocking AI Overview Modal)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — DossierAiSummaryModal (Feature Section 18: Non-Blocking AI Overview Modal)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * 
  * Implements Section 18:
  * - Prioritizes immediate useful content:
@@ -97,7 +97,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
         ],
         recommendedCommitteeVote: 'Khuyến nghị: Yêu cầu bổ sung tài liệu trước khi biểu quyết chính thức',
         executiveMemo:
-          `Kính trình Hội đồng xét chọn Sinh viên 5 tốt cấp Thành phố Đà Nẵng năm học 2025–2026.\n\nHồ sơ ứng viên ${applicationRecord.student.fullName} (MSSV: ${applicationRecord.student.studentCode}) - ${applicationRecord.institution.officialName}.\nSơ bộ đạt các tiêu chí cốt lõi. Cán bộ thẩm định đề xuất Hội đồng xem xét theo quy định.`,
+          `Kính trình Hội đồng xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2025–2026.\n\nHồ sơ ứng viên ${applicationRecord.student.fullName} (MSSV: ${applicationRecord.student.studentCode}) - ${applicationRecord.institution.officialName}.\nSơ bộ đạt các tiêu chí cốt lõi. Cán bộ thẩm định đề xuất Hội đồng xem xét theo quy định.`,
       });
       return;
     }
@@ -178,7 +178,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                 </span>
               </div>
               <p className="text-[12px] text-[#607483] mt-0.5">
-                Hội đồng xét chọn Sinh viên 5 tốt cấp Thành phố Đà Nẵng · Năm học 2025–2026
+                Hội đồng xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · Năm học 2025–2026
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                 {completedCriteriaCount} / 5 tiêu chí hoàn tất
               </div>
               <p className="text-[11.5px] text-[#526B7C]">
-                Đánh giá chính thức thực hiện bởi Cán bộ Thành Đoàn phụ trách.
+                Đánh giá chính thức thực hiện bởi Cán bộ Hội Sinh viên Đại học Đà Nẵng phụ trách.
               </p>
             </div>
 
@@ -348,7 +348,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
           {/* 5-Criteria Status Matrix Table */}
           <div className="space-y-2.5">
             <h4 className="text-[13px] font-bold text-[#172A3A]">
-              Bảng đối soát 5 Tiêu chí cấp Thành phố
+              Bảng đối soát 5 Tiêu chí cấp Đại học Đà Nẵng
             </h4>
 
             <div className="border border-[#E2E8F0] rounded-[12px] overflow-hidden">

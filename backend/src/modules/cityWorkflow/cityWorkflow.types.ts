@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — City Workflow & Review Types (Backend V2)
+ * 5TOT ĐHĐN — City Workflow & Review Types (Backend V2)
  */
 
 import type { PaginatedResult } from '../../shared/query/pagination';

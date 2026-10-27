@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Central Deep-Link Resolver & Deterministic Next-Best-Action Selector
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Central Deep-Link Resolver & Deterministic Next-Best-Action Selector
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 12 (Sections 21-30, 58, 77, 78) & Prompt 13 (Sections 1-4, 7-26, 47-58, 65, 88-98):
  * - Central `resolveNotificationTarget(notification, applicationData)` resolves the smallest valid context.
@@ -349,7 +349,7 @@ export function getNextStudentAction(
       eyebrow: 'Bắt đầu hồ sơ năm học 2026–2027',
       title: 'Bắt đầu hồ sơ Sinh viên 5 tốt',
       description:
-        'Tạo hồ sơ cho năm học 2026–2027 để bắt đầu kê khai 5 tiêu chí xét chọn cấp Thành phố.',
+        'Tạo hồ sơ cho năm học 2026–2027 để bắt đầu kê khai 5 tiêu chí xét chọn cấp Đại học Đà Nẵng.',
       actionLabel: 'Bắt đầu hồ sơ',
       target: { targetType: 'APPLICATION' },
       notificationTypeForResolver: 'system_information',
@@ -435,7 +435,7 @@ export function getNextStudentAction(
       eyebrow: 'Thông tin đợt nhận hồ sơ',
       title: 'Thời gian nhận hồ sơ đã kết thúc',
       description:
-        'Đợt nhận hồ sơ trực tuyến cấp Thành phố hiện đã đóng. Bạn vẫn có thể xem lại toàn bộ thông tin và minh chứng đã chuẩn bị.',
+        'Đợt nhận hồ sơ trực tuyến cấp Đại học Đà Nẵng hiện đã đóng. Bạn vẫn có thể xem lại toàn bộ thông tin và minh chứng đã chuẩn bị.',
       supportingCountsText: `${snapshot.declaredCount} kê khai · ${snapshot.evidenceCount} minh chứng`,
       actionLabel: 'Xem hồ sơ',
       target: { targetType: 'APPLICATION' },
@@ -452,7 +452,7 @@ export function getNextStudentAction(
       kind: 'eligibility_waiting',
       priority: 2,
       tone: 'urgent_amber',
-      eyebrow: 'Điều kiện nộp hồ sơ cấp Thành phố',
+      eyebrow: 'Điều kiện nộp hồ sơ cấp Đại học Đà Nẵng',
       title: 'Đang chờ xác nhận điều kiện nộp hồ sơ',
       description:
         'Bạn vẫn có thể tiếp tục chuẩn bị hồ sơ. Hệ thống sẽ cập nhật khi thông tin công nhận phù hợp được xác nhận.',
@@ -503,7 +503,7 @@ export function getNextStudentAction(
       eyebrow: 'Sẵn sàng rà soát trước khi gửi',
       title: 'Kiểm tra hồ sơ trước khi gửi',
       description:
-        'Xem lại thông tin kê khai, minh chứng và điều kiện nộp hồ sơ trước khi gửi lên Hội Sinh viên TP. Đà Nẵng.',
+        'Xem lại thông tin kê khai, minh chứng và điều kiện nộp hồ sơ trước khi gửi lên Hội Sinh viên Đại học Đà Nẵng.',
       supportingCountsText: `${snapshot.declaredCount} kê khai · ${snapshot.evidenceCount} minh chứng`,
       advisoryText:
         snapshot.advisoryCount > 0
@@ -526,7 +526,7 @@ export function getNextStudentAction(
       eyebrow: 'Hồ sơ năm học 2026–2027',
       title: 'Hồ sơ đang hoàn thiện',
       description:
-        'Bạn đã bắt đầu hồ sơ Sinh viên 5 tốt cấp Thành phố. Bạn có thể tiếp tục kê khai và bổ sung minh chứng trước khi gửi hồ sơ.',
+        'Bạn đã bắt đầu hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng. Bạn có thể tiếp tục kê khai và bổ sung minh chứng trước khi gửi hồ sơ.',
       supportingCountsText: `${snapshot.declaredCount} kê khai · ${snapshot.evidenceCount} minh chứng`,
       advisoryText:
         snapshot.advisoryCount > 0
@@ -570,7 +570,7 @@ export function getNextStudentAction(
       eyebrow: 'Hoàn tất rà soát chuyên môn',
       title: 'Đã hoàn tất xét 5 tiêu chí',
       description:
-        'Hồ sơ của bạn đang chờ kết quả chính thức được công bố từ Ban Thư ký Hội Sinh viên Việt Nam TP. Đà Nẵng.',
+        'Hồ sơ của bạn đang chờ kết quả chính thức được công bố từ Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng.',
       supportingCountsText: `${snapshot.declaredCount} kê khai · ${snapshot.evidenceCount} minh chứng`,
       actionLabel: 'Xem hồ sơ',
       target: { targetType: 'APPLICATION' },
@@ -603,7 +603,7 @@ export function getNextStudentAction(
     eyebrow: 'Đã tiếp nhận ngày 12/10/2026 · 14:32',
     title: 'Hồ sơ đã được gửi',
     description:
-      'Hồ sơ của bạn đang trong quá trình xét cấp Thành phố.',
+      'Hồ sơ của bạn đang trong quá trình xét cấp Đại học Đà Nẵng.',
     supportingCountsText: `${snapshot.declaredCount} kê khai · ${snapshot.evidenceCount} minh chứng`,
     actionLabel: 'Theo dõi hồ sơ',
     target: { targetType: 'APPLICATION' },

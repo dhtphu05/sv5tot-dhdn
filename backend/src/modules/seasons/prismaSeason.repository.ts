@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Award Season Repository (Backend V2)
+ * 5TOT ĐHĐN — Prisma Award Season Repository (Backend V2)
  * Throws 503 DATABASE_OFFLINE in offline development mode.
  */
 

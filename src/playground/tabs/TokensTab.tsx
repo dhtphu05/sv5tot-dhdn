@@ -8,7 +8,7 @@ export const TokensTab: React.FC = () => {
             {/* 1. Brand Identity */}
             <section className="flex flex-col gap-4">
               <h2 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight">
-                1. Bộ nhận diện Hội Sinh viên Việt Nam TP. Đà Nẵng
+                1. Bộ nhận diện Hội Sinh viên Việt Nam Đại học Đà Nẵng
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-[14px] border border-black/[0.05]">
                 <div className="flex flex-col items-center justify-center p-6 bg-[#F9FAFB] rounded-[10px]">
@@ -24,9 +24,9 @@ export const TokensTab: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex flex-col justify-center p-6 bg-[#F9FAFB] rounded-[10px] gap-4">
-                  <ProductBrandLockup size={40} badgeLabel="SV5T Đà Nẵng" />
+                  <ProductBrandLockup size={40} badgeLabel="SV5T ĐHĐN" />
                   <span className="text-[12px] text-[#86868B]">
-                    Khóa nhận diện sản phẩm 5TOT Đà Nẵng
+                    Khóa nhận diện sản phẩm 5TOT ĐHĐN
                   </span>
                 </div>
               </div>
@@ -114,7 +114,7 @@ export const TokensTab: React.FC = () => {
                 <div className="flex items-baseline justify-between border-b border-black/[0.04] pb-3">
                   <span className="text-[12px] text-[#86868B] uppercase w-48">Display Large (44–48px)</span>
                   <div className="text-[44px] font-semibold tracking-tight text-[#1D1D1F] flex-1">
-                    Sinh viên 5 tốt Thành phố
+                    Sinh viên 5 tốt Đại học Đà Nẵng
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between border-b border-black/[0.04] pb-3">

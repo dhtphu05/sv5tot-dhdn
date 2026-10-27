@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Institution Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Institution Domain Service (Backend V2)
  * Manages institutional master data and filtering.
  */
 

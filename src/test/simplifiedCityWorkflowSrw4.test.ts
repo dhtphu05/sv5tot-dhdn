@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — SRW-4 Automated Test Suite
+ * 5TOT ĐHĐN — SRW-4 Automated Test Suite
  * Simplified City Officer & Committee Review Workflow Specification Suite
  * Tests D01 through D15, Role Authorization, Shared Dossier Reuse,
  * School Decision Document Visibility, and Removal of ResolutionCase Workflow.
@@ -36,7 +36,7 @@ import { evaluateApplicationPreliminaryVerdict } from '../features/ai-review-cop
 import { CRITERIA_LIST } from '../tokens';
 import { ApplicationReviewWorkspaceState } from '../staff/reviewTypes';
 
-describe('5TOT Đà Nẵng — SRW-4 Simplified City Officer & Committee Review Suite', () => {
+describe('5TOT ĐHĐN — SRW-4 Simplified City Officer & Committee Review Suite', () => {
   const cityOfficer = STAFF_DEMO_USERS.CITY_OFFICER; // Trần Hoàng Nam
   const otherOfficer = {
     ...STAFF_DEMO_USERS.CITY_OFFICER,
@@ -82,7 +82,7 @@ describe('5TOT Đà Nẵng — SRW-4 Simplified City Officer & Committee Review 
   it('D02: City reviewers can access common UDN decision document (QĐ số 182/QĐ-ĐHĐN)', () => {
     const decisionAttachment = {
       decisionNumber: '182/QĐ-ĐHĐN',
-      decisionTitle: 'Quyết định đề xuất danh sách SV5T cấp Thành phố năm học 2025–2026',
+      decisionTitle: 'Quyết định đề xuất danh sách SV5T cấp Đại học Đà Nẵng năm học 2025–2026',
       signedBy: 'PGS.TS. Nguyễn Ngọc Vũ',
       unitName: 'Đại học Đà Nẵng',
     };
@@ -308,11 +308,11 @@ describe('5TOT Đà Nẵng — SRW-4 Simplified City Officer & Committee Review 
     // Record decision: recognized
     committeeCase.decision = {
       outcome: 'recognized',
-      outcomeLabel: 'Được công nhận Sinh viên 5 tốt cấp Thành phố',
+      outcomeLabel: 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng',
       recordedBy: committeeMember.fullName,
       recordedByRoleLabel: committeeMember.roleLabel,
       recordedAt: '2026-10-21 14:30',
-      internalNote: 'Hội đồng thống nhất công nhận danh hiệu Sinh viên 5 tốt cấp Thành phố.',
+      internalNote: 'Hội đồng thống nhất công nhận danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
     };
     committeeCase.workflowStage = 'decision_recorded';
 

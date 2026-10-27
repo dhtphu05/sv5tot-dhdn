@@ -312,8 +312,8 @@ export function buildHeroStudentApplicationForOfficer(
         declarations: [
           {
             id: 'decl-aca-comp-1',
-            value: 'Bằng khen BCH Thành Đoàn Đà Nẵng – Đạt Giải Nhất Cuộc thi Startup Runway 2026',
-            detail: 'Quyết định số 155-QĐ/TĐTN ngày 07/09/2026 của BCH Thành Đoàn Đà Nẵng',
+            value: 'Bằng khen BCH Hội Sinh viên Đại học Đà Nẵng – Đạt Giải Nhất Cuộc thi Startup Runway 2026',
+            detail: 'Quyết định số 155-QĐ/ĐHĐN-HSV ngày 07/09/2026 của BCH Hội Sinh viên Đại học Đà Nẵng',
             date: '07/09/2026',
             status: 'ready',
             evidenceFiles: [
@@ -670,7 +670,7 @@ export function buildHeroStudentApplicationForOfficer(
             id: 'decl-int-2',
             value: 'Bằng khen BCH Trung ương Hội Sinh viên Việt Nam – Giải Khuyến khích Bảng B Vietnamese Student HackAIthon 2026',
             detail:
-              'Quyết định số 147-QĐKT/TWHSV ngày 23/07/2026 của BCH Trung ương HSVVN & Bằng khen số 156-QĐ/TĐTN của BCH Thành Đoàn Đà Nẵng',
+              'Quyết định số 147-QĐKT/TWHSV ngày 23/07/2026 của BCH Trung ương HSVVN & Bằng khen số 156-QĐ/ĐHĐN-HSV của BCH Hội Sinh viên Đại học Đà Nẵng',
             date: '23/07/2026',
             status: 'ready',
             evidenceFiles: aseanEv,

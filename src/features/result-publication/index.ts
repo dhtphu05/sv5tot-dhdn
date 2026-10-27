@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Final Result Publication (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Final Result Publication (FSD Features Layer)
  * Encapsulates official recognition decree publication and certificate preview.
  */
 

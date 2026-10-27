@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Hero Identity Block (Approved Visual Reference)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Hero Identity Block (Approved Visual Reference)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Sections 8, 9, 10, 11, 35, 48:
  * - Eyebrow: "HỆ THỐNG NGHIỆP VỤ TRỰC TUYẾN" + short thin horizontal line to the right.
@@ -42,8 +42,7 @@ export const HeroIdentity: React.FC = () => {
       {/* 3. Supporting Copy (Section 11) */}
       <p className="gsap-hero-copy text-[16px] sm:text-[17.5px] lg:text-[18px] text-[#3B5266] leading-[1.56] max-w-[705px] font-normal pt-0.5">
         Phục vụ đăng ký, kê khai minh chứng, xét duyệt và theo dõi kết quả danh
-        hiệu Sinh viên 5 tốt cấp Thành phố đối với sinh viên các Đại học, Học
-        viện, Trường Đại học và Cao đẳng trên địa bàn Thành phố Đà Nẵng.
+        hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng đối với sinh viên các trường đại học thành viên và đơn vị trực thuộc Đại học Đà Nẵng.
       </p>
     </div>
   );

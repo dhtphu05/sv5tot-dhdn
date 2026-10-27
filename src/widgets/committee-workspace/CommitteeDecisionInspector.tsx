@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Decision Inspector & Note Editor (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Committee Decision Inspector & Note Editor (FSD Widgets Layer)
  */
 
 import React from 'react';
@@ -305,7 +305,7 @@ export const CommitteeDecisionInspector: React.FC<
                 type="button"
                 onClick={() => {
                   const student = studentName || 'sinh viên';
-                  onChangeNoteDraft(`[Nghị quyết Hội đồng] Thống nhất công nhận danh hiệu Sinh viên 5 tốt cấp Thành phố Đà Nẵng năm học 2025–2026 đối với sinh viên ${student}. Hồ sơ đầy đủ 5/5 tiêu chuẩn quy chế, minh chứng số hóa chuẩn mực.`);
+                  onChangeNoteDraft(`[Nghị quyết Hội đồng] Thống nhất công nhận danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2025–2026 đối với sinh viên ${student}. Hồ sơ đầy đủ 5/5 tiêu chuẩn quy chế, minh chứng số hóa chuẩn mực.`);
                 }}
                 className="text-[11px] font-bold text-[#1680DE] hover:text-[#1371C4] inline-flex items-center gap-1 cursor-pointer"
               >

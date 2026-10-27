@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AiReviewBrief (Feature A: AI Review Brief)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AiReviewBrief (Feature A: AI Review Brief)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Feature A:
  * - Vietnamese label: "AI hỗ trợ thẩm định"
@@ -359,7 +359,7 @@ export const AiReviewBrief: React.FC<AiReviewBriefProps> = ({
           <div className="pt-2 border-t border-[#EEF4F8] flex items-start gap-2 text-[11px] text-[#607483] leading-relaxed">
             <Info size={13} className="text-[#8295A5] shrink-0 mt-0.5" />
             <span>
-              <strong>Nguyên tắc thẩm định:</strong> Dữ liệu từ Trợ lý AI chỉ mang tính chất hỗ trợ rà soát sơ bộ. Cán bộ thẩm định và Hội đồng xét chọn giữ toàn quyền quyết định chính thức theo Quy chế số 18-QĐ/TĐTN-TTNTH của Ban Thường vụ Thành Đoàn Đà Nẵng.
+              <strong>Nguyên tắc thẩm định:</strong> Dữ liệu từ Trợ lý AI chỉ mang tính chất hỗ trợ rà soát sơ bộ. Cán bộ thẩm định và Hội đồng xét chọn giữ toàn quyền quyết định chính thức theo Quy chế số 12-QĐ/ĐHĐN-HSV của Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng.
             </span>
           </div>
         </div>

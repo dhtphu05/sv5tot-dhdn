@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Backend V2 Environment Configuration
+ * 5TOT ĐHĐN — Backend V2 Environment Configuration
  * Validates runtime environment with typed schema and strict validation.
  */
 

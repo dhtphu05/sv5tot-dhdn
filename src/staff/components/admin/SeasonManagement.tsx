@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Season Management (Quản lý mùa xét chọn & Lộ trình T01–T07)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Season Management (Quản lý mùa xét chọn & Lộ trình T01–T07)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements ADMIN-REVAMP Sections 6 & 7 + ADMIN-REVAMP.1 Sections 3–7:
  * - Central-style 5TOT Selection Timeline (T01–T07) including parallel Collective track (T04)
@@ -83,7 +83,7 @@ const TRACK_LABELS_VI: Record<string, string> = {
   INDIVIDUAL: 'Cá nhân',
   SCHOOL_UNIT: 'Cấp Trường',
   COLLECTIVE: 'Tập thể (Nộp thẳng TP)',
-  CITY: 'Cấp Thành phố',
+  CITY: 'Cấp Đại học Đà Nẵng',
   COMMITTEE: 'Hội đồng xét chọn',
   SYSTEM: 'Toàn hệ thống',
 };
@@ -235,7 +235,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
       <div className="border-b border-[#DCE7EE] pb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C]">
-            Chu kỳ xét chọn · Cấp Thành phố Đà Nẵng
+            Chu kỳ xét chọn · Cấp Đại học Đà Nẵng
           </div>
           <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5 flex items-center gap-2">
             <Calendar size={20} className="text-[#0D78AE]" />
@@ -623,7 +623,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                     })
                   }
                   showQuickShifts
-                  helperText="Tập thể nộp thẳng về Thành phố song song Cá nhân."
+                  helperText="Tập thể nộp thẳng về cấp Đại học Đà Nẵng song song Cá nhân."
                 />
                 <VietnameseDateTimePicker
                   stageBadge="T05 · Bổ sung"
@@ -656,7 +656,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                     setTimelineDraft({ ...timelineDraft, committeeDate: val })
                   }
                   showQuickShifts
-                  helperText="Phiên họp chính thức của Hội đồng cấp Thành phố."
+                  helperText="Phiên họp chính thức của Hội đồng cấp Đại học Đà Nẵng."
                 />
                 <VietnameseDateTimePicker
                   stageBadge="T07 · Công bố"
@@ -781,7 +781,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                   </span>
                 </h3>
                 <p className="text-[11.5px] text-[#526B7C] mt-0.5">
-                  Hồ sơ Tập thể (T04) nộp trực tiếp về Thành phố song song với
+                  Hồ sơ Tập thể (T04) nộp trực tiếp về cấp Đại học Đà Nẵng song song với
                   nhánh Cá nhân (T01 → T02 → T03). Bấm vào bất kỳ thẻ nào bên
                   dưới để mở trình chọn lịch.
                 </p>

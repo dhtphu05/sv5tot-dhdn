@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Student Notification Row
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Student Notification Row
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 12 Sections 9-11, 31-36, 43-48, 70, 71:
  * - Clean list row with subtle separators (not floating cards).

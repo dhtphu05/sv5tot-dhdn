@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Identity Repository Implementation
+ * 5TOT ĐHĐN — Prisma Identity Repository Implementation
  * Maps domain operations to PostgreSQL Prisma Client.
  * Automatically enforces offline guard when BACKEND_DATABASE_MODE === 'offline'.
  */

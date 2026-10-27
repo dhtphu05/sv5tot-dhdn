@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authentication Router (Backend V2)
+ * 5TOT ĐHĐN — Authentication Router (Backend V2)
  * Assembles and mounts zero-trust authentication and session endpoints.
  */
 

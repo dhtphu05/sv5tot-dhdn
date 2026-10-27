@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Status Badge (FSD Entities Layer)
+ * 5TOT ĐHĐN — Collective Status Badge (FSD Entities Layer)
  * Domain-aware status badge for Collective SV5T applications.
  */
 
@@ -18,7 +18,7 @@ const COLLECTIVE_STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Bản nháp', tone: 'neutral' },
   ready_to_submit: { label: 'Sẵn sàng nộp', tone: 'info' },
-  submitted_to_city: { label: 'Đã nộp cấp Thành phố', tone: 'info' },
+  submitted_to_city: { label: 'Đã nộp cấp Đại học Đà Nẵng', tone: 'info' },
   assigned_to_officer: { label: 'Đã phân công thẩm định', tone: 'info' },
   under_city_review: { label: 'Đang thẩm định cấp TP', tone: 'info' },
   needs_supplement: { label: 'Cần bổ sung hồ sơ', tone: 'warning' },

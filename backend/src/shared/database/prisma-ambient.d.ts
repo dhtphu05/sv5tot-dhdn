@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Ambient Module Declaration for Prisma Client
+ * 5TOT ĐHĐN — Ambient Module Declaration for Prisma Client
  * Enables strict TypeScript compilation without @ts-ignore when running in offline mode.
  */
 

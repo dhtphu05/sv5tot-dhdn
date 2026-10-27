@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Student Notifications View ("Thông báo" — Lightweight Action Inbox)
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Student Notifications View ("Thông báo" — Lightweight Action Inbox)
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 12 Sections 1–85:
  * - Answers: (1) Có việc gì cần tôi xử lý? (2) Có cập nhật gì mới về hồ sơ? (3) Tôi cần bấm vào đâu?

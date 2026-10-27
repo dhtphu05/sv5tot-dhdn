@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Types & DTOs (Backend V2)
+ * 5TOT ĐHĐN — Collective Application Types & DTOs (Backend V2)
  *
  * Implements authoritative domain invariants:
  * - Direct-to-City workflow (No School preliminary stage).

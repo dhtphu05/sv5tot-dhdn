@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Application Pure Domain Mutators & Selectors (FSD Entities Layer)
+ * 5TOT ĐHĐN — Student Application Pure Domain Mutators & Selectors (FSD Entities Layer)
  * Synchronizes criteria requirement mutations, declaration/evidence CRUD, summary strings, and live stats.
  */
 

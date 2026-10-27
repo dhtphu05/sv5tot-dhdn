@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — City Manager Collective Assignment & Reassignment Dialog
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — City Manager Collective Assignment & Reassignment Dialog
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8.3 Sections 17–29:
  * - Focused assignment & reassignment dialog for City Manager.
@@ -161,7 +161,7 @@ export const CollectiveAssignmentDialog: React.FC<CollectiveAssignmentDialogProp
                   : 'Phân công xét duyệt hồ sơ Tập thể'}
               </h2>
               <p className="text-[12px] text-[#607483]">
-                Hội Sinh viên Việt Nam TP. Đà Nẵng · Quản lý xét duyệt cấp Thành phố
+                Hội Sinh viên Việt Nam Đại học Đà Nẵng · Quản lý xét duyệt cấp Đại học Đà Nẵng
               </p>
             </div>
           </div>
@@ -275,7 +275,7 @@ export const CollectiveAssignmentDialog: React.FC<CollectiveAssignmentDialogProp
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <label className="block text-[12.5px] font-bold text-[#172A3A]">
-                Chọn Cán bộ xét duyệt cấp Thành phố
+                Chọn Cán bộ xét duyệt cấp Đại học Đà Nẵng
               </label>
               <span className="text-[11.5px] text-[#607483]">
                 {CITY_REVIEW_OFFICERS.length} cán bộ đủ thẩm quyền

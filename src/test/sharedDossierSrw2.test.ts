@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — SRW-2 Automated Test Suite
+ * 5TOT ĐHĐN — SRW-2 Automated Test Suite
  * Shared Student Dossier UI: One Dossier Experience for Students, School Officers, City Officers, and Committee
  */
 

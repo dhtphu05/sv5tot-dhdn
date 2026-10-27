@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Decision & Batch Publication Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Committee Decision & Batch Publication Domain Service (Backend V2)
  *
  * Implements authoritative business invariants:
  * - Committee queue evaluation (Individual and Collective tracks).

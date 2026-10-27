@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Typed Async Route Handler Wrapper (Backend V2)
+ * 5TOT ĐHĐN — Typed Async Route Handler Wrapper (Backend V2)
  * Ensures all rejected promises in Express 4 route handlers are forwarded to next(err)
  * without requiring boilerplate try/catch blocks in every controller method.
  */

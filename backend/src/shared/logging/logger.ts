@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Structured JSON Logger with Secret & PII Redaction
+ * 5TOT ĐHĐN — Structured JSON Logger with Secret & PII Redaction
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';

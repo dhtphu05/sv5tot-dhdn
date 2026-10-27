@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee & School Forwarding Pure Domain Mutators (FSD Entities Layer)
+ * 5TOT ĐHĐN — Committee & School Forwarding Pure Domain Mutators (FSD Entities Layer)
  * Pure state transition functions for Committee deliberation, result finalization/publication,
  * and School preliminary recommendation & forwarding snapshots.
  */
@@ -144,7 +144,7 @@ export function applyRecordCommitteeDecision(
   const nowLabel = 'Vừa xong · 18/10/2026';
   const outcomeLabel =
     outcome === 'recognized'
-      ? ('Được công nhận Sinh viên 5 tốt cấp Thành phố' as const)
+      ? ('Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng' as const)
       : ('Chưa được công nhận trong đợt xét này' as const);
 
   const current = prevCases[applicationId];
@@ -337,10 +337,10 @@ export function applyRecordSchoolRecommendation(
       schoolReviewSummary: nextSummary,
       latestOperationalNote:
         recommendation === 'recommended'
-          ? `Đã đề xuất chuyển Thành phố (${staffUser.fullName}) · Chờ xác nhận chuyển`
+          ? `Đã đề xuất chuyển cấp ĐHĐN (${staffUser.fullName}) · Chờ xác nhận chuyển`
           : recommendation === 'not_recommended'
-          ? `Không đề xuất chuyển Thành phố: ${
-              reason || 'Không đạt chuẩn cấp Thành phố'
+          ? `Không đề xuất chuyển cấp ĐHĐN: ${
+              reason || 'Không đạt chuẩn cấp Đại học Đà Nẵng'
             }`
           : `Chưa có kết luận xét sơ tuyển (${staffUser.fullName})`,
       updatedAt: dateTimeStr,
@@ -451,7 +451,7 @@ export function applyForwardSchoolApplicationsToCity(
       })),
       schoolReviewSummary: nextSummary,
       latestOperationalNote:
-        'Đã chuyển Hội Sinh viên Thành phố Đà Nẵng · Sẵn sàng tiếp nhận & phân công',
+        'Đã chuyển Hội Sinh viên Việt Nam Đại học Đà Nẵng · Sẵn sàng tiếp nhận & phân công',
       updatedAt: dateTimeStr,
     };
   });
@@ -462,7 +462,7 @@ export function applyForwardSchoolApplicationsToCity(
     title: `Tiếp nhận ${applicationIds.length} hồ sơ từ ${
       staffUser.unitLabel || 'Đại học Đà Nẵng'
     }`,
-    summary: `Đơn vị xét sơ tuyển đã hoàn tất và chuyển ${applicationIds.length} hồ sơ đủ điều kiện lên Hội Sinh viên Thành phố xét chọn.`,
+    summary: `Đơn vị xét sơ tuyển đã hoàn tất và chuyển ${applicationIds.length} hồ sơ đủ điều kiện lên Hội Sinh viên Đại học Đà Nẵng xét chọn.`,
     timestamp: 'Vừa xong',
     isUnread: true,
     categoryLabel: 'Tiếp nhận cơ sở',

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Automated Test Suite for Collective Committee, Results & Operations Integration
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Automated Test Suite for Collective Committee, Results & Operations Integration
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements S4.8.6 Verification:
  * 1. Eligibility gate for City Committee: draft/under_review/pending supplements rejected; city_review_completed accepted.
@@ -46,7 +46,7 @@ const committeeLeaderUser: StaffUser = {
   email: 'nguyen.va@hsv.danang.vn',
   primaryRole: 'CITY_COMMITTEE',
   roleLabel: 'Hội đồng xét chọn',
-  unitLabel: 'Hội đồng xét chọn TP. Đà Nẵng',
+  unitLabel: 'Hội đồng xét chọn Đại học Đà Nẵng',
   roles: ['CITY_COMMITTEE'],
   explicitCapabilities: [
     'VIEW_ALL_APPLICATIONS',
@@ -107,7 +107,7 @@ if (completedApp) {
   const decisionResult = recordCommitteeDecision(
     completedApp.id,
     'recognized',
-    'Hội đồng biểu quyết 100% thống nhất công nhận danh hiệu Tập thể SV5T cấp Thành phố.',
+    'Hội đồng biểu quyết 100% thống nhất công nhận danh hiệu Tập thể SV5T cấp Đại học Đà Nẵng.',
     { name: committeeLeaderUser.fullName, role: 'Chủ tịch Hội đồng' }
   );
 
@@ -260,7 +260,7 @@ console.log('--- ALL COLLECTIVE COMMITTEE INTEGRATION TESTS PASSED (100%) ---');
 if (process.env.VITEST) {
   const vitestPkg = 'vitest';
   const { describe, it, expect } = await import(vitestPkg);
-  describe('5TOT Đà Nẵng — Collective Committee Integration Suite (S4.8.6)', () => {
+  describe('5TOT ĐHĐN — Collective Committee Integration Suite (S4.8.6)', () => {
     it('passes all 7 collective committee integration and privacy checks', () => {
       expect(exportRows.length).toBe(freshApps.length);
     });

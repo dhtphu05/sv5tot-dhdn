@@ -179,7 +179,7 @@ describe('Backend V2: School Forwarding Batch Domain Service Unit Tests (SRW-1)'
 
     await assert.rejects(
       service.confirmBatchForwarding(mockUdnActor, { seasonId }),
-      /Danh sách đề xuất chuyển Thành phố không được để trống/
+      /Danh sách đề xuất chuyển cấp ĐHĐN không được để trống/
     );
   });
 

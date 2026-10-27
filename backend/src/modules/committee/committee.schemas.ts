@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee Zod Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Committee Zod Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

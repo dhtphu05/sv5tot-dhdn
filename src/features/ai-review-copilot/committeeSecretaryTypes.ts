@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AI Committee Secretary Domain Types
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AI Committee Secretary Domain Types
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements AI-REVIEW-H1 Committee Extension:
  * - "AI Thư ký Hội đồng" (Virtual Secretary for City Committee)

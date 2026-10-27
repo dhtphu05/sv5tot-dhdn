@@ -64,7 +64,7 @@ export const CollectiveAccountTab: React.FC<CollectiveAccountTabProps> = ({
 
         {onLogout && (
           <div className="pt-4 border-t border-[#EEF4F8] flex items-center justify-between">
-            <span className="text-[12px] text-[#728391]">Phiên làm việc bảo mật cấp Thành phố</span>
+            <span className="text-[12px] text-[#728391]">Phiên làm việc bảo mật cấp Đại học Đà Nẵng</span>
             <Button type="button" variant="danger" size="sm" onClick={onLogout}>
               Đăng xuất
             </Button>

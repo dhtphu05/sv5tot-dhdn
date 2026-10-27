@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — School Officer Review Controls Bar (UX-S2 Redesign)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — School Officer Review Controls Bar (UX-S2 Redesign)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements UX-S2 Section 6, 9, 10, 11, 12:
  * - Compact, non-obstructive action bar (~52px) for School preliminary review.
@@ -171,7 +171,7 @@ export const DossierSchoolReviewBar: React.FC<DossierSchoolReviewBarProps> = ({
               }
               className="bg-transparent font-bold text-[#136F3A] outline-none cursor-pointer border-0 text-[11.5px]"
             >
-              <option value="recommended">Giới thiệu Thành phố</option>
+              <option value="recommended">Giới thiệu cấp ĐHĐN</option>
               <option value="not_recommended">Chưa giới thiệu</option>
             </select>
           </div>

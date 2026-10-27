@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Home Recent Updates & Notifications Preview (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Student Home Recent Updates & Notifications Preview (FSD Widgets Layer)
  */
 
 import React from 'react';

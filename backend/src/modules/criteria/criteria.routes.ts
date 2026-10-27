@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Criteria Routes (Backend V2)
+ * 5TOT ĐHĐN — Criteria Routes (Backend V2)
  */
 
 import { Router } from 'express';

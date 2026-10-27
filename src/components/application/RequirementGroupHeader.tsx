@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Level 2 Requirement Group Header
+ * 5TOT ĐHĐN — Level 2 Requirement Group Header
  * Visually organizes criteria into clear semantic requirement groups.
  * Implements Prompt Section 1, 8, 9, 10, 11, 12, 14, 16:
  * - Level 2 in the 3-level visual hierarchy: Criterion → Requirement Group → Option

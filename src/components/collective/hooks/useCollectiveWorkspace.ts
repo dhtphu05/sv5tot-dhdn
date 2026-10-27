@@ -447,7 +447,7 @@ export function useCollectiveWorkspace({
 
     if (result.success && result.application) {
       setIsPreSubmitOpen(false);
-      showToast('Hồ sơ đã được nộp trực tiếp lên Hội Sinh viên Thành phố Đà Nẵng thành công!');
+      showToast('Hồ sơ đã được nộp trực tiếp lên Hội Sinh viên Việt Nam Đại học Đà Nẵng thành công!');
       if (onApplicationUpdated) {
         onApplicationUpdated(result.application);
       }

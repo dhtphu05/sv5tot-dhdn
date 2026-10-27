@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Always-Available AI Review Companion ("Trợ lý thẩm định") (Section 8, 9, 13, 14)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Always-Available AI Review Companion ("Trợ lý thẩm định") (Section 8, 9, 13, 14)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Feature G & H (Section 13 & 14):
  * - Vietnamese product language: "Trợ lý thẩm định"
@@ -481,7 +481,7 @@ export const AiCompanion: React.FC<AiCompanionProps> = ({
 
             {/* Quick regulation link */}
             <div className="pt-2 border-t border-[#EEF2F6] flex items-center justify-between text-[11px] text-[#607483]">
-              <span>Quy chế SV5T Đà Nẵng 2025–2026</span>
+              <span>Quy chế SV5T ĐHĐN 2025–2026</span>
               {onViewRegulation && (
                 <button
                   type="button"

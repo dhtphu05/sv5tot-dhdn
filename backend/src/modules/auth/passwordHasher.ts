@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Password Hashing Service (Backend V2)
+ * 5TOT ĐHĐN — Password Hashing Service (Backend V2)
  * Uses Argon2id for secure password hashing with constant-time verification.
  */
 

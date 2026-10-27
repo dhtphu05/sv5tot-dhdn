@@ -95,7 +95,7 @@ export const CollectiveWorkspaceHeader: React.FC<CollectiveWorkspaceHeaderProps>
                 className="gap-1.5 shadow-sm"
               >
                 <Send size={15} />
-                <span>Nộp hồ sơ lên Thành phố</span>
+                <span>Nộp hồ sơ lên cấp Đại học Đà Nẵng</span>
               </Button>
             </>
           )}

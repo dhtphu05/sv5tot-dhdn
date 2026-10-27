@@ -221,8 +221,8 @@ export function generateXlsxBinary(params: {
   const cleanYear = (schoolYear || '2025–2026').replace(/^Năm học\s+/i, '').trim() || '2025–2026';
   const metaPairs: [string, string][] = [
     ['Tên báo cáo', report.label],
-    ['Cơ quan quản lý', 'Thành Đoàn Đà Nẵng'],
-    ['Đơn vị tổ chức', 'Hội Sinh viên Việt Nam Thành phố Đà Nẵng'],
+    ['Cơ quan quản lý', 'Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng'],
+    ['Đơn vị tổ chức', 'Hội Sinh viên Việt Nam Đại học Đà Nẵng'],
     ['Năm học', cleanYear],
     ['Phạm vi xuất', scopeLabel],
     ['Bộ lọc áp dụng', filterSummaryLabel],
@@ -420,7 +420,7 @@ export function exportSchoolApplicationsList(params: {
     'Kết quả đề xuất',
     'Nhận xét / Lý do đề xuất',
     'Ngày đề xuất',
-    'Ngày chuyển Thành phố',
+    'Ngày chuyển cấp ĐHĐN',
   ];
 
   const rows = applications.map((app, idx) => {
@@ -435,9 +435,9 @@ export function exportSchoolApplicationsList(params: {
       app.schoolReviewSummary?.isForwardedToCity;
 
     const recResult = isForwarded
-      ? 'Đã chuyển Thành phố'
+      ? 'Đã chuyển cấp ĐHĐN'
       : isRecommended
-      ? 'Đề xuất chuyển Thành phố'
+      ? 'Đề xuất chuyển cấp ĐHĐN'
       : isNotRecommended
       ? 'Không đề xuất chuyển'
       : 'Chờ kết luận đề xuất';

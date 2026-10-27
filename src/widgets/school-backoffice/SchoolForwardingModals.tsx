@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Batch Forwarding Confirmation, Decision Preview & Snapshot Modals
+ * 5TOT ĐHĐN — School Batch Forwarding Confirmation, Decision Preview & Snapshot Modals
  * FSD Layer: widgets/school-backoffice
  * LEAN-4.1 Correction: Direct School Finalization — Select, Attach and Forward
  * Removed second per-student recommendation modal.
@@ -381,7 +381,7 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
           isOpen={Boolean(snapshotModalApp)}
           onClose={onCloseSnapshotModal}
           title="Bản lưu vết xét sơ tuyển cấp Trường"
-          description="Bản ghi nhận trạng thái đánh giá và nhận xét của cấp Trường tại thời điểm bàn giao lên cấp Thành phố."
+          description="Bản ghi nhận trạng thái đánh giá và nhận xét của cấp Trường tại thời điểm bàn giao lên cấp Đại học Đà Nẵng."
           maxWidth="max-w-xl"
           secondaryAction={{
             label: 'Đóng',
@@ -395,7 +395,7 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
                   {snapshotModalApp.applicationId}
                 </span>
                 <span className="font-bold text-[#16A34A] text-[11.5px]">
-                  Đã chuyển cấp Thành phố
+                  Đã chuyển cấp Đại học Đà Nẵng
                 </span>
               </div>
               <div className="text-[14px] font-bold text-[#0F2335]">

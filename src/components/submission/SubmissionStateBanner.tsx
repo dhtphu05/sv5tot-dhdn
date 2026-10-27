@@ -31,7 +31,7 @@ export const SubmissionStateBanner: React.FC<SubmissionStateBannerProps> = ({
             Hồ sơ đã được gửi
           </span>
           <span className="text-[12.5px] text-[#466474] mt-0.5 leading-relaxed">
-            Bạn có thể xem lại thông tin trong thời gian hồ sơ được chuyển đến Hội đồng xét chọn TP. Đà Nẵng.
+            Bạn có thể xem lại thông tin trong thời gian hồ sơ được chuyển đến Hội đồng xét chọn Đại học Đà Nẵng.
           </span>
         </div>
       </div>

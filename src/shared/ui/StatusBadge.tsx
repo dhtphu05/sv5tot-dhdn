@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Reusable StatusBadge (FSD Shared UI Layer)
+ * 5TOT ĐHĐN — Reusable StatusBadge (FSD Shared UI Layer)
  * Domain-independent status badge supporting semantic color tokens or custom hex palettes.
  */
 

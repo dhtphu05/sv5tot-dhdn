@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Application Inspectors & Modals Stack Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Student Application Inspectors & Modals Stack Widget (FSD Widgets Layer)
  * Encapsulates right-hand inspectors (pre-submit, regulation, evidence) and confirmation/edit dialogs.
  */
 
@@ -157,7 +157,7 @@ export const StudentApplicationInspectorsAndModals: React.FC<
         isOpen={inspectorMode === 'pre_submit'}
         onClose={() => onSetInspectorMode('none')}
         title="Kiểm tra & gửi hồ sơ"
-        subtitle="Rà soát một vài thông tin trước khi gửi hồ sơ Sinh viên 5 tốt cấp Thành phố."
+        subtitle="Rà soát một vài thông tin trước khi gửi hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng."
         width={460}
       >
         <PreSubmitReviewContent

@@ -189,7 +189,7 @@ export function buildOfficerScenarioBundle(
       'academic-competition',
       'decl-aca-comp-1',
       'review_completed',
-      'Giải Nhất CodeStorm 2026 do Hội Sinh viên TP. Đà Nẵng đồng tổ chức.'
+      'Giải Nhất CodeStorm 2026 do Hội Sinh viên Đại học Đà Nẵng đồng tổ chức.'
     ),
     // Physical (3 declarations on physical-sport)
     [getScopeKey('physical-khoe', 'decl-phy-khoe-1')]: makeScopeRecord(
@@ -982,10 +982,10 @@ export function buildFallbackBundleForStaffRecord(
     const defaultActorName = isSchoolStage
       ? record.schoolReviewSummary?.recommendingOfficerName ||
         `Cán bộ xét cấp trường ${unitName}`
-      : record.assignment?.officerName || 'Cán bộ xét duyệt cấp Thành phố';
+      : record.assignment?.officerName || 'Cán bộ xét duyệt cấp Đại học Đà Nẵng';
     const defaultActorRole = isSchoolStage
       ? 'Cán bộ xét cấp Trường'
-      : 'Cán bộ xét duyệt cấp Thành phố';
+      : 'Cán bộ xét duyệt cấp Đại học Đà Nẵng';
 
     const criterionCompletedMap: ApplicationReviewWorkspaceState['criterionCompletedMap'] =
       {};

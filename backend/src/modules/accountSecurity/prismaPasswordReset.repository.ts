@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma Password Reset Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma Password Reset Repository Implementation (Backend V2)
  * Note for BE2-B: Requires migration delta adding `PasswordResetToken` table to schema.prisma.
  * Enforces strict fail-closed 503 behavior when BACKEND_DATABASE_MODE === 'offline'.
  */

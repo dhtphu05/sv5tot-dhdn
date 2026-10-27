@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Password Reset Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Password Reset Repository Interface (Backend V2)
  */
 
 import type { PasswordResetTokenEntity } from './passwordReset.types';

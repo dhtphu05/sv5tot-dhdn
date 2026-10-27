@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Control Plane Feature Hook (FSD Features Layer)
+ * 5TOT ĐHĐN — Admin Control Plane Feature Hook (FSD Features Layer)
  * Encapsulates state, readiness checks, Central-style timeline synchronization,
  * and audit-logged mutations for Institutions, School Review Units, Staff Accounts,
  * Seasons, Criteria (Individual + Collective TT01–TT04), Deadlines, Notifications,
@@ -205,7 +205,7 @@ export function useAdminControlPlane(
         phone: payload.phone || '0905 000 111',
         primaryRole: 'ADMIN',
         roleLabel: 'Quản trị hệ thống',
-        unitLabel: 'Ban Thư ký Hội Sinh viên TP Đà Nẵng',
+        unitLabel: 'Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng',
         roles: ['ADMIN'],
         status: 'active',
         assignedApplicationCount: 0,

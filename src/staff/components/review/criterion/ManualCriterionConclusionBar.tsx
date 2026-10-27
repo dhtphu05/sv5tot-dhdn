@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Manual Criterion Human Conclusion Bar (UX Correction P0)
+ * 5TOT ĐHĐN — Manual Criterion Human Conclusion Bar (UX Correction P0)
  * Authorized reviewer explicitly clicks "Đạt tiêu chí" or "Không đạt tiêu chí".
  * Criteria are NEVER automatically passed from declaration outcomes.
  * School and City criterion conclusions are strictly independent.
@@ -78,7 +78,7 @@ export const ManualCriterionConclusionBar: React.FC<
     humanConclusion?.reason || ''
   );
 
-  const stageLabel = isSchoolStage ? 'Cấp Trường' : 'Cấp Thành phố';
+  const stageLabel = isSchoolStage ? 'Cấp Trường' : 'Cấp Đại học Đà Nẵng';
 
   const handleSelectConclusion = (outcome: CriterionConclusionOutcome) => {
     if (!canMutate) return;

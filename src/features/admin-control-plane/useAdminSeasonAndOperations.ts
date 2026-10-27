@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Season, Criteria & Operations Hook
+ * 5TOT ĐHĐN — Admin Season, Criteria & Operations Hook
  * Extracted modular action handlers for Award Seasons (Central Timeline T01–T07,
  * Copy Previous Season, 8-Gate Readiness Validation, Activation, Close/Archive),
  * Criteria Versions (Individual 05 + Collective TT01–TT04), Deadlines,
@@ -145,7 +145,7 @@ export function useAdminSeasonAndOperations({
         schoolYear: shortYear,
         title:
           newSeason.title ||
-          `Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Thành phố ${formatAcademicYearLabel(shortYear)}`,
+          `Đợt xét chọn Danh hiệu "Sinh viên 5 Tốt" cấp Đại học Đà Nẵng ${formatAcademicYearLabel(shortYear)}`,
         criteriaVersionId,
         criteriaVersionLabel,
         participatingInstitutionCount: activeInstCount || 15,

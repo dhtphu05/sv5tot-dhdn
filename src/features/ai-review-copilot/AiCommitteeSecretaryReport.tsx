@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AI Committee Secretary Report Component ("AI Thư ký Hội đồng")
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AI Committee Secretary Report Component ("AI Thư ký Hội đồng")
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements AI-REVIEW-H1 Committee Extension:
  * - Feature A: Committee Verdict-First AI Report
@@ -338,7 +338,7 @@ export const AiCommitteeSecretaryReport: React.FC<
               <div className="p-3 rounded-[9px] bg-[#F4FBF7] border border-[#C5ECD6] text-[12.5px]">
                 <div className="font-extrabold text-[#136F3A] flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#1A934E]" />
-                  Cấp 2: Thẩm định độc lập cấp Thành phố
+                  Cấp 2: Thẩm định độc lập cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[#334E68] mt-1 font-medium">
                   {reportData.cityReviewStatusText}
@@ -431,7 +431,7 @@ export const AiCommitteeSecretaryReport: React.FC<
               <div className="flex items-center gap-2">
                 <Scale size={16} className="text-[#0D78AE]" />
                 <h3 className="text-[14px] font-extrabold text-[#0F2335]">
-                  Đối chiếu Nhận định 03 Bên: Cấp Trường · Cán bộ Thành phố · AI Thư ký
+                  Đối chiếu Nhận định 03 Bên: Cấp Trường · Cán bộ cấp Đại học Đà Nẵng · AI Thư ký
                 </h3>
               </div>
               <span className="text-[11.5px] font-bold text-[#526B7C]">
@@ -546,7 +546,7 @@ export const AiCommitteeSecretaryReport: React.FC<
                           {/* 2. City Officer Level */}
                           <div className="p-2.5 rounded-[8px] bg-[#F0F9FF] border border-[#BAE6FD] space-y-1">
                             <div className="text-[11px] font-extrabold uppercase text-[#0369A1]">
-                              Cấp 2: Cán bộ Thành phố
+                              Cấp 2: Cán bộ cấp Đại học Đà Nẵng
                             </div>
                             <div className="font-bold text-[#0C4A6E]">
                               {comp.cityOfficer.judgmentLabel}

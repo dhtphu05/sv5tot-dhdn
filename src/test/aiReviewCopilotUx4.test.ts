@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — AI-UX4 Preliminary Review Intelligence & Trustworthy Companion Test Suite
+ * 5TOT ĐHĐN — AI-UX4 Preliminary Review Intelligence & Trustworthy Companion Test Suite
  * Validates deterministic aggregation, 3-way status distinction, reviewer dispute workflow,
  * policy season handling, and the 8 deterministic demo scenarios.
  */
@@ -19,7 +19,7 @@ import { INITIAL_STUDENT_APPLICATION } from '../demo/fixtures/initialStudentAppl
 import { AiFinding, ReviewerAiFeedback } from '../features/ai-review-copilot/copilotTypes';
 import { composeVirtualAiReviewReport } from '../features/ai-review-copilot/reportComposer';
 
-describe('5TOT Đà Nẵng — AI-UX4 Preliminary Review Intelligence Suite', () => {
+describe('5TOT ĐHĐN — AI-UX4 Preliminary Review Intelligence Suite', () => {
   // Test 1: PRELIMINARY_VERDICT_META linguistic and visual compliance
   it('1. PRELIMINARY_VERDICT_META defines all official statuses with institutional Vietnamese labels', () => {
     assert.equal(PRELIMINARY_VERDICT_META.preliminary_meets.label, 'AI sơ bộ: Có cơ sở ĐẠT');

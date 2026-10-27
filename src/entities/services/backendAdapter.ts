@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Real Backend Mode API Service Adapter
+ * 5TOT ĐHĐN — Real Backend Mode API Service Adapter
  * Implements DomainServicesBundle backed strictly by Express REST APIs,
  * server-side database persistence, secure file storage, and RBAC middleware.
  *

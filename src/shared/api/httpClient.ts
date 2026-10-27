@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Typed Backend API HTTP Client
+ * 5TOT ĐHĐN — Typed Backend API HTTP Client
  * Enforces strict Real Backend Mode semantics:
  * - Attaches actor authentication/authorization headers and Bearer token.
  * - Parses structured JSON responses.

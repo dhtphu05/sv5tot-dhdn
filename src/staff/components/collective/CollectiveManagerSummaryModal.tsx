@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — City Manager Collective Application Summary Modal
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — City Manager Collective Application Summary Modal
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8.3 Sections 12–16:
  * - Read-only operational summary view for City Manager.
@@ -206,7 +206,7 @@ export const CollectiveManagerSummaryModal: React.FC<CollectiveManagerSummaryMod
             </div>
 
             <div>
-              <div className="text-[#607483] text-[11.5px]">Cán bộ Thành phố phụ trách</div>
+              <div className="text-[#607483] text-[11.5px]">Cán bộ cấp Đại học Đà Nẵng phụ trách</div>
               <div className="font-bold text-[#172A3A] mt-0.5">
                 {application.assignedOfficerName || (
                   <span className="text-[#B45309] italic">Chưa phân công</span>
@@ -519,7 +519,7 @@ export const CollectiveManagerSummaryModal: React.FC<CollectiveManagerSummaryMod
         {/* Footer */}
         <div className="px-6 py-3.5 bg-[#F8FBFD] border-t border-[#DCE7EE] flex items-center justify-between">
           <span className="text-[12px] text-[#607483]">
-            Trạng thái Thành phố: <strong>{application.status}</strong>
+            Trạng thái cấp ĐHĐN: <strong>{application.status}</strong>
           </span>
           <div className="flex items-center gap-2">
             <Button variant="quiet" size="sm" onClick={onClose}>

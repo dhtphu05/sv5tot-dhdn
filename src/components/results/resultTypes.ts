@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Official Final Result Data Model
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Official Final Result Data Model
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * Implements Prompt 11 Sections 1, 2, 27, 51, 52, 53:
  * - Authoritative final result is strictly separate from 5-criteria review completion.
  * - Never expose internal enums (APPROVED, REJECTED, PASS, FAIL) or committee draft notes.
@@ -35,8 +35,8 @@ export interface FinalResultData {
   publishedAt?: string;            // e.g. "24/10/2026"
   schoolYear: string;              // "2026–2027"
   level: string;                   // "Thành phố"
-  awardTitle: string;              // "Sinh viên 5 tốt cấp Thành phố"
-  authority: string;               // "Hội Sinh viên Việt Nam TP. Đà Nẵng"
+  awardTitle: string;              // "Sinh viên 5 tốt cấp Đại học Đà Nẵng"
+  authority: string;               // "Hội Sinh viên Việt Nam Đại học Đà Nẵng"
   decisionNumber?: string;         // Optional, only shown when explicitly provided by authoritative data
   decisionDocument?: OfficialDecisionDocument;
   studentFacingReason?: string;    // Optional, only shown if authoritative final result provides it (Section 25 & 26)

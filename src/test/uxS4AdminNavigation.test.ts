@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — UX-S4 Administration Workspace, System Configuration &
+ * 5TOT ĐHĐN — UX-S4 Administration Workspace, System Configuration &
  * Extensible Award Program Navigation Test Suite
  *
  * Implements verification for UX4-01 through UX4-26:
@@ -51,7 +51,7 @@ import {
   CollectiveRequirementId,
 } from '../staff/collectiveTypes';
 
-describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite', () => {
+describe('5TOT ĐHĐN — UX-S4 Admin Workspace & Program Navigation Suite', () => {
 
   // ===========================================================================
   // LEVEL 1 & LEVEL 2 INFORMATION ARCHITECTURE (UX4-01 to UX4-03)
@@ -273,7 +273,7 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
       ...appliedVersion,
       id: `cv-${Date.now()}-draft`,
       versionCode: 'QC-5TOT-DN-2027-DRAFT',
-      title: 'Quy chế Sinh viên 5 tốt TP. Đà Nẵng (Dự thảo 2027–2028)',
+      title: 'Quy chế Sinh viên 5 tốt Đại học Đà Nẵng (Dự thảo 2027–2028)',
       status: 'draft',
       seasonSchoolYear: '2027–2028',
       appliedDate: undefined,

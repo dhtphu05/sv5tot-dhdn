@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Prisma City Workflow Repository Implementation (Backend V2)
+ * 5TOT ĐHĐN — Prisma City Workflow Repository Implementation (Backend V2)
  *
  * Implements authoritative queries for:
  * - City Manager Intake Queues (Individual forwarded from School + Collective direct intake).
@@ -33,7 +33,7 @@ export class PrismaCityWorkflowRepository implements ICityWorkflowRepository {
     const env = getEnvironment();
     if (env.BACKEND_DATABASE_MODE === 'offline') {
       throw ApiError.serviceUnavailable(
-        'Cơ sở dữ liệu đang ở chế độ Offline. Thao tác xét duyệt cấp Thành phố yêu cầu kết nối PostgreSQL.',
+        'Cơ sở dữ liệu đang ở chế độ Offline. Thao tác xét duyệt cấp Đại học Đà Nẵng yêu cầu kết nối PostgreSQL.',
         'DATABASE_OFFLINE'
       );
     }

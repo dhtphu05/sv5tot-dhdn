@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Query Projection Utilities
+ * 5TOT ĐHĐN — Query Projection Utilities
  * Enforces narrow projections to exclude heavy binary/file contents from list and queue queries.
  */
 

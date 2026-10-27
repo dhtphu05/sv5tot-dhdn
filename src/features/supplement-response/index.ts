@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Supplement Response (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Supplement Response (FSD Features Layer)
  * Encapsulates Collective and Individual supplement response submission.
  */
 

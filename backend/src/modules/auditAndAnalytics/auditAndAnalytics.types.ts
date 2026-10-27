@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Audit, Notifications & Analytics Types (Backend V2)
+ * 5TOT ĐHĐN — Audit, Notifications & Analytics Types (Backend V2)
  */
 
 import type { PaginatedResult } from '../../shared/query/pagination';

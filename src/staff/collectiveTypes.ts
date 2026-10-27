@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Collective Student 5-Good Domain Types & Contracts
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Collective Student 5-Good Domain Types & Contracts
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * Niên khóa áp dụng: Năm học 2025–2026
  *
  * Implements Prompt S4.8 v2:
@@ -428,7 +428,7 @@ export interface InstitutionalSignOffRecord {
   institutionId: string;
   institutionName: string;
   signOffNote?: string;
-  forwardingDestination: string; // 'Hội Sinh viên Việt Nam TP. Đà Nẵng'
+  forwardingDestination: string; // 'Hội Sinh viên Việt Nam Đại học Đà Nẵng'
 }
 
 export interface CollectiveCorrectionRequestRecord {
@@ -497,7 +497,7 @@ export interface CollectiveFinalResultRecord {
   institutionName?: string;
   academicYear?: string;
   outcome: 'recognized' | 'not_recognized';
-  awardTitle?: string; // "Tập thể Sinh viên 5 tốt cấp Thành phố"
+  awardTitle?: string; // "Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng"
   decisionNumber?: string;
   decisionDate?: string;
   signedBy?: string; // "TM. BAN THƯ KÝ - CHỦ TỊCH HỘI SINH VIÊN TP. ĐÀ NẴNG"

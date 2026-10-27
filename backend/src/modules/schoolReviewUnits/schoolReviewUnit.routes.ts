@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Unit Routes (Backend V2)
+ * 5TOT ĐHĐN — School Review Unit Routes (Backend V2)
  */
 
 import { Router } from 'express';

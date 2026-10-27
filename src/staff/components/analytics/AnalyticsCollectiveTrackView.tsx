@@ -24,7 +24,7 @@ export const AnalyticsCollectiveTrackView: React.FC<AnalyticsCollectiveTrackView
             <div className="text-[22px] font-extrabold text-[#0F2335] tabular-nums mt-0.5">
               {collectiveSeasonAnalytics.totalSubmitted}
             </div>
-            <div className="text-[11px] text-[#526B7C] mt-0.5">Toàn thành phố</div>
+            <div className="text-[11px] text-[#526B7C] mt-0.5">Toàn Đại học Đà Nẵng</div>
           </div>
           <div className="p-3.5">
             <div className="text-[11.5px] font-semibold text-[#526B7C]">Tiếp nhận ban đầu</div>
@@ -81,7 +81,7 @@ export const AnalyticsCollectiveTrackView: React.FC<AnalyticsCollectiveTrackView
               Tiến độ đạt 04 tiêu chuẩn Tập thể Sinh viên 5 tốt
             </h3>
             <p className="text-[12px] text-[#526B7C] mt-0.5">
-              Tỷ lệ các tập thể đạt chuẩn theo từng tiêu chí thẩm định cấp Thành phố.
+              Tỷ lệ các tập thể đạt chuẩn theo từng tiêu chí thẩm định cấp Đại học Đà Nẵng.
             </p>
           </div>
           <div className="space-y-3">

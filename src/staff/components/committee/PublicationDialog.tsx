@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Official Result Publication Confirmation Dialog (PublicationDialog)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Official Result Publication Confirmation Dialog (PublicationDialog)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 61–67, 95, 113:
  * - Deliberate, permission-protected confirmation step ("Công bố kết quả xét chọn?").
@@ -127,7 +127,7 @@ export const PublicationDialog: React.FC<PublicationDialogProps> = ({
             <div className="flex items-center justify-between gap-2">
               <span className="text-[#526B7C]">Đợt xét chọn:</span>
               <strong className="font-bold text-[#0F2335]">
-                {seasonLabel} · Cấp Thành phố Đà Nẵng
+                {seasonLabel} · Cấp Đại học Đà Nẵng
               </strong>
             </div>
             {decisionDoc && (
@@ -149,7 +149,7 @@ export const PublicationDialog: React.FC<PublicationDialogProps> = ({
             <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E2EDF5]">
               <span className="text-[#136F3A] font-semibold flex items-center gap-1.5">
                 <CheckCircle2 size={14} />
-                <span>Được công nhận Sinh viên 5 tốt cấp Thành phố:</span>
+                <span>Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng:</span>
               </span>
               <strong className="font-extrabold text-[#136F3A] tabular-nums">
                 {readiness.recognizedCount} hồ sơ

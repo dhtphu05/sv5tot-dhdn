@@ -19,7 +19,7 @@ export interface ResultAnnouncementBannerProps {
  */
 export const ResultAnnouncementBanner: React.FC<ResultAnnouncementBannerProps> = ({
   resultState = 'recognized',
-  awardTitle = 'Sinh viên 5 tốt cấp Thành phố',
+  awardTitle = 'Sinh viên 5 tốt cấp Đại học Đà Nẵng',
   schoolYear = '2026–2027',
   publishedAt = '24/10/2026',
   onViewResult,
@@ -76,7 +76,7 @@ export const ResultAnnouncementBanner: React.FC<ResultAnnouncementBannerProps> =
           </div>
 
           <p className="text-[12.5px] text-[#334E68] mt-1 leading-snug">
-            Kết quả xét chọn danh hiệu {awardTitle} năm học {schoolYear} đã được Hội Sinh viên Việt Nam TP. Đà Nẵng công bố. Hồ sơ dưới đây được lưu trữ ở chế độ chỉ xem.
+            Kết quả xét chọn danh hiệu {awardTitle} năm học {schoolYear} đã được Hội Sinh viên Việt Nam Đại học Đà Nẵng công bố. Hồ sơ dưới đây được lưu trữ ở chế độ chỉ xem.
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Control Plane Controller (Backend V2)
+ * 5TOT ĐHĐN — Admin Control Plane Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

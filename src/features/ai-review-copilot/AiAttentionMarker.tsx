@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AiAttentionMarker (Feature A: AI Attention Spotlight)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AiAttentionMarker (Feature A: AI Attention Spotlight)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Section 5:
  * - Subtle animated focus ring / short pulse (max 1-2 pulses, never infinite blinking).

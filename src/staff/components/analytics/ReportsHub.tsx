@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Reports Hub, Report Selector & Report Preview Table (ReportsHub)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Reports Hub, Report Selector & Report Preview Table (ReportsHub)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 20 Sections 48–89, 101–103, 117–129:
  * - Compact ReportSelector dropdown (never 14 giant cards) with role-aware presets.

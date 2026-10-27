@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Express Routes (Backend V2)
+ * 5TOT ĐHĐN — Collective Application Express Routes (Backend V2)
  */
 
 import { Router } from 'express';

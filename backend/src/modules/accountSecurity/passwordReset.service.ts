@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Password Reset Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Password Reset Domain Service (Backend V2)
  * Handles single-use cryptographically secure reset tokens, expiry validation, and session revocation.
  */
 

@@ -24,9 +24,9 @@ export interface CollectiveAssignmentResult {
 }
 
 /**
- * Phân công hoặc điều chỉnh phân công Cán bộ Thành phố xét duyệt hồ sơ Tập thể
+ * Phân công hoặc điều chỉnh phân công Cán bộ cấp Đại học Đà Nẵng xét duyệt hồ sơ Tập thể
  * (Prompt S4.8.3 Sections 17–29)
- * - Kiểm tra tính hợp lệ của hồ sơ (COLLECTIVE, đã nộp lên Thành phố, không ở trạng thái Draft)
+ * - Kiểm tra tính hợp lệ của hồ sơ (COLLECTIVE, đã nộp lên cấp Đại học Đà Nẵng, không ở trạng thái Draft)
  * - Đảm bảo tính Idempotent (không trùng lặp nếu phân công cùng cán bộ)
  * - An toàn khi Reassignment (giữ nguyên lịch sử đánh giá, minh chứng, ghi nhận lý do điều chỉnh)
  * - Khởi tạo trạng thái xét duyệt 'not_reviewed' cho 04 tiêu chuẩn nếu chưa có
@@ -56,7 +56,7 @@ export function assignCityOfficer(
   ) {
     return {
       success: false,
-      message: 'Hồ sơ chưa được nộp lên cấp Thành phố, không thể phân công cán bộ.',
+      message: 'Hồ sơ chưa được nộp lên cấp Đại học Đà Nẵng, không thể phân công cán bộ.',
     };
   }
 
@@ -104,8 +104,8 @@ export function assignCityOfficer(
   };
 
   const auditAction = isReassignment
-    ? 'Điều chỉnh phân công cán bộ Thành phố'
-    : 'Phân công cán bộ Thành phố xét duyệt';
+    ? 'Điều chỉnh phân công cán bộ cấp Đại học Đà Nẵng'
+    : 'Phân công cán bộ cấp Đại học Đà Nẵng xét duyệt';
 
   const auditDetails = isReassignment
     ? `Điều chỉnh phân công từ cán bộ ${previousOfficerName} sang cán bộ ${officerName}.${
@@ -182,7 +182,7 @@ export function startCityReview(
           actorName: actor.name,
           actorRole: actor.role || 'Cán bộ xét duyệt',
           timestamp: now,
-          details: 'Cán bộ bắt đầu thẩm định 04 điều kiện xét chọn cấp Thành phố.',
+          details: 'Cán bộ bắt đầu thẩm định 04 điều kiện xét chọn cấp Đại học Đà Nẵng.',
         },
       ],
     };
@@ -408,7 +408,7 @@ export function canCompleteCityReview(app: CollectiveApplication): {
   ) {
     return {
       canComplete: false,
-      reason: 'Hồ sơ đã được hoàn tất xét duyệt cấp Thành phố trước đó.',
+      reason: 'Hồ sơ đã được hoàn tất xét duyệt cấp Đại học Đà Nẵng trước đó.',
       unreviewedRequirements: [],
     };
   }
@@ -460,7 +460,7 @@ export function completeCityReview(
       ...app.auditHistory,
       {
         id: `aud-${Date.now()}`,
-        action: 'Cán bộ Thành phố hoàn tất xét 4 tiêu chuẩn',
+        action: 'Cán bộ cấp Đại học Đà Nẵng hoàn tất xét 4 tiêu chuẩn',
         actorName: actor.name,
         actorRole: actor.role || 'Cán bộ xét duyệt',
         timestamp: now,
@@ -472,7 +472,7 @@ export function completeCityReview(
   saveCollectiveApplication(updatedApp);
   return {
     success: true,
-    message: 'Đã hoàn tất xét hồ sơ tập thể cấp Thành phố thành công!',
+    message: 'Đã hoàn tất xét hồ sơ tập thể cấp Đại học Đà Nẵng thành công!',
     application: updatedApp,
   };
 }
@@ -559,7 +559,7 @@ export function isCollectiveEligibleForCommittee(app: CollectiveApplication): {
   if (!allowedStatuses.includes(app.status)) {
     return {
       isEligible: false,
-      reason: `Hồ sơ đang ở trạng thái "${app.status}", chưa hoàn tất thẩm định cấp Thành phố.`,
+      reason: `Hồ sơ đang ở trạng thái "${app.status}", chưa hoàn tất thẩm định cấp Đại học Đà Nẵng.`,
       blockingSupplementsCount: 0,
       unreviewedRequirements: [],
     };

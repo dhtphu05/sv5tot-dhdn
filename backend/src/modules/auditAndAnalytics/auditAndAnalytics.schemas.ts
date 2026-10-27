@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Audit, Notifications & Analytics Zod Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Audit, Notifications & Analytics Zod Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

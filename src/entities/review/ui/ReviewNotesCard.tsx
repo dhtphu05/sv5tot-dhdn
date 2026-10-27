@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Reusable ReviewNotesCard & ReviewStatusPill (FSD Entities Layer)
+ * 5TOT ĐHĐN — Reusable ReviewNotesCard & ReviewStatusPill (FSD Entities Layer)
  * Displays officer review notes and standardized review status pills.
  */
 

@@ -25,7 +25,7 @@ export const DesignPlayground: React.FC = () => {
             <ProductBrandLockup size={28} badgeLabel="Design System Foundation" />
             <span className="text-[#86868B] text-[13px] hidden md:inline">|</span>
             <span className="text-[13px] text-[#6E6E73] hidden md:inline font-medium">
-              Thành Đoàn – Hội Sinh viên TP. Đà Nẵng
+              Đoàn Thanh niên – Hội Sinh viên Đại học Đà Nẵng
             </span>
           </div>
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — UX-S5.2 Direct Inline Review Verification Suite
+ * 5TOT ĐHĐN — UX-S5.2 Direct Inline Review Verification Suite
  * Tests for the simplified inline dossier review architecture:
  * - One continuous screen (all 5 criteria simultaneously readable)
  * - Direct Pass/Fail human review controls
@@ -33,7 +33,7 @@ import {
   isRequirementRequiredForReview,
 } from '../staff/reviewSelectors';
 
-describe('5TOT Đà Nẵng — UX-S5.2 Inline Dossier Review Suite', () => {
+describe('5TOT ĐHĐN — UX-S5.2 Inline Dossier Review Suite', () => {
   // Mock base workspace state
   const createInitialWorkspace = (): ApplicationReviewWorkspaceState => ({
     applicationId: 'app-danang-2026-001',

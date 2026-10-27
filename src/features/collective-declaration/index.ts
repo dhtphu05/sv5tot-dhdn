@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Feature: Collective Declaration Saving (FSD Features Layer)
+ * 5TOT ĐHĐN — Feature: Collective Declaration Saving (FSD Features Layer)
  * Encapsulates TT01–TT04 requirement saving, member management, and declaration forms.
  */
 

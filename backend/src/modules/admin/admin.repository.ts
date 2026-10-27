@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin Operational Config Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Admin Operational Config Repository Interface (Backend V2)
  */
 
 import type {

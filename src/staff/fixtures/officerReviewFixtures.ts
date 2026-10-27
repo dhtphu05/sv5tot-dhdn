@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Workspace Fixtures & 7 Canonical Scenarios
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Officer Review Workspace Fixtures & 7 Canonical Scenarios
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 23–26, 50–56, 66, 90, 106–111, 130:
  * - Builds complete StudentApplicationData for Officer review (preserving immutable Student declarations & evidence).

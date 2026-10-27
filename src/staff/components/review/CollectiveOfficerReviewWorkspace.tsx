@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — City Officer Collective Review Workspace
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — City Officer Collective Review Workspace
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * Niên khóa áp dụng: Năm học 2025–2026
  *
  * Implements Prompt S4.8.4 (P0 Core Functionality):
@@ -97,7 +97,7 @@ export const CollectiveOfficerReviewWorkspace: React.FC<CollectiveOfficerReviewW
   // Complete Review Dialog & Audit History Modal
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [completeSummaryNote, setCompleteSummaryNote] = useState(
-    'Cán bộ đã thẩm định độc lập 4/4 điều kiện xét chọn cấp Thành phố và chuyển hồ sơ lên Hội đồng.'
+    'Cán bộ đã thẩm định độc lập 4/4 điều kiện xét chọn cấp Đại học Đà Nẵng và chuyển hồ sơ lên Hội đồng.'
   );
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
@@ -298,7 +298,7 @@ export const CollectiveOfficerReviewWorkspace: React.FC<CollectiveOfficerReviewW
     if (res.success) {
       refreshApp();
       setIsCompleteModalOpen(false);
-      showToast('Đã hoàn tất xét duyệt hồ sơ tập thể cấp Thành phố!');
+      showToast('Đã hoàn tất xét duyệt hồ sơ tập thể cấp Đại học Đà Nẵng!');
     } else {
       showToast(res.message);
     }
@@ -472,7 +472,7 @@ export const CollectiveOfficerReviewWorkspace: React.FC<CollectiveOfficerReviewW
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-[6px] text-[12px] font-bold text-[#16A34A] bg-[#EDF9F1] border border-[#C6EED5] flex items-center gap-1.5">
                   <CheckCircle2 size={14} />
-                  <span>Đã hoàn tất xét cấp Thành phố</span>
+                  <span>Đã hoàn tất xét cấp Đại học Đà Nẵng</span>
                 </span>
                 {isAuthorizedCityReviewer && (
                   <Button
@@ -592,10 +592,10 @@ export const CollectiveOfficerReviewWorkspace: React.FC<CollectiveOfficerReviewW
           <div className="mt-auto p-4 bg-white border border-[#DCE7EE] rounded-[12px] text-[12px] space-y-1.5 shadow-2xs">
             <div className="font-bold text-[#172A3A] flex items-center gap-1.5">
               <Building2 size={14} className="text-[#0D78AE]" />
-              <span>Thẩm định trực tiếp cấp Thành phố</span>
+              <span>Thẩm định trực tiếp cấp Đại học Đà Nẵng</span>
             </div>
             <div className="text-[#607483] leading-relaxed text-[11.5px]">
-              Tập thể nộp thẳng lên Hội Sinh viên Thành phố Đà Nẵng. Không qua khâu sơ tuyển hay chuyển tiếp của Trường. Cán bộ thẩm định độc lập cả 04 tiêu chuẩn.
+              Tập thể nộp thẳng lên Hội Sinh viên Việt Nam Đại học Đà Nẵng. Không qua khâu sơ tuyển hay chuyển tiếp của Trường. Cán bộ thẩm định độc lập cả 04 tiêu chuẩn.
             </div>
           </div>
         </div>

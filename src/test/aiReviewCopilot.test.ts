@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — AI Review Copilot Unit & Integration Test Suite
+ * 5TOT ĐHĐN — AI Review Copilot Unit & Integration Test Suite
  * Tests Feature A (Brief), Feature B (Inspector), Feature C (Navigation),
  * Feature D (Supplement Draft), and Feature E (Student Coach).
  */
@@ -30,7 +30,7 @@ import {
   AiNextBestAction,
 } from '../features/ai-review-copilot/copilotTypes';
 
-describe('5TOT Đà Nẵng — AI Review Copilot (AI-UX2 Suite)', () => {
+describe('5TOT ĐHĐN — AI Review Copilot (AI-UX2 Suite)', () => {
   describe('1. Demo Scenarios & Data Provenance (Section 12 & 19)', () => {
     it('provides all 5 realistic synthetic scenarios in Demo mode', () => {
       // Scenario 1: Ethics compliant
@@ -90,7 +90,7 @@ describe('5TOT Đà Nẵng — AI Review Copilot (AI-UX2 Suite)', () => {
     it('Regulation citations are grounded in official 2025–2026 SV5T regulations', () => {
       for (const key of Object.keys(DEMO_AI_FINDINGS)) {
         const f = DEMO_AI_FINDINGS[key];
-        assert.match(f.applicableRegulation, /Quy chế SV5T cấp Thành phố 2025–2026/);
+        assert.match(f.applicableRegulation, /Quy chế SV5T cấp Đại học Đà Nẵng 2025–2026/);
       }
     });
   });

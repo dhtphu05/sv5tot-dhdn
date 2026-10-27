@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Centralized Staff Status Vocabulary & Semantic Styling
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Centralized Staff Status Vocabulary & Semantic Styling
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 16 Sections 38, 39, 56, 70, 71, 109:
  * - Single source of truth for application status, criterion review status,
@@ -255,7 +255,7 @@ export type LeanSchoolStatus =
   | 'Chưa kết luận'
   | 'Đề nghị'
   | 'Không đề nghị'
-  | 'Đã gửi Thành phố';
+  | 'Đã gửi cấp ĐHĐN';
 export type LeanCityStatus =
   | 'Chờ Trường chuyển giao'
   | 'Chờ thẩm định'
@@ -286,8 +286,8 @@ export interface LeanRoleAwareStatusProjection {
  * Single source of truth for role-appropriate status projection across 5 dimensions:
  * 1. Tiến độ xét (Review progress): Chưa xét, Đang xét, Đã xét
  * 2. Kết quả tiêu chí (Criteria outcome): Đạt, Không đạt
- * 3. Đề xuất cấp Trường (School preliminary): Chưa kết luận, Đề nghị, Không đề nghị, Đã gửi Thành phố
- * 4. Thẩm định Thành phố (City review): Chờ thẩm định, Đang thẩm định, Đã thẩm định
+ * 3. Đề xuất cấp Trường (School preliminary): Chưa kết luận, Đề nghị, Không đề nghị, Đã gửi cấp ĐHĐN
+ * 4. Thẩm định cấp ĐHĐN (City review): Chờ thẩm định, Đang thẩm định, Đã thẩm định
  * 5. Quyết định Hội đồng (Committee decision): Chờ quyết định, Được công nhận, Không được công nhận
  */
 export function getRoleAwareStatusProjection(
@@ -419,9 +419,9 @@ export function getRoleAwareStatusProjection(
     app.schoolReviewSummary?.recommendation === 'not_recommended';
 
   if (isForwarded) {
-    schoolLabel = 'Đã gửi Thành phố';
+    schoolLabel = 'Đã gửi cấp ĐHĐN';
     schoolMeta = {
-      label: 'Đã gửi Thành phố',
+      label: 'Đã gửi cấp ĐHĐN',
       tone: 'brand',
       dotColor: '#0D78AE',
       badgeBg: '#EAF6FC',

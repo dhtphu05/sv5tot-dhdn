@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Home 5-Criteria Overview Strip (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Student Home 5-Criteria Overview Strip (FSD Widgets Layer)
  */
 
 import React from 'react';

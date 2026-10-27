@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Overview Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — School Overview Page (FSD Pages Layer)
  * Renders 8 actionable summary cards, priority work queue ("Cần xử lý hôm nay"), and featured applications table.
  */
 

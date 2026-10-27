@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Native PostgreSQL Wire Protocol Probe
+ * 5TOT ĐHĐN — Native PostgreSQL Wire Protocol Probe
  * Implements standard PostgreSQL v3 frontend/backend SSL and SCRAM-SHA-256 handshake
  * to verify live PostgreSQL connectivity without external library dependencies.
  */

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Scope Policy Evaluation (Backend V2)
+ * 5TOT ĐHĐN — Scope Policy Evaluation (Backend V2)
  * Enforces multi-tenant institutional isolation, review unit scoping, applicant self-ownership,
  * and strict separation between City Manager oversight, assigned City Officer review, and Committee authority.
  */

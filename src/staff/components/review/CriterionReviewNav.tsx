@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Canonical Criterion Navigation (CriterionReviewNav)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Canonical Criterion Navigation (CriterionReviewNav)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements UX-S2 Section 4, 8, 14:
  * - Single source of truth for the 5 criteria navigation (no duplicate selectors).

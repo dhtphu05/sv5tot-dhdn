@@ -33,7 +33,7 @@ export const AnalyticsWorkloadTab: React.FC<AnalyticsWorkloadTabProps> = ({
             <span>Phân bố khối lượng xét duyệt theo Cán bộ</span>
           </h2>
           <p className="text-[12.5px] text-[#526B7C]">
-            Phục vụ điều phối nguồn lực xét duyệt cấp Thành phố (không xếp hạng năng suất cá nhân).
+            Phục vụ điều phối nguồn lực xét duyệt cấp Đại học Đà Nẵng (không xếp hạng năng suất cá nhân).
           </p>
         </div>
         <Button

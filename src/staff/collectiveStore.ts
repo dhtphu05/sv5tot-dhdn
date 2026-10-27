@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Centralized Collective Store Architecture
+ * 5TOT ĐHĐN — Centralized Collective Store Architecture
  * Decomposed into Feature-Sliced collective store modules:
  * - collectiveFixtures: Demo collective application records
  * - collectiveStoreCore: Storage management, listeners, and core getters

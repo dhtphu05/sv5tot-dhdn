@@ -53,7 +53,7 @@ export const CollectiveCommitteeDecisionPanel: React.FC<CollectiveCommitteeDecis
             </h3>
           </div>
           <span className="text-[11px] font-bold text-[#526B7C]">
-            Cấp Thành phố
+            Cấp Đại học Đà Nẵng
           </span>
         </div>
 

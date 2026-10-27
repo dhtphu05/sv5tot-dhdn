@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Guard Screens & Top Banners Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Officer Review Guard Screens & Top Banners Widget (FSD Widgets Layer)
  * Renders unauthorized/reassigned guard screens, stale state alert, school preliminary summary strip, and start-review banner.
  */
 
@@ -153,7 +153,7 @@ export const OfficerReviewTopBanners: React.FC<OfficerReviewTopBannersProps> = (
                 <span>THÔNG TIN XÉT SƠ</span>
               </span>
               <span className="text-[12px] font-semibold text-[#15803D]">
-                Đề xuất chuyển Thành phố
+                Đề xuất chuyển cấp ĐHĐN
               </span>
             </div>
             <div className="flex items-center gap-3 text-[13px] text-[#172A3A] flex-wrap">
@@ -178,7 +178,7 @@ export const OfficerReviewTopBanners: React.FC<OfficerReviewTopBannersProps> = (
               <span>
                 Kết quả:{' '}
                 <strong className="text-[#15803D]">
-                  Đề xuất chuyển Thành phố
+                  Đề xuất chuyển cấp ĐHĐN
                 </strong>
               </span>
             </div>

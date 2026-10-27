@@ -1,11 +1,11 @@
 /**
- * 5TOT Đà Nẵng — Official Student Signup Page
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Official Student Signup Page
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 14 Sections 27–49, 56–68, 93–95, 98C–E:
  * - Student-only public signup (~520px width, no role selector).
  * - Title: "Tạo tài khoản sinh viên"
- * - Supporting: "Đăng ký để bắt đầu hoặc tiếp tục chuẩn bị hồ sơ Sinh viên 5 tốt cấp Thành phố."
+ * - Supporting: "Đăng ký để bắt đầu hoặc tiếp tục chuẩn bị hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng."
  * - Fields: Họ và tên, Email, Trường / đơn vị đào tạo (searchable InstitutionCombobox),
  *   Mã số sinh viên, Mật khẩu ("Ít nhất 8 ký tự."), Xác nhận mật khẩu ("Mật khẩu xác nhận chưa khớp.").
  * - Friendly conflict errors ("Email này đã được sử dụng." + [Đăng nhập],
@@ -321,7 +321,7 @@ export const PublicSignupPage: React.FC<PublicSignupPageProps> = ({
                 Tạo tài khoản sinh viên
               </h1>
               <p className="text-[13.5px] text-[#607483] mt-1 leading-relaxed">
-                Đăng ký để bắt đầu hoặc tiếp tục chuẩn bị hồ sơ Sinh viên 5 tốt cấp Thành phố.
+                Đăng ký để bắt đầu hoặc tiếp tục chuẩn bị hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng.
               </p>
             </div>
 
@@ -647,7 +647,7 @@ export const PublicSignupPage: React.FC<PublicSignupPageProps> = ({
 
       {/* Quiet Institutional Footer */}
       <footer className="text-center text-[12px] text-[#607483]">
-        Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Thành phố · Hội Sinh viên Việt Nam TP. Đà Nẵng
+        Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · Hội Sinh viên Việt Nam Đại học Đà Nẵng
       </footer>
     </div>
   );

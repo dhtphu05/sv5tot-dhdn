@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Notification QA Switcher
+ * 5TOT ĐHĐN — Student Notification QA Switcher
  * Implements Prompt 12 Sections 51, 52, 54-56, 76-80:
  * Discrete collapsible toolbar for testing Scenarios A-E, business resolution (2 -> 1 -> 0),
  * loading skeletons, empty notifications, and load errors.

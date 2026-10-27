@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AiEvidenceInspectorModal (Feature B: AI Evidence Inspector)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AiEvidenceInspectorModal (Feature B: AI Evidence Inspector)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Feature B & C & Section 6 (Overlay & Popover System):
  * - Desktop (>= 1024px): 58% Document viewer / 42% AI extraction & comparison.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Collective Application Domain Service (Backend V2)
  *
  * Implements authoritative business invariants:
  * - Preparer authorization scope validation.

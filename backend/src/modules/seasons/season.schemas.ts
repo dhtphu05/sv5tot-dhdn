@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Award Season Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — Award Season Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

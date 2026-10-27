@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Public Auth & Persona Session Transition Hook (FSD Features Layer)
+ * 5TOT ĐHĐN — Public Auth & Persona Session Transition Hook (FSD Features Layer)
  * Handles login persona routing (Collective, School Officer, City Officer, City Manager, Committee, Student)
  * and new student registration state initialization.
  */

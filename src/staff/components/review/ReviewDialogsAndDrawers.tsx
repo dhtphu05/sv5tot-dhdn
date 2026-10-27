@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Officer Review Workspace Dialogs & Drawers
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Officer Review Workspace Dialogs & Drawers
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 17 Sections 9, 60–69, 98, 114, 125:
  * - CompleteReviewDialog ("Hoàn tất phần xét hồ sơ?") with error handling ("Chưa thể hoàn tất phần xét hồ sơ lúc này.").
@@ -122,15 +122,15 @@ export const CompleteReviewDialog: React.FC<CompleteReviewDialogProps> = ({
 
           <p className="leading-relaxed text-[#526B7C]">
             {isSchoolStage
-              ? 'Sau khi xác nhận, hồ sơ sẽ chuyển sang trạng thái đã hoàn tất xét sơ cấp Trường, sẵn sàng đưa ra kết luận đề xuất chuyển tiếp lên Thành phố.'
-              : 'Sau khi xác nhận, kết luận thẩm định sẽ được chốt và hồ sơ sẵn sàng để Hội đồng xét chọn cấp Thành phố xem xét quyết định.'}
+              ? 'Sau khi xác nhận, hồ sơ sẽ chuyển sang trạng thái đã hoàn tất xét sơ cấp Trường, sẵn sàng đưa ra kết luận đề xuất chuyển tiếp lên cấp Đại học Đà Nẵng.'
+              : 'Sau khi xác nhận, kết luận thẩm định sẽ được chốt và hồ sơ sẵn sàng để Hội đồng xét chọn cấp Đại học Đà Nẵng xem xét quyết định.'}
           </p>
 
           <div className="p-3 rounded-[12px] bg-[#F5F8FB] text-[12px] text-[#526B7C] flex items-start gap-2.5">
             <Info size={15} className="text-[#1680DE] shrink-0 mt-0.5" />
             <span className="leading-relaxed">
               {isSchoolStage
-                ? 'Xác nhận này chỉ ghi nhận Đơn vị xét sơ đã hoàn tất thẩm định chuyên môn. KHÔNG tự động chuyển hồ sơ lên Thành phố và KHÔNG quyết định danh hiệu Sinh viên 5 tốt.'
+                ? 'Xác nhận này chỉ ghi nhận Đơn vị xét sơ đã hoàn tất thẩm định chuyên môn. KHÔNG tự động chuyển hồ sơ lên cấp Đại học Đà Nẵng và KHÔNG quyết định danh hiệu Sinh viên 5 tốt.'
                 : 'Xác nhận này ghi nhận Tổ Thẩm định đã hoàn tất xem xét hồ sơ, chuyển giao kết quả để Hội đồng xét chọn quyết định chính thức.'}
             </span>
           </div>
@@ -377,7 +377,7 @@ export const ApplicationInfoModal: React.FC<ApplicationInfoModalProps> = ({
                 Đợt xét chọn
               </span>
               <span className="font-bold text-[#172A3A]">
-                {record.schoolYear} · Cấp Thành phố
+                {record.schoolYear} · Cấp Đại học Đà Nẵng
               </span>
             </div>
             <div className="p-3 rounded-[12px] bg-[#F5F8FB]">

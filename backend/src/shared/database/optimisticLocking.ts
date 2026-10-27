@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Optimistic Concurrency Control Helper
+ * 5TOT ĐHĐN — Optimistic Concurrency Control Helper
  * Verifies version compatibility on updates to prevent lost updates in concurrent review sessions.
  */
 

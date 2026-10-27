@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Institution Controller (Backend V2)
+ * 5TOT ĐHĐN — Institution Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

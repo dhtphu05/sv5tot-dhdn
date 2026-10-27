@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Zod Validation Schemas (Backend V2)
+ * 5TOT ĐHĐN — School Review Zod Validation Schemas (Backend V2)
  */
 
 import { z } from 'zod';

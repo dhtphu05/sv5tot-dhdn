@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Public Entry Portal Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — Public Entry Portal Page (FSD Pages Layer)
  * Composes PublicLandingPage, PublicLoginPage, PublicSignupPage, and PrototypeDemoToolbar.
  */
 

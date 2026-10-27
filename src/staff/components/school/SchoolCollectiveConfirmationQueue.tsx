@@ -1,14 +1,14 @@
 /**
- * 5TOT Đà Nẵng — School Collective Confirmation Queue & Handover View
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — School Collective Confirmation Queue & Handover View
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v2 Sections 41–47:
  * - Queue for School Officers / Confirmers (e.g. Nguyễn Văn An, ĐH Đà Nẵng).
  * - Displays Collective applications submitted for institutional sign-off.
  * - Institutional sign-off means acknowledging responsibility and forwarding to City.
  * - NO detailed school-level granular review required for collective track!
- * - Two primary actions: [Trả về để chỉnh sửa] and [Xác nhận và chuyển Thành phố].
+ * - Two primary actions: [Trả về để chỉnh sửa] and [Xác nhận và chuyển cấp ĐHĐN].
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -139,7 +139,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
 
     setIsForwardConfirmOpen(false);
     setSelectedApp(null);
-    showToast(`Đã xác nhận và chuyển hồ sơ ${selectedApp.collectiveName} lên Thành phố thành công!`);
+    showToast(`Đã xác nhận và chuyển hồ sơ ${selectedApp.collectiveName} lên cấp Đại học Đà Nẵng thành công!`);
   };
 
   return (
@@ -164,7 +164,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
               Danh sách Hồ sơ Tập thể trực thuộc đơn vị
             </h1>
             <p className="text-[12.5px] text-[#607483] mt-0.5">
-              Đơn vị quản lý: <strong>{unitName}</strong> · Quy định 2025–2026: Hồ sơ tập thể nộp trực tiếp lên Thành phố để tiếp nhận và xét chọn
+              Đơn vị quản lý: <strong>{unitName}</strong> · Quy định 2025–2026: Hồ sơ tập thể nộp trực tiếp lên cấp Đại học Đà Nẵng để tiếp nhận và xét chọn
             </p>
           </div>
 
@@ -181,7 +181,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
           <CheckCircle2 size={17} className="text-[#16A34A] shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <strong>Quyết định nghiệp vụ chính thức: </strong>
-            Hồ sơ Tập thể "Sinh viên 5 tốt" hiện nộp trực tiếp lên Hội Sinh viên Thành phố Đà Nẵng, không qua khâu duyệt trung gian hoặc chuyển trường. Trang này phục vụ cán bộ nhà trường theo dõi tiến độ thẩm định của các Chi hội/LCH trực thuộc và tra cứu hồ sơ lịch sử.
+            Hồ sơ Tập thể "Sinh viên 5 tốt" hiện nộp trực tiếp lên Hội Sinh viên Việt Nam Đại học Đà Nẵng, không qua khâu duyệt trung gian hoặc chuyển trường. Trang này phục vụ cán bộ nhà trường theo dõi tiến độ thẩm định của các Chi hội/LCH trực thuộc và tra cứu hồ sơ lịch sử.
           </div>
         </div>
       </div>
@@ -221,7 +221,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
                 : 'text-[#607483] hover:text-[#172A3A]'
             }`}
           >
-            Đã chuyển Thành phố ({apps.filter((a) => a.status !== 'draft' && a.status !== 'submitted_for_unit_confirmation' && a.status !== 'returned_for_correction').length})
+            Đã chuyển cấp ĐHĐN ({apps.filter((a) => a.status !== 'draft' && a.status !== 'submitted_for_unit_confirmation' && a.status !== 'returned_for_correction').length})
           </button>
           <button
             type="button"
@@ -310,7 +310,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
                           </span>
                         ) : (
                           <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#EDF9F1] text-[#16A34A] border border-[#C6EED5]">
-                            Đã chuyển Thành phố
+                            Đã chuyển cấp ĐHĐN
                           </span>
                         )}
                       </td>
@@ -377,8 +377,8 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
                 <div>
                   <div className="font-bold">Quy chế xác nhận hồ sơ Tập thể:</div>
                   <p className="mt-0.5 text-[#334155]">
-                    Đơn vị ({unitName}) xác nhận tính hợp lệ về danh tính tổ chức và đồng ý đề cử chuyển hồ sơ lên cấp Thành phố.
-                    <strong> Đơn vị KHÔNG thực hiện thêm một vòng xét sơ chi tiết từng tiêu chí trên hệ thống.</strong> Hội Sinh viên TP. Đà Nẵng sẽ là cấp trực tiếp thẩm định 4 tiêu chuẩn.
+                    Đơn vị ({unitName}) xác nhận tính hợp lệ về danh tính tổ chức và đồng ý đề cử chuyển hồ sơ lên cấp Đại học Đà Nẵng.
+                    <strong> Đơn vị KHÔNG thực hiện thêm một vòng xét sơ chi tiết từng tiêu chí trên hệ thống.</strong> Hội Sinh viên Đại học Đà Nẵng sẽ là cấp trực tiếp thẩm định 4 tiêu chuẩn.
                   </p>
                 </div>
               </div>
@@ -496,7 +496,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
                     className="gap-1.5 shadow-sm"
                   >
                     <CheckCircle2 size={15} />
-                    <span>Xác nhận và chuyển Thành phố</span>
+                    <span>Xác nhận và chuyển cấp ĐHĐN</span>
                   </Button>
                 </div>
               ) : (
@@ -552,7 +552,7 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
             <div className="flex items-center gap-2.5 text-[#0D78AE]">
               <Send size={22} />
               <h3 className="font-bold text-[16px] text-[#172A3A]">
-                Xác nhận chuyển hồ sơ tập thể lên Thành phố
+                Xác nhận chuyển hồ sơ tập thể lên cấp Đại học Đà Nẵng
               </h3>
             </div>
 
@@ -560,11 +560,11 @@ export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirm
               <div>• Tên tập thể: <strong>{selectedApp.collectiveName}</strong></div>
               <div>• Đơn vị trực thuộc: <strong>{selectedApp.institutionName}</strong></div>
               <div>• Đơn vị xác nhận: <strong>{unitName}</strong></div>
-              <div>• Điểm đến: <strong>Hội Sinh viên Việt Nam TP. Đà Nẵng</strong></div>
+              <div>• Điểm đến: <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong></div>
             </div>
 
             <p className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] text-[12px] text-[#607483] leading-relaxed">
-              Sau khi xác nhận, hồ sơ sẽ được chuyển đến cấp Thành phố để xét chọn. Đơn vị không thực hiện thêm một vòng xét sơ chi tiết trên hệ thống.
+              Sau khi xác nhận, hồ sơ sẽ được chuyển đến cấp Đại học Đà Nẵng để xét chọn. Đơn vị không thực hiện thêm một vòng xét sơ chi tiết trên hệ thống.
             </p>
 
             <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#EEF4F8]">

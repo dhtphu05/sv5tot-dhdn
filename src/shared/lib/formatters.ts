@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Shared Formatters (FSD Shared Layer)
+ * 5TOT ĐHĐN — Shared Formatters (FSD Shared Layer)
  * Domain-independent formatting utilities for dates, numbers, and percentages.
  */
 

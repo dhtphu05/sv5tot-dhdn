@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Canonical Student Application Domain Types (FSD Entities Layer)
+ * 5TOT ĐHĐN — Canonical Student Application Domain Types (FSD Entities Layer)
  */
 
 import { RequirementStatus } from '../../tokens';
@@ -86,7 +86,7 @@ export interface ApplicationCriterion {
 }
 
 /**
- * 5TOT Đà Nẵng — 13-Field Student Personal Information Profile (SRW-6)
+ * 5TOT ĐHĐN — 13-Field Student Personal Information Profile (SRW-6)
  * Group A: Thông tin cá nhân (fullName, gender, dateOfBirth, ethnicity)
  * Group B: Thông tin học tập (academicYearNumber, educationLevel, className, homeProvince, institutionId, institutionName)
  * Group C: Thông tin Đoàn – Hội (unionPosition, politicalStatus)

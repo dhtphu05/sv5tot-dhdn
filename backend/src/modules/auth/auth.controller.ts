@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authentication HTTP Controller (Backend V2)
+ * 5TOT ĐHĐN — Authentication HTTP Controller (Backend V2)
  * Maps HTTP requests to domain services with strict schema validation and RFC 7807 error responses.
  */
 

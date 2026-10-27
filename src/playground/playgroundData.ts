@@ -116,7 +116,7 @@ export const PLAYGROUND_INITIAL_REQUIREMENTS: Record<string, RequirementData[]> 
         criterionId: 'volunteer',
         title: 'Chiến dịch Tình nguyện Mùa hè xanh',
         ruleBadge: 'Có thể khai nhiều hoạt động',
-        ruleHelper: 'Tham gia đầy đủ chiến dịch cấp Trường hoặc cấp Thành phố',
+        ruleHelper: 'Tham gia đầy đủ chiến dịch cấp Trường hoặc cấp Đại học Đà Nẵng',
         declarationValue: 'Đội trưởng Mùa hè xanh 2026 tại Huyện Hòa Vang',
         declarationDetail: 'Thời gian tham gia: 15 ngày, hoàn thành 02 công trình thanh niên',
         declarationDate: '18/07/2026',

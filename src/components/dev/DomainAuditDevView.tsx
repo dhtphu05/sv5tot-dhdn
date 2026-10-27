@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Development Domain Audit Matrix View
+ * 5TOT ĐHĐN — Development Domain Audit Matrix View
  * Development-only inspector listing all 5 criteria, requirement groups, and requirements.
  * Implements Prompt Section 9, 36, 45:
  * - Shows: criterion, group, requirement code & title, group minimum, SINGLE / MULTIPLE,

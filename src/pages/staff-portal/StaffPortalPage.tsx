@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Portal Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — Staff Portal Page (FSD Pages Layer)
  * Composes StaffAppShell, CommitteeApplicationWorkspace, OfficerReviewWorkspace,
  * SchoolBackofficeViews, StaffBackofficeViews, and PrototypeDemoToolbar.
  */

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Canonical RBAC Role & Capability Matrix (@5tot/contracts)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Canonical RBAC Role & Capability Matrix (@5tot/contracts)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Shared pure RBAC policy consumed by both Frontend route/UI guards and Backend authorization middleware.
  */

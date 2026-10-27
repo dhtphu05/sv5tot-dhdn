@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Officer Evidence Review Viewer (EvidenceReviewViewer)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Officer Evidence Review Viewer (EvidenceReviewViewer)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 22.2 Sections 10, 11, 13–18, 35, 74, 76:
  * - True individual Evidence review: every evidence file has independent review state.
@@ -242,12 +242,12 @@ function getOfficerRecognizedFields(
       },
       {
         label: 'Số quyết định & Ngày cấp',
-        value: 'Quyết định số 155-QĐ/TĐTN ngày 07/09/2026',
+        value: 'Quyết định số 155-QĐ/ĐHĐN-HSV ngày 07/09/2026',
         highlightRegionId: 'date',
       },
       {
         label: 'Cơ quan ban hành',
-        value: 'Ban Chấp hành Thành Đoàn Đà Nẵng (Dấu đỏ Thành Đoàn)',
+        value: 'Ban Thư ký Hội Sinh viên Đại học Đà Nẵng (Dấu đỏ HSV ĐHĐN)',
         highlightRegionId: 'authority',
       },
     ];
@@ -276,18 +276,18 @@ function getOfficerRecognizedFields(
   if (lower.includes('img_9540') || lower.includes('156')) {
     return [
       {
-        label: 'Tên bằng khen cấp Thành phố',
+        label: 'Tên bằng khen cấp Đại học Đà Nẵng',
         value: 'Bằng khen Giải Khuyến khích Bảng B Cuộc thi Vietnamese Student HackAIthon 2026',
         highlightRegionId: 'award-name',
       },
       {
         label: 'Số quyết định & Ngày cấp',
-        value: 'Quyết định số 156-QĐ/TĐTN ngày 08/09/2026',
+        value: 'Quyết định số 156-QĐ/ĐHĐN-HSV ngày 08/09/2026',
         highlightRegionId: 'date',
       },
       {
         label: 'Cơ quan ban hành',
-        value: 'Ban Chấp hành Thành Đoàn Đà Nẵng',
+        value: 'Ban Thư ký Hội Sinh viên Đại học Đà Nẵng',
         highlightRegionId: 'authority',
       },
     ];

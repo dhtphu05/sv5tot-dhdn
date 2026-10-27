@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — City Workflow Domain Service (Backend V2)
+ * 5TOT ĐHĐN — City Workflow Domain Service (Backend V2)
  *
  * Implements authoritative business invariants:
  * - City Manager intake queue aggregation and officer workload tracking.

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Criteria Catalog Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Criteria Catalog Repository Interface (Backend V2)
  */
 
 import type {

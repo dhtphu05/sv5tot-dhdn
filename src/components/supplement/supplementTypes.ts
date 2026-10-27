@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Supplement Request Types & Data Models
+ * 5TOT ĐHĐN — Supplement Request Types & Data Models
  * Implements Prompt 10: Bổ sung hồ sơ (Supplement Request + Resubmit)
  */
 

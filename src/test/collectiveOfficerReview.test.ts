@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Phase S4.8.4 Comprehensive Automated Test Suite
+ * 5TOT ĐHĐN — Phase S4.8.4 Comprehensive Automated Test Suite
  * City Officer Collective Review Workspace & Business Engine Verification
  *
  * Tests:
@@ -344,7 +344,7 @@ console.log('================================================================');
 if (process.env.VITEST) {
   const vitestPkg = 'vitest';
   const { describe, it, expect } = await import(vitestPkg);
-  describe('5TOT Đà Nẵng — City Officer Collective Review Suite (S4.8.4)', () => {
+  describe('5TOT ĐHĐN — City Officer Collective Review Suite (S4.8.4)', () => {
     it('completes all 12 officer collective review verification sections', () => {
       expect(reopenedApp.status).toBe('city_in_review');
     });

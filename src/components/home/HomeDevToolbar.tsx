@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Student Home Shared-Store Dev Switcher
+ * 5TOT ĐHĐN — Student Home Shared-Store Dev Switcher
  * Implements Prompt 13 Sections 77-82:
  * Discrete, collapsible QA bar that updates the entire shared Student store
  * (Trang chủ, Hồ sơ của tôi, Thông báo, Kết quả xét chọn, Sidebar badge) simultaneously.

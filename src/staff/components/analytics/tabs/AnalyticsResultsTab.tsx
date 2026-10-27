@@ -52,7 +52,7 @@ export const AnalyticsResultsTab: React.FC<AnalyticsResultsTabProps> = ({
               Chưa có dữ liệu kết quả đã công bố.
             </div>
             <p className="mt-0.5 text-[#526B7C]">
-              Dữ liệu kết luận xét chọn trước thời điểm công bố thuộc thẩm quyền của Hội đồng xét chọn cấp Thành phố. Sau khi Hội đồng công bố kết quả chính thức, số liệu công nhận theo đơn vị sẽ hiển thị tại đây.
+              Dữ liệu kết luận xét chọn trước thời điểm công bố thuộc thẩm quyền của Hội đồng xét chọn cấp Đại học Đà Nẵng. Sau khi Hội đồng công bố kết quả chính thức, số liệu công nhận theo đơn vị sẽ hiển thị tại đây.
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ export const AnalyticsResultsTab: React.FC<AnalyticsResultsTabProps> = ({
               items={[
                 {
                   id: 'recognized',
-                  label: 'Được công nhận Sinh viên 5 tốt cấp Thành phố',
+                  label: 'Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng',
                   value: resultSummary.recognizedCount,
                   barColor: '#1A934E',
                 },

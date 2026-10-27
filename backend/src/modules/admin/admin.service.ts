@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Admin & Operational Control Plane Service (Backend V2)
+ * 5TOT ĐHĐN — Admin & Operational Control Plane Service (Backend V2)
  * Implements:
  * - Zero-manual-seed First-Admin Bootstrap (one-time token, rate limit, permanent lock)
  * - 8-gate Season Readiness Checklist & safe season activation
@@ -45,9 +45,9 @@ const ROLE_LABELS_VI: Record<SystemRoleCode, string> = {
   STUDENT: 'Sinh viên / Ứng viên',
   COLLECTIVE_PREPARER: 'Người lập hồ sơ Tập thể',
   SCHOOL_OFFICER: 'Cán bộ Hội Sinh viên Cấp Trường / ĐHĐN',
-  CITY_OFFICER: 'Cán bộ Thẩm định Cấp Thành phố',
-  CITY_MANAGER: 'Tổ Thư ký / Điều phối Cấp Thành phố',
-  CITY_COMMITTEE: 'Thành viên Hội đồng Xét chọn Thành phố',
+  CITY_OFFICER: 'Cán bộ Thẩm định Cấp Đại học Đà Nẵng',
+  CITY_MANAGER: 'Tổ Thư ký / Điều phối Cấp Đại học Đà Nẵng',
+  CITY_COMMITTEE: 'Thành viên Hội đồng Xét chọn Đại học Đà Nẵng',
   ADMIN: 'Quản trị viên Hệ thống',
 };
 
@@ -177,7 +177,7 @@ export class AdminService {
       roleCode: 'ADMIN',
       roleLabelVi: ROLE_LABELS_VI.ADMIN,
       schoolReviewUnitId: null,
-      schoolReviewUnitLabelVi: 'Toàn hệ thống (Thành Đoàn / HSV Thành phố)',
+      schoolReviewUnitLabelVi: 'Toàn hệ thống (Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng)',
       institutionId: null,
       inviteCode: null,
       inviteStatus: 'ACTIVATED',
@@ -282,13 +282,13 @@ export class AdminService {
       },
       {
         code: 'STAFF_PROVISIONED',
-        labelVi: 'Nhân sự Cấp Trường, Cấp Thành phố & Hội đồng',
+        labelVi: 'Nhân sự Cấp Trường, Cấp Đại học Đà Nẵng & Hội đồng',
         passed: hasSchoolOfficer && hasCityReviewer && hasCommittee,
         severity: 'WARNING',
         detailVi:
           hasSchoolOfficer && hasCityReviewer && hasCommittee
-            ? `Đã cấp quyền Cán bộ Trường, Cán bộ Thành phố và Hội đồng xét chọn (${activeStaff.length} tài khoản hoạt động).`
-            : 'Khuyến nghị cấp đủ tài khoản Cán bộ Trường (SCHOOL_OFFICER), Thành phố (CITY_OFFICER) và Hội đồng (CITY_COMMITTEE).',
+            ? `Đã cấp quyền Cán bộ Trường, Cán bộ cấp Đại học Đà Nẵng và Hội đồng xét chọn (${activeStaff.length} tài khoản hoạt động).`
+            : 'Khuyến nghị cấp đủ tài khoản Cán bộ Trường (SCHOOL_OFFICER), Cấp ĐHĐN (CITY_OFFICER) và Hội đồng (CITY_COMMITTEE).',
         actionRoute: '/staff/admin/staff',
       },
       {
@@ -411,7 +411,7 @@ export class AdminService {
         ? unitMap.get(unitId) || unitId
         : roleCode === 'SCHOOL_OFFICER'
           ? 'Chưa gán đơn vị xét sơ tuyển'
-          : 'Cấp Thành phố / Toàn hệ thống';
+          : 'Cấp Đại học Đà Nẵng / Toàn hệ thống';
 
       const invitation = await this.adminRepo.getInvitationByUserId(user.id);
 

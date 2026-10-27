@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Committee School Common Decision Preview Modal (SRW-4 Section 11)
+ * 5TOT ĐHĐN — Committee School Common Decision Preview Modal (SRW-4 Section 11)
  * Displays the authoritative School Decision document from the forwarded batch
  * (e.g. Quyết định số 182/QĐ-ĐHĐN của Đại học Đà Nẵng).
  */
@@ -52,7 +52,7 @@ export const CommitteeSchoolDecisionPreviewModal: React.FC<
                 Văn bản đề nghị xét chọn — {unitName}
               </h3>
               <p className="text-[12px] text-[#94A3B8]">
-                {fileName || decisionNumber} · Văn bản đính kèm đợt chuyển cấp Thành phố
+                {fileName || decisionNumber} · Văn bản đính kèm đợt chuyển cấp Đại học Đà Nẵng
               </p>
             </div>
           </div>
@@ -91,7 +91,7 @@ export const CommitteeSchoolDecisionPreviewModal: React.FC<
                 </div>
               </div>
               <div className="text-[12.5px] text-[#526B7C] pt-3 border-t border-[#E2E8F0]">
-                Văn bản PDF đề nghị xét chọn đã được đơn vị đính kèm khi chuyển giao danh sách hồ sơ lên Hội Sinh viên Thành phố.
+                Văn bản PDF đề nghị xét chọn đã được đơn vị đính kèm khi chuyển giao danh sách hồ sơ lên Hội Sinh viên Đại học Đà Nẵng.
               </div>
             </div>
           )}

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Collective Application Controller (Backend V2)
+ * 5TOT ĐHĐN — Collective Application Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

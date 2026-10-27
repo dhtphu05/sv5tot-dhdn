@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Level 1: Application-Wide AI Preliminary Verdict Surface (Feature A & Section 4, 6)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Level 1: Application-Wide AI Preliminary Verdict Surface (Feature A & Section 4, 6)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt Section 4 & 6:
  * - Vietnamese Heading: "AI đánh giá sơ bộ hồ sơ"

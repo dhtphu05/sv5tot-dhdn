@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Student Personal Information Profile View (SRW-6)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Student Personal Information Profile View (SRW-6)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements:
  * - 13 canonical fields across 4 groups (A: Cá nhân, B: Học tập, C: Đoàn - Hội, D: Liên hệ).
@@ -325,7 +325,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
             </h1>
           </div>
           <p className="text-[13.5px] text-[#607483] mt-1.5 max-w-2xl">
-            Quản lý và cập nhật thông tin định danh cá nhân phục vụ quy trình xét duyệt danh hiệu Sinh viên 5 tốt TP. Đà Nẵng.
+            Quản lý và cập nhật thông tin định danh cá nhân phục vụ quy trình xét duyệt danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng.
           </p>
         </div>
 

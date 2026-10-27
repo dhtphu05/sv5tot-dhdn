@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Forwarding Batch Controller (Backend V2)
+ * 5TOT ĐHĐN — School Forwarding Batch Controller (Backend V2)
  */
 
 import type { Request, Response } from 'express';

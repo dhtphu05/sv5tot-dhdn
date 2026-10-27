@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Authoritative Neon PostgreSQL Seed Script (Production Ready)
+ * 5TOT ĐHĐN — Authoritative Neon PostgreSQL Seed Script (Production Ready)
  * Seeds all Institutions, School Review Units, Active Season (2025-2026),
  * Criteria Definitions, Collective Units, and Multi-School Accounts (Admin,
  * Committee, City Manager, City Officers, School Officers, Collective Preparers,

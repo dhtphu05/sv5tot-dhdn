@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Identity Domain Types & Contracts
+ * 5TOT ĐHĐN — Identity Domain Types & Contracts
  * Reflects authoritative PostgreSQL Prisma schema definitions.
  */
 
@@ -90,7 +90,7 @@ export type SafeUser = Omit<UserEntity, 'passwordHash' | 'ssoSubjectId'> & {
 };
 
 /**
- * 5TOT Đà Nẵng — Student Personal Information Profile (SRW-6)
+ * 5TOT ĐHĐN — Student Personal Information Profile (SRW-6)
  * Authoritative 13 fields grouped into 4 functional sections:
  * Group A: Thông tin cá nhân (fullName, gender, dateOfBirth, ethnicity)
  * Group B: Thông tin học tập (academicYearNumber, educationLevel, className, homeProvince, institutionId/Name)

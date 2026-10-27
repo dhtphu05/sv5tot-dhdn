@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Correlation ID Middleware
+ * 5TOT ĐHĐN — Correlation ID Middleware
  * Assigns or propagates x-request-id across HTTP requests.
  */
 

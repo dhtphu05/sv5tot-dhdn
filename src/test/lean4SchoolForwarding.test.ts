@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — LEAN-4: Production Lean School Preliminary Review, Recommendation Selection & One-Time City Forwarding
+ * 5TOT ĐHĐN — LEAN-4: Production Lean School Preliminary Review, Recommendation Selection & One-Time City Forwarding
  * Test Suite SF01–SF42
  *
  * Core Philosophy: "The School reviewer manages applications, not forwarding engine states."
@@ -7,7 +7,7 @@
  * Step 2: Record School recommendation (Authoritative human decision: Đề nghị / Không đề nghị / Chưa có kết luận).
  * Step 3: Select applications directly with checkboxes (intentional, respects eligibility/filters, persistent across member institutions).
  * Step 4: Attach the School official decision document (1 PDF per Review Unit per season, e.g., 182/QĐ-ĐHĐN).
- * Step 5: Forward once with a compact, professional confirmation ("Gửi danh sách lên Thành phố").
+ * Step 5: Forward once with a compact, professional confirmation ("Gửi danh sách lên cấp Đại học Đà Nẵng").
  */
 
 import { test, describe, beforeEach } from 'node:test';
@@ -101,7 +101,7 @@ const DU_OFFICER: StaffUser = {
   roleLabel: 'Cán bộ xét sơ tuyển cấp Trường',
 };
 
-describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01–SF42)', () => {
+describe('5TOT ĐHĐN — LEAN-4 Production Lean School Review Suite (SF01–SF42)', () => {
   beforeEach(() => {
     resetDemoBatchState();
   });
@@ -209,12 +209,12 @@ describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01�
     test('SF08: Non-school role (e.g. CITY_OFFICER) cannot review school applications', () => {
       const fakeUser: StaffUser = {
         id: 'usr-city-officer',
-        fullName: 'Cán bộ Thành phố',
+        fullName: 'Cán bộ cấp Đại học Đà Nẵng',
         email: 'officer@hsvdanang.vn',
         primaryRole: 'CITY_OFFICER',
         roles: ['CITY_OFFICER'],
         unitLabel: 'Thành phố',
-        roleLabel: 'Cán bộ xét duyệt Thành phố',
+        roleLabel: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
       };
       const appDut = createMockSchoolApp();
       const check = canSchoolOfficerReviewApplication(fakeUser, appDut);
@@ -437,11 +437,11 @@ describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01�
         'APP-REC-01',
         'recommended',
         UDN_OFFICER,
-        'Hồ sơ xuất sắc, đề nghị Thành phố xét chọn'
+        'Hồ sơ xuất sắc, đề nghị cấp Đại học Đà Nẵng xét chọn'
       );
       assert.equal(nextApps[0].schoolPreliminaryStatus, 'recommended_forwarding');
       assert.equal(nextApps[0].schoolRecommendation, 'recommended');
-      assert.equal(nextApps[0].schoolRecommendationNotes, 'Hồ sơ xuất sắc, đề nghị Thành phố xét chọn');
+      assert.equal(nextApps[0].schoolRecommendationNotes, 'Hồ sơ xuất sắc, đề nghị cấp Đại học Đà Nẵng xét chọn');
       assert.equal(nextApps[0].schoolReviewSummary?.recommendation, 'recommended');
     });
 
@@ -453,11 +453,11 @@ describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01�
         'not_recommended',
         UDN_OFFICER,
         'Xem xét nội bộ',
-        'Chưa đạt tiêu chuẩn tiếng Anh cấp Thành phố'
+        'Chưa đạt tiêu chuẩn tiếng Anh cấp Đại học Đà Nẵng'
       );
       assert.equal(nextApps[0].schoolPreliminaryStatus, 'not_recommended');
       assert.equal(nextApps[0].schoolRecommendation, 'not_recommended');
-      assert.equal(nextApps[0].schoolRecommendationReason, 'Chưa đạt tiêu chuẩn tiếng Anh cấp Thành phố');
+      assert.equal(nextApps[0].schoolRecommendationReason, 'Chưa đạt tiêu chuẩn tiếng Anh cấp Đại học Đà Nẵng');
       assert.equal(nextApps[0].schoolReviewSummary?.recommendation, 'not_recommended');
     });
 
@@ -623,7 +623,7 @@ describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01�
   describe('Group 5: Step 4 — Official Decision Document Attachment (SF31–SF36)', () => {
     const validDecision: DecisionDocumentMetadata = {
       decisionNumber: '182/QĐ-ĐHĐN',
-      decisionTitle: 'Quyết định về việc đề xuất danh sách sinh viên đạt danh hiệu SV5T cấp Thành phố năm học 2026–2027',
+      decisionTitle: 'Quyết định về việc đề xuất danh sách sinh viên đạt danh hiệu SV5T cấp Đại học Đà Nẵng năm học 2026–2027',
       decisionDate: '2026-10-18',
       signedByName: 'PGS.TS. Nguyễn Ngọc Vũ',
       signedByTitle: 'Giám đốc Đại học Đà Nẵng',
@@ -735,7 +735,7 @@ describe('5TOT Đà Nẵng — LEAN-4 Production Lean School Review Suite (SF01�
   describe('Group 6: Step 5 — One-Time Forwarding Invariant & City Intake (SF37–SF42)', () => {
     const validDecision: DecisionDocumentMetadata = {
       decisionNumber: '182/QĐ-ĐHĐN',
-      decisionTitle: 'Quyết định về việc đề xuất danh sách sinh viên đạt danh hiệu SV5T cấp Thành phố năm học 2026–2027',
+      decisionTitle: 'Quyết định về việc đề xuất danh sách sinh viên đạt danh hiệu SV5T cấp Đại học Đà Nẵng năm học 2026–2027',
       decisionDate: '2026-10-18',
       signedByName: 'PGS.TS. Nguyễn Ngọc Vũ',
       signedByTitle: 'Giám đốc Đại học Đà Nẵng',

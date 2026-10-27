@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Collective Official Result Presentation Modal
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Collective Official Result Presentation Modal
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v2 Sections 67, 68:
  * - Displays official published result of the Collective Student 5-Good track.
@@ -40,10 +40,10 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
             <HsvEmblem size={28} />
             <div>
               <h2 className="text-[15px] font-bold text-[#172A3A]">
-                Kết quả xét chọn Tập thể Sinh viên 5 tốt cấp Thành phố
+                Kết quả xét chọn Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng
               </h2>
               <p className="text-[11.5px] text-[#607483]">
-                Hội Sinh viên Việt Nam Thành phố Đà Nẵng · Năm học {application.academicYear}
+                Hội Sinh viên Việt Nam Đại học Đà Nẵng · Năm học {application.academicYear}
               </p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
                 {application.institutionName}
               </div>
               <div className="text-[12px] text-[#728391] pt-2">
-                Hồ sơ nộp trực tiếp và xét chọn tại: <strong>Hội Sinh viên Việt Nam TP. Đà Nẵng</strong>
+                Hồ sơ nộp trực tiếp và xét chọn tại: <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong>
               </div>
             </div>
           ) : (

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Review Unit Domain Service (Backend V2)
+ * 5TOT ĐHĐN — School Review Unit Domain Service (Backend V2)
  * Implements authoritative routing, resolution, and authorization boundaries.
  */
 
@@ -83,7 +83,7 @@ export class SchoolReviewUnitService {
         unit: null,
         trainingInstitutionId,
         errorCode: 'COLLECTIVE_NOT_APPLICABLE',
-        errorMessage: 'Hồ sơ Tập thể nộp trực tiếp Cấp Thành phố, không qua xét sơ cấp Trường.',
+        errorMessage: 'Hồ sơ Tập thể nộp trực tiếp Cấp Đại học Đà Nẵng, không qua xét sơ cấp Trường.',
       };
     }
 
@@ -189,7 +189,7 @@ export class SchoolReviewUnitService {
     }
     if (application.track === 'COLLECTIVE') {
       throw ApiError.forbidden(
-        'Hồ sơ Tập thể nộp trực tiếp Cấp Thành phố, không thuộc thẩm quyền xét sơ cấp Trường.'
+        'Hồ sơ Tập thể nộp trực tiếp Cấp Đại học Đà Nẵng, không thuộc thẩm quyền xét sơ cấp Trường.'
       );
     }
     if (officerSchoolReviewUnitId !== application.schoolReviewUnitId) {

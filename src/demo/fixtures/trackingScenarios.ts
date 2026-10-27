@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Submitted / Under Review Tracking Fixtures
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Submitted / Under Review Tracking Fixtures
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * Implements Complete Requirement Structure across all 5 criteria.
  */
 
@@ -153,7 +153,7 @@ export const HERO_ACTIVITIES: TrackingActivity[] = [
   {
     id: 'act-1',
     timestamp: '12/10/2026 · 14:32',
-    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên TP. Đà Nẵng.',
+    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng.',
   },
 ];
 
@@ -178,7 +178,7 @@ export const SUPPLEMENT_ACTIVITIES: TrackingActivity[] = [
   {
     id: 'act-sup-4',
     timestamp: '12/10/2026 · 14:32',
-    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên TP. Đà Nẵng.',
+    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng.',
   },
 ];
 
@@ -206,6 +206,6 @@ export const ALL_REVIEWED_ACTIVITIES: TrackingActivity[] = [
   {
     id: 'act-all-5',
     timestamp: '12/10/2026 · 14:32',
-    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên TP. Đà Nẵng.',
+    message: 'Hồ sơ đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng.',
   },
 ];

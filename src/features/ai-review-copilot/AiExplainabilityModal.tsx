@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — AI Explainability Modal ("Vì sao AI nhận định như vậy?")
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — AI Explainability Modal ("Vì sao AI nhận định như vậy?")
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Feature E (Section 10 & 11):
  * - Grounded explainability for all consequential preliminary AI observations.
@@ -213,7 +213,7 @@ export const AiExplainabilityModal: React.FC<AiExplainabilityModalProps> = ({
                 ? 'Đối chiếu mốc thời gian thực tế giữa tài liệu xác nhận và phần kê khai của sinh viên. Nếu cần, yêu cầu nộp xác nhận bổ trợ.'
                 : isMissing
                 ? 'Kiểm tra xem sinh viên có bảng điểm đầy đủ cho cả năm học hoặc bảng điểm học kỳ 2 đã được cấp hay chưa.'
-                : 'Xác minh văn bản có phù hợp với danh mục quy chuẩn quy đổi thể lực theo hướng dẫn thi đua của Hội Sinh viên thành phố.'}
+                : 'Xác minh văn bản có phù hợp với danh mục quy chuẩn quy đổi thể lực theo hướng dẫn thi đua của Hội Sinh viên Đại học Đà Nẵng.'}
             </p>
           </div>
 

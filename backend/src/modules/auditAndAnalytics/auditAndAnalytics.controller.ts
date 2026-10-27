@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Audit, Notifications & Analytics Controller (Backend V2)
+ * 5TOT ĐHĐN — Audit, Notifications & Analytics Controller (Backend V2)
  */
 
 import type { Request, Response, RequestHandler } from 'express';

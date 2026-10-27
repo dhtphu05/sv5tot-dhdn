@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Repeatable Declaration List
+ * 5TOT ĐHĐN — Repeatable Declaration List
  * Handles multiple declarations (e.g. volunteer activities, publications).
  * Implements Prompt Requirements 5, 6, 8, 31, 32, 40:
  * - Domain-specific wording (e.g. "+ Thêm hoạt động")

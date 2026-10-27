@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Overview & Workload Views (FSD Widgets Layer)
+ * 5TOT ĐHĐN — Staff Overview & Workload Views (FSD Widgets Layer)
  */
 
 import React from 'react';
@@ -271,7 +271,7 @@ export const StaffOverviewDashboard: React.FC<StaffOverviewDashboardProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-[15.5px] font-extrabold text-[#0F2335]">
-              Hồ sơ xét duyệt cấp Thành phố cần ưu tiên xử lý
+              Hồ sơ xét duyệt cấp Đại học Đà Nẵng cần ưu tiên xử lý
             </h2>
             <p className="text-[12.5px] text-[#526B7C]">
               Chọn &ldquo;Mở hồ sơ xét duyệt&rdquo; để thẩm định trực tiếp 05 tiêu chí của hồ sơ mà không cần qua phân công trước.
@@ -288,7 +288,7 @@ export const StaffOverviewDashboard: React.FC<StaffOverviewDashboardProps> = ({
 
         <SharedOperationalTable
           variant="operational"
-          ariaLabel="Danh sách hồ sơ xét duyệt cấp Thành phố ưu tiên"
+          ariaLabel="Danh sách hồ sơ xét duyệt cấp Đại học Đà Nẵng ưu tiên"
           columns={applicationTableColumns}
           data={sharedCityApps}
           getRowKey={(r) => r.applicationId}

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Interactive Demo Mode Service Adapter
+ * 5TOT ĐHĐN — Interactive Demo Mode Service Adapter
  * Implements DomainServicesBundle backed by isolated Demo Stores and Fixtures.
  * Works 100% offline/client-side without requiring a production backend connection.
  */

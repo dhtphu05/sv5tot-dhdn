@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — UX-S5 Final Integration & Acceptance Test Suite
+ * 5TOT ĐHĐN — UX-S5 Final Integration & Acceptance Test Suite
  * Covers UX-S5 quality gate requirements:
  * 1. Business Workflow Rules & Role Invariants
  * 2. Shared Dossier Presentation Invariants across Student, School, City, and Committee
@@ -37,7 +37,7 @@ import {
   STUDENT_APPLICATION_FIXTURE,
 } from '../demo/fixtures/studentApplication';
 
-describe('5TOT Đà Nẵng — UX-S5 Final Integration & Acceptance Suite', () => {
+describe('5TOT ĐHĐN — UX-S5 Final Integration & Acceptance Suite', () => {
   // =========================================================================
   // 1. BUSINESS WORKFLOW & ROLE INVARIANTS
   // =========================================================================
@@ -96,7 +96,7 @@ describe('5TOT Đà Nẵng — UX-S5 Final Integration & Acceptance Suite', () =
       primaryRole: 'ADMIN',
       roles: ['ADMIN'],
       roleLabel: 'Quản trị hệ thống',
-      unitLabel: 'Văn phòng Hội Sinh viên TP. Đà Nẵng',
+      unitLabel: 'Văn phòng Hội Sinh viên Đại học Đà Nẵng',
     };
 
     const caps = resolveUserCapabilities(adminUser);

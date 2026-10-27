@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Staff Review Tokens & Status Metadata Re-exports
+ * 5TOT ĐHĐN — Staff Review Tokens & Status Metadata Re-exports
  */
 
 import { CRITERIA_LIST, CriterionDefinition } from '../tokens';

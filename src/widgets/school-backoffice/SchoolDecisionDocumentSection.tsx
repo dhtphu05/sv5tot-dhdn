@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — School Decision Document Section Widget (FSD Widgets Layer)
+ * 5TOT ĐHĐN — School Decision Document Section Widget (FSD Widgets Layer)
  * LEAN-4.2: PDF-Only Official Document Upload.
  * Eliminates manual input fields for Số hiệu văn bản, Ngày ban hành, Người ký, Chức vụ.
  * Preserves historical metadata for viewing without requiring fabrication or manual input.

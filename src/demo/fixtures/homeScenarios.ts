@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Shared Coherent Demo Store Scenarios (Prompt 13 Sections 56-58, 81-86)
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Shared Coherent Demo Store Scenarios (Prompt 13 Sections 56-58, 81-86)
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Ensures that Trang chủ (Home), Hồ sơ của tôi (Application), Thông báo (Notifications),
  * Kết quả xét chọn (Results), and Sidebar Badge consume ONE unified business state.
@@ -272,7 +272,7 @@ export const HOME_COHERENT_SCENARIOS: Record<
     scenarioId: 'state_k_recognized',
     label: 'K. Kết quả: Được công nhận',
     description:
-      'Kết quả chính thức đã công bố: Được công nhận Sinh viên 5 tốt cấp Thành phố · Bấm [Xem kết quả].',
+      'Kết quả chính thức đã công bố: Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng · Bấm [Xem kết quả].',
     hasApplication: true,
     application: TRACKING_APPLICATION_STATE_E,
     submissionState: 'result_published',

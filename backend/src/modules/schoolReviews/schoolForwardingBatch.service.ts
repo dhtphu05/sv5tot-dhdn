@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — School Forwarding Batch Domain Service (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — School Forwarding Batch Domain Service (Backend V2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import type { ISchoolForwardingBatchRepository } from './schoolForwardingBatch.repository';
@@ -48,7 +48,7 @@ export class SchoolForwardingBatchService {
     const existing = await this.batchRepo.findBatchByUnitAndSeason(unitId, input.seasonId);
     if (existing && existing.status === 'FORWARDED') {
       throw ApiError.conflict(
-        'Đơn vị đã chốt và chuyển danh sách lên cấp Thành phố. Không thể chỉnh sửa danh sách sau khi đã gửi.',
+        'Đơn vị đã chốt và chuyển danh sách lên cấp Đại học Đà Nẵng. Không thể chỉnh sửa danh sách sau khi đã gửi.',
         'BATCH_ALREADY_FORWARDED'
       );
     }
@@ -94,7 +94,7 @@ export class SchoolForwardingBatchService {
     const existing = await this.batchRepo.findBatchByUnitAndSeason(unitId, input.seasonId);
     if (existing && existing.status === 'FORWARDED') {
       throw ApiError.conflict(
-        'Đơn vị đã chốt và chuyển danh sách lên cấp Thành phố. Quyết định đã được đóng băng.',
+        'Đơn vị đã chốt và chuyển danh sách lên cấp Đại học Đà Nẵng. Quyết định đã được đóng băng.',
         'BATCH_ALREADY_FORWARDED'
       );
     }
@@ -137,7 +137,7 @@ export class SchoolForwardingBatchService {
     // 1. Check existing batch
     const batch = await this.batchRepo.findBatchByUnitAndSeason(unitId, input.seasonId);
     if (!batch) {
-      throw ApiError.notFound('Chưa khởi tạo danh sách đề xuất chuyển Thành phố.', 'BATCH_NOT_FOUND');
+      throw ApiError.notFound('Chưa khởi tạo danh sách đề xuất chuyển cấp ĐHĐN.', 'BATCH_NOT_FOUND');
     }
 
     // 2. Compute canonical payload hash for idempotency conflict detection
@@ -170,7 +170,7 @@ export class SchoolForwardingBatchService {
         };
       }
       throw ApiError.conflict(
-        'Danh sách đề xuất của đơn vị đã được chuyển lên cấp Thành phố trước đó. Mỗi đơn vị chỉ được chuyển 01 lần duy nhất trong mùa xét.',
+        'Danh sách đề xuất của đơn vị đã được chuyển lên cấp Đại học Đà Nẵng trước đó. Mỗi đơn vị chỉ được chuyển 01 lần duy nhất trong mùa xét.',
         'BATCH_ALREADY_FORWARDED'
       );
     }
@@ -178,7 +178,7 @@ export class SchoolForwardingBatchService {
     // 4. Selection validation
     if (!batch.selectedApplicationIds || batch.selectedApplicationIds.length === 0) {
       throw ApiError.badRequest(
-        'Danh sách đề xuất chuyển Thành phố không được để trống.',
+        'Danh sách đề xuất chuyển cấp ĐHĐN không được để trống.',
         'EMPTY_SELECTION_LIST'
       );
     }
@@ -186,7 +186,7 @@ export class SchoolForwardingBatchService {
     // 5. Decision document validation (LEAN-4.2 PDF-only requirement)
     if (!batch.decisionFileId) {
       throw ApiError.badRequest(
-        'Bắt buộc phải đính kèm tệp văn bản PDF đề nghị của đơn vị trước khi chuyển danh sách lên cấp Thành phố.',
+        'Bắt buộc phải đính kèm tệp văn bản PDF đề nghị của đơn vị trước khi chuyển danh sách lên cấp Đại học Đà Nẵng.',
         'MISSING_DECISION_DOCUMENT'
       );
     }

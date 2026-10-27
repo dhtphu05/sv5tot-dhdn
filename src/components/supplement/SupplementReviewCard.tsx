@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Supplement Review Card (LEAN-3)
+ * 5TOT ĐHĐN — Supplement Review Card (LEAN-3)
  * Scoped review block appearing within the targeted declaration when responding to a supplement request.
  * Implements LEAN-3 Sections 10, 11, 12, 13:
  * - Direct Student explanation input ("Nội dung giải trình").

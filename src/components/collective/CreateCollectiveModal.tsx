@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Create Collective Application Modal
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Create Collective Application Modal
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt S4.8 v2 Sections 11, 12, 16, 17:
  * - Desktop-first modal for Step 1 collective identity creation.
@@ -122,7 +122,7 @@ export const CreateCollectiveModal: React.FC<CreateCollectiveModalProps> = ({
                 Tạo hồ sơ Tập thể Sinh viên 5 tốt
               </h2>
               <p className="text-[12px] text-[#607483]">
-                Năm học 2025–2026 · Nộp trực tiếp cấp Thành phố Đà Nẵng
+                Năm học 2025–2026 · Nộp trực tiếp cấp Đại học Đà Nẵng
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export const CreateCollectiveModal: React.FC<CreateCollectiveModalProps> = ({
                     Tập thể này đã có hồ sơ trong năm học 2025–2026.
                   </div>
                   <p className="text-[12px] mt-0.5 text-[#A1480C]">
-                    Mã hồ sơ: <strong>{existingApp.id}</strong> · Trạng thái: {existingApp.status === 'draft' ? 'Đang kê khai' : 'Đã nộp Thành phố'}.
+                    Mã hồ sơ: <strong>{existingApp.id}</strong> · Trạng thái: {existingApp.status === 'draft' ? 'Đang kê khai' : 'Đã nộp cấp ĐHĐN'}.
                   </p>
                 </div>
               </div>
@@ -243,7 +243,7 @@ export const CreateCollectiveModal: React.FC<CreateCollectiveModalProps> = ({
               <span className="font-bold">Đơn vị quản lý theo dõi: </span>
               <span className="font-semibold text-[#172A3A]">{selectedEntity.schoolReviewUnitName}</span>
               <p className="text-[11.5px] text-[#4A6275] mt-0.5">
-                Đích nộp hồ sơ: <strong>Hội Sinh viên Việt Nam TP. Đà Nẵng</strong> (Nộp trực tiếp, không qua khâu duyệt của Trường).
+                Đích nộp hồ sơ: <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong> (Nộp trực tiếp, không qua khâu duyệt của Trường).
               </p>
             </div>
           </div>

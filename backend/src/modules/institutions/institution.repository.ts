@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Institution Repository Interface (Backend V2)
+ * 5TOT ĐHĐN — Institution Repository Interface (Backend V2)
  */
 
 import type {

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Dual-Mode Architecture & Real Backend E2E Verification Suite
+ * 5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Verification Suite
  * Verifies:
  * 1. Mode Resolver & Strict Dual-Mode Isolation (DEMO vs BACKEND).
  * 2. Prohibition of silent fallback to Demo when Backend API returns error.
@@ -33,7 +33,7 @@ import {
 import { clearEvidenceViewUrlCache } from '../shared/api/r2EvidenceClient';
 import { resolveDomainServices } from '../entities/services/modeResolver';
 
-describe('5TOT Đà Nẵng — Dual-Mode Architecture & Real Backend E2E Suite', () => {
+describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () => {
   let server: http.Server;
   let baseUrl = '';
 
@@ -172,7 +172,7 @@ describe('5TOT Đà Nẵng — Dual-Mode Architecture & Real Backend E2E Suite',
     const completedSchool = await services.schoolReview.completeSchoolPreliminaryReview({
       applicationId: created.applicationId,
       recommendation: 'recommended',
-      summaryNote: 'Đủ điều kiện tiêu biểu cấp Trường, kính trình Hội đồng Thành phố.',
+      summaryNote: 'Đủ điều kiện tiêu biểu cấp Trường, kính trình Hội đồng cấp Đại học Đà Nẵng.',
       actor: schoolActor,
     });
     assert.equal(completedSchool.schoolPreliminaryStatus, 'recommended_forwarding');
@@ -220,7 +220,7 @@ describe('5TOT Đà Nẵng — Dual-Mode Architecture & Real Backend E2E Suite',
     const decided = await services.committeeDecision.recordIndividualDecision({
       applicationId: created.applicationId,
       outcome: 'recognized',
-      internalNote: 'Hội đồng thống nhất công nhận Sinh viên 5 Tốt cấp Thành phố.',
+      internalNote: 'Hội đồng thống nhất công nhận Sinh viên 5 Tốt cấp Đại học Đà Nẵng.',
       actor: committeeActor,
     });
     assert.equal(decided.finalResultSummary?.outcome, 'recognized');
@@ -454,7 +454,7 @@ describe('5TOT Đà Nẵng — Dual-Mode Architecture & Real Backend E2E Suite',
     const committeeDecided = await services.committeeDecision.recordCollectiveDecision({
       applicationId: draft.id,
       outcome: 'recognized',
-      notes: 'Hội đồng thống nhất công nhận danh hiệu Tập thể Sinh viên 5 Tốt cấp Thành phố.',
+      notes: 'Hội đồng thống nhất công nhận danh hiệu Tập thể Sinh viên 5 Tốt cấp Đại học Đà Nẵng.',
       actor: committeeActor,
     });
     assert.equal(committeeDecided.success, true);

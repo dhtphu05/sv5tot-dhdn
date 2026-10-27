@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — ACID Transaction Execution & Atomic Audit Helper
+ * 5TOT ĐHĐN — ACID Transaction Execution & Atomic Audit Helper
  * Enforces transaction boundaries with bounded retry on transient concurrency conflicts.
  */
 

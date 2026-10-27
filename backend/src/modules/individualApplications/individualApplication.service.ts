@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Individual Application Domain Service (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Individual Application Domain Service (Backend V2)
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements authoritative Student Application Lifecycle (BE4-A):
  * - One application per Student per season (idempotent startOrResume).

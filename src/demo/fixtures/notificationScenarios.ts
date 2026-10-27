@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Canonical Student Notification Scenarios & Fixtures
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Canonical Student Notification Scenarios & Fixtures
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 12 Sections 12-19, 64, 65, 76, 77, 78, 84.
  */
@@ -325,7 +325,7 @@ export const NOTIFICATION_DEMO_SCENARIOS: Record<
     id: 'scenario_c_result',
     label: 'C. Đã công bố kết quả xét chọn',
     description:
-      'Thông báo công bố kết quả chính thức Sinh viên 5 tốt cấp Thành phố năm học 2026–2027 nổi bật ở đầu danh sách.',
+      'Thông báo công bố kết quả chính thức Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2026–2027 nổi bật ở đầu danh sách.',
     items: [
       NOTIF_RESULT_PUBLISHED,
       NOTIF_SUPPLEMENT_SENT,

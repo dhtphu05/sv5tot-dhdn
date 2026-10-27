@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Shared Operational Table Primitive (variant="operational")
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Shared Operational Table Primitive (variant="operational")
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 19 Sections 0–9, 85–88, 104–112, 114 & Prompt 20 Sections 56, 59, 73, 76, 96–97, 101–103:
  * - Applies a unified, high-legibility operational table treatment across Staff Backoffice:

@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Reusable ApplicationTimeline (FSD Entities Layer)
+ * 5TOT ĐHĐN — Reusable ApplicationTimeline (FSD Entities Layer)
  * Displays chronological audit history for Individual and Collective applications.
  */
 

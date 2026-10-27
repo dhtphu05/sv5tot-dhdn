@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Audit, Notifications & Analytics Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Audit, Notifications & Analytics Domain Service (Backend V2)
  */
 
 import type { IAuditAndAnalyticsRepository, AuditLogFilter } from './auditAndAnalytics.repository';

@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Restrained Institutional Operational Charts
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Restrained Institutional Operational Charts
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 20 Sections 16, 17, 22, 33, 38, 46, 90–93, 131, 137:
  * - Flat, clean, institutional visualizations (no 3D, no gradients, no giant donuts, no neon).

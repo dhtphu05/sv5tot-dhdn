@@ -1,6 +1,6 @@
 /**
- * 5TOT Đà Nẵng — Student Notification & Smart Deep-Link Data Model
- * Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT ĐHĐN — Student Notification & Smart Deep-Link Data Model
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
  * Implements Prompt 12 Sections 3, 20, 21, 23, 31-37, 58-60:
  * - Splits notifications semantically into Actionable ("Cần bạn xử lý") and Informational ("Cập nhật").
