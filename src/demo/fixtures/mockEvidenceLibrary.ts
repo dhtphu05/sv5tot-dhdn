@@ -440,7 +440,27 @@ export function getActiveStudentCombinedLibrary(
     criteria?: Array<{
       id: PersonalLibraryItem['criterionId'];
       name: string;
+      groups?: Array<{
+        requirements: Array<{
+          id?: string;
+          title: string;
+          declarations: Array<{
+            value: string;
+            evidenceFiles: Array<{
+              id: string;
+              name: string;
+              fileType: string;
+              size: string;
+              uploadedAt: string;
+              status: RequirementStatus;
+              url?: string;
+              aiSuggestedInfo?: PersonalLibraryItem['aiSuggestedInfo'];
+            }>;
+          }>;
+        }>;
+      }>;
       requirements: Array<{
+        id?: string;
         title: string;
         declarations: Array<{
           value: string;
@@ -489,7 +509,18 @@ export function getActiveStudentCombinedLibrary(
   // 1. Live declarations from the student's application (strictly excluding mock fixtures)
   if (effectiveApp?.criteria) {
     for (const criterion of effectiveApp.criteria) {
-      for (const req of criterion.requirements || []) {
+      const allReqs = [
+        ...(Array.isArray(criterion.groups)
+          ? criterion.groups.flatMap((g) => g.requirements || [])
+          : []),
+        ...(criterion.requirements || []),
+      ];
+      const visitedReqKeys = new Set<string>();
+      for (const req of allReqs) {
+        if (!req) continue;
+        const reqKey = req.id || req.title;
+        if (visitedReqKeys.has(reqKey)) continue;
+        visitedReqKeys.add(reqKey);
         for (const decl of req.declarations || []) {
           for (const ev of decl.evidenceFiles || []) {
             if (isMockFixtureEvidence(ev.id, ev.name)) {

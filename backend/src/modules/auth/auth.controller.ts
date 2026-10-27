@@ -119,12 +119,54 @@ export class AuthController {
       throw ApiError.unauthorized();
     }
 
-    const result = await this.identityService.getProfile(req.actor.userId);
+    const {
+      resolveSavedStudentProfileFromPortalState,
+      mergeStudentProfileObjects,
+      syncStudentProfileInPortalState,
+    } = await import('../domainPortal/domainPortal.state');
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    try {
+      const result = await this.identityService.getProfile(req.actor.userId);
+      const portalSaved = resolveSavedStudentProfileFromPortalState({
+        userId: req.actor.userId,
+        email: req.actor.email,
+      });
+      const mergedProfile = portalSaved
+        ? (mergeStudentProfileObjects(portalSaved, result.profile) as typeof result.profile)
+        : result.profile;
+      syncStudentProfileInPortalState(mergedProfile, {
+        userId: req.actor.userId,
+        email: req.actor.email,
+      });
+      res.status(200).json({
+        success: true,
+        data: {
+          profile: mergedProfile,
+          completeness: this.identityService.checkProfileCompleteness(mergedProfile),
+        },
+      });
+    } catch (err: any) {
+      const status = err?.status ?? err?.statusCode;
+      if (status === 400 || status === 401 || status === 403) {
+        throw err;
+      }
+      const portalSaved = resolveSavedStudentProfileFromPortalState({
+        userId: req.actor.userId,
+        email: req.actor.email,
+      });
+      const fallbackProfile = mergeStudentProfileObjects(portalSaved, {
+        fullName: req.actor.fullName,
+        email: req.actor.email,
+        institutionId: req.actor.institutionId || 'inst-dut',
+      }) as any;
+      res.status(200).json({
+        success: true,
+        data: {
+          profile: fallbackProfile,
+          completeness: this.identityService.checkProfileCompleteness(fallbackProfile),
+        },
+      });
+    }
   });
 
   public updateProfile: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -132,13 +174,44 @@ export class AuthController {
       throw ApiError.unauthorized();
     }
 
-    const result = await this.identityService.updateProfile(req.actor.userId, req.body);
+    const { syncStudentProfileInPortalState } = await import('../domainPortal/domainPortal.state');
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Cập nhật thông tin cá nhân thành công.',
-    });
+    try {
+      const result = await this.identityService.updateProfile(req.actor.userId, req.body);
+      syncStudentProfileInPortalState(result.profile, {
+        userId: req.actor.userId,
+        email: req.actor.email,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: 'Cập nhật thông tin cá nhân thành công.',
+      });
+    } catch (err: any) {
+      const status = err?.status ?? err?.statusCode;
+      if (status === 400 || status === 401 || status === 403) {
+        throw err;
+      }
+      const merged = syncStudentProfileInPortalState(
+        {
+          ...(req.body || {}),
+          email: req.actor.email,
+        },
+        {
+          userId: req.actor.userId,
+          email: req.actor.email,
+        }
+      ) as any;
+      res.status(200).json({
+        success: true,
+        data: {
+          profile: merged,
+          completeness: this.identityService.checkProfileCompleteness(merged),
+        },
+        message: 'Cập nhật thông tin cá nhân thành công.',
+      });
+    }
   });
 
   public changePassword: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {

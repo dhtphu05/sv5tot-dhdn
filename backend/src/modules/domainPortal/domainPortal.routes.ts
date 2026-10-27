@@ -26,10 +26,14 @@ import {
   resolveSessionActor,
   requireAllowedRoles,
   issueZeroTrustJwtToken,
+  mergeStudentProfileObjects,
+  resolveSavedStudentProfileFromPortalState,
+  syncStudentProfileInPortalState,
   type PortalAuthSessionPayload,
   type PortalAuditLogRecord,
 } from './domainPortal.state';
 import { registerCollectiveAndEvidencePortalRoutes } from './domainPortal.collective.routes';
+import { ensurePortalStateHydratedFromNeonDb } from './domainPortal.dbSync';
 import { dbManager } from '../../shared/database/prismaClient';
 import { defaultPasswordHasher } from '../auth/passwordHasher';
 
@@ -42,6 +46,11 @@ export interface DomainPortalRouterDeps {
 
 export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
   const router = Router();
+
+  router.use(async (_req, _res, next) => {
+    await ensurePortalStateHydratedFromNeonDb().catch(() => {});
+    next();
+  });
 
   router.post('/admin/reset-empty', async (_req: Request, res: Response): Promise<void> => {
     clearDomainPortalStateForSeed();
@@ -824,7 +833,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     });
   });
 
-  router.get('/individual/applications/:id/student-view', (req: Request, res: Response): void => {
+  router.get('/individual/applications/:id/student-view', async (req: Request, res: Response): Promise<void> => {
     const app = portalState.studentApplications[req.params.id];
     if (!app) {
       res.status(404).json({
@@ -834,12 +843,49 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       });
       return;
     }
+
+    const studentCode = String(
+      app.student?.studentId || app.student?.studentCode || req.params.id.replace(/^APP-\d{4}-DN-/, '')
+    ).trim();
+    const email = String(app.student?.email || app.applicantProfileSnapshot?.email || '').trim();
+    const portalSaved = resolveSavedStudentProfileFromPortalState({ studentCode, email });
+
+    let dbProfile: Record<string, any> | null = null;
+    try {
+      const dbUser =
+        (studentCode ? await deps.identityRepo.findByStudentCode(studentCode).catch(() => null) : null) ||
+        (email ? await deps.identityRepo.findByEmail(email).catch(() => null) : null);
+      if (dbUser) {
+        dbProfile = await deps.identityRepo.getProfile(dbUser.id).catch(() => null);
+      }
+    } catch {
+      // Offline or test mode
+    }
+
+    if (portalSaved || dbProfile) {
+      const mergedProfile = mergeStudentProfileObjects(
+        mergeStudentProfileObjects(app.applicantProfileSnapshot, portalSaved),
+        dbProfile
+      );
+      app.applicantProfileSnapshot = mergedProfile;
+      if (app.student) {
+        if (mergedProfile.fullName) app.student.fullName = mergedProfile.fullName;
+        if (mergedProfile.className) app.student.class = mergedProfile.className;
+        if (mergedProfile.institutionName) app.student.university = mergedProfile.institutionName;
+        if (mergedProfile.email) app.student.email = mergedProfile.email;
+      }
+      if (mergedProfile.institutionName) {
+        app.trainingInstitutionName = mergedProfile.institutionName;
+      }
+    }
+
     res.status(200).json({ success: true, data: app });
   });
 
-  router.put('/individual/applications/:id/student-view', (req: Request, res: Response): void => {
+  router.put('/individual/applications/:id/student-view', async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const incoming = (req.body?.application || req.body || {}) as Record<string, any>;
+    const isUserMutation = Boolean(req.body?.isUserMutation);
     if (!incoming || typeof incoming !== 'object') {
       res.status(400).json({
         success: false,
@@ -849,11 +895,104 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       return;
     }
 
+    const countCriteriaDecls = (criteriaList?: Record<string, any>[]) =>
+      (Array.isArray(criteriaList) ? criteriaList : []).reduce((sum, c) => {
+        const reqs =
+          Array.isArray(c.groups) && c.groups.length > 0
+            ? c.groups.flatMap((g: Record<string, any>) => g.requirements || [])
+            : Array.isArray(c.requirements)
+            ? c.requirements
+            : [];
+        return (
+          sum +
+          reqs.reduce(
+            (rSum: number, r: Record<string, any>) =>
+              rSum + (Array.isArray(r.declarations) ? r.declarations.length : 0),
+            0
+          )
+        );
+      }, 0);
+
     const existing = portalState.studentApplications[id] || {};
+    const existingDecls = countCriteriaDecls(existing.criteria);
+    const incomingDecls = countCriteriaDecls(incoming.criteria);
+
+    const shouldPreserveExistingCriteria =
+      !isUserMutation && existingDecls > 0 && incomingDecls === 0;
+    const shouldPreserveSubmittedStatus =
+      Boolean(existing.status && existing.status !== 'draft') &&
+      (!incoming.status || incoming.status === 'draft');
+
+    const studentCode = String(
+      incoming.student?.studentId ||
+        existing.student?.studentId ||
+        id.replace(/^APP-\d{4}-DN-/, '')
+    ).trim();
+    const studentEmail = String(
+      incoming.student?.email ||
+        incoming.applicantProfileSnapshot?.email ||
+        existing.student?.email ||
+        existing.applicantProfileSnapshot?.email ||
+        ''
+    ).trim();
+
+    const portalSaved = resolveSavedStudentProfileFromPortalState({
+      studentCode,
+      email: studentEmail,
+    });
+    const mergedSnapshot = mergeStudentProfileObjects(
+      mergeStudentProfileObjects(portalSaved, existing.applicantProfileSnapshot),
+      incoming.applicantProfileSnapshot
+    );
+
     const merged: Record<string, any> = {
       ...existing,
       ...incoming,
       applicationId: id,
+      applicantProfileSnapshot: mergedSnapshot,
+      student: {
+        ...(existing.student || {}),
+        ...(incoming.student || {}),
+        fullName:
+          mergedSnapshot.fullName ||
+          incoming.student?.fullName ||
+          existing.student?.fullName,
+        class:
+          mergedSnapshot.className ||
+          incoming.student?.class ||
+          existing.student?.class ||
+          '',
+        university:
+          mergedSnapshot.institutionName ||
+          incoming.student?.university ||
+          existing.student?.university,
+        email:
+          mergedSnapshot.email ||
+          incoming.student?.email ||
+          existing.student?.email,
+      },
+      criteria: shouldPreserveExistingCriteria
+        ? existing.criteria
+        : incoming.criteria ?? existing.criteria,
+      status: shouldPreserveSubmittedStatus
+        ? existing.status
+        : incoming.status || existing.status || 'draft',
+      reviewStage: shouldPreserveSubmittedStatus
+        ? existing.reviewStage
+        : incoming.reviewStage || existing.reviewStage || 'SCHOOL',
+      schoolPreliminaryStatus: shouldPreserveSubmittedStatus
+        ? existing.schoolPreliminaryStatus
+        : incoming.schoolPreliminaryStatus || existing.schoolPreliminaryStatus,
+      schoolRecommendation: shouldPreserveSubmittedStatus
+        ? existing.schoolRecommendation
+        : incoming.schoolRecommendation || existing.schoolRecommendation,
+      supplementRequests:
+        Array.isArray(incoming.supplementRequests) && incoming.supplementRequests.length > 0
+          ? incoming.supplementRequests
+          : existing.supplementRequests || [],
+      councilFeedback: incoming.councilFeedback ?? existing.councilFeedback,
+      decisionCode: incoming.decisionCode ?? existing.decisionCode,
+      awardedAt: incoming.awardedAt ?? existing.awardedAt,
     };
     const mapped = resolveSchoolMappingForApp(merged);
     if (!merged.schoolReviewUnitId) merged.schoolReviewUnitId = mapped.unitId;
@@ -861,6 +1000,10 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     if (!merged.trainingInstitutionName) merged.trainingInstitutionName = mapped.instName;
 
     portalState.studentApplications[id] = merged;
+    syncStudentProfileInPortalState(mergedSnapshot, {
+      studentCode,
+      email: studentEmail,
+    });
     syncStaffRecordFromStudentApplication(merged, {
       createIfMissing: merged.status && merged.status !== 'draft',
     });
@@ -869,7 +1012,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     res.status(200).json({ success: true, data: merged });
   });
 
-  router.post('/individual/applications', (req: Request, res: Response): void => {
+  router.post('/individual/applications', async (req: Request, res: Response): Promise<void> => {
     const {
       studentFullName,
       studentCode,
@@ -905,43 +1048,68 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       instName: institutionName || 'Trường Đại học Bách khoa – ĐHĐN',
     };
 
-    const resolvedSnapshot = applicantProfileSnapshot || {
+    const appId = `APP-2026-DN-${studentCode}`;
+    const existingApp = portalState.studentApplications[appId];
+    const portalSaved = resolveSavedStudentProfileFromPortalState({
+      studentCode: String(studentCode),
+      email: email ? String(email) : undefined,
+    });
+
+    let dbProfile: Record<string, any> | null = null;
+    try {
+      const dbUser =
+        (await deps.identityRepo.findByStudentCode(String(studentCode)).catch(() => null)) ||
+        (email ? await deps.identityRepo.findByEmail(String(email)).catch(() => null) : null);
+      if (dbUser) {
+        dbProfile = await deps.identityRepo.getProfile(dbUser.id).catch(() => null);
+      }
+    } catch {
+      // Offline or test mode
+    }
+
+    const explicitFieldsSnapshot = {
       fullName: studentFullName,
-      gender: gender || 'Nam',
-      dateOfBirth: dateOfBirth || '15/05/2004',
-      ethnicity: ethnicity || 'Kinh',
-      academicYearNumber: Number(academicYearNumber) || 3,
-      educationLevel: educationLevel || 'Đại học',
-      className: className || '22CLC1',
-      homeProvince: homeProvince || 'Thành phố Đà Nẵng',
+      gender: gender || '',
+      dateOfBirth: dateOfBirth || '',
+      ethnicity: ethnicity || '',
+      academicYearNumber: Number(academicYearNumber) || 0,
+      educationLevel: educationLevel || '',
+      className: className || '',
+      homeProvince: homeProvince || '',
       institutionId,
       institutionName: institutionName || mapped.instName,
-      unionPosition: unionPosition || 'Ủy viên BCH Chi đoàn',
-      politicalStatus: politicalStatus || 'Đoàn viên',
-      phoneNumber: phoneNumber || '0905123456',
+      unionPosition: unionPosition || '',
+      politicalStatus: politicalStatus || '',
+      phoneNumber: phoneNumber || '',
       email: email || `${studentCode}@sv.udn.vn`,
     };
 
-    const appId = `APP-2026-DN-${studentCode}`;
-    const existingApp = portalState.studentApplications[appId];
+    const resolvedSnapshot = mergeStudentProfileObjects(
+      mergeStudentProfileObjects(
+        mergeStudentProfileObjects(existingApp?.applicantProfileSnapshot, portalSaved),
+        dbProfile
+      ),
+      mergeStudentProfileObjects(explicitFieldsSnapshot, applicantProfileSnapshot)
+    );
+
     const created: Record<string, any> = {
       applicationId: appId,
       season: 'Năm học 2025–2026',
       level: 'Cấp Đại học Đà Nẵng',
       status: existingApp?.status || 'draft',
       reviewStage: existingApp?.reviewStage || 'SCHOOL',
-      trainingInstitutionName: institutionName || mapped.instName,
+      trainingInstitutionName: resolvedSnapshot.institutionName || institutionName || mapped.instName,
       schoolReviewUnitId: mapped.unitId,
       schoolReviewUnitName: mapped.unitName,
       schoolPreliminaryStatus: existingApp?.schoolPreliminaryStatus || 'school_not_submitted',
       applicantProfileSnapshot: resolvedSnapshot,
       student: {
-        fullName: studentFullName,
+        fullName: resolvedSnapshot.fullName || studentFullName,
         studentId: studentCode,
-        university: institutionName || mapped.instName,
+        university: resolvedSnapshot.institutionName || institutionName || mapped.instName,
         faculty: faculty || existingApp?.student?.faculty || 'Khoa Đào tạo',
-        class: className || existingApp?.student?.class || '22CLC1',
-        email: email || `${studentCode}@sv.udn.vn`,
+        class: resolvedSnapshot.className || className || existingApp?.student?.class || '',
+        email: resolvedSnapshot.email || email || `${studentCode}@sv.udn.vn`,
         academicYear: 'Năm học 2025–2026',
       },
       criteria:
@@ -952,6 +1120,10 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     };
 
     portalState.studentApplications[appId] = created;
+    syncStudentProfileInPortalState(resolvedSnapshot, {
+      studentCode: String(studentCode),
+      email: created.student.email,
+    });
     syncStaffRecordFromStudentApplication(created, { createIfMissing: true });
     savePortalStateToDisk();
 
@@ -1173,7 +1345,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     res.status(200).json({ success: true, data: app });
   });
 
-  router.post('/individual/applications/:id/submit', (req: Request, res: Response): void => {
+  router.post('/individual/applications/:id/submit', async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const incomingApp = (req.body?.application || undefined) as Record<string, any> | undefined;
     const baseApp =
@@ -1192,6 +1364,53 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       ? { ...baseApp, ...incomingApp, applicationId: id }
       : { ...baseApp, applicationId: id };
 
+    const actor = resolveSessionActor(req);
+    const studentCode = String(
+      app.student?.studentId || app.student?.studentCode || id.replace(/^APP-\d{4}-DN-/, '')
+    ).trim();
+    const studentEmail = String(
+      app.student?.email || app.applicantProfileSnapshot?.email || actor.email || ''
+    ).trim();
+
+    const portalSaved = resolveSavedStudentProfileFromPortalState({
+      userId: actor.authenticated ? actor.id : undefined,
+      studentCode,
+      email: studentEmail,
+    });
+    let dbProfile: Record<string, any> | null = null;
+    try {
+      const dbUser =
+        (actor.authenticated ? await deps.identityRepo.findById(actor.id).catch(() => null) : null) ||
+        (studentCode ? await deps.identityRepo.findByStudentCode(studentCode).catch(() => null) : null) ||
+        (studentEmail ? await deps.identityRepo.findByEmail(studentEmail).catch(() => null) : null);
+      if (dbUser) {
+        dbProfile = await deps.identityRepo.getProfile(dbUser.id).catch(() => null);
+      }
+    } catch {
+      // Offline or test mode
+    }
+
+    if (portalSaved || dbProfile || app.applicantProfileSnapshot) {
+      app.applicantProfileSnapshot = mergeStudentProfileObjects(
+        mergeStudentProfileObjects(portalSaved, dbProfile),
+        app.applicantProfileSnapshot
+      );
+      if (app.student) {
+        if (app.applicantProfileSnapshot.fullName) {
+          app.student.fullName = app.applicantProfileSnapshot.fullName;
+        }
+        if (app.applicantProfileSnapshot.className) {
+          app.student.class = app.applicantProfileSnapshot.className;
+        }
+        if (app.applicantProfileSnapshot.institutionName) {
+          app.student.university = app.applicantProfileSnapshot.institutionName;
+        }
+        if (app.applicantProfileSnapshot.email) {
+          app.student.email = app.applicantProfileSnapshot.email;
+        }
+      }
+    }
+
     const mapped = resolveSchoolMappingForApp(app);
     app.applicationId = id;
     app.status = 'under_review';
@@ -1209,7 +1428,6 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     });
     savePortalStateToDisk();
 
-    const actor = resolveSessionActor(req);
     appendPortalAuditLog({
       track: 'INDIVIDUAL',
       applicationId: id,

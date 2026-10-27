@@ -213,9 +213,9 @@ export class IdentityService {
     this.assertUserIsActive(user);
 
     // 1. Phone number validation (Vietnamese standard 10 digits)
-    if (input.phoneNumber !== undefined && input.phoneNumber !== '') {
-      const cleanPhone = input.phoneNumber.replace(/[\s.-]/g, '');
-      const vnPhoneRegex = /^(03|05|07|08|09)\d{8}$/;
+    if (input.phoneNumber !== undefined && input.phoneNumber.trim() !== '') {
+      const cleanPhone = input.phoneNumber.trim().replace(/[\s.-]/g, '');
+      const vnPhoneRegex = /^(03|05|07|08|09|02)\d{8,9}$/;
       if (!vnPhoneRegex.test(cleanPhone)) {
         throw ApiError.badRequest(
           'Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng 10 chữ số tại Việt Nam (ví dụ: 0905123456).',
@@ -233,7 +233,7 @@ export class IdentityService {
       }
     }
 
-    // 3. Academic year validation
+    // 3. Academic year validation (1 to 7)
     if (input.academicYearNumber !== undefined) {
       const yr = Number(input.academicYearNumber);
       if (isNaN(yr) || yr < 1 || yr > 7) {
@@ -246,7 +246,7 @@ export class IdentityService {
     }
 
     // 4. Full name normalization (preserve diacritics, trim)
-    if (input.fullName !== undefined) {
+    if (input.fullName !== undefined && input.fullName.trim() !== '') {
       input.fullName = input.fullName.trim().replace(/\s+/g, ' ');
       if (input.fullName.length < 2) {
         throw ApiError.badRequest('Họ và tên phải có tối thiểu 2 ký tự.', 'INVALID_FULL_NAME');
@@ -254,13 +254,16 @@ export class IdentityService {
     }
 
     // 5. Date of Birth format normalization (DD/MM/YYYY)
-    if (input.dateOfBirth !== undefined && input.dateOfBirth !== '') {
+    if (input.dateOfBirth !== undefined && input.dateOfBirth.trim() !== '') {
       let dob = input.dateOfBirth.trim();
       // If ISO format YYYY-MM-DD
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dob)) {
         const [y, m, d] = dob.split('-');
-        dob = `${d}/${m}/${y}`;
-      } else if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
+        dob = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dob)) {
+        const [d, m, y] = dob.split('/');
+        dob = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      } else {
         throw ApiError.badRequest(
           'Ngày sinh không đúng định dạng DD/MM/YYYY (ví dụ: 15/10/2004).',
           'INVALID_DOB_FORMAT'

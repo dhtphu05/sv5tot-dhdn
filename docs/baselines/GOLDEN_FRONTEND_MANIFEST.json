@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T17:57:57.559Z",
+  "createdAt": "2026-10-27T20:31:36.880Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 45204,
-      "sha256": "596026f35ec037768418c4db7d210150eeba9a8847390dac0fc3698ec9f34553"
+      "sizeBytes": 54951,
+      "sha256": "8863ebd990397aeb284a3c32cd5db5966b13037119b4fda12afcb5f83c5d432a"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -446,13 +446,13 @@
     },
     {
       "path": "src/components/application/AddEditDeclarationModal.tsx",
-      "sizeBytes": 28813,
-      "sha256": "c88f5b0ad5c6b54fa4bc0e235e4078c25070086e61cfd8c9b9ec77aa00b28812"
+      "sizeBytes": 30783,
+      "sha256": "dd2f60928b39e6a696d7c90d56cfa4285b5f5a1a6429f7c5ad8dab82127b33db"
     },
     {
       "path": "src/components/application/AddEvidenceModal.tsx",
-      "sizeBytes": 29935,
-      "sha256": "d55552f6dd5be678b0e3447c5e94059d73cc66f4a9ab049dde5e6e20b296acb5"
+      "sizeBytes": 30102,
+      "sha256": "42d6a11b69b10f8cf78dc49ddaf1fdc447f836cef3417d371cd5679e5377f122"
     },
     {
       "path": "src/components/application/ApplicationHeader.tsx",
@@ -476,8 +476,8 @@
     },
     {
       "path": "src/components/application/CriterionSection.tsx",
-      "sizeBytes": 22743,
-      "sha256": "77a1dfec8bdcf51cc85406a28f83ab6231725f25ee1fcbe613f064da191f8c9f"
+      "sizeBytes": 18678,
+      "sha256": "0926aa97447e0b6175f12b309b8a3df81e85d620ce68129a9735e167c8afd243"
     },
     {
       "path": "src/components/application/EvidenceCell.tsx",
@@ -491,8 +491,8 @@
     },
     {
       "path": "src/components/application/FindDeclarationSearchBar.tsx",
-      "sizeBytes": 26399,
-      "sha256": "0666450cfe2c713954495a69dc5ec17e689c10069c5a4ba227581e4bcd4aa6d3"
+      "sizeBytes": 32948,
+      "sha256": "b3c8f1b289962c1542842a05b3173e43c774bb34259e656af103193a466298fa"
     },
     {
       "path": "src/components/application/RepeatableDeclarationList.tsx",
@@ -501,18 +501,18 @@
     },
     {
       "path": "src/components/application/RequirementGroupHeader.tsx",
-      "sizeBytes": 5016,
-      "sha256": "e46bc6d7229b55aa4e41212dbf3d7d7ca00bf9d123a433eedfcd978ed8717b29"
+      "sizeBytes": 5006,
+      "sha256": "c045de9a00b1b7b5a45f73073fac9af7cda450e61a4cb05954fa550bb7d0bf5c"
     },
     {
       "path": "src/components/application/RequirementRow.tsx",
-      "sizeBytes": 20515,
-      "sha256": "09e9daa40dcc42c72986c2825eecbbc80fcccb46d5dcba5b6ebb20c8bdefe52d"
+      "sizeBytes": 19491,
+      "sha256": "89cdebdc279059c5f9a6a15845d65ede9899687aecbd50d7bb327878a37e06c6"
     },
     {
       "path": "src/components/application/StudentApplicationWorkspace.tsx",
-      "sizeBytes": 31878,
-      "sha256": "4bd3aaac09b5b0f0173e86ac0ea07d6bc683db7e6345dd61477224dca8e0e264"
+      "sizeBytes": 34069,
+      "sha256": "cec9ec41b23c28f3c25169bac6a83abb30997f25d88bd0523a8ae298d71e86e7"
     },
     {
       "path": "src/components/application/modal/InlineEvidenceSection.tsx",
@@ -521,8 +521,8 @@
     },
     {
       "path": "src/components/application/modal/SpecializedCriteriaFields.tsx",
-      "sizeBytes": 22205,
-      "sha256": "a2b928ecf4809e6d3123c6e2a2d0932733e20466a420fba91f560ccbc8789531"
+      "sizeBytes": 22249,
+      "sha256": "7d5aeda9199c6e5c06f534a70b22ef0ecdc594634977f8b000ff53f91e67d19f"
     },
     {
       "path": "src/components/brand/HsvLogo.tsx",
@@ -721,8 +721,8 @@
     },
     {
       "path": "src/components/evidence/detail/DocumentViewer.tsx",
-      "sizeBytes": 12305,
-      "sha256": "4b3d4b5e9cc01d98f96d93051f1d9ad2b5d6fc9e53ea69f58c87c433154f8f2e"
+      "sizeBytes": 12485,
+      "sha256": "d705139a2dbc22d4a735e8e1350077b98ba13b4e26c826b6f703b990ba00e29b"
     },
     {
       "path": "src/components/evidence/detail/EvidenceDetailWorkspace.tsx",
@@ -851,8 +851,8 @@
     },
     {
       "path": "src/components/profile/StudentProfileView.tsx",
-      "sizeBytes": 35055,
-      "sha256": "3ce17a6e5f9857f49e48eb517289eb2058724deca96cba570a2b8629def9ae1b"
+      "sizeBytes": 40712,
+      "sha256": "6c7d7b25148b0bbe5e8fc4a95d5cbc957423ba7c2e9a0a99b0ace35a3075a709"
     },
     {
       "path": "src/components/public/InstitutionCombobox.tsx",
@@ -1156,8 +1156,8 @@
     },
     {
       "path": "src/demo/fixtures/criteriaDefinitions.ts",
-      "sizeBytes": 48268,
-      "sha256": "08db6fe5136b18a955ab0fd3480326eb16c918df26889c1f24c247f75383842f"
+      "sizeBytes": 68860,
+      "sha256": "9f7142c428bc9b75c07695e6f673896adbe2fba9ec93e6d3251e89a7b6e87b66"
     },
     {
       "path": "src/demo/fixtures/homeScenarios.ts",
@@ -1176,8 +1176,8 @@
     },
     {
       "path": "src/demo/fixtures/mockEvidenceLibrary.ts",
-      "sizeBytes": 18705,
-      "sha256": "716ec403a3c5ddfccf3bc188bfb290751336ebc82b34d80765ae9ead318ddef1"
+      "sizeBytes": 19650,
+      "sha256": "27649f8086a944e5367ba3d2f83cdfbacd34bee15e111eb851944de2bc99806f"
     },
     {
       "path": "src/demo/fixtures/notificationScenarios.ts",
@@ -1186,8 +1186,8 @@
     },
     {
       "path": "src/demo/fixtures/regulationData.ts",
-      "sizeBytes": 25984,
-      "sha256": "b4545b7bf45c71701ae8c2ed11faa6cdf0167bed5e499f0d4e8a7fa296062b08"
+      "sizeBytes": 25955,
+      "sha256": "4e7ae04314c0c555b3ee60afb7b53a1d23384f2fdc0ac53488649e849eec6d41"
     },
     {
       "path": "src/demo/fixtures/resultScenarios.ts",
@@ -1196,8 +1196,8 @@
     },
     {
       "path": "src/demo/fixtures/studentApplication.ts",
-      "sizeBytes": 11406,
-      "sha256": "6091ce6287edab1b870ed3197b80388c7357e859e1aa98e03db562a5f9f8c865"
+      "sizeBytes": 17649,
+      "sha256": "8553ef8f09508f0b8b499a31d61257f1e8c1f127bb22adb9d745487ff30fd994"
     },
     {
       "path": "src/demo/fixtures/studentProfileFixtures.ts",
@@ -1216,8 +1216,8 @@
     },
     {
       "path": "src/demo/prototypeDemoMode.ts",
-      "sizeBytes": 19535,
-      "sha256": "98327446f98aed23473d200022e59d21f30e335917a6d51217df9b59b41c8a59"
+      "sizeBytes": 19897,
+      "sha256": "7d74ed11acb2e935231b49e932dad6097bbc33fa79f59da9ec5ceb90c706e211"
     },
     {
       "path": "src/demo/studentSelectors.ts",
@@ -1231,13 +1231,13 @@
     },
     {
       "path": "src/entities/application/studentApplicationMutators.ts",
-      "sizeBytes": 14142,
-      "sha256": "e8b6e651e67b859cbc181474f7510b9442cb3f2c053c156f8a6b0286ab98567a"
+      "sizeBytes": 14162,
+      "sha256": "c0b8a7de984d5f08f24dff9b69c0c1703061a0d93bd9086356d1332fbb7cd767"
     },
     {
       "path": "src/entities/application/studentApplicationTypes.ts",
-      "sizeBytes": 4881,
-      "sha256": "208360d1a901240e78493c398d56b12616a8f1abb3f054440713abcd5d55acae"
+      "sizeBytes": 4956,
+      "sha256": "a24d181f7620952ff6089463491853d267288e74832587ff0cd093c7f399ea67"
     },
     {
       "path": "src/entities/application/ui/ApplicationTimeline.tsx",
@@ -1486,8 +1486,8 @@
     },
     {
       "path": "src/features/public-auth/usePublicAuthSessionTransition.ts",
-      "sizeBytes": 18887,
-      "sha256": "b8e543937694fae03fb3c27cdc49df1ac529b5ffe33c8d924c9047cbb344f883"
+      "sizeBytes": 24040,
+      "sha256": "429ab19a882622583e2f961d9a7f24423a4b504169a58fcb7e4fe42be4450589"
     },
     {
       "path": "src/features/result-publication/index.ts",
@@ -1506,18 +1506,18 @@
     },
     {
       "path": "src/features/staff-workflow/useStaffWorkflowCoordination.ts",
-      "sizeBytes": 45871,
-      "sha256": "6f227625552ba8391b6fef48cbd2c530a15665a3139a716cd4067390bd9b00dc"
+      "sizeBytes": 46798,
+      "sha256": "e8414ef6ba360ad524cc8f6b79a9f41a82e725f2d30451953841fad1375d6155"
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
-      "sizeBytes": 10284,
-      "sha256": "575ae456b563a782c9bb8cab59bdae432025856630f66223c3b79259a0dd0d6e"
+      "sizeBytes": 10334,
+      "sha256": "e6af7e3fdadf8f638685f24444e53cc7ee87e5539d20d75e6adca2e0be9cbbf5"
     },
     {
       "path": "src/features/student-application/useStudentSupplementWorkflow.ts",
-      "sizeBytes": 12225,
-      "sha256": "07d5d06797f6c0e67a37819967683971796859e587c439412aa5542ba117d14f"
+      "sizeBytes": 13381,
+      "sha256": "519ff9773bc09d3388e80e2fcaeb9c7b42808355b347b7408f91c07811a7f287"
     },
     {
       "path": "src/features/student-application/useStudentWorkspaceDeepLink.ts",
@@ -1526,8 +1526,8 @@
     },
     {
       "path": "src/features/student-portal/useStudentPortalWorkflow.ts",
-      "sizeBytes": 24836,
-      "sha256": "19804829e849fba716dc5722fb5e2c90298c6dd3a7d699d1eb89b32d2e580b51"
+      "sizeBytes": 30023,
+      "sha256": "393f0af5aea54587c108f105fa04128b1fd11675116d49b9d58d1aa2dd1a464e"
     },
     {
       "path": "src/features/supplement-request/SupplementComposers.tsx",
@@ -1547,7 +1547,7 @@
     {
       "path": "src/index.css",
       "sizeBytes": 5423,
-      "sha256": "99c72e3ed5c5adf2364bb705027791bec3af7a297f4501deaf38651d18b846c8"
+      "sha256": "d2669caa672d0ba4c1073de560e3287c1c60119b2ba17058f968ac4fa9ba05c1"
     },
     {
       "path": "src/main.tsx",
@@ -1581,13 +1581,13 @@
     },
     {
       "path": "src/pages/staff-portal/StaffPortalPage.tsx",
-      "sizeBytes": 24260,
-      "sha256": "68dcca49e20c592afc2a1a7a0d604423da0eb1b2be53af3540fe3e85c1e636d0"
+      "sizeBytes": 24411,
+      "sha256": "eecda4a840be7429e33e3fc2fa4f4d28290b100e6a4184d4486c59d24bd73109"
     },
     {
       "path": "src/pages/student-portal/StudentPortalPage.tsx",
-      "sizeBytes": 14630,
-      "sha256": "7ef3e139d555de6d30cabb38b2c8ad45532c96cfdf532e374bef65b935be24ab"
+      "sizeBytes": 14749,
+      "sha256": "503ebff67f09a04831355b0f2755d8aea1e1ca1e6843e0560777e5a6720e2605"
     },
     {
       "path": "src/playground/DesignPlayground.tsx",
@@ -2041,8 +2041,8 @@
     },
     {
       "path": "src/staff/components/review/SupplementRequestFormModal.tsx",
-      "sizeBytes": 26828,
-      "sha256": "d2a10c738a5753ca73c041027faf1bf879be20a560d0536e550e020804458f44"
+      "sizeBytes": 26848,
+      "sha256": "77d4a9aaef4c50bafa8b48a2fc50e0ada5e8b7be94c962277ce7ebe0d2119ea3"
     },
     {
       "path": "src/staff/components/review/collective/CollectiveAuditHistoryModal.tsx",
@@ -2086,8 +2086,8 @@
     },
     {
       "path": "src/staff/components/review/criterion/CriterionRequirementRow.tsx",
-      "sizeBytes": 8958,
-      "sha256": "421e39e627c740aadb712f77643fb465483456025a00b259b94fbac70ed2fcc1"
+      "sizeBytes": 8850,
+      "sha256": "d99c4f72f306c57cb6012583e4ac3f5b37d4550714e9655d1a762ffbb9ec3aca"
     },
     {
       "path": "src/staff/components/review/criterion/ManualCriterionConclusionBar.tsx",
@@ -2151,8 +2151,8 @@
     },
     {
       "path": "src/staff/demoEvidenceStorage.ts",
-      "sizeBytes": 11727,
-      "sha256": "f4d69cc062511a5752f7bdc36021d6263d7a75058cfb938e3583bdc0577d1982"
+      "sizeBytes": 15826,
+      "sha256": "b7d381526ed563a7adde08e3d84893f77ea2a3f43a423dd5b3af60110a49a853"
     },
     {
       "path": "src/staff/export/exportDataTransform.ts",
@@ -2241,8 +2241,8 @@
     },
     {
       "path": "src/staff/fixtures/officer/scenarioBundles.ts",
-      "sizeBytes": 42779,
-      "sha256": "93538842ad994d03218be2741a69f2ffd6e00013daf6c9a2322e2e979eaea1dc"
+      "sizeBytes": 44229,
+      "sha256": "54e18a3b0073f4ef1a8127def43ec9f8763a742c17c14819484089b08ac461e5"
     },
     {
       "path": "src/staff/fixtures/officerReviewFixtures.ts",
@@ -2271,8 +2271,8 @@
     },
     {
       "path": "src/staff/reviewSelectors.ts",
-      "sizeBytes": 42088,
-      "sha256": "e5f5be124f3e1b38a5d43ef0ea61412f34dd13f2d9210edce45eeffec74bacb1"
+      "sizeBytes": 43039,
+      "sha256": "565d42027c752d8efbc9cd163f59aeedbcde8fba44e6f39d8c3b6eef4e5c5ead"
     },
     {
       "path": "src/staff/reviewTokens.ts",
@@ -2312,7 +2312,7 @@
     {
       "path": "src/test/aiReviewCopilot.test.ts",
       "sizeBytes": 14229,
-      "sha256": "6a80b0f56f4bd209b59a14d8d6e0fbe1482de3e557103120abba87e3780efce2"
+      "sha256": "9756359032175a602578b86cd4dd69ba80e1d305db3c6f4cee3d70eb197abce1"
     },
     {
       "path": "src/test/aiReviewCopilotUx4.test.ts",
@@ -2336,13 +2336,13 @@
     },
     {
       "path": "src/test/criteriaCompliance.test.ts",
-      "sizeBytes": 15873,
-      "sha256": "defde4fb53a3582b5693e6a70686c5164abfc6d67d5660bd71e49431b25357fc"
+      "sizeBytes": 16273,
+      "sha256": "263e5a11eced2df6b23af0fe6b6ccf2ab7e3f373765bf78f77eabc92949bac42"
     },
     {
       "path": "src/test/dual-mode-backend.test.ts",
-      "sizeBytes": 21664,
-      "sha256": "01f3d63c7fd51c74e8ba0c334d8f22ac074f4fa3c4d4756b5b52fa53c7b3c6a5"
+      "sizeBytes": 35734,
+      "sha256": "aceec9d14f4ede5d6b812b08c42b17430ff687188c8f5f370644e43e8e2e5d7a"
     },
     {
       "path": "src/test/lean1DeclarationSimplification.test.ts",

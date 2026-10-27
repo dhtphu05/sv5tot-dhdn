@@ -275,6 +275,7 @@ export function useStudentDeclarationAndEvidenceModals({
       saveEvidenceFile(evId, f, f.name, ext, {
         size: sizeStr,
         reqId,
+        applicationId: application.applicationId,
       }).catch(() => {});
 
       return {

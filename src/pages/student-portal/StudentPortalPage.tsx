@@ -210,6 +210,9 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
         ) : activeNavId === 'profile' ? (
           <StudentProfileView
             onProfileUpdated={onProfileUpdated}
+            initialProfileSnapshot={
+              activeStoreState.application.applicantProfileSnapshot
+            }
             fallbackStudent={{
               fullName: studentIdentity.fullName,
               studentId: studentIdentity.studentId,

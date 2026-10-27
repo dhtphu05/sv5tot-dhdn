@@ -58,6 +58,11 @@ import {
   resolveInitialRouteAndSession,
 } from './app/routing/initialSessionResolver';
 import { useAdminControlPlane } from './features/admin-control-plane/useAdminControlPlane';
+import {
+  mergeStudentProfileSnapshots,
+  loadPersistedStudentProfile,
+  savePersistedStudentProfile,
+} from './components/profile/StudentProfileView';
 import { useStaffWorkflowCoordination } from './features/staff-workflow/useStaffWorkflowCoordination';
 import { useStudentPortalWorkflow } from './features/student-portal/useStudentPortalWorkflow';
 import { usePublicAuthSessionTransition } from './features/public-auth/usePublicAuthSessionTransition';
@@ -138,22 +143,30 @@ export default function App() {
     (updated: import('./entities/application/studentApplicationTypes').StudentProfileDto) => {
       setStudentIdentity((prev) => ({
         ...prev,
-        fullName: updated.fullName,
+        fullName: updated.fullName || prev.fullName,
         university: updated.institutionName || prev.university,
       }));
       setSharedApplication((prev) => {
+        const mergedSnapshot = mergeStudentProfileSnapshots(
+          prev.applicantProfileSnapshot,
+          updated
+        );
+        savePersistedStudentProfile(mergedSnapshot, {
+          studentId: prev.student?.studentId,
+          email: mergedSnapshot.email || prev.student?.email,
+        });
         const nextApp: StudentApplicationData = {
           ...prev,
-          applicantProfileSnapshot: updated,
+          applicantProfileSnapshot: mergedSnapshot,
           student: {
             ...prev.student,
-            fullName: updated.fullName,
-            university: updated.institutionName || prev.student.university,
-            class: updated.className || prev.student.class,
-            email: updated.email || prev.student.email,
+            fullName: mergedSnapshot.fullName || prev.student.fullName,
+            university: mergedSnapshot.institutionName || prev.student.university,
+            class: mergedSnapshot.className || prev.student.class,
+            email: mergedSnapshot.email || prev.student.email,
           },
           trainingInstitutionName:
-            updated.institutionName || prev.trainingInstitutionName,
+            mergedSnapshot.institutionName || prev.trainingInstitutionName,
         };
         savePersistedDemoSession({ mutatedApplication: nextApp });
         if (isBackendMode() && nextApp.student.studentId && nextApp.applicationId) {
@@ -442,22 +455,74 @@ export default function App() {
     notifications,
   ]);
 
-  // Hydrate student application from backend on reload in student_app mode
+  // Hydrate student application and profile from backend on reload in student_app mode
   useEffect(() => {
     if (!isBackendMode() || viewMode !== 'student_app' || !studentIdentity.studentId) {
       return;
     }
     let cancelled = false;
     const targetAppId = `APP-2026-DN-${studentIdentity.studentId}`;
-    resolveDomainServices()
-      .individual.getStudentApplication(targetAppId)
+    const countAppDeclarations = (appObj?: StudentApplicationData | null) =>
+      (appObj?.criteria || []).reduce((sum, c) => {
+        const reqs =
+          Array.isArray(c.groups) && c.groups.length > 0
+            ? c.groups.flatMap((g) => g.requirements || [])
+            : c.requirements || [];
+        return (
+          sum +
+          reqs.reduce((rSum, r) => rSum + (r.declarations?.length || 0), 0)
+        );
+      }, 0);
+
+    const services = resolveDomainServices();
+
+    // 1. Hydrate personal profile from /api/v2/auth/profile & localStorage cache
+    services.profile
+      .getProfile()
+      .then((res) => {
+        if (cancelled || !res?.profile) return;
+        setSharedApplication((prev) => {
+          const cached = loadPersistedStudentProfile({
+            studentId: studentIdentity.studentId,
+            email: prev.student?.email || res.profile.email,
+          });
+          const mergedSnapshot = mergeStudentProfileSnapshots(
+            mergeStudentProfileSnapshots(prev.applicantProfileSnapshot, cached),
+            res.profile
+          );
+          savePersistedStudentProfile(mergedSnapshot, {
+            studentId: studentIdentity.studentId,
+            email: mergedSnapshot.email,
+          });
+          const nextApp: StudentApplicationData = {
+            ...prev,
+            applicantProfileSnapshot: mergedSnapshot,
+            student: {
+              ...prev.student,
+              fullName: mergedSnapshot.fullName || prev.student.fullName,
+              university: mergedSnapshot.institutionName || prev.student.university,
+              class: mergedSnapshot.className || prev.student.class,
+              email: mergedSnapshot.email || prev.student.email,
+            },
+            trainingInstitutionName:
+              mergedSnapshot.institutionName || prev.trainingInstitutionName,
+          };
+          savePersistedDemoSession({ mutatedApplication: nextApp });
+          return nextApp;
+        });
+      })
+      .catch(() => {});
+
+    // 2. Hydrate student application from /api/v2/portal/individual/applications/:id/student-view
+    services.individual
+      .getStudentApplication(targetAppId)
       .then((remoteApp) => {
         if (cancelled || !remoteApp || !remoteApp.applicationId) return;
+        const hydratedCriteria = buildCriteriaFromDefinitions(remoteApp.criteria);
         const hydratedApp: StudentApplicationData = {
           ...remoteApp,
-          criteria: buildCriteriaFromDefinitions(remoteApp.criteria),
+          criteria: hydratedCriteria,
         };
-        setSharedApplication(hydratedApp);
         const st = hydratedApp.status;
         const resolvedScenarioId: PrototypeScenarioId =
           st === 'supplement_required'
@@ -499,19 +564,127 @@ export default function App() {
             : st && st !== 'draft'
             ? 'under_review'
             : 'draft';
+
+        setSharedApplication((prev) => {
+          const remoteDecls = countAppDeclarations(hydratedApp);
+          const localDecls =
+            prev.student?.studentId === studentIdentity.studentId &&
+            !isDemoFixtureApplication(prev, studentIdentity.studentId)
+              ? countAppDeclarations(prev)
+              : 0;
+          const cachedProfile = loadPersistedStudentProfile({
+            studentId: studentIdentity.studentId,
+            email:
+              hydratedApp.student?.email ||
+              hydratedApp.applicantProfileSnapshot?.email ||
+              prev.student?.email,
+          });
+          const mergedSnapshot = mergeStudentProfileSnapshots(
+            mergeStudentProfileSnapshots(
+              prev.student?.studentId === studentIdentity.studentId
+                ? prev.applicantProfileSnapshot
+                : null,
+              cachedProfile
+            ),
+            hydratedApp.applicantProfileSnapshot
+          );
+          savePersistedStudentProfile(mergedSnapshot, {
+            studentId: studentIdentity.studentId,
+            email: mergedSnapshot.email,
+          });
+          const finalApp: StudentApplicationData = {
+            ...hydratedApp,
+            criteria:
+              remoteDecls === 0 && localDecls > 0
+                ? prev.criteria
+                : hydratedApp.criteria,
+            applicantProfileSnapshot: mergedSnapshot,
+            student: {
+              ...hydratedApp.student,
+              fullName:
+                mergedSnapshot.fullName ||
+                hydratedApp.student?.fullName ||
+                studentIdentity.fullName,
+              university:
+                mergedSnapshot.institutionName ||
+                hydratedApp.student?.university ||
+                studentIdentity.university,
+              class:
+                mergedSnapshot.className ||
+                hydratedApp.student?.class ||
+                prev.student?.class ||
+                '',
+              email:
+                mergedSnapshot.email ||
+                hydratedApp.student?.email ||
+                prev.student?.email ||
+                '',
+            },
+            trainingInstitutionName:
+              mergedSnapshot.institutionName ||
+              hydratedApp.trainingInstitutionName,
+          };
+          if (remoteDecls === 0 && localDecls > 0) {
+            apiRequest(
+              `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/student-view`,
+              {
+                method: 'PUT',
+                body: { application: finalApp, isUserMutation: true },
+              }
+            ).catch(() => {});
+          }
+          savePersistedDemoSession({
+            scenarioId: resolvedScenarioId,
+            mutatedApplication: finalApp,
+          });
+          return finalApp;
+        });
         setPrototypeScenarioId(resolvedScenarioId);
         setHomeScenario(resolvedHomeScenario);
         setAppSubmissionState(resolvedSubState);
-        savePersistedDemoSession({
-          scenarioId: resolvedScenarioId,
-          mutatedApplication: hydratedApp,
-        });
       })
-      .catch(() => {});
+      .catch(() => {
+        setSharedApplication((prev) => {
+          const cachedProfile = loadPersistedStudentProfile({
+            studentId: studentIdentity.studentId,
+            email: prev.student?.email,
+          });
+          const mergedSnapshot = mergeStudentProfileSnapshots(
+            prev.applicantProfileSnapshot,
+            cachedProfile
+          );
+          const nextPrev: StudentApplicationData = {
+            ...prev,
+            applicantProfileSnapshot: mergedSnapshot,
+            student: {
+              ...prev.student,
+              fullName: mergedSnapshot.fullName || prev.student.fullName,
+              university: mergedSnapshot.institutionName || prev.student.university,
+              class: mergedSnapshot.className || prev.student.class,
+              email: mergedSnapshot.email || prev.student.email,
+            },
+          };
+          const localDecls =
+            nextPrev.student?.studentId === studentIdentity.studentId &&
+            !isDemoFixtureApplication(nextPrev, studentIdentity.studentId)
+              ? countAppDeclarations(nextPrev)
+              : 0;
+          if (localDecls > 0 && nextPrev.applicationId) {
+            apiRequest(
+              `/api/v2/portal/individual/applications/${encodeURIComponent(nextPrev.applicationId)}/student-view`,
+              {
+                method: 'PUT',
+                body: { application: nextPrev, isUserMutation: true },
+              }
+            ).catch(() => {});
+          }
+          return nextPrev;
+        });
+      });
     return () => {
       cancelled = true;
     };
-  }, [viewMode, studentIdentity.studentId]);
+  }, [viewMode, studentIdentity.studentId, studentIdentity.fullName, studentIdentity.university]);
 
   const activeStoreState: CoherentStudentStoreState = useMemo(() => {
     const base = HOME_COHERENT_SCENARIOS[homeScenario];

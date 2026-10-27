@@ -183,26 +183,84 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
   const [saveError, setSaveError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Initialize or reset form state
+  const draftStorageKey = reqId
+    ? `5tot_decl_modal_draft_${reqId}_${declaration?.id || 'new'}`
+    : '';
+
+  const clearModalDraft = () => {
+    if (!draftStorageKey || typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.removeItem(draftStorageKey);
+    } catch {
+      // ignore
+    }
+  };
+
+  // Initialize or reset form state (restoring any unsaved draft from sessionStorage)
   useEffect(() => {
     if (!isOpen) return;
 
-    if (declaration) {
-      setContent(declaration.value || '');
-      setAttachedFiles(declaration.evidenceFiles || []);
-    } else {
-      setContent('');
-      setAttachedFiles([]);
+    let restoredFromDraft = false;
+    if (draftStorageKey && typeof window !== 'undefined') {
+      try {
+        const rawDraft = window.sessionStorage.getItem(draftStorageKey);
+        if (rawDraft) {
+          const parsed = JSON.parse(rawDraft) as {
+            content?: string;
+            attachedFiles?: ApplicationEvidence[];
+          };
+          if (
+            typeof parsed.content === 'string' ||
+            Array.isArray(parsed.attachedFiles)
+          ) {
+            setContent(parsed.content ?? (declaration?.value || ''));
+            setAttachedFiles(
+              Array.isArray(parsed.attachedFiles)
+                ? parsed.attachedFiles
+                : declaration?.evidenceFiles || []
+            );
+            setIsDirty(true);
+            restoredFromDraft = true;
+          }
+        }
+      } catch {
+        // ignore
+      }
     }
 
-    setIsDirty(false);
+    if (!restoredFromDraft) {
+      if (declaration) {
+        setContent(declaration.value || '');
+        setAttachedFiles(declaration.evidenceFiles || []);
+      } else {
+        setContent('');
+        setAttachedFiles([]);
+      }
+      setIsDirty(false);
+    }
+
     setDuplicateNotice(null);
     setSaveError(null);
     setValidationError(null);
     setShowLibraryPicker(false);
     setLibraryFilter('all');
     setShowDiscardConfirm(false);
-  }, [isOpen, declaration, reqId]);
+  }, [isOpen, declaration, reqId, draftStorageKey]);
+
+  // Auto-save modal draft to sessionStorage whenever user edits content or attaches files
+  useEffect(() => {
+    if (!isOpen || !isDirty || !draftStorageKey || typeof window === 'undefined') {
+      return;
+    }
+    try {
+      window.sessionStorage.setItem(
+        draftStorageKey,
+        JSON.stringify({ content, attachedFiles })
+      );
+    } catch {
+      // ignore
+    }
+  }, [isOpen, isDirty, draftStorageKey, content, attachedFiles]);
 
   // Handle escape key
   useEffect(() => {
@@ -221,6 +279,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
+      clearModalDraft();
       onClose();
     }
   };
@@ -321,6 +380,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
 
   const handleDeleteCurrentDeclaration = () => {
     if (!declaration || !onDeleteDeclaration) return;
+    clearModalDraft();
     onDeleteDeclaration(requirement.id, declaration.id);
     onClose();
   };
@@ -342,6 +402,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
     const finalValue = content.trim();
 
     const metadataObj: Record<string, string> = {
+      ...(declaration?.metadata || {}),
       criterionId: criterion.id,
       requirementId: reqId,
     };
@@ -355,6 +416,8 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
         title: finalValue || requirement.title,
       });
     }
+
+    clearModalDraft();
 
     onSaveDeclaration(
       requirement.id,
@@ -725,7 +788,10 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
                   type="button"
                   variant="danger"
                   size="sm"
-                  onClick={onClose}
+                  onClick={() => {
+                    clearModalDraft();
+                    onClose();
+                  }}
                 >
                   Hủy thay đổi
                 </Button>

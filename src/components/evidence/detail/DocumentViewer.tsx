@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import {
   getEvidenceBlobUrlByIdOrName,
+  isLiveSessionBlobUrl,
   saveEvidenceFile,
 } from '../../../staff/demoEvidenceStorage';
 
@@ -96,7 +97,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const handleResetZoom = () => setZoomLevel(100);
 
   const isPdf = fileName.toLowerCase().endsWith('.pdf') || fileType === 'pdf';
-  const candidateUrl = resolvedBlobUrl || (!blobLoadFailed ? fileUrl : undefined);
+  const usableExplicitUrl =
+    fileUrl && (!fileUrl.startsWith('blob:') || isLiveSessionBlobUrl(fileUrl))
+      ? fileUrl
+      : undefined;
+  const candidateUrl =
+    resolvedBlobUrl || (!blobLoadFailed ? usableExplicitUrl : undefined);
   const effectiveUrl = resolvePreviewUrl(fileName, fileType, candidateUrl, fileId);
   const isMissingLocalBinary = !effectiveUrl && !isLoading && !isFailed;
 

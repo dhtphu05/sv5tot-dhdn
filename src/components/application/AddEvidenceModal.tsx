@@ -147,20 +147,25 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
 
     const newItems = unique.map((f, i) => {
       const name = f.name;
-      const ext = name.split('.').pop()?.toLowerCase() || '';
+      const ext = name.split('.').pop()?.toLowerCase() || 'pdf';
       const sizeMb = (f.size / (1024 * 1024)).toFixed(1);
       const sizeStr =
         f.size > 1024 * 1024 ? `${sizeMb} MB` : `${Math.max(1, Math.round(f.size / 1024))} KB`;
+      const evId = `ev-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`;
       const objectUrl =
         typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
           ? URL.createObjectURL(f)
           : undefined;
 
+      saveEvidenceFile(evId, f, name, ext, {
+        size: sizeStr,
+      }).catch(() => {});
+
       return {
-        id: `upl-${Date.now()}-${i}`,
+        id: evId,
         name,
         size: sizeStr,
-        fileType: ext || 'pdf',
+        fileType: ext,
         url: objectUrl,
         rawFile: f,
       };
@@ -215,7 +220,7 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
 
     if (activeTab === 'upload') {
       uploadedFiles.forEach((f) => {
-        const evId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+        const evId = f.id || `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
         if (f.rawFile) {
           saveEvidenceFile(evId, f.rawFile, f.name, f.fileType, {
             size: f.size,

@@ -277,7 +277,16 @@ export function useStudentPortalWorkflow({
   const handleApplicationChange = useCallback(
     (nextApp: StudentApplicationData) => {
       setSharedApplication(nextApp);
-      savePersistedDemoSession({ mutatedApplication: nextApp });
+      if (prototypeScenarioId === 'new_student') {
+        setPrototypeScenarioId('draft');
+        setHomeScenario('state_b_draft_clean');
+        savePersistedDemoSession({
+          scenarioId: 'draft',
+          mutatedApplication: nextApp,
+        });
+      } else {
+        savePersistedDemoSession({ mutatedApplication: nextApp });
+      }
       const targetAppId = nextApp.applicationId;
       if (targetAppId) {
         setOfficerStudentAppMap((prev) => {
@@ -289,22 +298,23 @@ export function useStudentPortalWorkflow({
           return nextMap;
         });
       }
-      if (
-        isBackendMode() &&
-        targetAppId &&
-        nextApp.student?.studentId &&
-        prototypeScenarioId !== 'new_student'
-      ) {
+      if (isBackendMode() && targetAppId && nextApp.student?.studentId) {
         apiRequest(
           `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/student-view`,
           {
             method: 'PUT',
-            body: { application: nextApp },
+            body: { application: nextApp, isUserMutation: true },
           }
         ).catch(() => {});
       }
     },
-    [setSharedApplication, setOfficerStudentAppMap, prototypeScenarioId]
+    [
+      setSharedApplication,
+      setOfficerStudentAppMap,
+      prototypeScenarioId,
+      setPrototypeScenarioId,
+      setHomeScenario,
+    ]
   );
 
   const handleApplicationSubmitted = useCallback(

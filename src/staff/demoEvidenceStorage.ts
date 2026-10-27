@@ -48,6 +48,18 @@ const activeBlobUrls = new Map<string, string>();
 // Maps client-side evidence ID to Backend V2 R2 evidenceObjectId when uploaded in BACKEND mode
 const remoteEvidenceIdMap = new Map<string, string>();
 
+/**
+ * Checks whether a blob: URL was created during the current live browser session.
+ * Stale blob: URLs persisted from previous page loads or other browsers are dead and must be ignored.
+ */
+export function isLiveSessionBlobUrl(url?: string): boolean {
+  if (!url || !url.startsWith('blob:')) return false;
+  for (const activeUrl of activeBlobUrls.values()) {
+    if (activeUrl === url) return true;
+  }
+  return false;
+}
+
 function isIndexedDBAvailable(): boolean {
   return typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined';
 }
@@ -98,9 +110,30 @@ function base64ToUint8(base64: string): Uint8Array {
   return new Uint8Array(Buffer.from(clean, 'base64'));
 }
 
+async function persistRecordLocally(record: StoredEvidenceRecord): Promise<void> {
+  memoryFallbackStore.set(record.id, record);
+  if (!isIndexedDBAvailable()) {
+    return;
+  }
+  try {
+    const db = await openDatabase();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.put(record);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+      tx.oncomplete = () => db.close();
+    });
+  } catch (err) {
+    console.warn('Failed to store in IndexedDB, saved to memory fallback:', err);
+  }
+}
+
 /**
  * Stores a binary evidence file persistently (up to 100MB).
- * When running in BACKEND mode, also executes the 3-step Cloudflare R2 Presigned URL upload pipeline.
+ * Always saves to local IndexedDB + memory fallback immediately, and when running in BACKEND mode,
+ * indexes in `/api/v2/portal/evidence/upload` AND executes the Cloudflare R2 Presigned URL upload pipeline.
  */
 export async function saveEvidenceFile(
   id: string,
@@ -122,35 +155,48 @@ export async function saveEvidenceFile(
     );
   }
 
+  const resolvedMime = resolveCanonicalMimeType(fileName, fileType);
+  if (isBackendMode()) {
+    validateClientEvidenceFile(fileName, resolvedMime, sizeBytes);
+  }
+
   const sizeText =
     meta?.size ||
     (sizeBytes >= 1024 * 1024
       ? `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
       : `${Math.max(1, Math.round(sizeBytes / 1024))} KB`);
 
-  let remoteEvidenceId: string | undefined;
+  if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+    try {
+      const immediateUrl = URL.createObjectURL(fileOrBlob);
+      activeBlobUrls.set(id, immediateUrl);
+    } catch {
+      // ignore
+    }
+  }
+
+  const record: StoredEvidenceRecord = {
+    id,
+    name: fileName,
+    fileType: fileType.toLowerCase(),
+    size: sizeText,
+    sizeBytes,
+    blob: fileOrBlob,
+    uploadedAt: new Date().toISOString(),
+    reqId: meta?.reqId,
+    applicationId: meta?.applicationId,
+  };
+
+  // Persist locally first so page reload (F5) never loses the binary even if network is slow
+  await persistRecordLocally(record);
 
   if (isBackendMode()) {
-    const resolvedMime = resolveCanonicalMimeType(fileName, fileType);
-    validateClientEvidenceFile(fileName, resolvedMime, sizeBytes);
     const ownerTrack =
       meta?.ownerTrack ||
       (meta?.applicationId?.startsWith('COL-') ? 'COLLECTIVE' : 'INDIVIDUAL');
-    const r2Result = await executeR2EvidenceUpload({
-      track: ownerTrack,
-      applicationId: meta?.applicationId || 'APP-2026-DN-00142',
-      requirementOrCriterionId: meta?.reqId || 'general',
-      fileName,
-      mimeType: resolvedMime,
-      sizeBytes,
-      binary: fileOrBlob,
-      onStateChange: meta?.onStateChange,
-    });
-    remoteEvidenceId = r2Result.id;
-    remoteEvidenceIdMap.set(id, remoteEvidenceId);
 
-    // Also index in portalState.evidenceIndex by client evidence ID so officers on any browser can preview
-    if (sizeBytes <= 15 * 1024 * 1024) {
+    // 1. Index in portalState.evidenceIndex by client evidence ID so any browser/officer can preview
+    if (sizeBytes <= 25 * 1024 * 1024) {
       fileOrBlob
         .arrayBuffer()
         .then((ab) => {
@@ -170,51 +216,31 @@ export async function saveEvidenceFile(
           });
         })
         .catch(() => {
-          // Non-fatal: R2 upload already succeeded
+          // Non-fatal fallback
         });
     }
-  }
 
-  const record: StoredEvidenceRecord = {
-    id,
-    remoteEvidenceId,
-    name: fileName,
-    fileType: fileType.toLowerCase(),
-    size: sizeText,
-    sizeBytes,
-    blob: fileOrBlob,
-    uploadedAt: new Date().toISOString(),
-    reqId: meta?.reqId,
-    applicationId: meta?.applicationId,
-  };
-
-  if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+    // 2. Execute 3-step R2 presigned upload
     try {
-      const immediateUrl = URL.createObjectURL(fileOrBlob);
-      activeBlobUrls.set(id, immediateUrl);
-    } catch {
-      // ignore
+      const r2Result = await executeR2EvidenceUpload({
+        track: ownerTrack,
+        applicationId: meta?.applicationId || 'APP-2026-DN-00142',
+        requirementOrCriterionId: meta?.reqId || 'general',
+        fileName,
+        mimeType: resolvedMime,
+        sizeBytes,
+        binary: fileOrBlob,
+        onStateChange: meta?.onStateChange,
+      });
+      record.remoteEvidenceId = r2Result.id;
+      remoteEvidenceIdMap.set(id, r2Result.id);
+      await persistRecordLocally(record);
+    } catch (err) {
+      if (meta?.onStateChange) {
+        throw err;
+      }
+      console.warn('R2 presigned upload fallback to portal evidence store:', err);
     }
-  }
-
-  if (!isIndexedDBAvailable()) {
-    memoryFallbackStore.set(id, record);
-    return;
-  }
-
-  try {
-    const db = await openDatabase();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.put(record);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-      tx.oncomplete = () => db.close();
-    });
-  } catch (err) {
-    console.warn('Failed to store in IndexedDB, saving to memory fallback:', err);
-    memoryFallbackStore.set(id, record);
   }
 }
 
@@ -332,6 +358,15 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
         const mime = resolveCanonicalMimeType(evData.name || 'file.pdf', evData.fileType);
         const bytes = base64ToUint8(evData.base64Content);
         const blob = new Blob([bytes as unknown as BlobPart], { type: mime });
+        persistRecordLocally({
+          id: evData.id || id,
+          name: evData.name || 'file.pdf',
+          fileType: (evData.fileType || 'pdf').toLowerCase(),
+          size: `${Math.max(1, Math.round(bytes.byteLength / 1024))} KB`,
+          sizeBytes: bytes.byteLength,
+          blob,
+          uploadedAt: new Date().toISOString(),
+        }).catch(() => {});
         if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
           const url = URL.createObjectURL(blob);
           activeBlobUrls.set(id, url);
@@ -350,7 +385,7 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
 }
 
 /**
- * Resolves a live browser Blob URL by evidence ID first, falling back to filename lookup in IndexedDB.
+ * Resolves a live browser Blob URL by evidence ID first, falling back to filename lookup in IndexedDB and Backend.
  */
 export async function getEvidenceBlobUrlByIdOrName(
   fileId?: string,
@@ -371,6 +406,10 @@ export async function getEvidenceBlobUrlByIdOrName(
         activeBlobUrls.set(byName.id, url);
         return url;
       }
+    }
+    if (isBackendMode() && fileName !== fileId) {
+      const byRemoteName = await getEvidenceBlobUrl(fileName);
+      if (byRemoteName) return byRemoteName;
     }
   }
   return null;

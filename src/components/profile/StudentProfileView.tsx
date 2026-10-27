@@ -56,6 +56,7 @@ import {
 
 export interface StudentProfileViewProps {
   onProfileUpdated?: (updated: StudentProfileDto) => void;
+  initialProfileSnapshot?: StudentProfileDto | null;
   fallbackStudent?: {
     fullName?: string;
     studentId?: string;
@@ -75,6 +76,7 @@ export const CANONICAL_INSTITUTION_OPTIONS = [
   { id: 'inst-vku', name: 'Trường Đại học CNTT & Truyền thông Việt - Hàn - Đại học Đà Nẵng' },
   { id: 'inst-smp', name: 'Trường Y Dược - Đại học Đà Nẵng' },
   { id: 'inst-vnuk', name: 'Viện Nghiên cứu & Đào tạo Việt - Anh - Đại học Đà Nẵng' },
+  { id: 'inst-kontum', name: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum' },
   { id: 'inst-dtu', name: 'Trường Đại học Duy Tân' },
   { id: 'inst-donga', name: 'Trường Đại học Đông Á' },
   { id: 'inst-dau', name: 'Trường Đại học Kiến trúc Đà Nẵng' },
@@ -83,8 +85,126 @@ export const CANONICAL_INSTITUTION_OPTIONS = [
   { id: 'inst-fpt', name: 'Trường Đại học FPT phân hiệu Đà Nẵng' },
 ];
 
+const STUDENT_PROFILE_CACHE_PREFIX = '5tot_dhdn_student_profile_v1_';
+
+export function normalizeDateOfBirthValue(dob?: string | null): string {
+  if (!dob) return '';
+  const trimmed = String(dob).trim();
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(trimmed)) {
+    const [y, m, d] = trimmed.split('-');
+    return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+  }
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split('/');
+    return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+  }
+  return trimmed;
+}
+
+export function mergeStudentProfileSnapshots(
+  base?: Partial<StudentProfileDto> | null,
+  override?: Partial<StudentProfileDto> | null
+): StudentProfileDto {
+  const b = (base || {}) as Record<string, any>;
+  const o = (override || {}) as Record<string, any>;
+  const pickStr = (key: string, fallback = '') => {
+    const ov = o[key];
+    if (typeof ov === 'string' && ov.trim() !== '' && ov.trim() !== '—') {
+      return ov.trim();
+    }
+    const bv = b[key];
+    if (typeof bv === 'string' && bv.trim() !== '' && bv.trim() !== '—') {
+      return bv.trim();
+    }
+    return fallback;
+  };
+  const pickNum = (key: string, fallback = 0) => {
+    const ov = Number(o[key]);
+    if (!Number.isNaN(ov) && ov > 0) return ov;
+    const bv = Number(b[key]);
+    if (!Number.isNaN(bv) && bv > 0) return bv;
+    return fallback;
+  };
+  const instId = pickStr('institutionId', 'inst-dut');
+  const matchedInst = CANONICAL_INSTITUTION_OPTIONS.find((opt) => opt.id === instId);
+  return {
+    fullName: pickStr('fullName'),
+    gender: pickStr('gender') as any,
+    dateOfBirth: normalizeDateOfBirthValue(pickStr('dateOfBirth')),
+    ethnicity: pickStr('ethnicity'),
+    academicYearNumber: pickNum('academicYearNumber', 0),
+    educationLevel: pickStr('educationLevel') as any,
+    className: pickStr('className'),
+    homeProvince: pickStr('homeProvince'),
+    institutionId: instId,
+    institutionName:
+      pickStr('institutionName') ||
+      matchedInst?.name ||
+      'Trường Đại học Bách khoa - Đại học Đà Nẵng',
+    unionPosition: pickStr('unionPosition'),
+    politicalStatus: pickStr('politicalStatus') as any,
+    phoneNumber: pickStr('phoneNumber'),
+    email: pickStr('email'),
+  };
+}
+
+export function loadPersistedStudentProfile(keys?: {
+  studentId?: string;
+  email?: string;
+}): StudentProfileDto | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const candidateKeys: string[] = [];
+    if (keys?.studentId?.trim()) {
+      candidateKeys.push(`${STUDENT_PROFILE_CACHE_PREFIX}id_${keys.studentId.trim().toUpperCase()}`);
+    }
+    if (keys?.email?.trim()) {
+      candidateKeys.push(`${STUDENT_PROFILE_CACHE_PREFIX}email_${keys.email.trim().toLowerCase()}`);
+    }
+    for (const k of candidateKeys) {
+      const raw = window.localStorage.getItem(k);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return mergeStudentProfileSnapshots(null, parsed);
+        }
+      }
+    }
+  } catch {
+    // Ignore storage read errors
+  }
+  return null;
+}
+
+export function savePersistedStudentProfile(
+  profile: StudentProfileDto,
+  keys?: { studentId?: string; email?: string }
+): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const normalized = mergeStudentProfileSnapshots(null, profile);
+    const serialized = JSON.stringify(normalized);
+    if (keys?.studentId?.trim()) {
+      window.localStorage.setItem(
+        `${STUDENT_PROFILE_CACHE_PREFIX}id_${keys.studentId.trim().toUpperCase()}`,
+        serialized
+      );
+    }
+    const effectiveEmail = (keys?.email || normalized.email || '').trim().toLowerCase();
+    if (effectiveEmail) {
+      window.localStorage.setItem(
+        `${STUDENT_PROFILE_CACHE_PREFIX}email_${effectiveEmail}`,
+        serialized
+      );
+    }
+  } catch {
+    // Ignore storage write errors
+  }
+}
+
 function buildFallbackStudentProfile(
-  fallbackStudent?: StudentProfileViewProps['fallbackStudent']
+  fallbackStudent?: StudentProfileViewProps['fallbackStudent'],
+  initialProfileSnapshot?: StudentProfileDto | null
 ): StudentProfileDto {
   if (
     !isBackendMode() &&
@@ -99,7 +219,7 @@ function buildFallbackStudentProfile(
         (opt.name.toLowerCase().includes(fallbackStudent.university.toLowerCase()) ||
           fallbackStudent.university.toLowerCase().includes(opt.name.split(' - ')[0].toLowerCase())))
   );
-  return {
+  const baseFallback: StudentProfileDto = {
     fullName: fallbackStudent?.fullName || '',
     gender: '' as any,
     dateOfBirth: '',
@@ -118,21 +238,33 @@ function buildFallbackStudentProfile(
     phoneNumber: '',
     email: fallbackStudent?.email || '',
   };
+
+  const cached = loadPersistedStudentProfile({
+    studentId: fallbackStudent?.studentId,
+    email: fallbackStudent?.email,
+  });
+
+  return mergeStudentProfileSnapshots(
+    mergeStudentProfileSnapshots(baseFallback, cached),
+    initialProfileSnapshot
+  );
 }
 
 export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
   onProfileUpdated,
+  initialProfileSnapshot,
   fallbackStudent,
   className = '',
 }) => {
   const defaultResolvedProfile = useMemo(
-    () => buildFallbackStudentProfile(fallbackStudent),
+    () => buildFallbackStudentProfile(fallbackStudent, initialProfileSnapshot),
     [
       fallbackStudent?.fullName,
       fallbackStudent?.studentId,
       fallbackStudent?.university,
       fallbackStudent?.email,
       fallbackStudent?.institutionId,
+      initialProfileSnapshot,
     ]
   );
   const [profile, setProfile] = useState<StudentProfileDto>(defaultResolvedProfile);
@@ -154,9 +286,10 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
     return JSON.stringify(profile) !== JSON.stringify(initialProfile);
   }, [profile, initialProfile]);
 
-  // Load profile from domain services on mount
+  // Load profile from domain services on mount or when student identity changes
   useEffect(() => {
     let isMounted = true;
+    const seedProfile = buildFallbackStudentProfile(fallbackStudent, initialProfileSnapshot);
     const fetchProfile = async () => {
       if (!hasActiveAuthSession() && !IS_DEMO_MODE_ENABLED) {
         notifySessionExpired();
@@ -168,11 +301,16 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
         const res = await services.profile.getProfile();
         if (isMounted && res?.profile) {
           const isStaleDefaultForOtherUser =
-            Boolean(fallbackStudent?.fullName) &&
-            res.profile.fullName !== fallbackStudent!.fullName;
+            Boolean(fallbackStudent?.email) &&
+            Boolean(res.profile.email) &&
+            res.profile.email.toLowerCase() !== fallbackStudent!.email!.toLowerCase();
           const resolvedProfile = isStaleDefaultForOtherUser
-            ? defaultResolvedProfile
-            : res.profile;
+            ? seedProfile
+            : mergeStudentProfileSnapshots(seedProfile, res.profile);
+          savePersistedStudentProfile(resolvedProfile, {
+            studentId: fallbackStudent?.studentId,
+            email: fallbackStudent?.email || resolvedProfile.email,
+          });
           setProfile(resolvedProfile);
           setInitialProfile(resolvedProfile);
           setCompleteness(evaluateProfileCompleteness(resolvedProfile));
@@ -180,9 +318,9 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       } catch (err: any) {
         console.warn('Could not load student profile via domain service, using student identity fallback:', err);
         if (isMounted) {
-          setProfile(defaultResolvedProfile);
-          setInitialProfile(defaultResolvedProfile);
-          setCompleteness(evaluateProfileCompleteness(defaultResolvedProfile));
+          setProfile(seedProfile);
+          setInitialProfile(seedProfile);
+          setCompleteness(evaluateProfileCompleteness(seedProfile));
         }
       } finally {
         if (isMounted) setIsLoading(false);
@@ -192,7 +330,8 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [defaultResolvedProfile, fallbackStudent?.fullName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fallbackStudent?.studentId, fallbackStudent?.email]);
 
   // Update completeness real-time as user types
   useEffect(() => {
@@ -206,7 +345,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       return;
     }
     const cleanPhone = profile.phoneNumber.trim().replace(/[\s.-]/g, '');
-    const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
+    const phoneRegex = /^(03|05|07|08|09|02)\d{8,9}$/;
     if (!phoneRegex.test(cleanPhone)) {
       setPhoneError('Số điện thoại không hợp lệ (cần 10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)');
     } else {
@@ -220,7 +359,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       setDobError(null);
       return;
     }
-    const dob = profile.dateOfBirth.trim();
+    const dob = normalizeDateOfBirthValue(profile.dateOfBirth);
     const dobRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
     const match = dob.match(dobRegex);
     if (!match) {
@@ -271,35 +410,48 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       return;
     }
 
+    const normalizedDob = normalizeDateOfBirthValue(profile.dateOfBirth);
+    const parsedAcademicYear = Number(profile.academicYearNumber || 0);
+    const input: UpdateStudentProfileInput = {
+      fullName: profile.fullName?.trim(),
+      gender: profile.gender ? profile.gender : undefined,
+      dateOfBirth: normalizedDob,
+      ethnicity: profile.ethnicity?.trim(),
+      academicYearNumber: parsedAcademicYear >= 1 && parsedAcademicYear <= 7 ? parsedAcademicYear : undefined,
+      educationLevel: profile.educationLevel ? profile.educationLevel : undefined,
+      className: profile.className?.trim(),
+      homeProvince: profile.homeProvince?.trim(),
+      institutionId: profile.institutionId,
+      institutionName: profile.institutionName,
+      unionPosition: profile.unionPosition?.trim(),
+      politicalStatus: profile.politicalStatus ? profile.politicalStatus : undefined,
+      phoneNumber: profile.phoneNumber?.trim(),
+    };
+
+    const optimisticProfile: StudentProfileDto = mergeStudentProfileSnapshots(profile, {
+      ...input,
+      email: profile.email || fallbackStudent?.email || '',
+    });
+
     try {
       setIsSaving(true);
       setErrorMsg(null);
       const services = resolveDomainServices();
-      const input: UpdateStudentProfileInput = {
-        fullName: profile.fullName?.trim(),
-        gender: profile.gender,
-        dateOfBirth: profile.dateOfBirth?.trim(),
-        ethnicity: profile.ethnicity?.trim(),
-        academicYearNumber: Number(profile.academicYearNumber),
-        educationLevel: profile.educationLevel,
-        className: profile.className?.trim(),
-        homeProvince: profile.homeProvince?.trim(),
-        institutionId: profile.institutionId,
-        institutionName: profile.institutionName,
-        unionPosition: profile.unionPosition?.trim(),
-        politicalStatus: profile.politicalStatus,
-        phoneNumber: profile.phoneNumber?.trim(),
-      };
-
       const res = await services.profile.updateProfile(input);
-      if (res?.profile) {
-        setProfile(res.profile);
-        setInitialProfile(res.profile);
-        setCompleteness(res.completeness);
-        setSaveSuccessMsg('Đã lưu thông tin hồ sơ cá nhân thành công!');
-        if (onProfileUpdated) {
-          onProfileUpdated(res.profile);
-        }
+      const savedProfile = res?.profile
+        ? mergeStudentProfileSnapshots(optimisticProfile, res.profile)
+        : optimisticProfile;
+
+      savePersistedStudentProfile(savedProfile, {
+        studentId: fallbackStudent?.studentId,
+        email: fallbackStudent?.email || savedProfile.email,
+      });
+      setProfile(savedProfile);
+      setInitialProfile(savedProfile);
+      setCompleteness(evaluateProfileCompleteness(savedProfile));
+      setSaveSuccessMsg('Đã lưu thông tin hồ sơ cá nhân thành công!');
+      if (onProfileUpdated) {
+        onProfileUpdated(savedProfile);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Không thể lưu hồ sơ cá nhân lúc này. Vui lòng thử lại.');

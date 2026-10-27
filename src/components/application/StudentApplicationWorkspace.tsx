@@ -5,7 +5,7 @@
  * StudentApplicationBodySection, and StudentApplicationInspectorsAndModals.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   INITIAL_STUDENT_APPLICATION,
   StudentApplicationData,
@@ -46,6 +46,7 @@ import { StudentApplicationTopBanners } from '../../widgets/student-application/
 import { StudentApplicationBodySection } from '../../widgets/student-application/StudentApplicationBodySection';
 import { StudentApplicationInspectorsAndModals } from '../../widgets/student-application/StudentApplicationInspectorsAndModals';
 import { isBackendMode } from '../../shared/config/executionMode';
+import { mergeStudentProfileSnapshots } from '../profile/StudentProfileView';
 
 export interface StudentApplicationWorkspaceProps {
   hasApplication?: boolean;
@@ -186,6 +187,13 @@ export const StudentApplicationWorkspace: React.FC<
     useState<StudentApplicationData>(() => initialData);
   const hasLocalMutationRef = useRef(false);
 
+  const setApplicationWithMutation = useCallback<
+    React.Dispatch<React.SetStateAction<StudentApplicationData>>
+  >((updater) => {
+    hasLocalMutationRef.current = true;
+    setApplication(updater);
+  }, []);
+
   useEffect(() => {
     setAdvisories(isDemoPersona ? DEFAULT_ADVISORIES : []);
     if (!isDemoPersona && initialSubmissionState !== 'supplement_required') {
@@ -225,8 +233,31 @@ export const StudentApplicationWorkspace: React.FC<
         return initialData;
       }
 
-      if (!hasLocalMutationRef.current && prevDeclCount === 0 && nextDeclCount > 0) {
-        return initialData;
+      const mergedProfileSnapshot =
+        prev.applicantProfileSnapshot || initialData.applicantProfileSnapshot
+          ? mergeStudentProfileSnapshots(
+              prev.applicantProfileSnapshot,
+              initialData.applicantProfileSnapshot
+            )
+          : initialData.applicantProfileSnapshot ?? prev.applicantProfileSnapshot;
+
+      if (
+        !hasLocalMutationRef.current &&
+        nextDeclCount >= prevDeclCount &&
+        nextDeclCount > 0
+      ) {
+        return {
+          ...initialData,
+          applicantProfileSnapshot: mergedProfileSnapshot,
+          student: {
+            ...initialData.student,
+            class:
+              mergedProfileSnapshot?.className ||
+              initialData.student?.class ||
+              prev.student?.class ||
+              '',
+          },
+        };
       }
       return {
         ...prev,
@@ -241,9 +272,15 @@ export const StudentApplicationWorkspace: React.FC<
         councilFeedback: initialData.councilFeedback ?? prev.councilFeedback,
         decisionCode: initialData.decisionCode ?? prev.decisionCode,
         awardedAt: initialData.awardedAt ?? prev.awardedAt,
-        student: initialData.student,
-        applicantProfileSnapshot:
-          initialData.applicantProfileSnapshot ?? prev.applicantProfileSnapshot,
+        student: {
+          ...initialData.student,
+          class:
+            mergedProfileSnapshot?.className ||
+            initialData.student?.class ||
+            prev.student?.class ||
+            '',
+        },
+        applicantProfileSnapshot: mergedProfileSnapshot,
         trainingInstitutionName:
           initialData.trainingInstitutionName || prev.trainingInstitutionName,
       };
@@ -319,7 +356,7 @@ export const StudentApplicationWorkspace: React.FC<
     initialSubmissionState,
     submissionState,
     setSubmissionState,
-    setApplication,
+    setApplication: setApplicationWithMutation,
     setActivities,
     setExpandedCriteria,
     setExpandedRowId,
@@ -364,7 +401,7 @@ export const StudentApplicationWorkspace: React.FC<
   } = useStudentDeclarationAndEvidenceModals({
     initialData,
     application,
-    setApplication,
+    setApplication: setApplicationWithMutation,
     submissionState,
     activeEvidenceForInspect,
     setActiveEvidenceForInspect,
@@ -523,6 +560,7 @@ export const StudentApplicationWorkspace: React.FC<
   };
 
   useEffect(() => {
+    if (!hasLocalMutationRef.current) return;
     onApplicationChange?.(application);
   }, [application, onApplicationChange]);
 
@@ -540,7 +578,7 @@ export const StudentApplicationWorkspace: React.FC<
       schoolPreliminaryStatus: 'pending_intake',
       submittedAt: application.submittedAt || new Date().toLocaleDateString('vi-VN'),
     };
-    setApplication(submittedApp);
+    setApplicationWithMutation(submittedApp);
     setActivities(HERO_ACTIVITIES);
 
     onApplicationSubmitted?.(submittedApp);

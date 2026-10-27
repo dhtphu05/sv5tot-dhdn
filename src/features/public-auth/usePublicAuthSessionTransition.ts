@@ -38,6 +38,11 @@ import { AuthSessionPayload } from '../../entities/services/contracts';
 import { isBackendMode } from '../../shared/config/executionMode';
 import { resolveDomainServices } from '../../entities/services/modeResolver';
 import {
+  mergeStudentProfileSnapshots,
+  loadPersistedStudentProfile,
+  savePersistedStudentProfile,
+} from '../../components/profile/StudentProfileView';
+import {
   hasActiveAuthSession,
   setApiActorContext,
 } from '../../shared/api/httpClient';
@@ -319,13 +324,21 @@ export function usePublicAuthSessionTransition({
           university: nextUniversity,
         });
 
+        const cachedProfile = loadPersistedStudentProfile({
+          studentId: nextStudentId,
+          email: nextEmail,
+        });
         const cleanInitial = buildCleanStudentApplication({
           fullName: nextFullName,
           studentId: nextStudentId,
           university: nextUniversity,
           email: nextEmail,
           institutionId: nextInstitutionId,
+          existingProfileSnapshot: cachedProfile,
         });
+        if (cachedProfile?.className) {
+          cleanInitial.student.class = cachedProfile.className;
+        }
 
         setPrototypeScenarioId('new_student');
         setHomeScenario('state_a_no_app');
@@ -340,81 +353,158 @@ export function usePublicAuthSessionTransition({
 
         if (isBackendMode() && nextStudentId) {
           const targetAppId = `APP-2026-DN-${nextStudentId}`;
-          resolveDomainServices()
-            .individual.getStudentApplication(targetAppId)
+          const services = resolveDomainServices();
+
+          services.profile
+            .getProfile()
+            .then((profileRes) => {
+              if (!profileRes?.profile) return;
+              setSharedApplication((prev) => {
+                const mergedSnapshot = mergeStudentProfileSnapshots(
+                  mergeStudentProfileSnapshots(
+                    cleanInitial.applicantProfileSnapshot,
+                    prev.applicantProfileSnapshot
+                  ),
+                  profileRes.profile
+                );
+                savePersistedStudentProfile(mergedSnapshot, {
+                  studentId: nextStudentId,
+                  email: nextEmail,
+                });
+                const nextApp: StudentApplicationData = {
+                  ...prev,
+                  applicantProfileSnapshot: mergedSnapshot,
+                  student: {
+                    ...prev.student,
+                    fullName: mergedSnapshot.fullName || prev.student.fullName,
+                    university:
+                      mergedSnapshot.institutionName || prev.student.university,
+                    class: mergedSnapshot.className || prev.student.class,
+                    email: mergedSnapshot.email || prev.student.email,
+                  },
+                  trainingInstitutionName:
+                    mergedSnapshot.institutionName ||
+                    prev.trainingInstitutionName,
+                };
+                savePersistedDemoSession({ mutatedApplication: nextApp });
+                return nextApp;
+              });
+            })
+            .catch(() => {});
+
+          services.individual
+            .getStudentApplication(targetAppId)
             .then((remoteApp) => {
               if (!remoteApp || !remoteApp.applicationId) return;
-              const hydrated: StudentApplicationData = {
-                ...cleanInitial,
-                ...remoteApp,
-                criteria: buildCriteriaFromDefinitions(
-                  remoteApp.criteria as any
-                ),
-                applicantProfileSnapshot:
-                  remoteApp.applicantProfileSnapshot ||
-                  cleanInitial.applicantProfileSnapshot,
-                student: {
-                  ...cleanInitial.student,
-                  ...(remoteApp.student || {}),
-                },
-              };
-              const st = hydrated.status;
-              const isSubmitted =
-                st === 'under_review' ||
-                (st as string) === 'submitted' ||
-                remoteApp.schoolPreliminaryStatus === 'pending_intake' ||
-                remoteApp.schoolPreliminaryStatus === 'under_review' ||
-                remoteApp.schoolPreliminaryStatus === 'recommended_forwarding' ||
-                remoteApp.schoolPreliminaryStatus === 'forwarded_to_city';
-              const nextScId: PrototypeScenarioId =
-                st === 'supplement_required'
-                  ? 'supplement_required'
-                  : st === 'supplement_sent'
-                  ? 'supplement_submitted'
-                  : st === 'recognized'
-                  ? 'final_recognized'
-                  : st === 'not_recognized'
-                  ? 'final_not_recognized'
-                  : st === 'all_reviewed'
-                  ? 'waiting_final'
-                  : isSubmitted
-                  ? 'under_review'
-                  : 'draft';
-              const nextHomeSc: HomeDevScenarioId =
-                st === 'supplement_required'
-                  ? 'state_h_supplement_active'
-                  : st === 'supplement_sent'
-                  ? 'state_i_supplement_sent'
-                  : st === 'recognized'
-                  ? 'state_k_recognized'
-                  : st === 'not_recognized'
-                  ? 'state_l_not_recognized'
-                  : st === 'all_reviewed'
-                  ? 'state_j_waiting_final'
-                  : isSubmitted
-                  ? 'state_g_under_review'
-                  : 'state_b_draft_clean';
-              const nextSubState: ApplicationSubmissionState =
-                st === 'supplement_required'
-                  ? 'supplement_required'
-                  : st === 'supplement_sent'
-                  ? 'supplement_sent'
-                  : st === 'recognized' || st === 'not_recognized'
-                  ? 'result_published'
-                  : st === 'all_reviewed'
-                  ? 'all_reviewed'
-                  : isSubmitted
-                  ? 'under_review'
-                  : 'draft';
+              setSharedApplication((prev) => {
+                const latestCached = loadPersistedStudentProfile({
+                  studentId: nextStudentId,
+                  email: nextEmail,
+                });
+                const mergedSnapshot = mergeStudentProfileSnapshots(
+                  mergeStudentProfileSnapshots(
+                    cleanInitial.applicantProfileSnapshot,
+                    prev.applicantProfileSnapshot
+                  ),
+                  mergeStudentProfileSnapshots(
+                    latestCached,
+                    remoteApp.applicantProfileSnapshot
+                  )
+                );
+                savePersistedStudentProfile(mergedSnapshot, {
+                  studentId: nextStudentId,
+                  email: nextEmail,
+                });
+                const hydrated: StudentApplicationData = {
+                  ...cleanInitial,
+                  ...remoteApp,
+                  criteria: buildCriteriaFromDefinitions(
+                    remoteApp.criteria as any
+                  ),
+                  applicantProfileSnapshot: mergedSnapshot,
+                  student: {
+                    ...cleanInitial.student,
+                    ...(remoteApp.student || {}),
+                    fullName:
+                      mergedSnapshot.fullName ||
+                      remoteApp.student?.fullName ||
+                      cleanInitial.student.fullName,
+                    university:
+                      mergedSnapshot.institutionName ||
+                      remoteApp.student?.university ||
+                      cleanInitial.student.university,
+                    class:
+                      mergedSnapshot.className ||
+                      remoteApp.student?.class ||
+                      cleanInitial.student.class,
+                    email:
+                      mergedSnapshot.email ||
+                      remoteApp.student?.email ||
+                      cleanInitial.student.email,
+                  },
+                  trainingInstitutionName:
+                    mergedSnapshot.institutionName ||
+                    remoteApp.trainingInstitutionName ||
+                    cleanInitial.trainingInstitutionName,
+                };
+                const st = hydrated.status;
+                const isSubmitted =
+                  st === 'under_review' ||
+                  (st as string) === 'submitted' ||
+                  remoteApp.schoolPreliminaryStatus === 'pending_intake' ||
+                  remoteApp.schoolPreliminaryStatus === 'under_review' ||
+                  remoteApp.schoolPreliminaryStatus === 'recommended_forwarding' ||
+                  remoteApp.schoolPreliminaryStatus === 'forwarded_to_city';
+                const nextScId: PrototypeScenarioId =
+                  st === 'supplement_required'
+                    ? 'supplement_required'
+                    : st === 'supplement_sent'
+                    ? 'supplement_submitted'
+                    : st === 'recognized'
+                    ? 'final_recognized'
+                    : st === 'not_recognized'
+                    ? 'final_not_recognized'
+                    : st === 'all_reviewed'
+                    ? 'waiting_final'
+                    : isSubmitted
+                    ? 'under_review'
+                    : 'draft';
+                const nextHomeSc: HomeDevScenarioId =
+                  st === 'supplement_required'
+                    ? 'state_h_supplement_active'
+                    : st === 'supplement_sent'
+                    ? 'state_i_supplement_sent'
+                    : st === 'recognized'
+                    ? 'state_k_recognized'
+                    : st === 'not_recognized'
+                    ? 'state_l_not_recognized'
+                    : st === 'all_reviewed'
+                    ? 'state_j_waiting_final'
+                    : isSubmitted
+                    ? 'state_g_under_review'
+                    : 'state_b_draft_clean';
+                const nextSubState: ApplicationSubmissionState =
+                  st === 'supplement_required'
+                    ? 'supplement_required'
+                    : st === 'supplement_sent'
+                    ? 'supplement_sent'
+                    : st === 'recognized' || st === 'not_recognized'
+                    ? 'result_published'
+                    : st === 'all_reviewed'
+                    ? 'all_reviewed'
+                    : isSubmitted
+                    ? 'under_review'
+                    : 'draft';
 
-              setPrototypeScenarioId(nextScId);
-              setHomeScenario(nextHomeSc);
-              setAppSubmissionState(nextSubState);
-              setSharedApplication(hydrated);
-              savePersistedDemoSession({
-                scenarioId: nextScId,
-                mutatedApplication: hydrated,
-                mutatedNotifications: [],
+                setPrototypeScenarioId(nextScId);
+                setHomeScenario(nextHomeSc);
+                setAppSubmissionState(nextSubState);
+                savePersistedDemoSession({
+                  scenarioId: nextScId,
+                  mutatedApplication: hydrated,
+                  mutatedNotifications: [],
+                });
+                return hydrated;
               });
             })
             .catch(() => {

@@ -144,23 +144,32 @@ export class PrismaIdentityRepository implements IIdentityRepository {
       user.profile && typeof user.profile === 'object' && !Array.isArray(user.profile)
         ? user.profile
         : null
-    ) as Partial<StudentProfileDto> | null;
+    ) as (Partial<StudentProfileDto> & Record<string, any>) | null;
 
     if (saved) {
+      let normalizedDob = String(saved.dateOfBirth || '').trim();
+      if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(normalizedDob)) {
+        const [y, m, d] = normalizedDob.split('-');
+        normalizedDob = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalizedDob)) {
+        const [d, m, y] = normalizedDob.split('/');
+        normalizedDob = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+      }
       return {
         fullName: saved.fullName || user.fullName,
         gender: saved.gender || '',
-        dateOfBirth: saved.dateOfBirth || '',
+        dateOfBirth: normalizedDob,
         ethnicity: saved.ethnicity || '',
         academicYearNumber: Number(saved.academicYearNumber || 0),
         educationLevel: saved.educationLevel || '',
         className: saved.className || '',
-        homeProvince: saved.homeProvince || '',
-        institutionId: saved.institutionId || user.institutionId || '',
-        institutionName: saved.institutionName || user.institution?.officialName,
-        unionPosition: saved.unionPosition || '',
+        homeProvince: saved.homeProvince || saved.permanentAddress || '',
+        institutionId: saved.institutionId || saved.trainingInstitutionId || user.institutionId || '',
+        institutionName:
+          saved.institutionName || saved.trainingInstitutionName || user.institution?.officialName,
+        unionPosition: saved.unionPosition || saved.youthUnionRole || '',
         politicalStatus: (saved.politicalStatus as any) || '',
-        phoneNumber: user.phone || saved.phoneNumber || '',
+        phoneNumber: saved.phoneNumber || user.phone || '',
         email: user.email,
       };
     }
@@ -205,7 +214,8 @@ export class PrismaIdentityRepository implements IIdentityRepository {
         input.homeProvince !== undefined ? input.homeProvince : current?.homeProvince || '',
       institutionId:
         input.institutionId !== undefined ? input.institutionId : current?.institutionId || '',
-      institutionName: current?.institutionName,
+      institutionName:
+        input.institutionName !== undefined ? input.institutionName : current?.institutionName,
       unionPosition:
         input.unionPosition !== undefined ? input.unionPosition : current?.unionPosition || '',
       politicalStatus:
@@ -221,8 +231,15 @@ export class PrismaIdentityRepository implements IIdentityRepository {
       profile: mergedProfile as any,
     };
     if (input.fullName) updateData.fullName = input.fullName;
-    if (input.phoneNumber !== undefined) updateData.phone = input.phoneNumber;
-    if (input.institutionId) updateData.institutionId = input.institutionId;
+    if (input.phoneNumber !== undefined) updateData.phone = input.phoneNumber || null;
+    if (input.institutionId) {
+      const existingInst = await (prisma as any).institution
+        ?.findUnique?.({ where: { id: input.institutionId }, select: { id: true } })
+        ?.catch?.(() => null);
+      if (existingInst || !(prisma as any).institution?.findUnique) {
+        updateData.institutionId = input.institutionId;
+      }
+    }
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -233,9 +250,9 @@ export class PrismaIdentityRepository implements IIdentityRepository {
     return {
       ...mergedProfile,
       fullName: user.fullName,
-      institutionId: user.institutionId || mergedProfile.institutionId,
-      institutionName: user.institution?.officialName || mergedProfile.institutionName,
-      phoneNumber: user.phone || mergedProfile.phoneNumber,
+      institutionId: mergedProfile.institutionId || user.institutionId || '',
+      institutionName: mergedProfile.institutionName || user.institution?.officialName,
+      phoneNumber: mergedProfile.phoneNumber || user.phone || '',
       email: user.email,
     };
   }

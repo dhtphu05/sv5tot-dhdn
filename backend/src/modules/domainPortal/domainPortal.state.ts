@@ -11,6 +11,11 @@ import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
 import type { SystemRoleCode } from '../identity/identity.types';
 import { defaultPasswordHasher } from '../auth/passwordHasher';
+import {
+  schedulePortalStateNeonDbSync,
+  ensurePortalStateHydratedFromNeonDb,
+  clearPortalPersistentRecordsInNeonDb,
+} from './domainPortal.dbSync';
 
 export interface PortalAuditLogRecord {
   id: string;
@@ -606,11 +611,13 @@ export interface PortalRegisteredStudent {
   institutionId: string;
   institutionName: string;
   password?: string;
+  profile?: Record<string, any>;
 }
 
 export interface PortalState {
   sessions: Map<string, PortalAuthSessionPayload>;
   registeredStudents: Map<string, PortalRegisteredStudent>;
+  studentProfiles: Map<string, Record<string, any>>;
   individualStaffRecords: Array<Record<string, any>>;
   studentApplications: Record<string, Record<string, any>>;
   collectiveApplications: Array<Record<string, any>>;
@@ -623,6 +630,7 @@ const PORTAL_STATE_FILE_PATH = path.resolve(process.cwd(), '.data', 'portal-stat
 export const portalState: PortalState = {
   sessions: new Map(),
   registeredStudents: new Map(),
+  studentProfiles: new Map(),
   individualStaffRecords: buildSeededIndividualStaffRecords(),
   studentApplications: buildSeededStudentApplications(),
   collectiveApplications: [],
@@ -641,6 +649,175 @@ export const portalState: PortalState = {
   ],
 };
 
+export function mergeStudentProfileObjects(
+  base?: Record<string, any> | null,
+  override?: Record<string, any> | null
+): Record<string, any> {
+  const b = base || {};
+  const o = override || {};
+  const pickStr = (key: string, fallback = '') => {
+    const ov = o[key];
+    if (typeof ov === 'string' && ov.trim() !== '') return ov.trim();
+    const bv = b[key];
+    if (typeof bv === 'string' && bv.trim() !== '') return bv.trim();
+    return fallback;
+  };
+  const pickNum = (key: string, fallback = 0) => {
+    const ov = Number(o[key]);
+    if (!Number.isNaN(ov) && ov > 0) return ov;
+    const bv = Number(b[key]);
+    if (!Number.isNaN(bv) && bv > 0) return bv;
+    return fallback;
+  };
+  const instId = pickStr('institutionId', 'inst-dut');
+  return {
+    fullName: pickStr('fullName'),
+    gender: pickStr('gender'),
+    dateOfBirth: pickStr('dateOfBirth'),
+    ethnicity: pickStr('ethnicity'),
+    academicYearNumber: pickNum('academicYearNumber', 0),
+    educationLevel: pickStr('educationLevel'),
+    className: pickStr('className'),
+    homeProvince: pickStr('homeProvince'),
+    institutionId: instId,
+    institutionName:
+      pickStr('institutionName') || SCHOOL_UNIT_MAP[instId]?.instName || '',
+    unionPosition: pickStr('unionPosition'),
+    politicalStatus: pickStr('politicalStatus'),
+    phoneNumber: pickStr('phoneNumber'),
+    email: pickStr('email'),
+  };
+}
+
+export function resolveSavedStudentProfileFromPortalState(keys: {
+  userId?: string;
+  email?: string;
+  studentCode?: string;
+}): Record<string, any> | null {
+  const candidates: string[] = [];
+  if (keys.userId) candidates.push(`id:${keys.userId}`);
+  if (keys.email) candidates.push(`email:${keys.email.trim().toLowerCase()}`);
+  if (keys.studentCode) candidates.push(`code:${keys.studentCode.trim().toUpperCase()}`);
+
+  for (const key of candidates) {
+    const found = portalState.studentProfiles.get(key);
+    if (found) return found;
+  }
+
+  if (keys.email) {
+    const reg = portalState.registeredStudents.get(keys.email.trim().toLowerCase());
+    if (reg?.profile) return reg.profile;
+  }
+
+  if (keys.studentCode) {
+    const app = portalState.studentApplications[`APP-2026-DN-${keys.studentCode.trim()}`];
+    if (app?.applicantProfileSnapshot) {
+      return app.applicantProfileSnapshot;
+    }
+  }
+
+  return null;
+}
+
+export function syncStudentProfileInPortalState(
+  profile: Record<string, any>,
+  keys: { userId?: string; email?: string; studentCode?: string }
+): Record<string, any> {
+  const resolvedEmail = (keys.email || profile.email || '').trim().toLowerCase();
+  let resolvedCode = (keys.studentCode || '').trim();
+
+  if (!resolvedCode && resolvedEmail) {
+    const reg = portalState.registeredStudents.get(resolvedEmail);
+    if (reg?.studentCode) resolvedCode = reg.studentCode;
+  }
+  if (!resolvedCode && keys.userId) {
+    for (const reg of portalState.registeredStudents.values()) {
+      if (reg.id === keys.userId && reg.studentCode) {
+        resolvedCode = reg.studentCode;
+        break;
+      }
+    }
+  }
+
+  const existing = resolveSavedStudentProfileFromPortalState({
+    userId: keys.userId,
+    email: resolvedEmail,
+    studentCode: resolvedCode,
+  });
+  const merged = mergeStudentProfileObjects(existing, profile);
+
+  if (keys.userId) {
+    portalState.studentProfiles.set(`id:${keys.userId}`, merged);
+  }
+  if (resolvedEmail) {
+    portalState.studentProfiles.set(`email:${resolvedEmail}`, merged);
+    const reg = portalState.registeredStudents.get(resolvedEmail);
+    if (reg) {
+      reg.fullName = merged.fullName || reg.fullName;
+      reg.institutionId = merged.institutionId || reg.institutionId;
+      reg.institutionName = merged.institutionName || reg.institutionName;
+      reg.profile = merged;
+    }
+  }
+  if (resolvedCode) {
+    portalState.studentProfiles.set(`code:${resolvedCode.toUpperCase()}`, merged);
+  }
+
+  // Sync matching studentApplications & individualStaffRecords
+  for (const [appId, app] of Object.entries(portalState.studentApplications)) {
+    const appEmail = String(
+      app.student?.email || app.applicantProfileSnapshot?.email || ''
+    )
+      .trim()
+      .toLowerCase();
+    const appCode = String(
+      app.student?.studentId || app.student?.studentCode || appId.replace(/^APP-\d{4}-DN-/, '')
+    ).trim();
+    if (
+      (resolvedEmail && appEmail === resolvedEmail) ||
+      (resolvedCode && appCode.toUpperCase() === resolvedCode.toUpperCase())
+    ) {
+      app.applicantProfileSnapshot = mergeStudentProfileObjects(
+        app.applicantProfileSnapshot,
+        merged
+      );
+      if (app.student) {
+        if (merged.fullName) app.student.fullName = merged.fullName;
+        if (merged.className) app.student.class = merged.className;
+        if (merged.institutionName) app.student.university = merged.institutionName;
+        if (merged.email) app.student.email = merged.email;
+      }
+      if (merged.institutionName) {
+        app.trainingInstitutionName = merged.institutionName;
+      }
+    }
+  }
+
+  for (const rec of portalState.individualStaffRecords) {
+    const recEmail = String(
+      rec.student?.email || rec.applicantProfileSnapshot?.email || ''
+    )
+      .trim()
+      .toLowerCase();
+    const recCode = String(rec.student?.studentCode || '').trim();
+    if (
+      (resolvedEmail && recEmail === resolvedEmail) ||
+      (resolvedCode && recCode.toUpperCase() === resolvedCode.toUpperCase())
+    ) {
+      rec.applicantProfileSnapshot = mergeStudentProfileObjects(
+        rec.applicantProfileSnapshot,
+        merged
+      );
+      if (rec.student && merged.fullName) {
+        rec.student.fullName = merged.fullName;
+      }
+    }
+  }
+
+  savePortalStateToDisk();
+  return merged;
+}
+
 export function savePortalStateToDisk(): void {
   if (process.env.NODE_ENV === 'test') return;
   try {
@@ -650,6 +827,7 @@ export function savePortalStateToDisk(): void {
     }
     const payload = {
       registeredStudents: Array.from(portalState.registeredStudents.entries()),
+      studentProfiles: Array.from(portalState.studentProfiles.entries()),
       individualStaffRecords: portalState.individualStaffRecords,
       studentApplications: portalState.studentApplications,
       collectiveApplications: portalState.collectiveApplications,
@@ -660,6 +838,7 @@ export function savePortalStateToDisk(): void {
   } catch {
     // Ignore disk write errors in read-only environments
   }
+  schedulePortalStateNeonDbSync();
 }
 
 export function loadPortalStateFromDisk(): boolean {
@@ -669,6 +848,7 @@ export function loadPortalStateFromDisk(): boolean {
     const raw = fs.readFileSync(PORTAL_STATE_FILE_PATH, 'utf8');
     const parsed = JSON.parse(raw) as {
       registeredStudents?: Array<[string, PortalRegisteredStudent]>;
+      studentProfiles?: Array<[string, Record<string, any>]>;
       individualStaffRecords?: Array<Record<string, any>>;
       studentApplications?: Record<string, Record<string, any>>;
       collectiveApplications?: Array<Record<string, any>>;
@@ -677,6 +857,9 @@ export function loadPortalStateFromDisk(): boolean {
     };
     if (Array.isArray(parsed.registeredStudents)) {
       portalState.registeredStudents = new Map(parsed.registeredStudents);
+    }
+    if (Array.isArray(parsed.studentProfiles)) {
+      portalState.studentProfiles = new Map(parsed.studentProfiles);
     }
     if (Array.isArray(parsed.individualStaffRecords)) {
       portalState.individualStaffRecords = parsed.individualStaffRecords.map(
@@ -731,12 +914,16 @@ export function loadPortalStateFromDisk(): boolean {
   }
 }
 
-// Automatically load persisted state on server startup
+// Automatically load persisted state from local cache AND Neon PostgreSQL DB on server startup
 loadPortalStateFromDisk();
+queueMicrotask(() => {
+  void ensurePortalStateHydratedFromNeonDb();
+});
 
 export function clearDomainPortalStateForSeed(): void {
   portalState.sessions = new Map();
   portalState.registeredStudents = new Map();
+  portalState.studentProfiles = new Map();
   portalState.individualStaffRecords = [];
   portalState.studentApplications = {};
   portalState.collectiveApplications = [];
@@ -753,12 +940,14 @@ export function clearDomainPortalStateForSeed(): void {
       details: 'Đã làm sạch toàn bộ dữ liệu mẫu để khởi tạo dữ liệu thật qua REST API.',
     },
   ];
+  void clearPortalPersistentRecordsInNeonDb();
   savePortalStateToDisk();
 }
 
 export function resetDomainPortalState(): void {
   portalState.sessions = new Map();
   portalState.registeredStudents = new Map();
+  portalState.studentProfiles = new Map();
   portalState.individualStaffRecords = buildSeededIndividualStaffRecords();
   portalState.studentApplications = buildSeededStudentApplications();
   portalState.collectiveApplications = [];
