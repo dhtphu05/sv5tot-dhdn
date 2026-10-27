@@ -549,7 +549,22 @@ export default function App() {
           ...remoteApp,
           criteria: hydratedCriteria,
         };
-        const st = hydratedApp.status;
+        const st = String(hydratedApp.status || '').trim();
+        const sp = String(hydratedApp.schoolPreliminaryStatus || '').trim();
+        const isDraftApp =
+          !st ||
+          st === 'draft' ||
+          st === 'Đang hoàn thiện' ||
+          st === 'Đang hoàn thiện hồ sơ' ||
+          st === 'Chưa bắt đầu' ||
+          (sp === 'school_not_submitted' &&
+            st !== 'under_review' &&
+            st !== 'submitted' &&
+            st !== 'supplement_required' &&
+            st !== 'supplement_sent' &&
+            st !== 'all_reviewed' &&
+            st !== 'recognized' &&
+            st !== 'not_recognized');
         const resolvedScenarioId: PrototypeScenarioId =
           st === 'supplement_required'
             ? 'supplement_required'
@@ -561,7 +576,7 @@ export default function App() {
             ? 'final_not_recognized'
             : st === 'all_reviewed'
             ? 'waiting_final'
-            : st && st !== 'draft'
+            : !isDraftApp
             ? 'under_review'
             : 'draft';
         const resolvedHomeScenario: HomeDevScenarioId =
@@ -575,7 +590,7 @@ export default function App() {
             ? 'state_l_not_recognized'
             : st === 'all_reviewed'
             ? 'state_j_waiting_final'
-            : st && st !== 'draft'
+            : !isDraftApp
             ? 'state_g_under_review'
             : 'state_b_draft_clean';
         const resolvedSubState: ApplicationSubmissionState =
@@ -587,7 +602,7 @@ export default function App() {
             ? 'result_published'
             : st === 'all_reviewed'
             ? 'all_reviewed'
-            : st && st !== 'draft'
+            : !isDraftApp
             ? 'under_review'
             : 'draft';
 

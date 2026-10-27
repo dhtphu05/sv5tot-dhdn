@@ -733,6 +733,36 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     return { instId: 'inst-dut', ...SCHOOL_UNIT_MAP['inst-dut'] };
   }
 
+  function isDraftStudentAppStatus(
+    status?: string | null,
+    schoolPreliminaryStatus?: string | null
+  ): boolean {
+    const s = String(status || '').trim();
+    const sp = String(schoolPreliminaryStatus || '').trim();
+    if (
+      !s ||
+      s === 'draft' ||
+      s === 'Đang hoàn thiện' ||
+      s === 'Đang hoàn thiện hồ sơ' ||
+      s === 'Chưa bắt đầu'
+    ) {
+      return true;
+    }
+    if (
+      sp === 'school_not_submitted' &&
+      s !== 'under_review' &&
+      s !== 'submitted' &&
+      s !== 'supplement_required' &&
+      s !== 'supplement_sent' &&
+      s !== 'all_reviewed' &&
+      s !== 'recognized' &&
+      s !== 'not_recognized'
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   function syncStaffRecordFromStudentApplication(
     app: Record<string, any>,
     options?: { createIfMissing?: boolean; markSubmitted?: boolean }
@@ -804,18 +834,23 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     };
 
     const nowFormatted = new Date().toLocaleDateString('vi-VN');
+    const isDraftApp =
+      !options?.markSubmitted &&
+      isDraftStudentAppStatus(app.status, app.schoolPreliminaryStatus);
     const staffRec: Record<string, any> = {
       ...(existing || {
         applicationId: appId,
         schoolYear: app.season || 'Năm học 2025–2026',
         levelLabel: app.level || 'Cấp Đại học Đà Nẵng',
-        submittedAt: app.submittedAt || nowFormatted,
+        submittedAt: isDraftApp ? '' : app.submittedAt || nowFormatted,
         submittedDateSortKey: new Date().toISOString(),
         internalDeadline: '10/11/2026',
         eligibilityStatus: 'verified',
         eligibilityLabel: 'Đủ điều kiện nộp hồ sơ',
         currentReviewStage: app.reviewStage || 'SCHOOL',
-        schoolPreliminaryStatus: app.schoolPreliminaryStatus || 'pending_intake',
+        schoolPreliminaryStatus: isDraftApp
+          ? 'school_not_submitted'
+          : app.schoolPreliminaryStatus || 'pending_intake',
         schoolRecommendation: app.schoolRecommendation || 'pending',
         workflowStatus: 'unassigned',
         assignment: null,
@@ -827,7 +862,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         },
         committeeSummary: null,
         finalResultSummary: null,
-        latestOperationalNote: `Sinh viên đã nộp hồ sơ về ${app.schoolReviewUnitName || mapped.unitName}`,
+        latestOperationalNote: isDraftApp
+          ? 'Sinh viên đang hoàn thiện bản nháp hồ sơ'
+          : `Sinh viên đã nộp hồ sơ về ${app.schoolReviewUnitName || mapped.unitName}`,
       }),
       applicationId: appId,
       student: {
@@ -985,9 +1022,14 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
     const shouldPreserveExistingCriteria =
       !isUserMutation && existingDecls > 0 && incomingDecls === 0;
-    const shouldPreserveSubmittedStatus =
-      Boolean(existing.status && existing.status !== 'draft') &&
-      (!incoming.status || incoming.status === 'draft');
+    const existingIsSubmitted =
+      Boolean(existing.status) &&
+      !isDraftStudentAppStatus(existing.status, existing.schoolPreliminaryStatus);
+    const incomingIsDraft = isDraftStudentAppStatus(
+      incoming.status,
+      incoming.schoolPreliminaryStatus
+    );
+    const shouldPreserveSubmittedStatus = existingIsSubmitted && incomingIsDraft;
 
     const studentCode = String(
       incoming.student?.studentId ||
@@ -1010,6 +1052,18 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       mergeStudentProfileObjects(portalSaved, existing.applicantProfileSnapshot),
       incoming.applicantProfileSnapshot
     );
+
+    const resolvedStatus = shouldPreserveSubmittedStatus
+      ? existing.status
+      : incomingIsDraft && !existingIsSubmitted
+      ? 'draft'
+      : incoming.status || existing.status || 'draft';
+
+    const resolvedSchoolPrelim = shouldPreserveSubmittedStatus
+      ? existing.schoolPreliminaryStatus
+      : isDraftStudentAppStatus(resolvedStatus, incoming.schoolPreliminaryStatus)
+      ? 'school_not_submitted'
+      : incoming.schoolPreliminaryStatus || existing.schoolPreliminaryStatus || 'school_not_submitted';
 
     const merged: Record<string, any> = {
       ...existing,
@@ -1040,15 +1094,11 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       criteria: shouldPreserveExistingCriteria
         ? existing.criteria
         : incoming.criteria ?? existing.criteria,
-      status: shouldPreserveSubmittedStatus
-        ? existing.status
-        : incoming.status || existing.status || 'draft',
+      status: resolvedStatus,
       reviewStage: shouldPreserveSubmittedStatus
         ? existing.reviewStage
         : incoming.reviewStage || existing.reviewStage || 'SCHOOL',
-      schoolPreliminaryStatus: shouldPreserveSubmittedStatus
-        ? existing.schoolPreliminaryStatus
-        : incoming.schoolPreliminaryStatus || existing.schoolPreliminaryStatus,
+      schoolPreliminaryStatus: resolvedSchoolPrelim,
       schoolRecommendation: shouldPreserveSubmittedStatus
         ? existing.schoolRecommendation
         : incoming.schoolRecommendation || existing.schoolRecommendation,
@@ -1071,7 +1121,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       email: studentEmail,
     });
     syncStaffRecordFromStudentApplication(merged, {
-      createIfMissing: merged.status && merged.status !== 'draft',
+      createIfMissing: !isDraftStudentAppStatus(merged.status, merged.schoolPreliminaryStatus),
     });
     savePortalStateToDisk();
 
@@ -1158,16 +1208,23 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       mergeStudentProfileObjects(explicitFieldsSnapshot, applicantProfileSnapshot)
     );
 
+    const isExistingDraft = isDraftStudentAppStatus(
+      existingApp?.status,
+      existingApp?.schoolPreliminaryStatus
+    );
+
     const created: Record<string, any> = {
       applicationId: appId,
       season: 'Năm học 2025–2026',
       level: 'Cấp Đại học Đà Nẵng',
-      status: existingApp?.status || 'draft',
+      status: isExistingDraft ? 'draft' : existingApp?.status || 'draft',
       reviewStage: existingApp?.reviewStage || 'SCHOOL',
       trainingInstitutionName: resolvedSnapshot.institutionName || institutionName || mapped.instName,
       schoolReviewUnitId: mapped.unitId,
       schoolReviewUnitName: mapped.unitName,
-      schoolPreliminaryStatus: existingApp?.schoolPreliminaryStatus || 'school_not_submitted',
+      schoolPreliminaryStatus: isExistingDraft
+        ? 'school_not_submitted'
+        : existingApp?.schoolPreliminaryStatus || 'school_not_submitted',
       applicantProfileSnapshot: resolvedSnapshot,
       student: {
         fullName: resolvedSnapshot.fullName || studentFullName,
@@ -1190,7 +1247,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       studentCode: String(studentCode),
       email: created.student.email,
     });
-    syncStaffRecordFromStudentApplication(created, { createIfMissing: true });
+    syncStaffRecordFromStudentApplication(created, {
+      createIfMissing: !isDraftStudentAppStatus(created.status, created.schoolPreliminaryStatus),
+    });
     savePortalStateToDisk();
 
     appendPortalAuditLog({

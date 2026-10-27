@@ -98,14 +98,42 @@ async function upsertPersistentRecord(
   return true;
 }
 
+function isDraftAppStatus(status?: string | null, schoolPreliminaryStatus?: string | null): boolean {
+  const s = String(status || '').trim();
+  const sp = String(schoolPreliminaryStatus || '').trim();
+  if (
+    !s ||
+    s === 'draft' ||
+    s === 'Đang hoàn thiện' ||
+    s === 'Đang hoàn thiện hồ sơ' ||
+    s === 'Chưa bắt đầu'
+  ) {
+    return true;
+  }
+  if (
+    sp === 'school_not_submitted' &&
+    s !== 'under_review' &&
+    s !== 'submitted' &&
+    s !== 'supplement_required' &&
+    s !== 'supplement_sent' &&
+    s !== 'all_reviewed' &&
+    s !== 'recognized' &&
+    s !== 'not_recognized'
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function mapReviewStageEnum(
   status?: string,
-  reviewStage?: string
+  reviewStage?: string,
+  schoolPreliminaryStatus?: string
 ): 'STUDENT_DRAFT' | 'SCHOOL_PRELIMINARY' | 'CITY_REVIEW' | 'COMMITTEE_FINALIZATION' | 'COMPLETED' {
   if (status === 'recognized' || status === 'not_recognized') return 'COMPLETED';
   if (reviewStage === 'COMMITTEE' || status === 'all_reviewed') return 'COMMITTEE_FINALIZATION';
   if (reviewStage === 'CITY') return 'CITY_REVIEW';
-  if (!status || status === 'draft') return 'STUDENT_DRAFT';
+  if (isDraftAppStatus(status, schoolPreliminaryStatus)) return 'STUDENT_DRAFT';
   return 'SCHOOL_PRELIMINARY';
 }
 
@@ -122,6 +150,9 @@ function mapSchoolPrelimEnum(
   | 'ELIGIBLE_FOR_CITY'
   | 'NOT_ELIGIBLE_AT_SCHOOL'
   | 'FORWARDED_TO_CITY' {
+  if (isDraftAppStatus(status, schoolPreliminaryStatus)) {
+    return 'NOT_SUBMITTED';
+  }
   if (reviewStage === 'CITY' || reviewStage === 'COMMITTEE' || schoolPreliminaryStatus === 'school_forwarded') {
     return 'FORWARDED_TO_CITY';
   }
@@ -143,7 +174,7 @@ function mapSchoolPrelimEnum(
     case 'school_rejected':
       return 'NOT_ELIGIBLE_AT_SCHOOL';
     default:
-      return status && status !== 'draft' ? 'PENDING_SCHOOL_REVIEW' : 'NOT_SUBMITTED';
+      return !isDraftAppStatus(status, schoolPreliminaryStatus) ? 'PENDING_SCHOOL_REVIEW' : 'NOT_SUBMITTED';
   }
 }
 
@@ -385,7 +416,8 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       totalEvidenceCount,
       currentReviewStage: mapReviewStageEnum(
         app.status,
-        app.reviewStage || staffRec?.currentReviewStage
+        app.reviewStage || staffRec?.currentReviewStage,
+        app.schoolPreliminaryStatus
       ),
       schoolPreliminaryStatus: mapSchoolPrelimEnum(
         app.schoolPreliminaryStatus || staffRec?.schoolPreliminaryStatus,
@@ -397,8 +429,9 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
         app.reviewStage || staffRec?.currentReviewStage,
         staffRec?.workflowStatus
       ),
-      submittedToSchoolAt:
-        app.status && app.status !== 'draft' ? new Date() : undefined,
+      submittedToSchoolAt: !isDraftAppStatus(app.status, app.schoolPreliminaryStatus)
+        ? new Date()
+        : undefined,
     },
     create: {
       id: targetDbAppId,
@@ -419,7 +452,8 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       totalEvidenceCount,
       currentReviewStage: mapReviewStageEnum(
         app.status,
-        app.reviewStage || staffRec?.currentReviewStage
+        app.reviewStage || staffRec?.currentReviewStage,
+        app.schoolPreliminaryStatus
       ),
       schoolPreliminaryStatus: mapSchoolPrelimEnum(
         app.schoolPreliminaryStatus || staffRec?.schoolPreliminaryStatus,
@@ -431,8 +465,9 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
         app.reviewStage || staffRec?.currentReviewStage,
         staffRec?.workflowStatus
       ),
-      submittedToSchoolAt:
-        app.status && app.status !== 'draft' ? new Date() : null,
+      submittedToSchoolAt: !isDraftAppStatus(app.status, app.schoolPreliminaryStatus)
+        ? new Date()
+        : null,
     },
   });
 
@@ -855,6 +890,10 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               loadedCount++;
               break;
             case 'student_application':
+              if (isDraftAppStatus(data.status, data.schoolPreliminaryStatus)) {
+                data.status = 'draft';
+                data.schoolPreliminaryStatus = 'school_not_submitted';
+              }
               portalState.studentApplications[row.record_key] = data;
               loadedCount++;
               break;
@@ -897,6 +936,24 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               break;
           }
         }
+
+        // Remove any staff_record whose corresponding student_application is still an un-submitted draft
+        portalState.individualStaffRecords = portalState.individualStaffRecords.filter((rec) => {
+          const matchingStudentApp = portalState.studentApplications[rec.applicationId];
+          if (
+            matchingStudentApp &&
+            isDraftAppStatus(
+              matchingStudentApp.status,
+              matchingStudentApp.schoolPreliminaryStatus
+            )
+          ) {
+            return false;
+          }
+          if (rec.schoolPreliminaryStatus === 'school_not_submitted') {
+            return false;
+          }
+          return true;
+        });
 
         // Also hydrate any relational IndividualApplication rows that might not be in portal_persistent_records
         const relationalApps = await prisma.individualApplication

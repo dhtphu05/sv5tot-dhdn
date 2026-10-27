@@ -447,14 +447,30 @@ export function usePublicAuthSessionTransition({
                     remoteApp.trainingInstitutionName ||
                     cleanInitial.trainingInstitutionName,
                 };
-                const st = hydrated.status;
+                const st = String(hydrated.status || '').trim();
+                const sp = String(remoteApp.schoolPreliminaryStatus || '').trim();
+                const isDraftApp =
+                  !st ||
+                  st === 'draft' ||
+                  st === 'Đang hoàn thiện' ||
+                  st === 'Đang hoàn thiện hồ sơ' ||
+                  st === 'Chưa bắt đầu' ||
+                  (sp === 'school_not_submitted' &&
+                    st !== 'under_review' &&
+                    st !== 'submitted' &&
+                    st !== 'supplement_required' &&
+                    st !== 'supplement_sent' &&
+                    st !== 'all_reviewed' &&
+                    st !== 'recognized' &&
+                    st !== 'not_recognized');
                 const isSubmitted =
-                  st === 'under_review' ||
-                  (st as string) === 'submitted' ||
-                  remoteApp.schoolPreliminaryStatus === 'pending_intake' ||
-                  remoteApp.schoolPreliminaryStatus === 'under_review' ||
-                  remoteApp.schoolPreliminaryStatus === 'recommended_forwarding' ||
-                  remoteApp.schoolPreliminaryStatus === 'forwarded_to_city';
+                  !isDraftApp &&
+                  (st === 'under_review' ||
+                    st === 'submitted' ||
+                    sp === 'pending_intake' ||
+                    sp === 'under_review' ||
+                    sp === 'recommended_forwarding' ||
+                    sp === 'forwarded_to_city');
                 const nextScId: PrototypeScenarioId =
                   st === 'supplement_required'
                     ? 'supplement_required'

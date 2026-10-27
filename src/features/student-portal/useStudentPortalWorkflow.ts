@@ -290,7 +290,12 @@ export function useStudentPortalWorkflow({
       const targetAppId = nextApp.applicationId;
       if (targetAppId) {
         setOfficerStudentAppMap((prev) => {
-          if (!prev[targetAppId] && nextApp.status === 'draft') {
+          const isDraftStatus =
+            !nextApp.status ||
+            nextApp.status === 'draft' ||
+            nextApp.status === 'Đang hoàn thiện' ||
+            nextApp.status === 'Đang hoàn thiện hồ sơ';
+          if (!prev[targetAppId] && isDraftStatus) {
             return prev;
           }
           const nextMap = { ...prev, [targetAppId]: nextApp };

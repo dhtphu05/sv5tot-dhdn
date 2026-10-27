@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T21:01:37.979Z",
+  "createdAt": "2026-10-27T21:50:53.807Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 55867,
-      "sha256": "345d13573655fa639c8e3033f80176ba7429b5ff3a72c27e89fcc050782d1d04"
+      "sizeBytes": 56387,
+      "sha256": "dc297ad5b67835e25544bc1cc9da8c1e43b05bc61f7060eedb8f835df2f80eeb"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -511,8 +511,8 @@
     },
     {
       "path": "src/components/application/StudentApplicationWorkspace.tsx",
-      "sizeBytes": 34069,
-      "sha256": "cec9ec41b23c28f3c25169bac6a83abb30997f25d88bd0523a8ae298d71e86e7"
+      "sizeBytes": 37801,
+      "sha256": "5042936b61fbfec2c40f7591e85e865453a5841b9405f47a5ef9abe38bfb0abd"
     },
     {
       "path": "src/components/application/modal/InlineEvidenceSection.tsx",
@@ -1486,8 +1486,8 @@
     },
     {
       "path": "src/features/public-auth/usePublicAuthSessionTransition.ts",
-      "sizeBytes": 24040,
-      "sha256": "429ab19a882622583e2f961d9a7f24423a4b504169a58fcb7e4fe42be4450589"
+      "sizeBytes": 24680,
+      "sha256": "68c5bcc80a3afb3423c7eee85f75d70caa9fbb7d0da665a368c47778dd21c63b"
     },
     {
       "path": "src/features/result-publication/index.ts",
@@ -1511,8 +1511,8 @@
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
-      "sizeBytes": 10334,
-      "sha256": "e6af7e3fdadf8f638685f24444e53cc7ee87e5539d20d75e6adca2e0be9cbbf5"
+      "sizeBytes": 11914,
+      "sha256": "cbc43c28dc0cbb6a5de06fddaa47ab4931712d64923c21ac6ac114b3a398ee75"
     },
     {
       "path": "src/features/student-application/useStudentSupplementWorkflow.ts",
@@ -1526,8 +1526,8 @@
     },
     {
       "path": "src/features/student-portal/useStudentPortalWorkflow.ts",
-      "sizeBytes": 30023,
-      "sha256": "393f0af5aea54587c108f105fa04128b1fd11675116d49b9d58d1aa2dd1a464e"
+      "sizeBytes": 30234,
+      "sha256": "ae53e11d344b55a41854f5d1c61745ed9df82c08b1d5c130a29a4ada17a33f42"
     },
     {
       "path": "src/features/supplement-request/SupplementComposers.tsx",
