@@ -26,128 +26,16 @@ export interface DocumentViewerProps {
   onRetryPreview?: () => void;
 }
 
-const REAL_ASCII_PDFS = [
-  '/minhchung_test/518_quyet_dinh_giay_khen_bk_smartcampus.pdf',
-  '/minhchung_test/307_ke_hoach_bk_smartcampus.pdf',
-  '/minhchung_test/doan_hoang_thien_phu.pdf',
-  '/minhchung_test/mistalent_phu.pdf',
-  '/minhchung_test/vannghe_phu.pdf',
-];
-
-const REAL_JPG_PHOTOS = [
-  '/minhchung_test/IMG_1711.jpg',
-  '/minhchung_test/IMG_1720.jpg',
-  '/minhchung_test/IMG_1721.jpg',
-  '/minhchung_test/IMG_9540%202.jpg',
-  '/minhchung_test/IMG_9541.jpg',
-  '/minhchung_test/IMG_9542%202.jpg',
-  '/minhchung_test/IMG_9543%202.jpg',
-  '/minhchung_test/IMG_9544%202.jpg',
-  '/minhchung_test/IMG_9546.jpg',
-  '/minhchung_test/IMG_9547%202.jpg',
-  '/minhchung_test/IMG_9548%202.jpg',
-  '/minhchung_test/IMG_9549.jpg',
-  '/minhchung_test/IMG_9550%202.jpg',
-  '/minhchung_test/IMG_9551%202.jpg',
-  '/minhchung_test/IMG_9553.jpg',
-];
-
-function normalizeMinhChungPdfUrl(raw: string): string {
-  const decoded = (() => {
-    try {
-      return decodeURIComponent(raw).normalize('NFC');
-    } catch {
-      return raw.normalize('NFC');
-    }
-  })();
-
-  if (decoded.includes('307.') || decoded.includes('307_ke_hoach')) {
-    return '/minhchung_test/307_ke_hoach_bk_smartcampus.pdf';
-  }
-  if (decoded.includes('518.') || decoded.includes('518_quyet_dinh')) {
-    return '/minhchung_test/518_quyet_dinh_giay_khen_bk_smartcampus.pdf';
-  }
-  if (decoded.includes('Đoàn Hoàng Thiên Phú') || decoded.includes('doan_hoang_thien_phu')) {
-    return '/minhchung_test/doan_hoang_thien_phu.pdf';
-  }
-  if (decoded.includes('mistalent_phu')) {
-    return '/minhchung_test/mistalent_phu.pdf';
-  }
-  if (decoded.includes('vannghe_phu')) {
-    return '/minhchung_test/vannghe_phu.pdf';
-  }
-  return raw;
-}
-
-function hashStringIndex(input: string, modulo: number): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-  }
-  return hash % modulo;
-}
-
-function isUserUploadedEvidenceId(fileId?: string, explicitUrl?: string): boolean {
-  if (explicitUrl && (explicitUrl.startsWith('blob:') || explicitUrl.startsWith('data:'))) {
-    return true;
-  }
-  if (!fileId) return false;
-  return (
-    fileId.startsWith('ev-new-') ||
-    fileId.startsWith('ev-uploaded-') ||
-    fileId.startsWith('lib-upl-') ||
-    fileId.startsWith('upl-') ||
-    /^ev-\d{10,}/.test(fileId)
-  );
-}
-
 function resolvePreviewUrl(
-  fileName: string,
-  fileType: string,
+  _fileName: string,
+  _fileType: string,
   explicitUrl?: string,
-  fileId?: string
+  _fileId?: string
 ): string {
-  const normalizedName = fileName.normalize('NFC');
-  const isPdf = normalizedName.toLowerCase().endsWith('.pdf') || fileType === 'pdf';
-
-  if (explicitUrl) {
-    if (
-      explicitUrl.startsWith('blob:') ||
-      explicitUrl.startsWith('data:') ||
-      explicitUrl.startsWith('http')
-    ) {
-      return explicitUrl;
-    }
-    if (isPdf) {
-      return normalizeMinhChungPdfUrl(explicitUrl);
-    }
-    if (/\.heic$/i.test(explicitUrl) && explicitUrl.startsWith('/minhchung_test/')) {
-      return explicitUrl.replace(/\.heic$/i, '.jpg');
-    }
-    return explicitUrl;
-  }
-
-  // Never fall back to unrelated demo files (Đoàn Hoàng Thiên Phú) for user-uploaded evidence
-  if (isUserUploadedEvidenceId(fileId, explicitUrl)) {
+  if (!explicitUrl) {
     return '';
   }
-
-  // Match known files by name
-  const mappedPdf = normalizeMinhChungPdfUrl(normalizedName);
-  if (mappedPdf.startsWith('/minhchung_test/')) {
-    return mappedPdf;
-  }
-
-  if (/^IMG_\d+/i.test(normalizedName)) {
-    const jpgTarget = normalizedName.replace(/\.(heic|heif)$/i, '.jpg');
-    return `/minhchung_test/${encodeURIComponent(jpgTarget)}`;
-  }
-
-  // Fallback to real PDF or real photo in /minhchung_test only for demo fixture items
-  if (isPdf) {
-    return REAL_ASCII_PDFS[hashStringIndex(normalizedName, REAL_ASCII_PDFS.length)];
-  }
-  return REAL_JPG_PHOTOS[hashStringIndex(normalizedName, REAL_JPG_PHOTOS.length)];
+  return explicitUrl;
 }
 
 /**

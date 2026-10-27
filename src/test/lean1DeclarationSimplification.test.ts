@@ -785,6 +785,10 @@ describe('5TOT ĐHĐN — LEAN-1 Student Declaration Simplification Suite (D01�
     const afterRemove = getActiveStudentCombinedLibrary(undefined, testStudentId);
     assert.equal(afterRemove.length, 1, 'Standalone item removed cleanly');
     assert.equal(afterRemove[0].name, 'Bang_diem_HK2_2026.pdf');
+
+    // Strictly verify zero mock fallback even for studentId 102220123
+    const clean102220123 = getActiveStudentCombinedLibrary(undefined, '102220123');
+    assert.equal(clean102220123.length, 0, 'Strictly zero mock items returned for 102220123');
   });
 });
 

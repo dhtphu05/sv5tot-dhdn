@@ -170,29 +170,89 @@ export const MOCK_PERSONAL_LIBRARY_EVIDENCE: PersonalLibraryItem[] = [
 const PERSONAL_LIBRARY_STORAGE_PREFIX = '5tot_dhdn_personal_library_v1_';
 const PERSONAL_LIBRARY_UPDATED_EVENT = '5tot-personal-library-updated';
 
+const MOCK_FIXTURE_EVIDENCE_IDS = new Set([
+  ...MOCK_PERSONAL_LIBRARY_EVIDENCE.map((item) => item.id),
+  'ev-eth-1',
+  'ev-eth-2',
+  'ev-acad-1',
+  'ev-acad-2',
+  'ev-phys-1',
+  'ev-vol-1',
+  'ev-int-1',
+  'ev-int-2',
+]);
+
+const MOCK_FIXTURE_EVIDENCE_NAMES = new Set(
+  MOCK_PERSONAL_LIBRARY_EVIDENCE.map((item) => item.name.toLowerCase())
+);
+
+export function isMockFixtureEvidence(id?: string, name?: string): boolean {
+  const safeId = (id || '').trim();
+  const safeName = (name || '').trim();
+  if (!safeId && !safeName) return true;
+  if (
+    safeId.startsWith('ev-auto-') ||
+    MOCK_FIXTURE_EVIDENCE_IDS.has(safeId) ||
+    /^ev-(eth|acad|phys|vol|int)-\d+$/i.test(safeId) ||
+    /^lib-(eth|acad|phys|vol|int)-\d+$/i.test(safeId)
+  ) {
+    return true;
+  }
+  if (safeName.startsWith('Minh_chung_')) {
+    return true;
+  }
+  // If it's a user-uploaded file (lib-upl-*, ev-new-*, ev-uploaded-*), allow even if filename happens to match
+  const isUserUploadedId =
+    safeId.startsWith('lib-upl-') ||
+    safeId.startsWith('ev-new-') ||
+    safeId.startsWith('ev-uploaded-') ||
+    safeId.startsWith('col-ev-');
+  if (!isUserUploadedId && MOCK_FIXTURE_EVIDENCE_NAMES.has(safeName.toLowerCase())) {
+    return true;
+  }
+  return false;
+}
+
+let lastResolvedStudentId = '';
+let lastResolvedApplication: Parameters<typeof getActiveStudentCombinedLibrary>[0] | undefined;
+
 export function resolveActiveStudentLibraryId(explicitStudentId?: string): string {
   if (explicitStudentId && explicitStudentId.trim()) {
-    return explicitStudentId.trim();
+    const trimmed = explicitStudentId.trim();
+    lastResolvedStudentId = trimmed;
+    return trimmed;
   }
   if (typeof window !== 'undefined') {
     try {
-      const sessionRaw = window.sessionStorage.getItem('5tot_dhdn_prototype_session_v1');
-      if (sessionRaw) {
-        const parsed = JSON.parse(sessionRaw);
-        if (parsed?.student?.studentId) {
-          return String(parsed.student.studentId).trim();
+      const mutatedAppRaw = window.sessionStorage.getItem('5tot_demo_mutated_app_v3');
+      if (mutatedAppRaw) {
+        const parsedApp = JSON.parse(mutatedAppRaw);
+        const appStudentId =
+          parsedApp?.student?.studentId ||
+          parsedApp?.applicantProfileSnapshot?.email ||
+          parsedApp?.student?.email;
+        if (appStudentId && String(appStudentId).trim()) {
+          const resolved = String(appStudentId).trim();
+          lastResolvedStudentId = resolved;
+          return resolved;
         }
       }
-      const liveStoreRaw = window.localStorage.getItem('5tot_dhdn_student_live_store_v1');
-      if (liveStoreRaw) {
-        const parsedLive = JSON.parse(liveStoreRaw);
-        if (parsedLive?.application?.student?.studentId) {
-          return String(parsedLive.application.student.studentId).trim();
+      const actorRaw = window.sessionStorage.getItem('5tot_auth_actor_context_v1');
+      if (actorRaw) {
+        const parsedActor = JSON.parse(actorRaw);
+        const actorKey = parsedActor?.userEmail || parsedActor?.userId;
+        if (actorKey && String(actorKey).trim()) {
+          const resolved = String(actorKey).trim();
+          lastResolvedStudentId = resolved;
+          return resolved;
         }
       }
     } catch {
       // ignore storage errors
     }
+  }
+  if (lastResolvedStudentId) {
+    return lastResolvedStudentId;
   }
   return 'default';
 }
@@ -202,31 +262,25 @@ const inMemoryPersonalLibraryStore = new Map<string, PersonalLibraryItem[]>();
 export function loadPersonalLibraryItems(studentId?: string): PersonalLibraryItem[] {
   const resolvedId = resolveActiveStudentLibraryId(studentId);
   const storageKey = `${PERSONAL_LIBRARY_STORAGE_PREFIX}${resolvedId}`;
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return (inMemoryPersonalLibraryStore.get(storageKey) || []).filter(
-      (item) =>
-        item &&
+  const isValidItem = (item: PersonalLibraryItem) =>
+    Boolean(
+      item &&
         typeof item.id === 'string' &&
         typeof item.name === 'string' &&
-        !item.id.startsWith('ev-auto-') &&
-        !item.name.startsWith('Minh_chung_')
+        !isMockFixtureEvidence(item.id, item.name)
     );
+
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return (inMemoryPersonalLibraryStore.get(storageKey) || []).filter(isValidItem);
   }
   try {
     const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return inMemoryPersonalLibraryStore.get(storageKey) || [];
+    if (!raw) return (inMemoryPersonalLibraryStore.get(storageKey) || []).filter(isValidItem);
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (item: PersonalLibraryItem) =>
-        item &&
-        typeof item.id === 'string' &&
-        typeof item.name === 'string' &&
-        !item.id.startsWith('ev-auto-') &&
-        !item.name.startsWith('Minh_chung_')
-    );
+    return parsed.filter(isValidItem);
   } catch {
-    return inMemoryPersonalLibraryStore.get(storageKey) || [];
+    return (inMemoryPersonalLibraryStore.get(storageKey) || []).filter(isValidItem);
   }
 }
 
@@ -236,10 +290,11 @@ export function savePersonalLibraryItems(
 ): void {
   const resolvedId = resolveActiveStudentLibraryId(studentId);
   const storageKey = `${PERSONAL_LIBRARY_STORAGE_PREFIX}${resolvedId}`;
-  inMemoryPersonalLibraryStore.set(storageKey, [...items]);
+  const cleanItems = items.filter((item) => !isMockFixtureEvidence(item.id, item.name));
+  inMemoryPersonalLibraryStore.set(storageKey, [...cleanItems]);
   if (typeof window === 'undefined' || !window.localStorage) return;
   try {
-    window.localStorage.setItem(storageKey, JSON.stringify(items));
+    window.localStorage.setItem(storageKey, JSON.stringify(cleanItems));
     window.dispatchEvent(new CustomEvent(PERSONAL_LIBRARY_UPDATED_EVENT));
   } catch {
     // ignore storage quota errors
@@ -330,12 +385,15 @@ export function syncEvidenceFilesToPersonalLibrary(
   }
 ): void {
   if (!evidenceFiles || evidenceFiles.length === 0) return;
+  const validFiles = evidenceFiles.filter((ev) => !isMockFixtureEvidence(ev.id, ev.name));
+  if (validFiles.length === 0) return;
+
   const resolvedId = resolveActiveStudentLibraryId(context?.studentId);
   const critId = context?.criterionId || 'ethics';
   const critName = context?.criterionName || CRITERIA[critId]?.name || 'Đạo đức tốt';
   const existing = loadPersonalLibraryItems(resolvedId);
 
-  const syncedItems: PersonalLibraryItem[] = evidenceFiles.map((ev) => ({
+  const syncedItems: PersonalLibraryItem[] = validFiles.map((ev) => ({
     id: ev.id,
     name: ev.name,
     title: context?.title?.trim() || ev.name.replace(/\.[^/.]+$/, ''),
@@ -402,18 +460,21 @@ export function getActiveStudentCombinedLibrary(
   },
   studentId?: string
 ): PersonalLibraryItem[] {
+  if (application) {
+    lastResolvedApplication = application;
+  }
   const resolvedId = resolveActiveStudentLibraryId(
     studentId || application?.student?.studentId
   );
 
-  let effectiveApp = application;
+  let effectiveApp = application || lastResolvedApplication;
   if (!effectiveApp && typeof window !== 'undefined') {
     try {
-      const liveRaw = window.localStorage.getItem('5tot_dhdn_student_live_store_v1');
-      if (liveRaw) {
-        const parsedLive = JSON.parse(liveRaw);
-        if (parsedLive?.application) {
-          effectiveApp = parsedLive.application;
+      const mutatedRaw = window.sessionStorage.getItem('5tot_demo_mutated_app_v3');
+      if (mutatedRaw) {
+        const parsedApp = JSON.parse(mutatedRaw);
+        if (parsedApp?.criteria) {
+          effectiveApp = parsedApp;
         }
       }
     } catch {
@@ -425,13 +486,13 @@ export function getActiveStudentCombinedLibrary(
   const seenIds = new Set<string>();
   const combined: PersonalLibraryItem[] = [];
 
-  // 1. Live declarations from the student's application
+  // 1. Live declarations from the student's application (strictly excluding mock fixtures)
   if (effectiveApp?.criteria) {
     for (const criterion of effectiveApp.criteria) {
       for (const req of criterion.requirements || []) {
         for (const decl of req.declarations || []) {
           for (const ev of decl.evidenceFiles || []) {
-            if (ev.id.startsWith('ev-auto-') || ev.name.startsWith('Minh_chung_')) {
+            if (isMockFixtureEvidence(ev.id, ev.name)) {
               continue;
             }
             const lowerName = ev.name.toLowerCase();
@@ -459,9 +520,12 @@ export function getActiveStudentCombinedLibrary(
     }
   }
 
-  // 2. Standalone or synced items in Personal Library storage
+  // 2. Standalone or synced items in Personal Library storage (strictly excluding mock fixtures)
   const storedItems = loadPersonalLibraryItems(resolvedId);
   for (const item of storedItems) {
+    if (isMockFixtureEvidence(item.id, item.name)) {
+      continue;
+    }
     const lowerName = item.name.toLowerCase();
     if (!seenIds.has(item.id) && !seenNames.has(lowerName)) {
       seenIds.add(item.id);
@@ -471,24 +535,11 @@ export function getActiveStudentCombinedLibrary(
         isStandaloneLibraryItem: true,
       });
     } else {
-      // Enrich url if stored item has a newer url
       const existingIdx = combined.findIndex(
         (c) => c.id === item.id || c.name.toLowerCase() === lowerName
       );
       if (existingIdx >= 0 && item.url && !combined[existingIdx].url) {
         combined[existingIdx].url = item.url;
-      }
-    }
-  }
-
-  // 3. Fallback mock items ONLY for the built-in demo student account (102220123)
-  if (resolvedId === '102220123') {
-    for (const mockItem of MOCK_PERSONAL_LIBRARY_EVIDENCE) {
-      const lowerName = mockItem.name.toLowerCase();
-      if (!seenIds.has(mockItem.id) && !seenNames.has(lowerName)) {
-        seenIds.add(mockItem.id);
-        seenNames.add(lowerName);
-        combined.push(mockItem);
       }
     }
   }

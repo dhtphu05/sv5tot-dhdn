@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T17:47:17.690Z",
+  "createdAt": "2026-10-27T17:57:57.559Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -721,8 +721,8 @@
     },
     {
       "path": "src/components/evidence/detail/DocumentViewer.tsx",
-      "sizeBytes": 15952,
-      "sha256": "1a53f5129c158001ec68fb07350bbc5852877b27b47f818db4a67222ae3407f4"
+      "sizeBytes": 12305,
+      "sha256": "4b3d4b5e9cc01d98f96d93051f1d9ad2b5d6fc9e53ea69f58c87c433154f8f2e"
     },
     {
       "path": "src/components/evidence/detail/EvidenceDetailWorkspace.tsx",
@@ -1176,8 +1176,8 @@
     },
     {
       "path": "src/demo/fixtures/mockEvidenceLibrary.ts",
-      "sizeBytes": 17035,
-      "sha256": "a0776c7e8bdcb7c45b2651da7eaa46bb643a8ab07d7130dbf60b17ae34146f11"
+      "sizeBytes": 18705,
+      "sha256": "716ec403a3c5ddfccf3bc188bfb290751336ebc82b34d80765ae9ead318ddef1"
     },
     {
       "path": "src/demo/fixtures/notificationScenarios.ts",
@@ -2346,8 +2346,8 @@
     },
     {
       "path": "src/test/lean1DeclarationSimplification.test.ts",
-      "sizeBytes": 35157,
-      "sha256": "108ee93ade757602a19171153e4d134d351a1ad22d3acd7b017287559ecad342"
+      "sizeBytes": 35408,
+      "sha256": "b69df5a24a604f6a468fd816dbe74938fbe563fd085ca3782e43add63e71e63c"
     },
     {
       "path": "src/test/lean2DirectInlineReview.test.ts",
