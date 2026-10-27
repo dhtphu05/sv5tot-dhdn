@@ -79,7 +79,7 @@ export const NOTIF_REVIEW_STARTED: StudentNotificationItem = {
   priority: 5,
   timeGroup: 'earlier',
   title: 'Hồ sơ đang được xem xét',
-  message: 'Quá trình xét hồ sơ cấp Thành phố đã được bắt đầu.',
+  message: 'Quá trình xét hồ sơ cấp Đại học Đà Nẵng đã được bắt đầu.',
   timestamp: '13/10/2026 · 09:15',
   actionLabel: 'Xem tiến độ',
   target: {
@@ -98,7 +98,7 @@ export const NOTIF_SUBMISSION_RECEIVED: StudentNotificationItem = {
   priority: 5,
   timeGroup: 'earlier',
   title: 'Hồ sơ đã được gửi',
-  message: 'Hồ sơ Sinh viên 5 tốt cấp Thành phố đã được tiếp nhận.',
+  message: 'Hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng đã được tiếp nhận.',
   timestamp: '12/10/2026 · 14:32',
   actionLabel: 'Xem hồ sơ',
   target: {
@@ -119,8 +119,8 @@ export const NOTIF_RESULT_PUBLISHED: StudentNotificationItem = {
   priority: 4,
   timeGroup: 'today',
   title: 'Kết quả xét chọn đã được công bố',
-  contextLabel: 'Sinh viên 5 tốt cấp Thành phố năm học 2026–2027',
-  message: 'Kết quả hồ sơ Sinh viên 5 tốt cấp Thành phố của bạn đã được cập nhật.',
+  contextLabel: 'Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2026–2027',
+  message: 'Kết quả hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng của bạn đã được cập nhật.',
   timestamp: '24/10/2026 · 08:30',
   actionLabel: 'Xem kết quả',
   target: {
@@ -184,7 +184,7 @@ export const NOTIF_ELIGIBILITY_CONFIRMED: StudentNotificationItem = {
   priority: 5,
   timeGroup: 'earlier',
   title: 'Đã xác nhận điều kiện nộp hồ sơ',
-  message: 'Bạn có thể tiếp tục kiểm tra và gửi hồ sơ cấp Thành phố.',
+  message: 'Bạn có thể tiếp tục kiểm tra và gửi hồ sơ cấp Đại học Đà Nẵng.',
   timestamp: '10/10/2026 · 10:00',
   actionLabel: 'Tiếp tục hồ sơ',
   target: {

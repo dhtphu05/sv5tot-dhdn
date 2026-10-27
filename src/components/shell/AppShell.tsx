@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, Bell } from 'lucide-react';
 import { SidebarNav } from './SidebarNav';
-import { HsvEmblem } from '../brand/HsvLogo';
+import { UdnEmblem, HsvEmblem } from '../brand/HsvLogo';
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -46,13 +46,16 @@ export const AppShell: React.FC<AppShellProps> = ({
           >
             <Menu size={20} />
           </button>
-          <HsvEmblem size={26} className="shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <UdnEmblem size={26} className="shrink-0" />
+            <HsvEmblem size={26} className="shrink-0" />
+          </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold tracking-wider text-[#0D78AE] uppercase block leading-none">
-              HSV TP. Đà Nẵng
+              HSV ĐH Đà Nẵng
             </span>
             <span className="text-[13.5px] font-extrabold text-[#172A3A] truncate block leading-tight">
-              5TOT Đà Nẵng
+              5TOT ĐHĐN
             </span>
           </div>
         </div>

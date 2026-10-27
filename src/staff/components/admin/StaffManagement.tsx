@@ -113,8 +113,8 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
     fullName: '',
     email: '',
     primaryRole: 'CITY_OFFICER' as StaffRole,
-    schoolReviewUnitId: 'unit-udn',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Hội Sinh viên TP. Đà Nẵng',
+    schoolReviewUnitId: 'unit-dut',
+    unitLabel: 'Tổ Thẩm định Hồ sơ · Hội Sinh viên Đại học Đà Nẵng',
     status: 'active' as StaffAccountStatus,
     phone: '',
     notes: '',
@@ -492,13 +492,11 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
                 </div>
                 {selectedStaff.schoolReviewUnitId && (
                   <div className="mt-2 p-2.5 rounded-[8px] bg-[#F0FDF4] border border-[#DCFCE7] text-[12px]">
-                    <span className="font-bold text-[#166534] block">Hội đồng Sơ tuyển cấp Trường:</span>
+                    <span className="font-bold text-[#166534] block">Hội đồng Sơ tuyển cấp Trường / Đơn vị:</span>
                     <span className="font-mono text-[11px] font-bold text-[#15803D]">{selectedStaff.schoolReviewUnitId}</span>
-                    {selectedStaff.schoolReviewUnitId === 'unit-udn' && (
-                      <span className="block text-[11px] text-[#166534] mt-0.5">
-                        Phụ trách danh sách &amp; quyết định sơ tuyển chung toàn bộ 8 trường ĐH thành viên ĐHĐN (DUT, DUE, UED, UFL, UTE, VKU, VNUK, SMP).
-                      </span>
-                    )}
+                    <span className="block text-[11px] text-[#166534] mt-0.5">
+                      Phụ trách xét sơ tuyển hồ sơ và lập danh sách đề nghị của đơn vị trình lên Hội Sinh viên Đại học Đà Nẵng.
+                    </span>
                   </div>
                 )}
               </div>
@@ -635,11 +633,11 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
 
                 const roleLabel =
                   createForm.primaryRole === 'CITY_OFFICER'
-                    ? 'Cán bộ xét duyệt'
+                    ? 'Cán bộ xét duyệt cấp ĐHĐN'
                     : createForm.primaryRole === 'CITY_MANAGER'
-                    ? 'Quản lý xét duyệt'
+                    ? 'Quản lý xét duyệt cấp ĐHĐN'
                     : createForm.primaryRole === 'CITY_COMMITTEE'
-                    ? 'Hội đồng xét chọn'
+                    ? 'Hội đồng xét chọn cấp ĐHĐN'
                     : createForm.primaryRole === 'SCHOOL_OFFICER'
                     ? 'Cán bộ sơ tuyển cấp Trường'
                     : 'Quản trị hệ thống';
@@ -681,7 +679,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
 
               <div>
                 <label className="block text-[12px] font-bold text-[#172A3A] mb-1">
-                  Email công vụ (@hsvdanang.vn / trường) <span className="text-red-500">*</span>
+                  Email công vụ (@udn.vn) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -690,7 +688,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
                   onChange={(e) =>
                     setCreateForm({ ...createForm, email: e.target.value })
                   }
-                  placeholder="an.hv@hsvdanang.vn"
+                  placeholder="canbo.dut@udn.vn"
                   className="w-full h-[40px] px-3 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none focus:border-[#0D78AE] focus:bg-white"
                 />
               </div>
@@ -698,7 +696,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[12px] font-bold text-[#172A3A] mb-1">
-                    Vai trò chuyên trách
+                     Vai trò chuyên trách
                   </label>
                   <select
                     value={createForm.primaryRole}
@@ -709,15 +707,15 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
                         primaryRole: newRole,
                         unitLabel:
                           newRole === 'SCHOOL_OFFICER'
-                            ? 'Ban Thường vụ Đoàn - Hội Sinh viên Đại học Đà Nẵng'
+                            ? 'Hội Sinh viên Trường Đại học Bách khoa – ĐHĐN'
                             : createForm.unitLabel,
                       });
                     }}
                     className="w-full h-[40px] px-3 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none cursor-pointer"
                   >
-                    <option value="CITY_OFFICER">Cán bộ xét duyệt</option>
-                    <option value="CITY_MANAGER">Quản lý xét duyệt</option>
-                    <option value="CITY_COMMITTEE">Hội đồng xét chọn</option>
+                    <option value="CITY_OFFICER">Cán bộ xét duyệt cấp ĐHĐN</option>
+                    <option value="CITY_MANAGER">Quản lý xét duyệt cấp ĐHĐN</option>
+                    <option value="CITY_COMMITTEE">Hội đồng xét chọn cấp ĐHĐN</option>
                     <option value="SCHOOL_OFFICER">Cán bộ sơ tuyển cấp Trường</option>
                     <option value="ADMIN">Quản trị hệ thống</option>
                   </select>
@@ -746,7 +744,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
               {createForm.primaryRole === 'SCHOOL_OFFICER' && (
                 <div className="p-3 bg-[#F0FDF4] border border-[#DCFCE7] rounded-[8px] space-y-1.5">
                   <label className="block text-[12px] font-bold text-[#166534]">
-                    Đơn vị Hội đồng Sơ tuyển (School Review Unit) <span className="text-red-500">*</span>
+                    Đơn vị Hội đồng Sơ tuyển cấp Trường (School Review Unit) <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={createForm.schoolReviewUnitId}
@@ -758,14 +756,18 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
                     }
                     className="w-full h-[38px] px-3 text-[12px] font-semibold bg-white border border-[#86EFAC] rounded-[6px] outline-none text-[#166534] cursor-pointer"
                   >
-                    <option value="unit-udn">unit-udn · Hội đồng Sơ tuyển ĐH Đà Nẵng (8 trường thành viên)</option>
-                    <option value="unit-dtu">unit-dtu · Hội đồng Sơ tuyển Đại học Duy Tân</option>
-                    <option value="unit-da-nang-arch">unit-da-nang-arch · Hội đồng Sơ tuyển ĐH Kiến trúc Đà Nẵng</option>
-                    <option value="unit-dong-a">unit-dong-a · Hội đồng Sơ tuyển Trường Đại học Đông Á</option>
-                    <option value="unit-fpt">unit-fpt · Hội đồng Sơ tuyển Phân hiệu ĐH FPT Đà Nẵng</option>
+                    <option value="unit-dut">unit-dut · Trường Đại học Bách khoa – ĐHĐN</option>
+                    <option value="unit-due">unit-due · Trường Đại học Kinh tế – ĐHĐN</option>
+                    <option value="unit-ued">unit-ued · Trường Đại học Sư phạm – ĐHĐN</option>
+                    <option value="unit-ufl">unit-ufl · Trường Đại học Ngoại ngữ – ĐHĐN</option>
+                    <option value="unit-ute">unit-ute · Trường Đại học Sư phạm Kỹ thuật – ĐHĐN</option>
+                    <option value="unit-vku">unit-vku · Trường ĐH CNTT &amp; Truyền thông Việt – Hàn – ĐHĐN</option>
+                    <option value="unit-smp">unit-smp · Trường Y Dược – ĐHĐN</option>
+                    <option value="unit-vnuk">unit-vnuk · Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN</option>
+                    <option value="unit-kontum">unit-kontum · Phân hiệu Đại học Đà Nẵng tại Kon Tum</option>
                   </select>
                   <p className="text-[11px] text-[#15803D]">
-                    Theo quy chế, toàn bộ 8 cơ sở giáo dục thành viên ĐHĐN (DUT, DUE, UED, UFL, UTE, VKU, VNUK, SMP) được phân công về chung mã đơn vị <code className="font-mono font-bold">unit-udn</code>.
+                    Theo quy chế 02 cấp Đại học Đà Nẵng, mỗi trường/đơn vị thành viên (09 đơn vị) có Hội đồng Sơ tuyển độc lập trình danh sách lên Hội Sinh viên Đại học Đà Nẵng.
                   </p>
                 </div>
               )}

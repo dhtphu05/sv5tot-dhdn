@@ -42,8 +42,8 @@ export interface SchoolCollectiveConfirmationQueueProps {
 export const SchoolCollectiveConfirmationQueue: React.FC<SchoolCollectiveConfirmationQueueProps> = ({
   currentUser,
 }) => {
-  const userUnitId = currentUser.schoolReviewUnitId || 'unit-udn';
-  const unitName = currentUser.unitLabel || 'Đại học Đà Nẵng';
+  const userUnitId = currentUser.schoolReviewUnitId || 'unit-dut';
+  const unitName = currentUser.unitLabel || 'Trường Đại học Bách khoa – ĐHĐN';
 
   const [apps, setApps] = useState<CollectiveApplication[]>(() =>
     getCollectiveApplicationsForSchoolReviewUnit(userUnitId)

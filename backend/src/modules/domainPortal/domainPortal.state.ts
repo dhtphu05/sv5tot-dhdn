@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Frontend Domain Portal V2 State & Auth Helpers (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT Đại học Đà Nẵng — Frontend Domain Portal V2 State & Auth Helpers (Backend V2)
+ * Cơ quan quản lý: Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import fs from 'node:fs';
@@ -73,85 +73,61 @@ export const ALLOWED_EXTENSIONS = new Set([
 
 export const SCHOOL_UNIT_MAP: Record<string, { unitId: string; unitName: string; instName: string }> = {
   'inst-dut': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-dut',
+    unitName: 'Trường Đại học Bách khoa – ĐHĐN',
     instName: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   'inst-due': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-due',
+    unitName: 'Trường Đại học Kinh tế – ĐHĐN',
     instName: 'Trường Đại học Kinh tế – ĐHĐN',
   },
   'inst-ued': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-ued',
+    unitName: 'Trường Đại học Sư phạm – ĐHĐN',
     instName: 'Trường Đại học Sư phạm – ĐHĐN',
   },
   'inst-ufl': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-ufl',
+    unitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
     instName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
   },
   'inst-ufls': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-ufl',
+    unitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
     instName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
   },
   'inst-ute': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-ute',
+    unitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
     instName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
   },
   'inst-vku': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-vku',
+    unitName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
     instName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
   },
   'inst-smp': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-smp',
+    unitName: 'Trường Y Dược – ĐHĐN',
     instName: 'Trường Y Dược – ĐHĐN',
   },
   'inst-vnuk': {
-    unitId: 'unit-udn',
-    unitName: 'Đại học Đà Nẵng',
+    unitId: 'unit-vnuk',
+    unitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
     instName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
   },
-  'inst-dtu': {
-    unitId: 'unit-dtu',
-    unitName: 'Trường Đại học Duy Tân',
-    instName: 'Đại học Duy Tân',
-  },
-  'inst-dau': {
-    unitId: 'unit-dau',
-    unitName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    instName: 'Trường Đại học Kiến trúc Đà Nẵng',
-  },
-  'inst-donga': {
-    unitId: 'unit-donga',
-    unitName: 'Trường Đại học Đông Á',
-    instName: 'Trường Đại học Đông Á',
-  },
-  'inst-upes3': {
-    unitId: 'unit-upes3',
-    unitName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    instName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-  },
-  'inst-tyd': {
-    unitId: 'unit-tyd',
-    unitName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    instName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-  },
-  'inst-fpt': {
-    unitId: 'unit-fpt',
-    unitName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    instName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
+  'inst-kontum': {
+    unitId: 'unit-kontum',
+    unitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    instName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
   },
 };
 
 export const STAFF_SEED_ACCOUNTS: Array<{
   id: string;
   email: string;
+  aliases?: string[];
   fullName: string;
   role: SystemRoleCode;
   roleLabel: string;
@@ -159,196 +135,158 @@ export const STAFF_SEED_ACCOUNTS: Array<{
   unitLabel: string;
   institutionId?: string;
 }> = [
-  // Cán bộ sơ tuyển cấp Trường / Đơn vị (SCHOOL_OFFICER)
+  // Cán bộ sơ tuyển 9 trường/đơn vị thành viên ĐHĐN (SCHOOL_OFFICER) — mỗi đơn vị thành viên 01 tài khoản độc lập
   {
-    id: 'staff-sch-an',
-    email: 'an.nv@udn.vn',
-    fullName: 'Nguyễn Văn An',
+    id: 'staff-sch-dut',
+    email: 'canbo.dut@udn.vn',
+    aliases: ['canbo.udn@udn.vn', 'an.nv@udn.vn', 'tien.nv@udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Bách khoa – ĐHĐN',
     role: 'SCHOOL_OFFICER',
-    roleLabel: 'Cán bộ xét sơ tuyển',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    roleLabel: 'Cán bộ sơ tuyển cấp Trường',
+    unitId: 'unit-dut',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
     institutionId: 'inst-dut',
   },
   {
-    id: 'staff-sch-udn',
-    email: 'tien.nv@udn.vn',
-    fullName: 'Nguyễn Văn Tiến',
+    id: 'staff-sch-due',
+    email: 'canbo.due@udn.vn',
+    aliases: ['canbo.due@due.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Kinh tế – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-udn',
-    unitLabel: 'Hội đồng Sơ tuyển Đại học Đà Nẵng',
-    institutionId: 'inst-dut',
+    unitId: 'unit-due',
+    unitLabel: 'Trường Đại học Kinh tế – ĐHĐN',
+    institutionId: 'inst-due',
   },
   {
-    id: 'staff-sch-dtu',
-    email: 'dung.th@duytan.edu.vn',
-    fullName: 'Trần Hoàng Dũng',
+    id: 'staff-sch-ued',
+    email: 'canbo.ued@udn.vn',
+    aliases: ['canbo.ued@ued.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Sư phạm – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-dtu',
-    unitLabel: 'Trường Đại học Duy Tân',
-    institutionId: 'inst-dtu',
+    unitId: 'unit-ued',
+    unitLabel: 'Trường Đại học Sư phạm – ĐHĐN',
+    institutionId: 'inst-ued',
   },
   {
-    id: 'staff-sch-dtu-huy',
-    email: 'canbo.dtu@duytan.edu.vn',
-    fullName: 'Trần Gia Huy',
+    id: 'staff-sch-ufl',
+    email: 'canbo.ufl@udn.vn',
+    aliases: ['canbo.ufl@ufl.udn.vn', 'canbo.ufls@udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Ngoại ngữ – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-dtu',
-    unitLabel: 'Trường Đại học Duy Tân',
-    institutionId: 'inst-dtu',
+    unitId: 'unit-ufl',
+    unitLabel: 'Trường Đại học Ngoại ngữ – ĐHĐN',
+    institutionId: 'inst-ufl',
   },
   {
-    id: 'staff-sch-donga',
-    email: 'thao.htt@donga.edu.vn',
-    fullName: 'Hoàng Thị Thu Thảo',
+    id: 'staff-sch-ute',
+    email: 'canbo.ute@udn.vn',
+    aliases: ['canbo.ute@ute.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-donga',
-    unitLabel: 'Trường Đại học Đông Á',
-    institutionId: 'inst-donga',
+    unitId: 'unit-ute',
+    unitLabel: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
+    institutionId: 'inst-ute',
   },
   {
-    id: 'staff-sch-dau',
-    email: 'hai.lt@dau.edu.vn',
-    fullName: 'Lê Thanh Hải',
+    id: 'staff-sch-vku',
+    email: 'canbo.vku@udn.vn',
+    aliases: ['canbo.vku@vku.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-dau',
-    unitLabel: 'Trường Đại học Kiến trúc Đà Nẵng',
-    institutionId: 'inst-dau',
+    unitId: 'unit-vku',
+    unitLabel: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
+    institutionId: 'inst-vku',
   },
   {
-    id: 'staff-sch-upes3',
-    email: 'tri.vm@upes3.edu.vn',
-    fullName: 'Võ Minh Trí',
+    id: 'staff-sch-smp',
+    email: 'canbo.smp@udn.vn',
+    aliases: ['canbo.smp@smp.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Trường Y Dược – ĐHĐN',
     role: 'SCHOOL_OFFICER',
     roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-upes3',
-    unitLabel: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    institutionId: 'inst-upes3',
+    unitId: 'unit-smp',
+    unitLabel: 'Trường Y Dược – ĐHĐN',
+    institutionId: 'inst-smp',
   },
   {
-    id: 'staff-sch-tyd',
-    email: 'phuong.nt@dhktyduocdn.edu.vn',
-    fullName: 'Nguyễn Thị Phương',
+    id: 'staff-sch-vnuk',
+    email: 'canbo.vnuk@udn.vn',
+    aliases: ['canbo.vnuk@vnuk.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
     role: 'SCHOOL_OFFICER',
-    roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-tyd',
-    unitLabel: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    institutionId: 'inst-tyd',
+    roleLabel: 'Cán bộ sơ tuyển cấp Viện',
+    unitId: 'unit-vnuk',
+    unitLabel: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+    institutionId: 'inst-vnuk',
   },
   {
-    id: 'staff-sch-fpt',
-    email: 'anh.bd@fpt.edu.vn',
-    fullName: 'Bùi Đức Anh',
+    id: 'staff-sch-kontum',
+    email: 'canbo.kontum@udn.vn',
+    aliases: ['canbo.kontum@kontum.udn.vn'],
+    fullName: 'Cán bộ sơ tuyển Phân hiệu Đại học Đà Nẵng tại Kon Tum',
     role: 'SCHOOL_OFFICER',
-    roleLabel: 'Cán bộ sơ tuyển cấp Trường',
-    unitId: 'unit-fpt',
-    unitLabel: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    institutionId: 'inst-fpt',
+    roleLabel: 'Cán bộ sơ tuyển cấp Phân hiệu',
+    unitId: 'unit-kontum',
+    unitLabel: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    institutionId: 'inst-kontum',
   },
-  // Cán bộ xét duyệt Thành phố (CITY_OFFICER)
+  // Cán bộ xét duyệt cấp Đại học Đà Nẵng (CITY_OFFICER) — 01 tài khoản chính thức
   {
     id: 'staff-off-nam',
-    email: 'nam.th@hsvdanang.vn',
-    fullName: 'Trần Hoàng Nam',
+    email: 'canbo.dhdn@udn.vn',
+    aliases: [
+      'canbo.thanhpho@hsvdanang.vn',
+      'nam.th@hsvdanang.vn',
+      'chau.vtm@hsvdanang.vn',
+      'huy.dq@hsvdanang.vn',
+      'tung.pt@hsvdanang.vn',
+      'linh.pt@hsvdanang.vn',
+      'linh.ptm@hsvdanang.vn',
+    ],
+    fullName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
     role: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ xét duyệt Thành phố',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Kỹ thuật & Công nghệ',
+    roleLabel: 'Cán bộ xét duyệt cấp ĐHĐN',
+    unitLabel: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   },
-  {
-    id: 'staff-off-chau',
-    email: 'chau.vtm@hsvdanang.vn',
-    fullName: 'Võ Thị Minh Châu',
-    role: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ xét duyệt Thành phố',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Kinh tế & Sư phạm',
-  },
-  {
-    id: 'staff-off-huy',
-    email: 'huy.dq@hsvdanang.vn',
-    fullName: 'Đặng Quốc Huy',
-    role: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ xét duyệt Thành phố',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Ngoại ngữ & Y Dược',
-  },
-  {
-    id: 'staff-off-tung',
-    email: 'tung.pt@hsvdanang.vn',
-    fullName: 'Phan Thanh Tùng',
-    role: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ xét duyệt Thành phố',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Đại học & Học viện',
-  },
-  {
-    id: 'staff-off-linh',
-    email: 'linh.pt@hsvdanang.vn',
-    fullName: 'Phạm Thùy Linh',
-    role: 'CITY_OFFICER',
-    roleLabel: 'Cán bộ xét duyệt Thành phố',
-    unitLabel: 'Hội Sinh viên TP. Đà Nẵng',
-  },
-  // Quản lý xét duyệt Thành phố (CITY_MANAGER)
+  // Quản lý xét duyệt cấp Đại học Đà Nẵng (CITY_MANAGER) — 01 tài khoản chính thức
   {
     id: 'staff-mgr-ha',
-    email: 'ha.nt@hsvdanang.vn',
-    fullName: 'Nguyễn Thu Hà',
+    email: 'quanly.dhdn@udn.vn',
+    aliases: ['quanly.thanhpho@hsvdanang.vn', 'ha.nt@hsvdanang.vn'],
+    fullName: 'Quản lý xét duyệt cấp Đại học Đà Nẵng',
     role: 'CITY_MANAGER',
-    roleLabel: 'Quản lý xét duyệt Thành phố',
-    unitLabel: 'Ban Thư ký · Hội Sinh viên TP. Đà Nẵng',
+    roleLabel: 'Quản lý xét duyệt cấp ĐHĐN',
+    unitLabel: 'Ban Thư ký · Hội Sinh viên Đại học Đà Nẵng',
   },
-  // Hội đồng xét chọn Thành phố (CITY_COMMITTEE)
+  // Hội đồng xét chọn cấp Đại học Đà Nẵng (CITY_COMMITTEE) — 01 tài khoản chính thức
   {
     id: 'staff-com-quan',
-    email: 'quan.lm@hsvdanang.vn',
-    fullName: 'Lê Minh Quân',
+    email: 'hoidong.dhdn@udn.vn',
+    aliases: [
+      'hoidong.thanhpho@hsvdanang.vn',
+      'quan.lm@hsvdanang.vn',
+      'thao.tp@hsvdanang.vn',
+      'viet.hq@hsvdanang.vn',
+    ],
+    fullName: 'Hội đồng xét chọn cấp Đại học Đà Nẵng',
     role: 'CITY_COMMITTEE',
-    roleLabel: 'Hội đồng xét chọn Thành phố',
-    unitLabel: 'Hội đồng xét chọn cấp Thành phố Đà Nẵng',
+    roleLabel: 'Hội đồng xét chọn cấp ĐHĐN',
+    unitLabel: 'Hội đồng xét chọn cấp Đại học Đà Nẵng',
   },
-  {
-    id: 'staff-com-thao',
-    email: 'thao.tp@hsvdanang.vn',
-    fullName: 'Trương Phương Thảo',
-    role: 'CITY_COMMITTEE',
-    roleLabel: 'Hội đồng xét chọn Thành phố',
-    unitLabel: 'Ban Thanh niên Trường học Thành Đoàn',
-  },
-  {
-    id: 'staff-com-viet',
-    email: 'viet.hq@hsvdanang.vn',
-    fullName: 'Hoàng Quốc Việt',
-    role: 'CITY_COMMITTEE',
-    roleLabel: 'Hội đồng xét chọn Thành phố',
-    unitLabel: 'Hội đồng xét chọn cấp Thành phố Đà Nẵng',
-  },
-  // Quản trị hệ thống (ADMIN)
-  {
-    id: 'staff-adm-khoa',
-    email: 'khoa.nd@hsvdanang.vn',
-    fullName: 'Nguyễn Đăng Khoa',
-    role: 'ADMIN',
-    roleLabel: 'Quản trị hệ thống',
-    unitLabel: 'Thành Đoàn Đà Nẵng',
-  },
+  // Quản trị hệ thống 5TOT Đại học Đà Nẵng (ADMIN) — 01 tài khoản chính thức
   {
     id: 'staff-adm-lan',
-    email: 'lan.pn@hsvdanang.vn',
-    fullName: 'Phạm Ngọc Lan',
+    email: 'admin@udn.vn',
+    aliases: ['admin@hsvdanang.vn', 'lan.pn@hsvdanang.vn', 'khoa.nd@hsvdanang.vn'],
+    fullName: 'Quản trị hệ thống 5TOT Đại học Đà Nẵng',
     role: 'ADMIN',
     roleLabel: 'Quản trị hệ thống',
-    unitLabel: 'Văn phòng Hội Sinh viên TP. Đà Nẵng',
-  },
-  {
-    id: 'staff-adm-root',
-    email: 'admin@hsvdanang.vn',
-    fullName: 'Quản trị viên 5TOT Đà Nẵng',
-    role: 'ADMIN',
-    roleLabel: 'Quản trị hệ thống',
-    unitLabel: 'Hội Sinh viên TP. Đà Nẵng',
+    unitLabel: 'Văn phòng Hội Sinh viên Đại học Đà Nẵng',
   },
 ];
 
@@ -369,8 +307,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Chi hội Sinh viên 21TCLC_DT1',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   {
     id: 'prep-col-due-01',
@@ -379,8 +317,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Liên chi hội Khoa Quản trị Kinh doanh',
     institutionId: 'inst-due',
     institutionName: 'Trường Đại học Kinh tế – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-due',
+    schoolReviewUnitName: 'Trường Đại học Kinh tế – ĐHĐN',
   },
   {
     id: 'prep-col-ued-01',
@@ -389,8 +327,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Chi hội Sư phạm Toán 22ST',
     institutionId: 'inst-ued',
     institutionName: 'Trường Đại học Sư phạm – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ued',
+    schoolReviewUnitName: 'Trường Đại học Sư phạm – ĐHĐN',
   },
   {
     id: 'prep-col-ufl-01',
@@ -399,8 +337,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Liên chi hội Khoa Tiếng Anh',
     institutionId: 'inst-ufl',
     institutionName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ufl',
+    schoolReviewUnitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
   },
   {
     id: 'prep-col-ute-01',
@@ -409,8 +347,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Chi đoàn 21KMT',
     institutionId: 'inst-ute',
     institutionName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ute',
+    schoolReviewUnitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
   },
   {
     id: 'prep-col-vku-01',
@@ -419,8 +357,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Liên chi hội Khoa Khoa học Máy tính',
     institutionId: 'inst-vku',
     institutionName: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-vku',
+    schoolReviewUnitName: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
   },
   {
     id: 'prep-col-smp-01',
@@ -429,8 +367,8 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Liên chi hội Y khoa',
     institutionId: 'inst-smp',
     institutionName: 'Trường Y Dược – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-smp',
+    schoolReviewUnitName: 'Trường Y Dược – ĐHĐN',
   },
   {
     id: 'prep-col-vnuk-01',
@@ -439,68 +377,18 @@ export const COLLECTIVE_PREPARERS: Array<{
     collectiveName: 'Liên chi hội Viện Nghiên cứu và Đào tạo Việt – Anh',
     institutionId: 'inst-vnuk',
     institutionName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-vnuk',
+    schoolReviewUnitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
   },
   {
-    id: 'prep-col-dtu-01',
-    email: 'long.vh@dtu.edu.vn',
-    fullName: 'Võ Hoàng Long',
-    collectiveName: 'Liên chi đoàn Viện Đào tạo Quốc tế',
-    institutionId: 'inst-dtu',
-    institutionName: 'Đại học Duy Tân',
-    schoolReviewUnitId: 'unit-dtu',
-    schoolReviewUnitName: 'Trường Đại học Duy Tân',
-  },
-  {
-    id: 'prep-col-donga-01',
-    email: 'trang.lth@donga.edu.vn',
-    fullName: 'Lê Thị Huyền Trang',
-    collectiveName: 'Liên chi hội Khoa Quản trị Du lịch',
-    institutionId: 'inst-donga',
-    institutionName: 'Trường Đại học Đông Á',
-    schoolReviewUnitId: 'unit-donga',
-    schoolReviewUnitName: 'Trường Đại học Đông Á',
-  },
-  {
-    id: 'prep-col-dau-01',
-    email: 'minh.tqh@dau.edu.vn',
-    fullName: 'Trần Quốc Hoàng Minh',
-    collectiveName: 'Liên chi hội Khoa Kiến trúc',
-    institutionId: 'inst-dau',
-    institutionName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    schoolReviewUnitId: 'unit-dau',
-    schoolReviewUnitName: 'Trường Đại học Kiến trúc Đà Nẵng',
-  },
-  {
-    id: 'prep-col-upes3-01',
-    email: 'tuan.nq@upes3.edu.vn',
-    fullName: 'Nguyễn Quốc Tuấn',
-    collectiveName: 'Liên chi đoàn Khoa Giáo dục Thể chất',
-    institutionId: 'inst-upes3',
-    institutionName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    schoolReviewUnitId: 'unit-upes3',
-    schoolReviewUnitName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-  },
-  {
-    id: 'prep-col-tyd-01',
-    email: 'truc.htt@dhktyduocdn.edu.vn',
-    fullName: 'Huỳnh Thị Thanh Trúc',
-    collectiveName: 'Liên chi hội Khoa Điều dưỡng',
-    institutionId: 'inst-tyd',
-    institutionName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    schoolReviewUnitId: 'unit-tyd',
-    schoolReviewUnitName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-  },
-  {
-    id: 'prep-col-fpt-01',
-    email: 'vy.ntt@fpt.edu.vn',
-    fullName: 'Nguyễn Trần Thảo Vy',
-    collectiveName: 'CLB Kỹ thuật Phần mềm F-Code',
-    institutionId: 'inst-fpt',
-    institutionName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    schoolReviewUnitId: 'unit-fpt',
-    schoolReviewUnitName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
+    id: 'prep-col-kontum-01',
+    email: 'tuan.nv@kontum.udn.vn',
+    fullName: 'Nguyễn Văn Tuấn',
+    collectiveName: 'Liên chi hội Phân hiệu ĐHĐN tại Kon Tum',
+    institutionId: 'inst-kontum',
+    institutionName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    schoolReviewUnitId: 'unit-kontum',
+    schoolReviewUnitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
   },
 ];
 
@@ -521,8 +409,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '102220123',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-dut',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   {
     id: 'stu-dut-02',
@@ -531,8 +419,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '102220301',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-dut',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   {
     id: 'stu-due-01',
@@ -541,8 +429,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '211121045120',
     institutionId: 'inst-due',
     institutionName: 'Trường Đại học Kinh tế – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-due',
+    unitLabel: 'Trường Đại học Kinh tế – ĐHĐN',
   },
   {
     id: 'stu-ued-01',
@@ -551,8 +439,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '3140122089',
     institutionId: 'inst-ued',
     institutionName: 'Trường Đại học Sư phạm – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ued',
+    unitLabel: 'Trường Đại học Sư phạm – ĐHĐN',
   },
   {
     id: 'stu-ufl-01',
@@ -561,8 +449,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '411220156',
     institutionId: 'inst-ufl',
     institutionName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ufl',
+    unitLabel: 'Trường Đại học Ngoại ngữ – ĐHĐN',
   },
   {
     id: 'stu-ute-01',
@@ -571,8 +459,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '221150531201',
     institutionId: 'inst-ute',
     institutionName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ute',
+    unitLabel: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
   },
   {
     id: 'stu-vku-01',
@@ -581,8 +469,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '22IT088',
     institutionId: 'inst-vku',
     institutionName: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-vku',
+    unitLabel: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
   },
   {
     id: 'stu-smp-01',
@@ -591,8 +479,8 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '21YK042',
     institutionId: 'inst-smp',
     institutionName: 'Trường Y Dược – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-smp',
+    unitLabel: 'Trường Y Dược – ĐHĐN',
   },
   {
     id: 'stu-vnuk-01',
@@ -601,128 +489,18 @@ export const SEEDED_STUDENTS: Array<{
     studentCode: '22VNUK019',
     institutionId: 'inst-vnuk',
     institutionName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-vnuk',
+    unitLabel: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
   },
   {
-    id: 'stu-dtu-01',
-    email: 'sv.dtu@duytan.edu.vn',
-    fullName: 'Nguyễn Hoàng Phúc',
-    studentCode: '27211204567',
-    institutionId: 'inst-dtu',
-    institutionName: 'Đại học Duy Tân',
-    unitId: 'unit-dtu',
-    unitLabel: 'Trường Đại học Duy Tân',
-  },
-  {
-    id: 'stu-donga-01',
-    email: 'sv.donga@donga.edu.vn',
-    fullName: 'Trương Mỹ Linh',
-    studentCode: 'DA220518',
-    institutionId: 'inst-donga',
-    institutionName: 'Trường Đại học Đông Á',
-    unitId: 'unit-donga',
-    unitLabel: 'Trường Đại học Đông Á',
-  },
-  {
-    id: 'stu-dau-01',
-    email: 'sv.dau@dau.edu.vn',
-    fullName: 'Lê Đình Khôi',
-    studentCode: '21KT0115',
-    institutionId: 'inst-dau',
-    institutionName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    unitId: 'unit-dau',
-    unitLabel: 'Trường Đại học Kiến trúc Đà Nẵng',
-  },
-  {
-    id: 'stu-upes3-01',
-    email: 'sv.upes3@upes3.edu.vn',
-    fullName: 'Nguyễn Quốc Tuấn',
-    studentCode: 'TD220094',
-    institutionId: 'inst-upes3',
-    institutionName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    unitId: 'unit-upes3',
-    unitLabel: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-  },
-  {
-    id: 'stu-tyd-01',
-    email: 'sv.tyd@dhktyduocdn.edu.vn',
-    fullName: 'Huỳnh Thị Thanh Trúc',
-    studentCode: 'YD210312',
-    institutionId: 'inst-tyd',
-    institutionName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    unitId: 'unit-tyd',
-    unitLabel: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-  },
-  {
-    id: 'stu-fpt-01',
-    email: 'sv.fpt@fpt.edu.vn',
-    fullName: 'Bùi Quang Nhật',
-    studentCode: 'DE170452',
-    institutionId: 'inst-fpt',
-    institutionName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    unitId: 'unit-fpt',
-    unitLabel: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-  },
-  {
-    id: 'stu-dut-phu',
-    email: 'phu.dht@dut.udn.vn',
-    fullName: 'Đoàn Hoàng Thiên Phú',
-    studentCode: '193230153',
-    institutionId: 'inst-dut',
-    institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
-  },
-  {
-    id: 'stu-dtu-02',
-    email: 'minhanh.tran@duytan.edu.vn',
-    fullName: 'Trần Lê Minh Ánh',
-    studentCode: '282115088',
-    institutionId: 'inst-dtu',
-    institutionName: 'Đại học Duy Tân',
-    unitId: 'unit-dtu',
-    unitLabel: 'Trường Đại học Duy Tân',
-  },
-  {
-    id: 'stu-donga-02',
-    email: 'huukhang.nguyen@donga.edu.vn',
-    fullName: 'Nguyễn Hữu Khang',
-    studentCode: 'DA210892',
-    institutionId: 'inst-donga',
-    institutionName: 'Trường Đại học Đông Á',
-    unitId: 'unit-donga',
-    unitLabel: 'Trường Đại học Đông Á',
-  },
-  {
-    id: 'stu-dau-02',
-    email: 'thanhha.phan@dau.edu.vn',
-    fullName: 'Phan Thị Thanh Hà',
-    studentCode: '22KT0241',
-    institutionId: 'inst-dau',
-    institutionName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    unitId: 'unit-dau',
-    unitLabel: 'Trường Đại học Kiến trúc Đà Nẵng',
-  },
-  {
-    id: 'stu-upes3-02',
-    email: 'vanhoang.le@upes3.edu.vn',
-    fullName: 'Lê Văn Hoàng',
-    studentCode: 'TD210152',
-    institutionId: 'inst-upes3',
-    institutionName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    unitId: 'unit-upes3',
-    unitLabel: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-  },
-  {
-    id: 'stu-fpt-02',
-    email: 'tamhmde180129@fpt.edu.vn',
-    fullName: 'Hoàng Minh Tâm',
-    studentCode: 'DE180129',
-    institutionId: 'inst-fpt',
-    institutionName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    unitId: 'unit-fpt',
-    unitLabel: 'Trường Đại học FPT phân hiệu Đà Nẵng',
+    id: 'stu-kontum-01',
+    email: 'sv.kontum@kontum.udn.vn',
+    fullName: 'Nguyễn Minh Quân',
+    studentCode: '22KT015',
+    institutionId: 'inst-kontum',
+    institutionName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    unitId: 'unit-kontum',
+    unitLabel: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
   },
 ];
 
@@ -813,109 +591,11 @@ export function createEmptyCollectiveRequirements() {
 }
 
 function buildSeededIndividualStaffRecords(): Array<Record<string, any>> {
-  const baseRecords: Array<Record<string, any>> = [
-    {
-      applicationId: 'APP-2026-DN-00142',
-      schoolYear: 'Năm học 2025–2026',
-      student: {
-        fullName: 'Nguyễn Minh Anh',
-        studentCode: '102220123',
-        email: 'minhanh.nguyen@dut.udn.vn',
-      },
-      institution: {
-        id: 'inst-dut',
-        officialName: 'Trường Đại học Bách khoa – ĐHĐN',
-      },
-      currentReviewStage: 'SCHOOL',
-      schoolReviewUnitId: 'unit-udn',
-      schoolReviewUnitName: 'Đại học Đà Nẵng',
-      schoolPreliminaryStatus: 'pending_intake',
-      workflowStatus: 'unassigned',
-      assignment: null,
-      reviewedCriteriaCount: 0,
-      criteriaReview: createDefaultCriteriaReviewList(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-
-  for (const st of SEEDED_STUDENTS) {
-    if (st.studentCode === '102220123') continue;
-    baseRecords.push({
-      applicationId: `APP-2026-DN-${st.studentCode}`,
-      schoolYear: 'Năm học 2025–2026',
-      student: {
-        fullName: st.fullName,
-        studentCode: st.studentCode,
-        email: st.email,
-      },
-      institution: {
-        id: st.institutionId,
-        officialName: st.institutionName,
-      },
-      currentReviewStage: 'SCHOOL',
-      schoolReviewUnitId: st.unitId,
-      schoolReviewUnitName: st.unitLabel,
-      schoolPreliminaryStatus: 'pending_intake',
-      workflowStatus: 'unassigned',
-      assignment: null,
-      reviewedCriteriaCount: 0,
-      criteriaReview: createDefaultCriteriaReviewList(),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  return baseRecords;
+  return [];
 }
 
 function buildSeededStudentApplications(): Record<string, Record<string, any>> {
-  const map: Record<string, Record<string, any>> = {
-    'APP-2026-DN-00142': {
-      applicationId: 'APP-2026-DN-00142',
-      status: 'draft',
-      reviewStage: 'SCHOOL',
-      trainingInstitutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-      schoolReviewUnitId: 'unit-udn',
-      schoolReviewUnitName: 'Đại học Đà Nẵng',
-      schoolPreliminaryStatus: 'school_not_submitted',
-      student: {
-        fullName: 'Nguyễn Minh Anh',
-        studentId: '102220123',
-        university: 'Trường Đại học Bách khoa – ĐHĐN',
-        faculty: 'Khoa Công nghệ Thông tin',
-        class: '22T_CLC1',
-        email: 'minhanh.nguyen@dut.udn.vn',
-        academicYear: '2025–2026',
-      },
-      criteria: createDefaultCriteriaList(),
-      supplementRequests: [],
-    },
-  };
-
-  for (const st of SEEDED_STUDENTS) {
-    const appId = `APP-2026-DN-${st.studentCode}`;
-    map[appId] = {
-      applicationId: appId,
-      status: 'submitted',
-      reviewStage: 'SCHOOL',
-      trainingInstitutionName: st.institutionName,
-      schoolReviewUnitId: st.unitId,
-      schoolReviewUnitName: st.unitLabel,
-      schoolPreliminaryStatus: 'pending_intake',
-      student: {
-        fullName: st.fullName,
-        studentId: st.studentCode,
-        university: st.institutionName,
-        faculty: 'Khoa chuyên ngành',
-        class: 'K2022',
-        email: st.email,
-        academicYear: '2025–2026',
-      },
-      criteria: createDefaultCriteriaList(),
-      supplementRequests: [],
-    };
-  }
-
-  return map;
+  return {};
 }
 
 export interface PortalRegisteredStudent {
@@ -954,9 +634,9 @@ export const portalState: PortalState = {
       track: 'SYSTEM',
       action: 'BACKEND_DB_INITIALIZED',
       actorId: 'system',
-      actorName: 'Hệ thống 5TOT Đà Nẵng',
+      actorName: 'Hệ thống 5TOT Đại học Đà Nẵng',
       actorRole: 'ADMIN',
-      details: 'Khởi tạo cơ sở dữ liệu chế độ Real Backend V2.',
+      details: 'Khởi tạo cơ sở dữ liệu chế độ Real Backend V2 (Cấp Đại học Đà Nẵng — 0 hồ sơ mẫu).',
     },
   ],
 };
@@ -999,13 +679,44 @@ export function loadPortalStateFromDisk(): boolean {
       portalState.registeredStudents = new Map(parsed.registeredStudents);
     }
     if (Array.isArray(parsed.individualStaffRecords)) {
-      portalState.individualStaffRecords = parsed.individualStaffRecords;
+      portalState.individualStaffRecords = parsed.individualStaffRecords.map(
+        (rec) => {
+          if (rec?.assignment?.officerId) {
+            return {
+              ...rec,
+              assignment: {
+                ...rec.assignment,
+                officerId: 'staff-off-nam',
+                officerName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
+                assignedBy: 'Quản lý xét duyệt cấp Đại học Đà Nẵng',
+              },
+              latestOperationalNote:
+                typeof rec.latestOperationalNote === 'string' &&
+                rec.latestOperationalNote.includes('Phân công')
+                  ? 'Đã phân công cho Cán bộ xét duyệt cấp Đại học Đà Nẵng'
+                  : rec.latestOperationalNote,
+            };
+          }
+          return rec;
+        }
+      );
     }
     if (parsed.studentApplications && typeof parsed.studentApplications === 'object') {
       portalState.studentApplications = parsed.studentApplications;
     }
     if (Array.isArray(parsed.collectiveApplications)) {
-      portalState.collectiveApplications = parsed.collectiveApplications;
+      portalState.collectiveApplications = parsed.collectiveApplications.map(
+        (col) => {
+          if (col?.assignedOfficerId) {
+            return {
+              ...col,
+              assignedOfficerId: 'staff-off-nam',
+              assignedOfficerName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
+            };
+          }
+          return col;
+        }
+      );
     }
     if (Array.isArray(parsed.evidenceIndex)) {
       portalState.evidenceIndex = new Map(parsed.evidenceIndex);
@@ -1013,6 +724,7 @@ export function loadPortalStateFromDisk(): boolean {
     if (Array.isArray(parsed.auditLogs)) {
       portalState.auditLogs = parsed.auditLogs;
     }
+    savePortalStateToDisk();
     return true;
   } catch {
     return false;
@@ -1036,7 +748,7 @@ export function clearDomainPortalStateForSeed(): void {
       track: 'SYSTEM',
       action: 'CLEAN_SLATE_INITIALIZED',
       actorId: 'system',
-      actorName: 'Hệ thống 5TOT Đà Nẵng',
+      actorName: 'Hệ thống 5TOT Đại học Đà Nẵng',
       actorRole: 'ADMIN',
       details: 'Đã làm sạch toàn bộ dữ liệu mẫu để khởi tạo dữ liệu thật qua REST API.',
     },
@@ -1058,9 +770,9 @@ export function resetDomainPortalState(): void {
       track: 'SYSTEM',
       action: 'BACKEND_DB_INITIALIZED',
       actorId: 'system',
-      actorName: 'Hệ thống 5TOT Đà Nẵng',
+      actorName: 'Hệ thống 5TOT Đại học Đà Nẵng',
       actorRole: 'ADMIN',
-      details: 'Khởi tạo cơ sở dữ liệu chế độ Real Backend V2.',
+      details: 'Khởi tạo cơ sở dữ liệu chế độ Real Backend V2 (Cấp Đại học Đà Nẵng — 0 hồ sơ mẫu).',
     },
   ];
 }
@@ -1164,6 +876,9 @@ export async function issueZeroTrustJwtToken(
           grantedByUserId: 'system-portal',
         });
       }
+    }
+    if (existing && params.fullName && existing.fullName !== params.fullName) {
+      existing = { ...existing, fullName: params.fullName };
     }
     const tokens = await deps.sessionService.createSession(
       existing,

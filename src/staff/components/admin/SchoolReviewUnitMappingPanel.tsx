@@ -53,11 +53,9 @@ export const SchoolReviewUnitMappingPanel: React.FC<
             </span>
           </div>
           <p className="text-[12px] text-[#526B7C] mt-0.5">
-            Mỗi trường đào tạo tham gia phải được gán vào đúng 01 Đơn vị xét sơ
-            tuyển. Khối 08 trường/viện thuộc Đại học Đà Nẵng dùng chung{' '}
-            <code className="font-bold text-[#0F2335]">unit-udn</code> (01 đợt
-            gửi danh sách/mùa) nhưng vẫn giữ nguyên trường gốc của từng sinh
-            viên.
+            Mỗi trường/đơn vị đào tạo thành viên Đại học Đà Nẵng (09 đơn vị) có
+            01 Hội đồng Sơ tuyển cấp Trường độc lập (01 đợt trình danh sách/mùa)
+            lập tờ trình đề nghị lên Hội Sinh viên Đại học Đà Nẵng.
           </p>
         </div>
 
@@ -72,8 +70,8 @@ export const SchoolReviewUnitMappingPanel: React.FC<
             <>
               <CheckCircle2 size={14} />
               <span>
-                Phân tuyến hợp lệ ({mappingValidation.udnMemberCount}/8 trường
-                ĐHĐN → unit-udn)
+                Phân tuyến hợp lệ ({mappingValidation.udnMemberCount}/9 đơn vị
+                thành viên ĐHĐN)
               </span>
             </>
           ) : (
@@ -93,9 +91,9 @@ export const SchoolReviewUnitMappingPanel: React.FC<
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-[12px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-[12px]">
         {units.map((unit) => {
-          const isUdn = unit.id === 'unit-udn';
+          const isUdn = true;
           return (
             <div
               key={unit.id}

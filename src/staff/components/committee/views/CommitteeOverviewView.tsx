@@ -99,7 +99,7 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
           <div>
             <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0B64A0] bg-[#EAF5FC] px-2 py-0.5 rounded-[5px]">
               <CheckCircle2 size={12} className="text-[#0D78AE]" />
-              <span>Đề xuất Thành phố</span>
+              <span>Đề xuất trình ĐHĐN</span>
             </span>
             <div className="text-[11px] text-[#607483] mt-0.5">
               {docNum ? `Theo ${docNum}` : 'Đã kèm văn bản PDF'}
@@ -110,7 +110,7 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
     },
     {
       key: 'city_review',
-      header: 'Thẩm định Thành phố',
+      header: 'Thẩm định cấp ĐHĐN',
       renderCell: (app) => {
         const prg = deriveApplicationCriteriaReviewProgress(app);
         return (
@@ -127,7 +127,7 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
               {prg.compactProgressLabel}
             </div>
             <div className="text-[11px] text-[#607483]">
-              {app.assignment?.officerName || 'Tổ thẩm định Thành phố'}
+              {app.assignment?.officerName || 'Tổ thẩm định ĐHĐN'}
             </div>
           </div>
         );
@@ -193,10 +193,10 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
             {activeSeasonLabel || CURRENT_STAFF_SEASON.schoolYear} · {CURRENT_STAFF_SEASON.scopeLabel}
           </div>
           <h1 className="text-[22px] font-extrabold text-[#0F2335] mt-0.5">
-            Hội đồng xét chọn
+            Hội đồng xét chọn cấp Đại học Đà Nẵng
           </h1>
           <p className="text-[13.5px] text-[#4A6275] mt-0.5">
-            Xem xét các hồ sơ đã hoàn tất phần xét và thực hiện bước quyết định theo quy trình.
+            Xem xét các hồ sơ từ 09 đơn vị thành viên đã hoàn tất thẩm định và thực hiện bước quyết định công nhận theo quy trình.
           </p>
         </div>
         <div className="flex items-center gap-2.5">

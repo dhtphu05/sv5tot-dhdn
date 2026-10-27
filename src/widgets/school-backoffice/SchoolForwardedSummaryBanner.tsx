@@ -33,10 +33,10 @@ export const SchoolForwardedSummaryBanner: React.FC<
           </div>
           <div>
             <h3 className="text-[16px] font-extrabold text-[#5B21B6]">
-              Đã gửi danh sách lên Hội Sinh viên Thành phố
+              Đã trình danh sách lên Hội Sinh viên Đại học Đà Nẵng
             </h3>
             <p className="text-[12.5px] text-[#6D28D9] mt-0.5">
-              Danh sách đề xuất đã gửi thành công. Toàn bộ hồ sơ đã sẵn sàng cho Hội đồng Thành phố thẩm định xét chọn.
+              Danh sách đề xuất đã trình thành công. Toàn bộ hồ sơ đã sẵn sàng cho Hội đồng xét chọn cấp Đại học Đà Nẵng thẩm định.
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export const SchoolForwardedSummaryBanner: React.FC<
           </div>
         </div>
         <div>
-          <span className="text-[#6D28D9] font-medium">Trạng thái cấp Thành phố:</span>
+          <span className="text-[#6D28D9] font-medium">Trạng thái cấp ĐHĐN:</span>
           <div className="font-bold text-[#059669] mt-0.5 flex items-center gap-1">
             <CheckCircle2 size={13} />
             <span>Đã tiếp nhận hồ sơ</span>

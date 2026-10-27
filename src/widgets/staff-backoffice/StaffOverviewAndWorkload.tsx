@@ -50,19 +50,19 @@ export const StaffWorkloadView: React.FC<StaffWorkloadViewProps> = ({
     <div className="p-6 max-w-[1240px] w-full mx-auto space-y-5">
       <div className="border-b border-[#DCE7EE] pb-4">
         <div className="text-[12px] font-semibold text-[#526B7C]">
-          {seasonLabel} · Không gian xét duyệt cấp Thành phố
+          {seasonLabel} · Không gian xét duyệt cấp Đại học Đà Nẵng
         </div>
         <h1 className="text-[20px] font-extrabold text-[#0F2335] mt-0.5">
-          Tiến độ thẩm định hồ sơ cấp Thành phố
+          Tiến độ thẩm định hồ sơ cấp Đại học Đà Nẵng
         </h1>
         <p className="text-[12.5px] text-[#526B7C] mt-1">
-          Hồ sơ được tiếp nhận và thẩm định trực tiếp bởi Tổ thẩm định Thành phố, không yêu cầu phân bổ tác vụ cá nhân.
+          Hồ sơ từ 09 đơn vị thành viên được tiếp nhận và thẩm định trực tiếp bởi Tổ thẩm định cấp Đại học Đà Nẵng.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 bg-white rounded-[12px] border border-[#DCE7EE] shadow-2xs">
-          <div className="text-[12px] font-semibold text-[#526B7C]">Tổng hồ sơ Thành phố</div>
+          <div className="text-[12px] font-semibold text-[#526B7C]">Tổng hồ sơ cấp ĐHĐN</div>
           <div className="text-[26px] font-extrabold text-[#0F2335] tabular-nums mt-1">
             {totalApps}
           </div>
@@ -85,7 +85,7 @@ export const StaffWorkloadView: React.FC<StaffWorkloadViewProps> = ({
             {completedCount}
           </div>
           <div className="text-[11.5px] text-[#16A34A] font-semibold mt-1">
-            Sẵn sàng chuyển Hội đồng xét chọn
+            Sẵn sàng trình Hội đồng xét chọn cấp ĐHĐN
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@ export const StaffOverviewDashboard: React.FC<StaffOverviewDashboardProps> = ({
             · {currentUser.roleLabel}
           </div>
           <h1 className="text-[21px] font-extrabold text-[#0F2335] mt-0.5">
-            Không gian xét duyệt cấp Thành phố · {currentUser.fullName}
+            Không gian xét duyệt cấp Đại học Đà Nẵng · {currentUser.fullName}
           </h1>
         </div>
       </div>
@@ -184,7 +184,7 @@ export const StaffOverviewDashboard: React.FC<StaffOverviewDashboardProps> = ({
               {totalCityApps}
             </div>
             <div className="text-[11.5px] text-[#607483] mt-1">
-              Đợt xét cấp Thành phố
+              Đợt xét cấp Đại học Đà Nẵng
             </div>
           </button>
 

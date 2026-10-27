@@ -40,6 +40,7 @@ import {
   Sparkles,
   MessageSquare,
   Copy,
+  RotateCcw,
 } from 'lucide-react';
 import { CRITERIA } from '../../../tokens';
 import {
@@ -1175,6 +1176,21 @@ export const EvidenceReviewViewer: React.FC<EvidenceReviewViewerProps> = ({
                     <span className="truncate">Xem xét</span>
                   </button>
                 </div>
+
+                {currentEvidenceStatus !== 'not_reviewed' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUnsuitableForm(false);
+                      setShowConsiderationForm(false);
+                      onUpdateEvidenceStatus(evidence.id, 'not_reviewed', localNote);
+                    }}
+                    className="w-full h-[34px] px-3 rounded-[10px] bg-white hover:bg-[#F1F5F9] text-[#475569] hover:text-[#0F172A] border border-[#CBD5E1] text-[12px] font-bold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Hoàn tác đánh giá minh chứng</span>
+                  </button>
+                )}
               </div>
             )}
           </div>

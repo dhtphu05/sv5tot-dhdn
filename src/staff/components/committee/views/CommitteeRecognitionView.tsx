@@ -144,7 +144,7 @@ export const CommitteeRecognitionView: React.FC<CommitteeRecognitionViewProps> =
                   Đơn vị tổ chức / vận hành
                 </div>
                 <div className="font-bold text-[#0F2335] mt-0.5">
-                  Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+                  Hội Sinh viên Việt Nam Đại học Đà Nẵng
                 </div>
               </div>
 
@@ -153,13 +153,13 @@ export const CommitteeRecognitionView: React.FC<CommitteeRecognitionViewProps> =
                   Đợt xét chọn &amp; Cấp danh hiệu
                 </div>
                 <div className="font-bold text-[#0F2335] mt-0.5">
-                  {seasonLabel} · Cấp Thành phố Đà Nẵng
+                  {seasonLabel} · Cấp Đại học Đà Nẵng
                 </div>
               </div>
 
               <div className="p-3.5 rounded-[9px] bg-[#F8FBFD] border border-[#E2EDF5]">
                 <div className="text-[11.5px] text-[#526B7C]">
-                  Được công nhận Sinh viên 5 tốt cấp Thành phố
+                  Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[16px] font-extrabold text-[#136F3A] tabular-nums mt-0.5">
                   {publicationReadiness.recognizedCount} sinh viên
@@ -186,7 +186,7 @@ export const CommitteeRecognitionView: React.FC<CommitteeRecognitionViewProps> =
                       Văn bản Quyết định công nhận chính thức (.PDF)
                     </div>
                     <p className="text-[11.5px] text-[#607483]">
-                      Tải lên tệp PDF Quyết định công nhận đã ký đóng dấu của Ban Thư ký Hội Sinh viên Thành phố.
+                      Tải lên tệp PDF Quyết định công nhận đã ký đóng dấu của Ban Thư ký Hội Sinh viên Đại học Đà Nẵng.
                     </p>
                   </div>
                 </div>

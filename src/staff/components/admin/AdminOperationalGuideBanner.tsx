@@ -48,10 +48,10 @@ export const AdminOperationalGuideBanner: React.FC<
       step: 2 as const,
       title: 'Bước 2 · Đơn vị & Tài khoản Cán bộ',
       subtitle:
-        'Kiểm tra danh sách trường (khối ĐHĐN unit-udn) & cấp quyền Cán bộ',
+        'Kiểm tra danh sách 09 trường/đơn vị thành viên ĐHĐN & cấp quyền Cán bộ',
       route: 'admin_institutions' as StaffRouteId,
       icon: Building2,
-      badge: '25 trường · 8 cụm',
+      badge: '09 trường thành viên',
     },
     {
       step: 3 as const,

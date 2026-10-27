@@ -1,60 +1,82 @@
 /**
- * 5TOT Đà Nẵng — Minimal Institutional Footer (Approved Visual Reference)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
- *
- * Implements Section 3 & 45:
- * - Minimal institutional footer aligned to the 1280px primary container.
+ * 5TOT UDN — Institutional Footer (Matching Exact Reference Design)
+ * Đơn vị tổ chức: Hội Sinh viên Việt Nam Đại học Đà Nẵng
+ * Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên Đại học Đà Nẵng
  */
 
 import React from 'react';
-import { HsvEmblem } from '../../brand/HsvLogo';
+import { MapPin, Mail } from 'lucide-react';
+import { UdnEmblem, HsvEmblem } from '../../brand/HsvLogo';
 
-export interface PublicFooterProps {
-  onOpenGuidanceModal?: (tab: 'criteria' | 'guide') => void;
-}
-
-export const PublicFooter: React.FC<PublicFooterProps> = ({
-  onOpenGuidanceModal,
-}) => {
+export const PublicFooter: React.FC = () => {
   return (
-    <footer className="w-full py-4 bg-white/80 backdrop-blur-xs border-t border-[#E5EFF6] text-[12px] text-[#526B7E] shrink-0 relative z-20">
-      <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <HsvEmblem size={22} />
-          <span className="font-semibold text-[#526B7E] uppercase tracking-wider text-[11px]">
-            CƠ QUAN QUẢN LÝ:{' '}
-            <strong className="text-[#0F2335] font-extrabold">
-              THÀNH ĐOÀN ĐÀ NẴNG
-            </strong>
-          </span>
-          <span className="text-[#C5D8E6]">·</span>
-          <span className="font-semibold text-[#526B7E] uppercase tracking-wider text-[11px]">
-            ĐƠN VỊ VẬN HÀNH NGHIỆP VỤ:{' '}
-            <strong className="text-[#0B64A0] font-extrabold">
-              HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
-            </strong>
-          </span>
+    <footer className="w-full bg-[#07457E] text-white relative overflow-hidden py-10 sm:py-12 border-t border-[#063B6C]">
+      {/* Right-aligned Da Nang Dragon Bridge & Skyline Graphic */}
+      <div
+        className="hidden md:block absolute right-0 bottom-0 h-full w-[45%] pointer-events-none select-none opacity-90 z-0"
+        aria-hidden="true"
+      >
+        <img
+          src="/assets/udn/danang_skyline_footer.png"
+          alt=""
+          className="w-full h-full object-cover object-bottom"
+        />
+        {/* Soft gradient mask on left edge of the graphic to blend with the #07457E background */}
+        <div
+          className="absolute inset-y-0 left-0 w-24"
+          style={{
+            background: 'linear-gradient(to right, #07457E 0%, transparent 100%)',
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
+        {/* Left: UDN Emblem + HSV Emblem + Two-line Masthead + Subtitle */}
+        <div className="flex items-center gap-3.5 select-none">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-11 h-11 rounded-lg bg-white flex items-center justify-center p-1 shadow-xs shrink-0">
+              <UdnEmblem size={36} />
+            </div>
+            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-1 shadow-xs shrink-0">
+              <HsvEmblem size={36} />
+            </div>
+          </div>
+          <div className="h-10 w-[1px] bg-white/25 shrink-0" aria-hidden="true" />
+          <div className="flex flex-col justify-center">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/85 leading-tight">
+              HỘI SINH VIÊN VIỆT NAM
+            </span>
+            <span className="text-[16px] sm:text-[17px] font-extrabold uppercase tracking-tight text-white leading-tight">
+              ĐẠI HỌC ĐÀ NẴNG
+            </span>
+            <span className="text-[12.5px] sm:text-[13px] text-white/70 font-normal leading-normal pt-0.5">
+              Cổng xét chọn danh hiệu và giải thưởng sinh viên
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap text-[#526B7E] font-medium">
-          <span>
-            Hệ thống xét duyệt Sinh viên 5 tốt cấp Thành phố Đà Nẵng · Năm học
-            2026–2027
-          </span>
-          {onOpenGuidanceModal && (
-            <>
-              <span className="text-[#C5D8E6]">·</span>
-              <button
-                type="button"
-                onClick={() => onOpenGuidanceModal('criteria')}
-                className="font-bold text-[#0D6EB0] hover:underline cursor-pointer"
+        {/* Center: Address & Contact */}
+        <div className="flex items-center gap-6">
+          <div className="hidden md:block w-[1px] h-12 bg-white/20" aria-hidden="true" />
+          <div className="flex flex-col gap-2 text-[13px] sm:text-[13.5px] text-white/90 font-normal">
+            <div className="flex items-center gap-2.5">
+              <MapPin size={15} className="text-white/70 shrink-0" />
+              <span>41 Lê Duẩn, Quận Hải Châu, TP. Đà Nẵng</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Mail size={15} className="text-white/70 shrink-0" />
+              <a
+                href="mailto:hoisinhvien@udn.vn"
+                className="hover:text-white underline underline-offset-2 transition-colors"
               >
-                Văn bản - Hướng dẫn
-              </button>
-            </>
-          )}
+                hoisinhvien@udn.vn
+              </a>
+            </div>
+          </div>
         </div>
+
+        {/* Right placeholder spacer for desktop skyline graphic */}
+        <div className="hidden lg:block w-48 shrink-0" aria-hidden="true" />
       </div>
     </footer>
   );

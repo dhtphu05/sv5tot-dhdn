@@ -75,9 +75,19 @@ export function syncCriteriaWithUpdate(
       shortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
     }
 
+    const nextStatusLabel =
+      crit.statusLabel &&
+      crit.statusLabel !== 'Chưa kê khai' &&
+      crit.statusLabel !== 'Đã kê khai'
+        ? crit.statusLabel
+        : declaredReqs.length > 0
+        ? 'Đã kê khai'
+        : 'Chưa kê khai';
+
     return {
       ...crit,
       shortSummary,
+      statusLabel: nextStatusLabel,
       groups: updatedGroups || crit.groups,
       requirements: updatedReqs,
     };
@@ -254,10 +264,15 @@ export function applyDeleteDeclarationMutation(
 ): StudentApplicationData {
   return {
     ...prev,
-    criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({
-      ...req,
-      declarations: req.declarations.filter((d) => d.id !== declId),
-    })),
+    criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => {
+      const nextDeclarations = req.declarations.filter((d) => d.id !== declId);
+      return {
+        ...req,
+        declarations: nextDeclarations,
+        status: (nextDeclarations.length > 0 ? req.status : 'undeclared') as RequirementStatus,
+        isOptionalEmpty: nextDeclarations.length === 0,
+      };
+    }),
   };
 }
 

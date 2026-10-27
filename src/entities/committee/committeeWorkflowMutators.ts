@@ -377,9 +377,9 @@ export function applyForwardSchoolApplicationsToCity(
       trainingInstitutionId: app.institution.id,
       trainingInstitutionName: app.institution.officialName,
       schoolReviewUnitId:
-        app.schoolReviewUnitId || staffUser.schoolReviewUnitId || 'unit-udn',
+        app.schoolReviewUnitId || staffUser.schoolReviewUnitId || 'unit-dut',
       schoolReviewUnitName:
-        app.schoolReviewUnitName || staffUser.unitLabel || 'Đại học Đà Nẵng',
+        app.schoolReviewUnitName || staffUser.unitLabel || 'Trường Đại học Bách khoa – ĐHĐN',
       forwardedBy: staffUser.id,
       forwardedByName: staffUser.fullName,
       forwardedAt: dateTimeStr,
@@ -387,7 +387,7 @@ export function applyForwardSchoolApplicationsToCity(
       summaryNotes:
         forwardingNote ||
         app.schoolReviewSummary?.officerNotes ||
-        'Đơn vị xét sơ tuyển đề xuất Hội Sinh viên TP. Đà Nẵng xét chọn cấp Thành phố.',
+        'Đơn vị xét sơ tuyển đề xuất Hội Sinh viên Đại học Đà Nẵng xét chọn cấp Đại học Đà Nẵng.',
       reviewedCriteriaCount: app.reviewedCriteriaCount || 5,
       totalDeclarations: app.totalDeclarations || 5,
       totalEvidence: app.totalEvidence || 5,
@@ -434,11 +434,21 @@ export function applyForwardSchoolApplicationsToCity(
       snapshot,
     };
 
+    const baseCriteriaList = Array.isArray(app.criteriaReview)
+      ? app.criteriaReview
+      : [];
+
     return {
       ...app,
       currentReviewStage: 'CITY' as const,
       schoolPreliminaryStatus: 'forwarded_to_city' as const,
       workflowStatus: 'unassigned' as const,
+      reviewedCriteriaCount: 0,
+      criteriaReview: baseCriteriaList.map((cr) => ({
+        ...cr,
+        status: 'not_reviewed' as const,
+        noteSummary: undefined,
+      })),
       schoolReviewSummary: nextSummary,
       latestOperationalNote:
         'Đã chuyển Hội Sinh viên Thành phố Đà Nẵng · Sẵn sàng tiếp nhận & phân công',

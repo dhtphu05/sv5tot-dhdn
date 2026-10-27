@@ -925,7 +925,7 @@ export function buildFallbackBundleForStaffRecord(
     email: record.student.email,
     academicYear: record.schoolYear,
   };
-  bundle.studentApp.applicantProfileSnapshot = {
+  bundle.studentApp.applicantProfileSnapshot = record.applicantProfileSnapshot || {
     fullName: record.student.fullName,
     gender: 'Nam',
     dateOfBirth: '15/08/2004',
@@ -942,6 +942,207 @@ export function buildFallbackBundleForStaffRecord(
     phoneNumber: '0905123456',
     email: record.student.email,
   };
+
+  if ((record as any).workspaceState) {
+    const clonedWs = structuredClone(
+      (record as any).workspaceState
+    ) as ApplicationReviewWorkspaceState;
+    const isNowCityStage =
+      record.currentReviewStage === 'CITY' ||
+      record.currentReviewStage === 'COMPLETED';
+    if (isNowCityStage && clonedWs.reviewStage === 'SCHOOL') {
+      return {
+        studentApp: bundle.studentApp,
+        workspaceState: {
+          ...clonedWs,
+          reviewStage: 'CITY',
+          hasStartedReview:
+            record.workflowStatus !== 'unassigned' &&
+            record.workflowStatus !== 'assigned_not_started',
+          completedAt: undefined,
+          criterionCompletedMap: {},
+          criterionConclusions: {},
+          scopeRecords: {},
+        },
+      };
+    }
+    return {
+      studentApp: bundle.studentApp,
+      workspaceState: clonedWs,
+    };
+  }
+
+  if (record.applicationId !== 'APP-2026-DN-102220123') {
+    const isSchoolStage =
+      record.currentReviewStage !== 'CITY' &&
+      record.currentReviewStage !== 'COMPLETED';
+    const stage: 'SCHOOL' | 'CITY' = isSchoolStage ? 'SCHOOL' : 'CITY';
+    const unitName =
+      record.schoolReviewUnitName || record.institution.officialName;
+    const defaultActorName = isSchoolStage
+      ? record.schoolReviewSummary?.recommendingOfficerName ||
+        `Cán bộ xét cấp trường ${unitName}`
+      : record.assignment?.officerName || 'Cán bộ xét duyệt cấp Thành phố';
+    const defaultActorRole = isSchoolStage
+      ? 'Cán bộ xét cấp Trường'
+      : 'Cán bộ xét duyệt cấp Thành phố';
+
+    const criterionCompletedMap: ApplicationReviewWorkspaceState['criterionCompletedMap'] =
+      {};
+    const criterionConclusions: NonNullable<
+      ApplicationReviewWorkspaceState['criterionConclusions']
+    > = {};
+
+    const criteriaList = Array.isArray(record.criteriaReview)
+      ? record.criteriaReview
+      : record.criteriaReview && typeof record.criteriaReview === 'object'
+      ? Object.values(record.criteriaReview as Record<string, any>).filter(
+          (item) => item && typeof item === 'object' && item.criterionId
+        )
+      : [];
+
+    for (const cr of criteriaList) {
+      if (
+        cr.status === 'reviewed' ||
+        (cr.status as string) === 'pass' ||
+        (cr.status as string) === 'fail'
+      ) {
+        const cid = cr.criterionId as
+          | 'ethics'
+          | 'academic'
+          | 'physical'
+          | 'volunteer'
+          | 'integration';
+        const isFail =
+          (cr.status as string) === 'fail' ||
+          cr.noteSummary?.toLowerCase().includes('không đạt') ||
+          cr.noteSummary?.toLowerCase().includes('chưa đạt');
+        criterionCompletedMap[cid] = true;
+        criterionConclusions[cid] = {
+          criterionId: cid,
+          stage,
+          conclusion: isFail ? 'fail' : 'pass',
+          reason: cr.noteSummary,
+          actorId:
+            record.assignment?.officerId ||
+            `staff-school-${record.schoolReviewUnitId || 'unit-dut'}`,
+          actorName: defaultActorName,
+          actorRole: defaultActorRole,
+          concludedAt: record.updatedAt || record.submittedAt,
+        };
+      }
+    }
+
+    const isSchoolCompleted =
+      isSchoolStage &&
+      (record.schoolPreliminaryStatus === 'preliminary_completed' ||
+        record.schoolPreliminaryStatus === 'recommended_forwarding' ||
+        record.schoolPreliminaryStatus === 'not_recommended' ||
+        record.schoolPreliminaryStatus === 'forwarded_to_city');
+    const isCityCompleted =
+      !isSchoolStage &&
+      (record.workflowStatus === 'review_completed' ||
+        (record.workflowStatus as string) === 'committee_ready' ||
+        record.workflowStatus === 'waiting_decision' ||
+        record.workflowStatus === 'ready_for_finalization' ||
+        record.workflowStatus === 'finalized_recognized' ||
+        record.workflowStatus === 'finalized_not_recognized' ||
+        (record.workflowStatus as string) === 'published');
+    const isCompleted = isSchoolCompleted || isCityCompleted;
+
+    if (isCompleted) {
+      const allIds: Array<
+        'ethics' | 'academic' | 'physical' | 'volunteer' | 'integration'
+      > = ['ethics', 'academic', 'physical', 'volunteer', 'integration'];
+      for (const cid of allIds) {
+        criterionCompletedMap[cid] = true;
+        if (!criterionConclusions[cid]) {
+          criterionConclusions[cid] = {
+            criterionId: cid,
+            stage,
+            conclusion:
+              record.schoolPreliminaryStatus === 'not_recommended' &&
+              cid === 'volunteer'
+                ? 'fail'
+                : 'pass',
+            actorId:
+              record.assignment?.officerId ||
+              `staff-school-${record.schoolReviewUnitId || 'unit-dut'}`,
+            actorName: defaultActorName,
+            actorRole: defaultActorRole,
+            concludedAt: record.updatedAt || record.submittedAt,
+          };
+        }
+      }
+    }
+
+    const historyEvents: ReviewHistoryEvent[] = [
+      {
+        id: `hist-submit-${record.applicationId}`,
+        timestamp: record.submittedAt || '12/10/2026 · 14:20',
+        actorName: record.student.fullName,
+        actorRoleLabel: 'Sinh viên',
+        description: `Sinh viên nộp hồ sơ trực tuyến về ${unitName}.`,
+        tone: 'brand',
+      },
+    ];
+
+    if (record.assignment?.officerName) {
+      historyEvents.unshift({
+        id: `hist-assign-${record.applicationId}`,
+        timestamp: record.assignment.assignedAt || record.updatedAt || '14/10/2026 · 09:00',
+        actorName: record.assignment.assignedBy || 'Quản lý xét duyệt cấp Đại học Đà Nẵng',
+        actorRoleLabel: 'Quản lý xét duyệt',
+        description: `Phân công hồ sơ cho ${record.assignment.officerName}.`,
+        tone: 'neutral',
+      });
+    }
+
+    if (isCompleted) {
+      historyEvents.unshift({
+        id: `hist-complete-${record.applicationId}`,
+        timestamp: record.updatedAt || '16/10/2026 · 15:00',
+        actorName: defaultActorName,
+        actorRoleLabel: defaultActorRole,
+        description: isSchoolStage
+          ? `${defaultActorName} đã hoàn tất xét sơ tuyển 05 tiêu chí cấp Trường.`
+          : `${defaultActorName} đã hoàn tất thẩm định 05 tiêu chí cấp Đại học Đà Nẵng.`,
+        scopeBadge: isSchoolStage ? 'Hoàn tất xét sơ tuyển' : 'Hoàn tất thẩm định',
+        tone: 'green',
+      });
+    }
+
+    const hasStartedReview =
+      isCompleted ||
+      Object.keys(criterionCompletedMap).length > 0 ||
+      (isSchoolStage
+        ? record.schoolPreliminaryStatus === 'under_review' ||
+          record.schoolPreliminaryStatus === 'supplement_requested' ||
+          record.schoolPreliminaryStatus === 'supplement_returned'
+        : record.workflowStatus === 'under_review' ||
+          record.workflowStatus === 'supplement_requested' ||
+          record.workflowStatus === 'supplement_returned');
+
+    return {
+      studentApp: bundle.studentApp,
+      workspaceState: {
+        applicationId: record.applicationId,
+        reviewStage: stage,
+        reviewUnitId: record.schoolReviewUnitId || 'unit-dut',
+        hasStartedReview,
+        startedAt: hasStartedReview ? record.submittedAt : undefined,
+        lastReviewedAt: hasStartedReview ? record.updatedAt : undefined,
+        completedAt: isCompleted ? record.updatedAt || '16/10/2026 · 15:00' : undefined,
+        isCitySupplementWindowClosed: false,
+        scopeRecords: {},
+        evidenceRecords: {},
+        criterionCompletedMap,
+        criterionConclusions,
+        supplementRequests: [],
+        historyEvents,
+      },
+    };
+  }
 
   bundle.workspaceState.applicationId = record.applicationId;
   return {

@@ -142,7 +142,7 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
             <div>
               <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0B64A0] bg-[#EAF5FC] border border-[#CBE5F6] px-2 py-0.5 rounded-[5px]">
                 <CheckCircle2 size={12} className="text-[#0D78AE]" />
-                <span>Đề xuất Thành phố</span>
+                <span>Đề xuất trình ĐHĐN</span>
               </span>
               <div className="text-[11px] text-[#607483] mt-0.5 tabular-nums">
                 {docNum ? `Theo ${docNum}` : 'Đã kèm văn bản PDF'}
@@ -168,7 +168,7 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
     },
     {
       key: 'city_review',
-      header: 'Thẩm định Thành phố',
+      header: 'Thẩm định cấp ĐHĐN',
       renderCell: (app) => {
         const prg = deriveApplicationCriteriaReviewProgress(app);
         return (
@@ -187,7 +187,7 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
                 : prg.compactProgressLabel}
             </div>
             <div className="text-[11px] text-[#607483]">
-              {app.assignment?.officerName || 'Tổ thẩm định Thành phố'}
+              {app.assignment?.officerName || 'Tổ thẩm định ĐHĐN'}
             </div>
           </div>
         );

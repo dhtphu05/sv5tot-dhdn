@@ -94,9 +94,9 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
     institutionType: 'university' as InstitutionType,
     organizationContext: 'Đại học Đà Nẵng',
     isUnderUdn: true,
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Hội đồng Sơ tuyển Đại học Đà Nẵng',
-    eligibilityMode: 'DIRECT_CITY' as InstitutionEligibilityMode,
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
+    eligibilityMode: 'SCHOOL_PRELIMINARY_FIRST' as InstitutionEligibilityMode,
     status: 'active' as InstitutionStatus,
     contactEmail: '',
     contactPhone: '',
@@ -144,7 +144,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
       `"${inst.officialName.replace(/"/g, '""')}"`,
       `"${inst.shortName}"`,
       `"${inst.organizationContext}"`,
-      `"${inst.schoolReviewUnitId || (inst.isUnderUdn ? 'unit-udn' : 'unit-direct')}"`,
+      `"${inst.schoolReviewUnitId || 'unit-dut'}"`,
       inst.status === 'active' ? 'Hoạt động' : 'Tạm ngưng',
       inst.applicationCount,
     ]);
@@ -215,7 +215,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
             </span>
           </span>
           <div className="text-[10.5px] text-[#64748B] mt-0.5 font-mono">
-            {inst.schoolReviewUnitId || (inst.isUnderUdn ? 'unit-udn' : 'unit-direct')}
+            {inst.schoolReviewUnitId || 'unit-dut'}
           </div>
         </div>
       ),
@@ -484,7 +484,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
                       : 'Hội đồng Sơ tuyển trực tiếp')}
                 </div>
                 <div className="text-[11px] font-mono text-[#0D78AE]">
-                  Mã đơn vị: {selectedInstitution.schoolReviewUnitId || (selectedInstitution.isUnderUdn ? 'unit-udn' : 'unit-direct')}
+                  Mã đơn vị: {selectedInstitution.schoolReviewUnitId || 'unit-dut'}
                 </div>
               </div>
 
@@ -492,10 +492,10 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
                 <div className="p-3 rounded-[8px] bg-[#EBF6FC] border border-[#CCE7F6] text-[11.5px] text-[#0A527A] space-y-1">
                   <div className="font-bold flex items-center gap-1.5">
                     <Info size={13} className="text-[#0D78AE]" />
-                    <span>Quy tắc chuyển hồ sơ ĐHĐN (Bất biến hệ thống)</span>
+                    <span>Quy tắc trình hồ sơ cấp Đại học Đà Nẵng</span>
                   </div>
                   <p className="leading-relaxed text-[#355870]">
-                    08 trường thành viên Đại học Đà Nẵng (DUT, DUE, UED, UFL, UTE, VKU, VNUK, SMP) sơ tuyển tập trung dưới <strong>Hội đồng Sơ tuyển Đại học Đà Nẵng (unit-udn)</strong>. Khi hoàn tất, ĐHĐN lập <strong>01 danh sách đề nghị duy nhất</strong> kèm <strong>01 Quyết định chung (182/QĐ-ĐHĐN)</strong> chuyển lên Thành phố. Bản sắc cơ sở đào tạo gốc của sinh viên luôn được bảo lưu nguyên vẹn.
+                    Mỗi trường/đơn vị thành viên Đại học Đà Nẵng (09 đơn vị) tổ chức xét sơ tuyển độc lập tại Hội đồng Sơ tuyển cấp Trường của mình ({selectedInstitution.schoolReviewUnitId}), lập <strong>01 danh sách đề nghị</strong> kèm <strong>01 văn bản quyết định/tờ trình (.PDF)</strong> trình lên <strong>Hội Sinh viên Đại học Đà Nẵng</strong>.
                   </p>
                 </div>
               )}
@@ -726,7 +726,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
                     className="w-full h-[40px] px-3 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none cursor-pointer"
                   >
                     <option value="DIRECT_CITY">
-                      Nộp trực tiếp cấp Thành phố
+                      Sơ tuyển cấp Trường thành viên ĐHĐN
                     </option>
                     <option value="UDN_PREREQUISITE">
                       Yêu cầu xác nhận điều kiện
@@ -893,7 +893,7 @@ export const InstitutionManagement: React.FC<InstitutionManagementProps> = ({
                     className="w-full h-[40px] px-3 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none cursor-pointer"
                   >
                     <option value="DIRECT_CITY">
-                      Nộp trực tiếp cấp Thành phố
+                      Sơ tuyển cấp Trường thành viên ĐHĐN
                     </option>
                     <option value="UDN_PREREQUISITE">
                       Yêu cầu xác nhận điều kiện

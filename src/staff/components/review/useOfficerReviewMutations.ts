@@ -38,6 +38,7 @@ import {
   buildCompleteApplicationMutation,
   buildRecordCriterionConclusionMutation,
   buildRevokeCriterionConclusionMutation,
+  buildReopenApplicationReviewMutation,
 } from '../../../entities/review/officerReviewMutators';
 
 export interface UseOfficerReviewMutationsProps {
@@ -333,10 +334,22 @@ export function useOfficerReviewMutations({
           effectiveStage
         )
       );
-      showToast(`Đã hủy kết luận tiêu chí ${critId}.`);
+      showToast(`Đã hoàn tác kết luận tiêu chí. Bạn có thể xét lại tiêu chí này.`);
     },
     [effectiveCanMutate, onMutateWorkspaceState, currentUser, effectiveStage, showToast]
   );
+
+  const handleReopenApplicationReview = useCallback(() => {
+    if (!effectiveCanMutate) return;
+    onMutateWorkspaceState((prevWs) =>
+      buildReopenApplicationReviewMutation(prevWs, currentUser, isSchoolStage)
+    );
+    showToast(
+      isSchoolStage
+        ? 'Đã hoàn tác chốt xét sơ tuyển. Bạn có thể chỉnh sửa lại đánh giá và kết luận tiêu chí.'
+        : 'Đã hoàn tác chốt thẩm định. Bạn có thể chỉnh sửa lại đánh giá và kết luận tiêu chí.'
+    );
+  }, [effectiveCanMutate, onMutateWorkspaceState, currentUser, isSchoolStage, showToast]);
 
   return {
     handleStartReview,
@@ -351,5 +364,6 @@ export function useOfficerReviewMutations({
     handleConfirmCompleteApplicationReview,
     handleRecordCriterionConclusion,
     handleRevokeCriterionConclusion,
+    handleReopenApplicationReview,
   };
 }

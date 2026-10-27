@@ -1,7 +1,7 @@
 /**
- * 5TOT Đà Nẵng — Frontend Domain Portal V2 Collective, Evidence & Audit Routes (Backend V2)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT Đại học Đà Nẵng — Frontend Domain Portal V2 Collective, Evidence & Audit Routes (Backend V2)
+ * Cơ quan quản lý: Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 import fs from 'node:fs';
@@ -77,8 +77,8 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       collectiveType,
       institutionId,
       institutionName: institutionName || 'Trường Đại học Bách khoa – ĐHĐN',
-      schoolReviewUnitId: schoolReviewUnitId || 'unit-udn',
-      schoolReviewUnitName: schoolReviewUnitName || 'Đại học Đà Nẵng',
+      schoolReviewUnitId: schoolReviewUnitId || 'unit-dut',
+      schoolReviewUnitName: schoolReviewUnitName || 'Trường Đại học Bách khoa – ĐHĐN',
       facultyName: facultyName || 'Khoa Đào tạo',
       academicYear: academicYear || '2025–2026',
       contactPhone: contactPhone || '',
@@ -221,13 +221,13 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       actorId: actor.id,
       actorName: actor.name,
       actorRole: actor.role,
-      details: 'Nộp trực tiếp hồ sơ tập thể lên Hội Sinh viên TP. Đà Nẵng',
+      details: 'Nộp trực tiếp hồ sơ tập thể lên Hội Sinh viên Đại học Đà Nẵng',
     });
 
     res.status(200).json({
       success: true,
-      message: 'Đã nộp hồ sơ tập thể trực tiếp lên Hội Sinh viên TP. Đà Nẵng.',
-      destination: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+      message: 'Đã nộp hồ sơ tập thể trực tiếp lên Hội Sinh viên Đại học Đà Nẵng.',
+      destination: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
       data: app,
     });
   });
@@ -248,10 +248,13 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       }
 
       const isReassignment = Boolean(app.assignedOfficerId);
-      const officerAcc = STAFF_SEED_ACCOUNTS.find((s) => s.id === officerId);
+      const officerAcc =
+        STAFF_SEED_ACCOUNTS.find((s) => s.id === officerId) ||
+        STAFF_SEED_ACCOUNTS.find((s) => s.role === 'CITY_OFFICER');
       app.status = 'city_assigned';
-      app.assignedOfficerId = officerId || 'staff-off-nam';
-      app.assignedOfficerName = officerAcc?.fullName || 'Trần Hoài Nam';
+      app.assignedOfficerId = officerAcc?.id || 'staff-off-nam';
+      app.assignedOfficerName =
+        officerAcc?.fullName || 'Cán bộ xét duyệt cấp Đại học Đà Nẵng';
       app.assignmentNote = assignmentNote || '';
       app.updatedAt = new Date().toISOString();
 
@@ -547,7 +550,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       app.status = 'published';
       app.finalResult = {
         outcome: app.committeeDecision?.outcome || 'recognized',
-        decisionNumber: decisionNumber || '112/QĐ-HSV-TP',
+        decisionNumber: decisionNumber || '112/QĐ-HSV-ĐHĐN',
         decisionDate: decisionDate || new Date().toLocaleDateString('vi-VN'),
         publishedAt: new Date().toISOString(),
         publishedBy: actor.name,

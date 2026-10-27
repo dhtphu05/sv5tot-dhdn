@@ -110,9 +110,15 @@ export function usePublicAuthSessionTransition({
   const handleLoginSuccess = useCallback(
     (email: string, session?: AuthSessionPayload) => {
       const lower = (email || '').trim().toLowerCase();
-      const matchedStaffAccount = INITIAL_STAFF_ACCOUNTS.find(
-        (acc) => acc.email.toLowerCase() === lower
-      );
+      const matchedStaffAccount =
+        INITIAL_STAFF_ACCOUNTS.find(
+          (acc) => acc.email.toLowerCase() === lower
+        ) ||
+        (lower === 'canbo.udn@udn.vn' || lower === 'an.nv@udn.vn'
+          ? INITIAL_STAFF_ACCOUNTS.find((acc) => acc.id === 'staff-sch-dut')
+          : lower === 'canbo.ufls@udn.vn'
+          ? INITIAL_STAFF_ACCOUNTS.find((acc) => acc.id === 'staff-sch-ufl')
+          : undefined);
       const matchedCollectiveAccount = AUTHORIZED_COLLECTIVE_REGISTRY.find(
         (col) => col.authorizedPreparerEmail.toLowerCase() === lower
       );
@@ -171,7 +177,14 @@ export function usePublicAuthSessionTransition({
         };
       };
 
-      if (resolvedRole === 'SCHOOL_OFFICER' || lower.includes('an.nv')) {
+      if (
+        resolvedRole === 'SCHOOL_OFFICER' ||
+        (!resolvedRole &&
+          (lower.includes('an.nv') ||
+            (lower.startsWith('canbo.') &&
+              !lower.includes('thanhpho') &&
+              !lower.includes('dhdn'))))
+      ) {
         const nextStaffUser = buildResolvedStaffUser('SCHOOL_OFFICER');
         setStaffUser(nextStaffUser);
         setStaffRouteId('school_overview');
@@ -188,7 +201,12 @@ export function usePublicAuthSessionTransition({
         return;
       }
 
-      if (resolvedRole === 'CITY_OFFICER' || lower.includes('nam.th')) {
+      if (
+        resolvedRole === 'CITY_OFFICER' ||
+        lower.includes('nam.th') ||
+        lower.includes('canbo.dhdn') ||
+        lower.includes('canbo.thanhpho')
+      ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_OFFICER');
         setStaffUser(nextStaffUser);
         setStaffRouteId('overview');
@@ -205,7 +223,12 @@ export function usePublicAuthSessionTransition({
         return;
       }
 
-      if (resolvedRole === 'CITY_MANAGER' || lower.includes('ha.nt')) {
+      if (
+        resolvedRole === 'CITY_MANAGER' ||
+        lower.includes('ha.nt') ||
+        lower.includes('quanly.dhdn') ||
+        lower.includes('quanly.thanhpho')
+      ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_MANAGER');
         setStaffUser(nextStaffUser);
         setStaffRouteId('overview');
@@ -222,7 +245,12 @@ export function usePublicAuthSessionTransition({
         return;
       }
 
-      if (resolvedRole === 'CITY_COMMITTEE' || lower.includes('quan.lm')) {
+      if (
+        resolvedRole === 'CITY_COMMITTEE' ||
+        lower.includes('quan.lm') ||
+        lower.includes('hoidong.dhdn') ||
+        lower.includes('hoidong.thanhpho')
+      ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_COMMITTEE');
         setStaffUser(nextStaffUser);
         setStaffRouteId('committee');

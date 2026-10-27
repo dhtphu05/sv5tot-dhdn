@@ -56,8 +56,61 @@ export function buildCriteriaFromDefinitions(
           (resolvedMultiplicity === 'MULTIPLE' ? '+ Thêm kê khai' : 'Kê khai nội dung này');
 
         if (found && found.declarations && found.declarations.length > 0) {
+          const normalizedDeclarations: ApplicationDeclaration[] =
+            found.declarations.map((d) => {
+              const rawDecl = d as unknown as Record<string, any>;
+              const rawEvList = Array.isArray(d.evidenceFiles)
+                ? d.evidenceFiles
+                : Array.isArray(d.evidence)
+                ? d.evidence
+                : [];
+              const normalizedEvidence: ApplicationEvidence[] = rawEvList.map(
+                (ev) => {
+                  const rawEv = ev as unknown as Record<string, any>;
+                  return {
+                    ...ev,
+                    id: ev.id || `ev-${Date.now()}`,
+                    name:
+                      ev.name ||
+                      rawEv.fileName ||
+                      rawEv.title ||
+                      'Minh_chung.pdf',
+                    fileType: ev.fileType || 'pdf',
+                    size: ev.size || rawEv.fileSize || '240 KB',
+                    uploadedAt: ev.uploadedAt || '10/10/2026',
+                    status:
+                      ev.status && (ev.status as string) !== 'completed'
+                        ? ev.status
+                        : 'ready',
+                    url: ev.url || rawEv.previewUrl,
+                  };
+                }
+              );
+              return {
+                ...d,
+                value:
+                  d.value ||
+                  rawDecl.title ||
+                  rawDecl.description ||
+                  'Đã kê khai minh chứng',
+                detail: d.detail || rawDecl.description || rawDecl.authority || '',
+                date: d.date || rawDecl.date || '10/10/2026',
+                status:
+                  d.status && (d.status as string) !== 'completed'
+                    ? d.status
+                    : 'ready',
+                evidenceFiles: normalizedEvidence,
+              };
+            });
           return {
             ...found,
+            declarations: normalizedDeclarations,
+            status:
+              found.status &&
+              found.status !== 'undeclared' &&
+              (found.status as string) !== 'completed'
+                ? found.status
+                : 'ready',
             groupId: groupDef.id,
             title: reqDef.title,
             ruleBadge: reqDef.ruleBadge,
@@ -105,13 +158,71 @@ export function buildCriteriaFromDefinitions(
     });
 
     const flatRequirements = groups.flatMap((g) => g.requirements);
+    const declaredReqs = flatRequirements.filter(
+      (r) => r.declarations && r.declarations.length > 0
+    );
+    const totalEvidence = flatRequirements.reduce(
+      (sum, r) =>
+        sum +
+        r.declarations.reduce(
+          (dSum, d) => dSum + (d.evidenceFiles?.length || 0),
+          0
+        ),
+      0
+    );
+
+    let resolvedShortSummary = existingCrit?.shortSummary || critDef.shortSummary;
+    if (
+      declaredReqs.length > 0 &&
+      (!existingCrit?.shortSummary || existingCrit.shortSummary.startsWith('0 '))
+    ) {
+      if (critDef.id === 'volunteer') {
+        const allDecls = flatRequirements.flatMap((r) => r.declarations || []);
+        const totalActivities = allDecls.length;
+        let totalDays = 0;
+        let bloodCount = 0;
+        for (const d of allDecls) {
+          const combined = `${d.value} ${d.detail || ''}`.toLowerCase();
+          if (
+            d.metadata?.volActivityType === 'blood_donation' ||
+            combined.includes('hiến máu') ||
+            combined.includes('hien mau')
+          ) {
+            bloodCount++;
+            totalDays += 1;
+          } else if (d.metadata?.days) {
+            const p = parseInt(d.metadata.days, 10);
+            totalDays += isNaN(p) ? 1 : p;
+          } else {
+            const dayMatch = combined.match(/(\d+)\s*ngày/i);
+            totalDays += dayMatch ? parseInt(dayMatch[1], 10) : 1;
+          }
+        }
+        resolvedShortSummary = `${totalActivities} hoạt động đã khai · ${totalEvidence} minh chứng · ${totalDays}/5 ngày tích lũy${
+          bloodCount > 0 ? ` (${bloodCount} lần hiến máu)` : ''
+        }`;
+      } else if (critDef.id === 'physical') {
+        resolvedShortSummary = `${declaredReqs.length}/2 hình thức đã kê khai · ${totalEvidence} minh chứng`;
+      } else {
+        resolvedShortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
+      }
+    }
+
+    const resolvedStatusLabel =
+      existingCrit?.statusLabel &&
+      existingCrit.statusLabel !== 'Chưa kê khai' &&
+      existingCrit.statusLabel !== 'Đã kê khai'
+        ? existingCrit.statusLabel
+        : declaredReqs.length > 0
+        ? 'Đã kê khai'
+        : existingCrit?.statusLabel || 'Đã kê khai';
 
     return {
       id: critDef.id,
       number: critDef.number,
       name: critDef.name,
-      shortSummary: existingCrit?.shortSummary || critDef.shortSummary,
-      statusLabel: existingCrit?.statusLabel || 'Đã kê khai',
+      shortSummary: resolvedShortSummary,
+      statusLabel: resolvedStatusLabel,
       groups,
       requirements: flatRequirements,
     };

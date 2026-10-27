@@ -83,7 +83,7 @@ export function canOfficerReviewApplication(
 
   // SCHOOL REVIEW STAGE ACCESS CONTROL (Prompt S2)
   if (user.primaryRole === 'SCHOOL_OFFICER' || reviewStage === 'SCHOOL') {
-    const userUnitId = user.schoolReviewUnitId || 'unit-udn';
+    const userUnitId = user.schoolReviewUnitId || 'unit-dut';
     let appUnitId = appRecord.schoolReviewUnitId;
     if (!appUnitId) {
       const res = resolveSchoolReviewUnit(appRecord.institution.id);
@@ -112,7 +112,7 @@ export function canOfficerReviewApplication(
         isReadOnly: true,
         reason: 'already_forwarded',
         message:
-          'Hồ sơ đã được chuyển lên cấp Thành phố. Dữ liệu xét sơ cấp Trường chỉ dùng để tra cứu lịch sử.',
+          'Hồ sơ đã được chuyển lên cấp Đại học Đà Nẵng. Dữ liệu xét sơ cấp Trường chỉ dùng để tra cứu lịch sử.',
       };
     }
 

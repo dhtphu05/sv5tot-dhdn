@@ -165,7 +165,7 @@ export const OfficerReviewOverlaysAndDemoBar: React.FC<
                     </span>
                     <strong className="text-[#172A3A]">
                       {applicationRecord.schoolReviewSummary?.forwardedByName ||
-                        'Nguyễn Văn An'}
+                        'Cán bộ xét cấp trường Đại học Đà Nẵng'}
                     </strong>
                   </div>
                   <div>

@@ -198,9 +198,29 @@ export const StudentApplicationWorkspace: React.FC<
 
   useEffect(() => {
     setApplication((prev) => {
+      const prevDeclCount = (prev.criteria || []).reduce(
+        (sum, c) =>
+          sum +
+          (c.requirements || []).reduce(
+            (rSum, r) => rSum + (r.declarations?.length || 0),
+            0
+          ),
+        0
+      );
+      const nextDeclCount = (initialData.criteria || []).reduce(
+        (sum, c) =>
+          sum +
+          (c.requirements || []).reduce(
+            (rSum, r) => rSum + (r.declarations?.length || 0),
+            0
+          ),
+        0
+      );
+
       if (
         prev.applicationId !== initialData.applicationId ||
-        prev.student.studentId !== initialData.student.studentId
+        prev.student.studentId !== initialData.student.studentId ||
+        (prevDeclCount === 0 && nextDeclCount > 0)
       ) {
         return initialData;
       }
@@ -214,6 +234,7 @@ export const StudentApplicationWorkspace: React.FC<
       };
     });
   }, [
+    initialData,
     initialData.applicationId,
     initialData.student,
     initialData.applicantProfileSnapshot,

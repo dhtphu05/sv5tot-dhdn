@@ -34,7 +34,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { formatAcademicYearLabel } from '@5tot/contracts';
-import { HsvEmblem } from '../../../components/brand/HsvLogo';
+import { UdnEmblem, HsvEmblem } from '../../../components/brand/HsvLogo';
 import {
   StaffRole,
   StaffRouteId,
@@ -396,15 +396,18 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
           {/* Top Brand + Role Context */}
           <div>
             <div className="px-3.5 py-3.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <HsvEmblem size={34} className="shrink-0" />
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {!isSidebarCollapsed && <UdnEmblem size={30} className="shrink-0 rounded-[4px]" />}
+                  <HsvEmblem size={30} className="shrink-0" />
+                </div>
                 {!isSidebarCollapsed && (
                   <div className="min-w-0">
                     <div className="text-[10px] font-bold tracking-[0.06em] text-[#7CC4EE] uppercase truncate">
-                      HSV TP. Đà Nẵng
+                      HSV ĐH Đà Nẵng
                     </div>
                     <div className="text-[14.5px] font-extrabold text-white tracking-tight truncate">
-                      5TOT Đà Nẵng
+                      5TOT ĐHĐN
                     </div>
                   </div>
                 )}
@@ -437,12 +440,12 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
               <div className="mx-2.5 px-3 py-2 rounded-[10px] bg-white/[0.04] text-[11px] mb-2">
                 <div className="font-semibold text-[#8EA9BE] text-[11.5px]">
                   {currentUser.primaryRole === 'SCHOOL_OFFICER'
-                    ? 'Xét sơ tuyển cấp Trường'
-                    : 'Hệ thống xét duyệt cấp Thành phố'}
+                    ? 'Xét sơ tuyển cấp Trường / Đơn vị'
+                    : 'Hệ thống xét duyệt cấp ĐHĐN'}
                 </div>
                 <div className="text-[#64829A] text-[11px] mt-0.5 truncate">
                   {currentUser.primaryRole === 'SCHOOL_OFFICER'
-                    ? `Đơn vị: ${currentUser.unitLabel || 'Đại học Đà Nẵng'}`
+                    ? `Đơn vị: ${currentUser.unitLabel || 'Trường thành viên ĐHĐN'}`
                     : formatAcademicYearLabel(
                         currentSeason?.schoolYear || '2025–2026'
                       )}

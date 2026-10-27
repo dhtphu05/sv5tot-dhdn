@@ -186,7 +186,7 @@ export const PROTOTYPE_SCENARIOS: PrototypeScenarioConfig[] = [
     label: 'Được công nhận',
     toolbarLabel: 'Được công nhận',
     description:
-      'Công bố kết quả chính thức: Được công nhận Sinh viên 5 tốt cấp Thành phố.',
+      'Công bố kết quả chính thức: Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng.',
     homeScenarioId: 'state_k_recognized',
     defaultNavId: 'results',
     defaultPath: '/app/results',

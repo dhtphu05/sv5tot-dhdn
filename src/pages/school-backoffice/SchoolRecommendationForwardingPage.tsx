@@ -104,8 +104,8 @@ export const SchoolRecommendationForwardingPage: React.FC<
   const onSetInstitutionFilter =
     externalOnSetInstitutionFilter ?? setInternalInstitutionFilter;
 
-  const userUnitId = currentUser.schoolReviewUnitId || 'unit-udn';
-  const isUdn = userUnitId === 'unit-udn';
+  const userUnitId = currentUser.schoolReviewUnitId || 'unit-dut';
+  const isUdn = false;
 
   // Consolidate full pool of applications in unit
   const allUnitApplications = useMemo(() => {
@@ -393,7 +393,7 @@ export const SchoolRecommendationForwardingPage: React.FC<
       passed: hasSelected,
       message: hasSelected
         ? undefined
-        : 'Chưa có hồ sơ nào được chọn để gửi lên Thành phố.',
+        : 'Chưa có hồ sơ nào được chọn để trình lên Đại học Đà Nẵng.',
     });
 
     // 2. Decision document attached (.PDF file)
@@ -412,18 +412,18 @@ export const SchoolRecommendationForwardingPage: React.FC<
     const notForwarded = batchStatus === 'DRAFT';
     checks.push({
       label: notForwarded
-        ? 'Danh sách chưa gửi lên Thành phố'
-        : 'Danh sách đã gửi lên Thành phố',
+        ? 'Danh sách chưa trình lên Đại học Đà Nẵng'
+        : 'Danh sách đã trình lên Đại học Đà Nẵng',
       passed: notForwarded,
       message: notForwarded
         ? undefined
-        : 'Đơn vị đã gửi danh sách lên Thành phố trước đó.',
+        : 'Đơn vị đã trình danh sách lên Đại học Đà Nẵng trước đó.',
     });
 
     // 4. All selected belong to current unit
     const allInScope = selectedAppsList.every((a) => {
       if (!a) return true;
-      const appUnit = a.schoolReviewUnitId || 'unit-udn';
+      const appUnit = a.schoolReviewUnitId || 'unit-dut';
       return appUnit === userUnitId;
     });
     checks.push({
@@ -499,7 +499,7 @@ export const SchoolRecommendationForwardingPage: React.FC<
       setIsBatchConfirmOpen(false);
       setStatusFilter('selected');
       setActionSuccessNotice(
-        `Đã gửi danh sách gồm ${selectedAppIds.length} hồ sơ của ${unitName} lên Hội Sinh viên TP. Đà Nẵng.`
+        `Đã trình danh sách gồm ${selectedAppIds.length} hồ sơ của ${unitName} lên Hội Sinh viên Đại học Đà Nẵng.`
       );
     } catch (err: any) {
       setUploadError(

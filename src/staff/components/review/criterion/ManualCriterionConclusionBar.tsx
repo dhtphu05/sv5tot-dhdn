@@ -64,8 +64,14 @@ export const ManualCriterionConclusionBar: React.FC<
   className = '',
 }) => {
   const humanConclusion = assessment.humanConclusion;
-  const currentConclusion = humanConclusion?.conclusion;
-  const hasConclusion = Boolean(humanConclusion);
+  const currentConclusion =
+    humanConclusion?.conclusion ||
+    (workspaceState.criterionCompletedMap?.[criterionId]
+      ? assessment.eligibilityResult === 'fail'
+        ? 'fail'
+        : 'pass'
+      : undefined);
+  const hasConclusion = Boolean(currentConclusion);
 
   const [isReasonOpen, setIsReasonOpen] = useState(false);
   const [reasonDraft, setReasonDraft] = useState(
@@ -76,6 +82,11 @@ export const ManualCriterionConclusionBar: React.FC<
 
   const handleSelectConclusion = (outcome: CriterionConclusionOutcome) => {
     if (!canMutate) return;
+    if (currentConclusion === outcome) {
+      onRevokeConclusion(criterionId);
+      setIsReasonOpen(false);
+      return;
+    }
     if (outcome === 'fail' && !isReasonOpen && !reasonDraft) {
       setIsReasonOpen(true);
       return;
@@ -215,16 +226,16 @@ export const ManualCriterionConclusionBar: React.FC<
                 <span>Không đạt tiêu chí</span>
               </button>
 
-              {/* Revoke Conclusion */}
+              {/* Revoke / Undo Conclusion */}
               {hasConclusion && (
                 <button
                   type="button"
                   onClick={() => onRevokeConclusion(criterionId)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0] border border-transparent hover:border-[#CBD5E1] transition-colors cursor-pointer select-none"
-                  title="Hủy kết luận tiêu chí và chuyển lại về Đang xét"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-bold text-[#475569] hover:text-[#0F172A] bg-white hover:bg-[#F1F5F9] border border-[#CBD5E1] transition-colors cursor-pointer select-none shadow-2xs"
+                  title="Hoàn tác kết luận tiêu chí và chuyển lại về Đang xét"
                 >
-                  <RotateCcw size={12} />
-                  <span>Hủy kết luận</span>
+                  <RotateCcw size={12.5} />
+                  <span>Hoàn tác kết luận</span>
                 </button>
               )}
             </>

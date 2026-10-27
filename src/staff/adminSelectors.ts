@@ -49,6 +49,7 @@ export const CANONICAL_UDN_INSTITUTION_IDS = [
   'inst-vku',
   'inst-smp',
   'inst-vnuk',
+  'inst-kontum',
 ] as const;
 
 // =============================================================================
@@ -131,42 +132,24 @@ export function validateSchoolReviewUnitMapping(
   const activeInstitutions = institutions.filter((i) => i.status === 'active');
   const unmappedInstitutions = activeInstitutions.filter((i) => !i.schoolReviewUnitId);
   const udnMemberCount = institutions.filter(
-    (i) => i.isUnderUdn && i.schoolReviewUnitId === 'unit-udn'
+    (i) => i.isUnderUdn && Boolean(i.schoolReviewUnitId)
   ).length;
 
   if (unmappedInstitutions.length > 0) {
     errors.push(
-      `${unmappedInstitutions.length} cơ sở đào tạo đang hoạt động chưa được gán Đơn vị xét duyệt cấp Trường (${unmappedInstitutions.map((i) => i.shortName).join(', ')}).`
+      `${unmappedInstitutions.length} cơ sở đào tạo đang hoạt động chưa được gán Đơn vị xét sơ tuyển (${unmappedInstitutions.map((i) => i.shortName).join(', ')}).`
     );
   }
 
-  // Enforce UDN 8-member single review unit invariant
-  for (const udnId of CANONICAL_UDN_INSTITUTION_IDS) {
-    const inst = institutions.find((i) => i.id === udnId);
-    if (inst && inst.status === 'active') {
-      if (!inst.isUnderUdn || inst.schoolReviewUnitId !== 'unit-udn') {
+  for (const inst of activeInstitutions) {
+    if (inst.schoolReviewUnitId && reviewUnits.length > 0) {
+      const unitExists = reviewUnits.some((u) => u.id === inst.schoolReviewUnitId);
+      if (!unitExists) {
         errors.push(
-          `Trường thành viên Đại học Đà Nẵng (${inst.shortName}) bắt buộc phải thuộc Đơn vị xét duyệt chung "unit-udn" (Hội đồng Sơ tuyển Đại học Đà Nẵng).`
+          `Đơn vị "${inst.shortName}" đang gán về mã Đơn vị xét sơ tuyển "${inst.schoolReviewUnitId}" chưa tồn tại trong danh mục.`
         );
       }
     }
-  }
-
-  // Ensure non-UDN institutions do not map to unit-udn
-  const invalidNonUdn = institutions.filter(
-    (i) => !i.isUnderUdn && i.schoolReviewUnitId === 'unit-udn'
-  );
-  if (invalidNonUdn.length > 0) {
-    errors.push(
-      `Đơn vị độc lập ngoài Đại học Đà Nẵng (${invalidNonUdn.map((i) => i.shortName).join(', ')}) không được gán vào Đơn vị xét duyệt chung "unit-udn".`
-    );
-  }
-
-  const udnUnit = reviewUnits.find((u) => u.id === 'unit-udn');
-  if (udnUnit && udnUnit.forwardingBatchesAllowedPerSeason !== 1) {
-    errors.push(
-      'Đơn vị xét duyệt Đại học Đà Nẵng (unit-udn) chỉ được phép gửi đúng 01 đợt danh sách tổng hợp kèm 01 văn bản PDF chung mỗi mùa xét.'
-    );
   }
 
   return {
@@ -491,29 +474,29 @@ export function evaluateSeasonReadiness(params: {
   const activeInstitutions = institutions.filter((i) => i.status === 'active');
   checks.push({
     key: 'participating_institutions',
-    titleVi: 'Danh sách cơ sở đào tạo tham gia mùa xét',
+    titleVi: 'Danh sách trường/đơn vị thành viên tham gia mùa xét',
     passed: activeInstitutions.length > 0,
     severity: 'blocking',
     detailVi:
       activeInstitutions.length > 0
-        ? `Có ${activeInstitutions.length} cơ sở đào tạo đang hoạt động tham gia mùa xét (bao gồm 08 trường/viện thuộc Đại học Đà Nẵng).`
+        ? `Có ${activeInstitutions.length} trường/đơn vị thành viên Đại học Đà Nẵng đang hoạt động tham gia mùa xét.`
         : 'Chưa có cơ sở đào tạo nào đang hoạt động để tiếp nhận hồ sơ.',
     targetRoute: 'admin_institutions',
-    actionLabelVi: 'Quản lý đơn vị đào tạo',
+    actionLabelVi: 'Quản lý đơn vị thành viên',
   });
 
-  // 5. School Review Units mapped (including unit-udn 8-member invariant)
+  // 5. School Review Units mapped (09 UDN member units)
   const unitMappingValidation = validateSchoolReviewUnitMapping(institutions, schoolReviewUnits);
   checks.push({
     key: 'school_review_units',
-    titleVi: 'Phân tuyến Đơn vị xét duyệt cấp Trường (bao gồm ĐHĐN - unit-udn)',
+    titleVi: 'Phân tuyến Đơn vị xét sơ tuyển cấp Trường/Đơn vị (09 đơn vị thành viên ĐHĐN)',
     passed: unitMappingValidation.isValid,
     severity: 'blocking',
     detailVi: unitMappingValidation.isValid
-      ? 'Tất cả cơ sở đào tạo đã được gán Đơn vị xét duyệt cấp Trường; 08 trường thành viên ĐHĐN gán về 01 đơn vị chung (unit-udn).'
+      ? 'Tất cả 09 trường/đơn vị thành viên ĐHĐN đã được gán 1–1 với Hội đồng Sơ tuyển cấp Trường/Đơn vị tương ứng.'
       : unitMappingValidation.errors[0],
     targetRoute: 'admin_institutions',
-    actionLabelVi: 'Gán đơn vị xét duyệt',
+    actionLabelVi: 'Gán đơn vị xét sơ tuyển',
   });
 
   // 6. Required Central-style timeline deadlines configured & valid
@@ -538,7 +521,7 @@ export function evaluateSeasonReadiness(params: {
     passed: timelineValidation.valid,
     severity: 'blocking',
     detailVi: timelineValidation.valid
-      ? `Đã cấu hình hợp lệ hạn nộp Cá nhân (${season.submissionDeadline}), hạn Trường gửi danh sách (${season.reviewDeadline}) và lịch họp Hội đồng (${season.committeeDate}).`
+      ? `Đã cấu hình hợp lệ hạn nộp Cá nhân (${season.submissionDeadline}), hạn Trường/Đơn vị trình danh sách (${season.reviewDeadline}) và lịch họp Hội đồng ĐHĐN (${season.committeeDate}).`
       : timelineValidation.issues[0]?.messageVi || 'Các mốc thời gian xét chọn chưa hợp lệ.',
     targetRoute: 'admin_season',
     actionLabelVi: 'Cấu hình thời hạn mùa xét',
@@ -566,12 +549,12 @@ export function evaluateSeasonReadiness(params: {
 
   checks.push({
     key: 'staff_permissions',
-    titleVi: 'Nhân sự thẩm định cấp Trường, cấp Thành phố & Hội đồng',
+    titleVi: 'Nhân sự thẩm định cấp Trường/Đơn vị, cấp Đại học Đà Nẵng & Hội đồng',
     passed: staffProvisioned,
     severity: 'blocking',
     detailVi: staffProvisioned
-      ? `Đã phân quyền ${activeSchoolOfficers.length} Cán bộ cấp Trường, ${activeCityReviewers.length} Cán bộ/Quản lý cấp Thành phố và ${activeCommitteeMembers.length} Thành viên Hội đồng.`
-      : 'Cần có ít nhất 01 Cán bộ sơ tuyển cấp Trường, 01 Cán bộ thẩm định cấp Thành phố và 01 Thành viên Hội đồng đang hoạt động.',
+      ? `Đã phân quyền ${activeSchoolOfficers.length} Cán bộ sơ tuyển cấp Trường/Đơn vị, ${activeCityReviewers.length} Cán bộ/Quản lý cấp ĐHĐN và ${activeCommitteeMembers.length} Thành viên Hội đồng.`
+      : 'Cần có ít nhất 01 Cán bộ sơ tuyển cấp Trường/Đơn vị, 01 Cán bộ thẩm định cấp ĐHĐN và 01 Thành viên Hội đồng đang hoạt động.',
     targetRoute: 'admin_users',
     actionLabelVi: 'Phân quyền cán bộ',
   });

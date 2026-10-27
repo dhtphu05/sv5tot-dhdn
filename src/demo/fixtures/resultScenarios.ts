@@ -50,19 +50,19 @@ export const CANONICAL_FIVE_CRITERIA_PROCESS: CriterionProcessSummary[] = [
 
 export const DEMO_DECISION_DOCUMENT: OfficialDecisionDocument = {
   id: 'doc-decision-2026-sv5t',
-  title: 'Quyết định công bố kết quả xét chọn Sinh viên 5 tốt cấp Thành phố',
-  fileName: 'Van_ban_cong_bo_ket_qua_SV5T_Da_Nang_2026_2027.pdf',
+  title: 'Quyết định công bố kết quả xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+  fileName: 'Van_ban_cong_bo_ket_qua_SV5T_DHDN_2026_2027.pdf',
   fileType: 'pdf',
   publishedDate: '24/10/2026',
-  issuingAuthority: 'Ban Thư ký Hội Sinh viên Việt Nam TP. Đà Nẵng',
+  issuingAuthority: 'Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng',
 };
 
 /**
  * PRIMARY DEMO — RECOGNIZED (Prompt 11 Section 8, 12, 17, 54, 72)
  * - Student: Nguyễn Minh Anh (MSSV: 102220123)
  * - Institution: Trường Đại học Bách khoa - Đại học Đà Nẵng
- * - Official Result: Được công nhận · Sinh viên 5 tốt cấp Thành phố
- * - Authority: Hội Sinh viên Việt Nam TP. Đà Nẵng
+ * - Official Result: Được công nhận · Sinh viên 5 tốt cấp Đại học Đà Nẵng
+ * - Authority: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  * - All 5 criteria: "Đã hoàn tất xét"
  * - Timeline: Submitted (12/10/2026) -> Supplement (16/10 & 17/10/2026) -> Review complete -> Official result (24/10/2026)
  * - Note (Section 12 & 72): No fake decisionNumber by default; optional QA toggle can test decisionNumber & decisionDocument.
@@ -72,9 +72,9 @@ export const PRIMARY_RECOGNIZED_RESULT: FinalResultData = {
   status: 'recognized',
   publishedAt: '24/10/2026',
   schoolYear: '2026–2027',
-  level: 'Thành phố',
-  awardTitle: 'Sinh viên 5 tốt cấp Thành phố',
-  authority: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+  level: 'Đại học Đà Nẵng',
+  awardTitle: 'Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+  authority: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   criterionOutcomes: CANONICAL_FIVE_CRITERIA_PROCESS,
   applicationSnapshot: {
     applicationId: 'APP-2026-DN-102220123',
@@ -105,9 +105,9 @@ export const NOT_RECOGNIZED_RESULT: FinalResultData = {
   status: 'not_recognized',
   publishedAt: '24/10/2026',
   schoolYear: '2026–2027',
-  level: 'Thành phố',
-  awardTitle: 'Sinh viên 5 tốt cấp Thành phố',
-  authority: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+  level: 'Đại học Đà Nẵng',
+  awardTitle: 'Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+  authority: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   criterionOutcomes: CANONICAL_FIVE_CRITERIA_PROCESS.map((c) => ({
     ...c,
     processStatusLabel: 'Đã hoàn tất xét',
@@ -137,9 +137,9 @@ export const WAITING_FINAL_RESULT: FinalResultData = {
   id: 'res-waiting-102220123',
   status: 'waiting_final',
   schoolYear: '2026–2027',
-  level: 'Thành phố',
-  awardTitle: 'Sinh viên 5 tốt cấp Thành phố',
-  authority: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+  level: 'Đại học Đà Nẵng',
+  awardTitle: 'Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+  authority: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   criterionOutcomes: CANONICAL_FIVE_CRITERIA_PROCESS,
   applicationSnapshot: {
     applicationId: 'APP-2026-DN-102220123',
@@ -205,4 +205,4 @@ export const DELAYED_FINAL_RESULT: FinalResultData = {
 };
 
 export const AUTHORITATIVE_DEMO_REASON =
-  'Hồ sơ đợt này chưa đủ điều kiện công nhận ở cấp Thành phố do thời gian tham gia hoạt động tình nguyện trong năm học chưa đạt mức tối thiểu theo Quy chế xét chọn.';
+  'Hồ sơ đợt này chưa đủ điều kiện công nhận ở cấp Đại học Đà Nẵng do thời gian tham gia hoạt động tình nguyện trong năm học chưa đạt mức tối thiểu theo Quy định xét chọn.';

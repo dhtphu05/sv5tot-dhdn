@@ -74,8 +74,8 @@ describe('5TOT Đà Nẵng — SRW-4 Simplified City Officer & Committee Review 
     assert.equal(appRecord.institution.officialName, 'Trường Đại học Bách khoa - Đại học Đà Nẵng');
     const unitRes = resolveSchoolReviewUnit(appRecord.institution.id);
     assert.equal(unitRes.resolved, true);
-    assert.equal(unitRes.unit?.id, 'unit-udn');
-    assert.equal(unitRes.unit?.officialName, 'Đại học Đà Nẵng');
+    assert.equal(unitRes.unit?.id, 'unit-dut');
+    assert.equal(unitRes.unit?.officialName, 'Trường Đại học Bách khoa – ĐHĐN');
   });
 
   // D02: UDN common decision document visibility

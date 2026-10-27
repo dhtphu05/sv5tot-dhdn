@@ -1,6 +1,6 @@
 {
-  "name": "@5tot-danang/monorepo",
-  "description": "Hệ thống Xét chọn Sinh viên 5 tốt & Tập thể Sinh viên 5 tốt TP. Đà Nẵng — Thành Đoàn & Hội Sinh viên Việt Nam TP. Đà Nẵng",
+  "name": "@5tot-dhdn/monorepo",
+  "description": "Cổng xét chọn Danh hiệu Sinh viên 5 tốt, Tập thể Sinh viên 5 tốt & Giải thưởng Sinh viên Đại học Đà Nẵng — Hội Sinh viên Việt Nam Đại học Đà Nẵng",
   "private": true,
   "version": "2.0.0",
   "type": "module",

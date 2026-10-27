@@ -77,7 +77,7 @@ export const StaffNotificationsRouteView: React.FC<
             Thông báo nghiệp vụ
           </h1>
           <p className="text-[13px] text-[#526B7C] mt-0.5">
-            Cập nhật phân công xét duyệt, phản hồi bổ sung của sinh viên, tiến độ Hội đồng và mốc thời gian cấp Thành phố.
+            Cập nhật phân công xét duyệt, phản hồi bổ sung của sinh viên, tiến độ Hội đồng và mốc thời gian cấp Đại học Đà Nẵng.
           </p>
         </div>
       </div>
@@ -339,7 +339,7 @@ export const StaffApplicationQueueRouteView: React.FC<
           schoolYear: app.schoolYear || '2026–2027',
           submittedAt: app.submittedAt,
           workflowStatusLabel: statusMeta.label,
-          officerName: app.assignment?.officerName || 'Tổ thẩm định Thành phố',
+          officerName: app.assignment?.officerName || 'Tổ thẩm định ĐHĐN',
           assignedAt: app.assignment?.assignedAt || '—',
           reviewProgressLabel: progress.compactProgressLabel,
           supplementStatusLabel:
@@ -371,7 +371,7 @@ export const StaffApplicationQueueRouteView: React.FC<
       const xlsxBytes = generateXlsxBinary({
         report: {
           id: 'ALL_SUBMITTED_APPLICATIONS',
-          label: 'Danh sách hồ sơ Sinh viên 5 tốt cấp Thành phố',
+          label: 'Danh sách hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng',
           defaultColumns: [],
         } as any,
         columns: reportCols,
@@ -387,7 +387,7 @@ export const StaffApplicationQueueRouteView: React.FC<
       });
       triggerBrowserDownload(
         blob,
-        `DanhSach_SV5T_ThanhPho_${new Date().toISOString().slice(0, 10)}.xlsx`
+        `DanhSach_SV5T_DHDN_${new Date().toISOString().slice(0, 10)}.xlsx`
       );
     } finally {
       setIsExporting(false);
@@ -399,7 +399,7 @@ export const StaffApplicationQueueRouteView: React.FC<
       ? 'Hồ sơ cần xử lý'
       : activeRouteId === 'supplements'
       ? 'Theo dõi yêu cầu bổ sung'
-      : 'Hồ sơ xét duyệt cấp Thành phố';
+      : 'Hồ sơ xét duyệt cấp Đại học Đà Nẵng';
 
   return (
     <div className="p-6 max-w-[1360px] w-full mx-auto space-y-5">

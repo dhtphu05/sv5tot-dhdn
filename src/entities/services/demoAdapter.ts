@@ -54,6 +54,7 @@ import {
 } from '../../staff/collectiveStore';
 import { getApplicationSchoolReviewUnitId } from '../../staff/schoolSelectors';
 import {
+  AUTHORITATIVE_SCHOOL_REVIEW_UNITS,
   resolveSchoolReviewUnit,
   SchoolForwardingBatchSummaryDto,
   SchoolForwardingBatchDto,
@@ -88,8 +89,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '102220123',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-dut',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   {
     id: 'stu-dut-02',
@@ -98,8 +99,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '102220123',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-dut',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
   },
   {
     id: 'stu-due-01',
@@ -108,8 +109,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '211121045120',
     institutionId: 'inst-due',
     institutionName: 'Trường Đại học Kinh tế – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-due',
+    unitLabel: 'Trường Đại học Kinh tế – ĐHĐN',
   },
   {
     id: 'stu-ued-01',
@@ -118,8 +119,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '3140122089',
     institutionId: 'inst-ued',
     institutionName: 'Trường Đại học Sư phạm – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ued',
+    unitLabel: 'Trường Đại học Sư phạm – ĐHĐN',
   },
   {
     id: 'stu-ufl-01',
@@ -128,8 +129,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '411220156',
     institutionId: 'inst-ufl',
     institutionName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ufl',
+    unitLabel: 'Trường Đại học Ngoại ngữ – ĐHĐN',
   },
   {
     id: 'stu-ute-01',
@@ -138,8 +139,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '221150531201',
     institutionId: 'inst-ute',
     institutionName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-ute',
+    unitLabel: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
   },
   {
     id: 'stu-vku-01',
@@ -148,8 +149,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '22IT088',
     institutionId: 'inst-vku',
     institutionName: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-vku',
+    unitLabel: 'Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
   },
   {
     id: 'stu-smp-01',
@@ -158,8 +159,8 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '21YK042',
     institutionId: 'inst-smp',
     institutionName: 'Trường Y Dược – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-smp',
+    unitLabel: 'Trường Y Dược – ĐHĐN',
   },
   {
     id: 'stu-vnuk-01',
@@ -168,68 +169,18 @@ const DEMO_SEEDED_STUDENTS: Array<{
     studentCode: '22VNUK019',
     institutionId: 'inst-vnuk',
     institutionName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
-    unitId: 'unit-udn',
-    unitLabel: 'Đại học Đà Nẵng',
+    unitId: 'unit-vnuk',
+    unitLabel: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
   },
   {
-    id: 'stu-dtu-01',
-    email: 'sv.dtu@duytan.edu.vn',
+    id: 'stu-kontum-01',
+    email: 'sv.kontum@kontum.udn.vn',
     fullName: 'Nguyễn Hoàng Phúc',
-    studentCode: '27211204567',
-    institutionId: 'inst-dtu',
-    institutionName: 'Đại học Duy Tân',
-    unitId: 'unit-dtu',
-    unitLabel: 'Trường Đại học Duy Tân',
-  },
-  {
-    id: 'stu-donga-01',
-    email: 'sv.donga@donga.edu.vn',
-    fullName: 'Trương Mỹ Linh',
-    studentCode: 'DA220518',
-    institutionId: 'inst-donga',
-    institutionName: 'Trường Đại học Đông Á',
-    unitId: 'unit-donga',
-    unitLabel: 'Trường Đại học Đông Á',
-  },
-  {
-    id: 'stu-dau-01',
-    email: 'sv.dau@dau.edu.vn',
-    fullName: 'Lê Đình Khôi',
-    studentCode: '21KT0115',
-    institutionId: 'inst-dau',
-    institutionName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    unitId: 'unit-dau',
-    unitLabel: 'Trường Đại học Kiến trúc Đà Nẵng',
-  },
-  {
-    id: 'stu-upes3-01',
-    email: 'sv.upes3@upes3.edu.vn',
-    fullName: 'Nguyễn Quốc Tuấn',
-    studentCode: 'TD220094',
-    institutionId: 'inst-upes3',
-    institutionName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    unitId: 'unit-upes3',
-    unitLabel: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-  },
-  {
-    id: 'stu-tyd-01',
-    email: 'sv.tyd@dhktyduocdn.edu.vn',
-    fullName: 'Huỳnh Thị Thanh Trúc',
-    studentCode: 'YD210312',
-    institutionId: 'inst-tyd',
-    institutionName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    unitId: 'unit-tyd',
-    unitLabel: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-  },
-  {
-    id: 'stu-fpt-01',
-    email: 'sv.fpt@fpt.edu.vn',
-    fullName: 'Bùi Quang Nhật',
-    studentCode: 'DE170452',
-    institutionId: 'inst-fpt',
-    institutionName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    unitId: 'unit-fpt',
-    unitLabel: 'Trường Đại học FPT phân hiệu Đà Nẵng',
+    studentCode: '22KT045',
+    institutionId: 'inst-kontum',
+    institutionName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    unitId: 'unit-kontum',
+    unitLabel: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
   },
 ];
 
@@ -300,17 +251,35 @@ export const demoServicesAdapter: DomainServicesBundle = {
         throw err;
       }
 
-      // Check full Staff accounts list first (includes all School Officers across units)
+      // Check full Staff accounts list first (includes all School Officers across 9 member units)
       const matchedStaffAccount = INITIAL_STAFF_ACCOUNTS.find(
         (acc) => acc.email.toLowerCase() === normalized && acc.status === 'active'
       );
 
-      // Check canonical Staff demo users
+      // Check canonical Staff demo users (including legacy aliases)
       const staffRoleEntry = (Object.entries(STAFF_DEMO_USERS) as [StaffRole, typeof STAFF_DEMO_USERS[StaffRole]][]).find(
         ([, user]) =>
           user.email.toLowerCase() === normalized ||
+          (user.primaryRole === 'SCHOOL_OFFICER' &&
+            (normalized === 'canbo.udn@udn.vn' ||
+              normalized === 'an.nv@udn.vn')) ||
+          (user.primaryRole === 'CITY_OFFICER' &&
+            (normalized === 'nam.th@hsvdanang.vn' ||
+              normalized === 'canbo.thanhpho@hsvdanang.vn' ||
+              normalized === 'canbo.dhdn@udn.vn')) ||
+          (user.primaryRole === 'CITY_MANAGER' &&
+            (normalized === 'ha.nt@hsvdanang.vn' ||
+              normalized === 'quanly.thanhpho@hsvdanang.vn' ||
+              normalized === 'quanly.dhdn@udn.vn')) ||
+          (user.primaryRole === 'CITY_COMMITTEE' &&
+            (normalized === 'quan.lm@hsvdanang.vn' ||
+              normalized === 'hoidong.thanhpho@hsvdanang.vn' ||
+              normalized === 'hoidong.dhdn@udn.vn')) ||
           (user.primaryRole === 'ADMIN' &&
-            (normalized === 'khoa.nd@hsvdanang.vn' || normalized === 'admin@hsvdanang.vn'))
+            (normalized === 'lan.pn@hsvdanang.vn' ||
+              normalized === 'khoa.nd@hsvdanang.vn' ||
+              normalized === 'admin@hsvdanang.vn' ||
+              normalized === 'admin@udn.vn'))
       );
 
       if (matchedStaffAccount || staffRoleEntry || preferredTrack === 'STAFF') {
@@ -449,8 +418,8 @@ export const demoServicesAdapter: DomainServicesBundle = {
             registeredProf?.institutionName ||
             matchedStudent?.institutionName ||
             STUDENT_APPLICATION_FIXTURE.student.university,
-          unitId: matchedStudent?.unitId || 'unit-udn',
-          unitLabel: matchedStudent?.unitLabel || 'Đại học Đà Nẵng',
+          unitId: matchedStudent?.unitId || 'unit-dut',
+          unitLabel: matchedStudent?.unitLabel || 'Trường Đại học Bách khoa – ĐHĐN',
         },
       };
       return activeDemoSession;
@@ -592,8 +561,8 @@ export const demoServicesAdapter: DomainServicesBundle = {
         status: 'draft',
         reviewStage: 'SCHOOL',
         trainingInstitutionName: params.institutionName,
-        schoolReviewUnitId: routing.unit?.id || 'unit-udn',
-        schoolReviewUnitName: routing.unit?.officialName || 'Đại học Đà Nẵng',
+        schoolReviewUnitId: routing.unit?.id || 'unit-dut',
+        schoolReviewUnitName: routing.unit?.officialName || 'Trường Đại học Bách khoa – ĐHĐN',
         schoolPreliminaryStatus: 'school_not_submitted',
         student: {
           fullName: params.studentFullName,
@@ -680,7 +649,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
         actorId: actor.id,
         actorName: actor.name,
         actorRole: actor.role,
-        details: `Nộp hồ sơ về đơn vị xét sơ tuyển: ${updated.schoolReviewUnitName || 'Đại học Đà Nẵng'}`,
+        details: `Nộp hồ sơ về đơn vị xét sơ tuyển: ${updated.schoolReviewUnitName || 'Trường Đại học Bách khoa – ĐHĐN'}`,
       });
       return {
         success: true,
@@ -725,8 +694,9 @@ export const demoServicesAdapter: DomainServicesBundle = {
   schoolReview: {
     async listSchoolQueue(unitId) {
       if (!unitId) return [...demoIndividualRecords];
+      const effectiveUnitId = unitId === 'unit-udn' ? 'unit-dut' : unitId;
       return demoIndividualRecords.filter(
-        (r) => getApplicationSchoolReviewUnitId(r) === unitId
+        (r) => getApplicationSchoolReviewUnitId(r) === effectiveUnitId
       );
     },
 
@@ -822,13 +792,17 @@ export const demoServicesAdapter: DomainServicesBundle = {
       demoIndividualRecords[idx] = updatedRecord;
       return {
         success: true,
-        message: 'Đã xác nhận và chuyển hồ sơ lên Hội Sinh viên TP. Đà Nẵng.',
+        message: 'Đã xác nhận và chuyển hồ sơ lên Hội Sinh viên Đại học Đà Nẵng.',
         record: updatedRecord,
       };
     },
 
     async getSchoolForwardingBatchSummary(params) {
-      const unitId = params?.actor?.unitId || 'unit-udn';
+      const rawUnitId = params?.actor?.unitId || 'unit-dut';
+      const unitId = rawUnitId === 'unit-udn' ? 'unit-dut' : rawUnitId;
+      const unitName =
+        AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === unitId)?.officialName ||
+        'Trường Đại học Bách khoa – ĐHĐN';
       const seasonId = params?.seasonId || 'season-2026-2027';
       const batchKey = `${unitId}:${seasonId}`;
       const existingBatch = demoSchoolForwardingBatches.get(batchKey);
@@ -883,7 +857,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
 
       const blockingReasons: string[] = [];
       if (effectiveSelectedCount === 0) {
-        blockingReasons.push('Chưa có hồ sơ nào được đơn vị đề xuất chuyển cấp Thành phố.');
+        blockingReasons.push('Chưa có hồ sơ nào được đơn vị đề xuất chuyển cấp Đại học Đà Nẵng.');
       }
       if (!existingBatch?.decisionFileId) {
         blockingReasons.push('Chưa đính kèm tệp văn bản PDF đề nghị của đơn vị.');
@@ -896,7 +870,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
 
       return {
         schoolReviewUnitId: unitId,
-        schoolReviewUnitName: unitId === 'unit-udn' ? 'Đại học Đà Nẵng' : 'Đơn vị xét sơ tuyển',
+        schoolReviewUnitName: unitName,
         seasonId,
         seasonCode: seasonId.includes('2025') ? '2025–2026' : '2026–2027',
         totalApplicationsInScope: apps.length,
@@ -934,19 +908,24 @@ export const demoServicesAdapter: DomainServicesBundle = {
     },
 
     async getSchoolForwardingBatch(params) {
-      const unitId = params?.actor?.unitId || 'unit-udn';
+      const rawUnitId = params?.actor?.unitId || 'unit-dut';
+      const unitId = rawUnitId === 'unit-udn' ? 'unit-dut' : rawUnitId;
       const seasonId = params?.seasonId || 'season-2026-2027';
       const batchKey = `${unitId}:${seasonId}`;
       return demoSchoolForwardingBatches.get(batchKey) || null;
     },
 
     async saveSchoolForwardingBatchDraft({ seasonId = 'season-2026-2027', selectedApplicationIds, forwardingNote, decisionMetadata, actor }) {
-      const unitId = actor.unitId || 'unit-udn';
+      const rawUnitId = actor.unitId || 'unit-dut';
+      const unitId = rawUnitId === 'unit-udn' ? 'unit-dut' : rawUnitId;
+      const unitName =
+        AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === unitId)?.officialName ||
+        'Trường Đại học Bách khoa – ĐHĐN';
       const batchKey = `${unitId}:${seasonId}`;
       let batch = demoSchoolForwardingBatches.get(batchKey);
 
       if (batch && batch.status === 'FORWARDED') {
-        throw new Error('BATCH_ALREADY_FORWARDED: Đơn vị đã chốt và chuyển danh sách lên cấp Thành phố. Không thể chỉnh sửa sau khi đã gửi.');
+        throw new Error('BATCH_ALREADY_FORWARDED: Đơn vị đã chốt và chuyển danh sách lên cấp Đại học Đà Nẵng. Không thể chỉnh sửa sau khi đã gửi.');
       }
 
       for (const appId of selectedApplicationIds) {
@@ -966,7 +945,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
           id: `batch-${unitId}-${Date.now().toString(36)}`,
           seasonId,
           schoolReviewUnitId: unitId,
-          schoolReviewUnitName: unitId === 'unit-udn' ? 'Đại học Đà Nẵng' : 'Đơn vị xét sơ tuyển',
+          schoolReviewUnitName: unitName,
           status: 'DRAFT',
           selectedApplicationIds,
           applicationCount: selectedApplicationIds.length,
@@ -1009,12 +988,16 @@ export const demoServicesAdapter: DomainServicesBundle = {
     },
 
     async attachSchoolDecisionDocument({ seasonId = 'season-2026-2027', decisionNumber, decisionTitle, decisionDate, signedByName, signedByTitle, fileId, fileName, fileSize, fileUrl, actor }) {
-      const unitId = actor.unitId || 'unit-udn';
+      const rawUnitId = actor.unitId || 'unit-dut';
+      const unitId = rawUnitId === 'unit-udn' ? 'unit-dut' : rawUnitId;
+      const unitName =
+        AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === unitId)?.officialName ||
+        'Trường Đại học Bách khoa – ĐHĐN';
       const batchKey = `${unitId}:${seasonId}`;
       let batch = demoSchoolForwardingBatches.get(batchKey);
 
       if (batch && batch.status === 'FORWARDED') {
-        throw new Error('BATCH_ALREADY_FORWARDED: Đơn vị đã chốt và chuyển danh sách lên cấp Thành phố. Quyết định đã được đóng băng.');
+        throw new Error('BATCH_ALREADY_FORWARDED: Đơn vị đã chốt và chuyển danh sách lên cấp Đại học Đà Nẵng. Quyết định đã được đóng băng.');
       }
 
       if (!fileId) {
@@ -1031,7 +1014,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
           id: `batch-${unitId}-${Date.now().toString(36)}`,
           seasonId,
           schoolReviewUnitId: unitId,
-          schoolReviewUnitName: unitId === 'unit-udn' ? 'Đại học Đà Nẵng' : 'Đơn vị xét sơ tuyển',
+          schoolReviewUnitName: unitName,
           status: 'DRAFT',
           selectedApplicationIds: [],
           applicationCount: 0,
@@ -1076,12 +1059,13 @@ export const demoServicesAdapter: DomainServicesBundle = {
     },
 
     async confirmSchoolForwardingBatch({ seasonId = 'season-2026-2027', idempotencyKey, forwardingNote, actor }) {
-      const unitId = actor.unitId || 'unit-udn';
+      const rawUnitId = actor.unitId || 'unit-dut';
+      const unitId = rawUnitId === 'unit-udn' ? 'unit-dut' : rawUnitId;
       const batchKey = `${unitId}:${seasonId}`;
       const batch = demoSchoolForwardingBatches.get(batchKey);
 
       if (!batch) {
-        throw new Error('BATCH_NOT_FOUND: Chưa khởi tạo danh sách đề xuất chuyển Thành phố.');
+        throw new Error('BATCH_NOT_FOUND: Chưa khởi tạo danh sách đề xuất chuyển cấp Đại học Đà Nẵng.');
       }
 
       if (batch.status === 'FORWARDED') {
@@ -1092,15 +1076,15 @@ export const demoServicesAdapter: DomainServicesBundle = {
             data: batch,
           };
         }
-        throw new Error('BATCH_ALREADY_FORWARDED: Danh sách đề xuất của đơn vị đã được chuyển lên cấp Thành phố trước đó. Mỗi đơn vị chỉ được chuyển 01 lần duy nhất trong mùa xét.');
+        throw new Error('BATCH_ALREADY_FORWARDED: Danh sách đề xuất của đơn vị đã được chuyển lên cấp Đại học Đà Nẵng trước đó. Mỗi đơn vị chỉ được chuyển 01 lần duy nhất trong mùa xét.');
       }
 
       if (!batch.selectedApplicationIds || batch.selectedApplicationIds.length === 0) {
-        throw new Error('EMPTY_SELECTION_LIST: Danh sách đề xuất chuyển Thành phố không được để trống.');
+        throw new Error('EMPTY_SELECTION_LIST: Danh sách đề xuất chuyển cấp Đại học Đà Nẵng không được để trống.');
       }
 
       if (!batch.decisionFileId) {
-        throw new Error('MISSING_DECISION_DOCUMENT: Bắt buộc phải đính kèm tệp văn bản PDF đề nghị của đơn vị trước khi chuyển danh sách lên cấp Thành phố.');
+        throw new Error('MISSING_DECISION_DOCUMENT: Bắt buộc phải đính kèm tệp văn bản PDF đề nghị của đơn vị trước khi chuyển danh sách lên cấp Đại học Đà Nẵng.');
       }
 
       const now = new Date().toISOString();
@@ -1131,8 +1115,8 @@ export const demoServicesAdapter: DomainServicesBundle = {
               noteSummary: undefined,
             })),
             latestOperationalNote: `Đã chuyển theo Quyết định ${batch.decisionNumber} từ ${
-              current.schoolReviewUnitName || 'Đại học Đà Nẵng'
-            } lên Hội Sinh viên TP. Đà Nẵng (${now}).`,
+              current.schoolReviewUnitName || batch.schoolReviewUnitName || 'Trường Đại học Bách khoa – ĐHĐN'
+            } lên Hội Sinh viên Đại học Đà Nẵng (${now}).`,
           };
           transitionedCount++;
         }
@@ -1144,12 +1128,12 @@ export const demoServicesAdapter: DomainServicesBundle = {
         actorId: actor.id,
         actorName: actor.name,
         actorRole: actor.role,
-        details: `Chốt và chuyển chính thức đợt ${batch.id} gồm ${transitionedCount} hồ sơ lên Hội Sinh viên TP. Đà Nẵng theo QĐ số ${batch.decisionNumber}.`,
+        details: `Chốt và chuyển chính thức đợt ${batch.id} gồm ${transitionedCount} hồ sơ lên Hội Sinh viên Đại học Đà Nẵng theo QĐ số ${batch.decisionNumber}.`,
       });
 
       return {
         success: true,
-        message: `Đã chốt và chuyển thành công ${transitionedCount} hồ sơ lên Hội Sinh viên TP. Đà Nẵng.`,
+        message: `Đã chốt và chuyển thành công ${transitionedCount} hồ sơ lên Hội Sinh viên Đại học Đà Nẵng.`,
         data: batch,
       };
     },
@@ -1219,7 +1203,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
       return {
         success: res.success,
         message: res.message,
-        destination: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+        destination: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
         data: res.application || getCollectiveApplicationById(id) || null,
       };
     },

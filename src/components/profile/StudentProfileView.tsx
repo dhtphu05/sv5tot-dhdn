@@ -43,7 +43,10 @@ import {
   DEFAULT_CANONICAL_STUDENT_PROFILE,
   evaluateProfileCompleteness,
 } from '../../demo/fixtures/studentProfileFixtures';
-import { resolveDomainServices } from '../../entities/services/modeResolver';
+import {
+  resolveDomainServices,
+  isBackendMode,
+} from '../../entities/services/modeResolver';
 import { resolveSchoolReviewUnit } from '../../staff/schoolReviewTypes';
 
 export interface StudentProfileViewProps {
@@ -79,20 +82,21 @@ function buildFallbackStudentProfile(
   fallbackStudent?: StudentProfileViewProps['fallbackStudent']
 ): StudentProfileDto {
   if (
-    !fallbackStudent?.fullName ||
-    fallbackStudent.fullName === DEFAULT_CANONICAL_STUDENT_PROFILE.fullName
+    !isBackendMode() &&
+    (!fallbackStudent?.fullName ||
+      fallbackStudent.fullName === DEFAULT_CANONICAL_STUDENT_PROFILE.fullName)
   ) {
     return structuredClone(DEFAULT_CANONICAL_STUDENT_PROFILE);
   }
   const matchedInst = CANONICAL_INSTITUTION_OPTIONS.find(
     (opt) =>
-      opt.id === fallbackStudent.institutionId ||
-      (fallbackStudent.university &&
+      opt.id === fallbackStudent?.institutionId ||
+      (fallbackStudent?.university &&
         (opt.name.toLowerCase().includes(fallbackStudent.university.toLowerCase()) ||
           fallbackStudent.university.toLowerCase().includes(opt.name.split(' - ')[0].toLowerCase())))
   );
   return {
-    fullName: fallbackStudent.fullName,
+    fullName: fallbackStudent?.fullName || '',
     gender: '' as any,
     dateOfBirth: '',
     ethnicity: '',
@@ -100,15 +104,15 @@ function buildFallbackStudentProfile(
     educationLevel: '' as any,
     className: '',
     homeProvince: '',
-    institutionId: matchedInst?.id || fallbackStudent.institutionId || 'inst-dut',
+    institutionId: matchedInst?.id || fallbackStudent?.institutionId || 'inst-dut',
     institutionName:
       matchedInst?.name ||
-      fallbackStudent.university ||
+      fallbackStudent?.university ||
       'Trường Đại học Bách khoa - Đại học Đà Nẵng',
     unionPosition: '',
     politicalStatus: '' as any,
     phoneNumber: '',
-    email: fallbackStudent.email || '',
+    email: fallbackStudent?.email || '',
   };
 }
 

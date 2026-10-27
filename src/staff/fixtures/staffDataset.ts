@@ -1,15 +1,11 @@
 /**
- * 5TOT Đà Nẵng — Shared City-Level Staff Backoffice Dataset
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT Đại học Đà Nẵng — Shared University-Level Staff Backoffice Dataset
+ * Cơ quan quản lý: Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
- * Implements Prompt 16 Sections 31–33, 50–61, 84–87, 115–119:
- * - Single shared dataset consumed across Officer, Manager, Committee, and Admin views.
+ * Implements 2-level University of Da Nang review architecture:
+ * - Single shared dataset consumed across School Officer, University Officer, Manager, Committee, and Admin views.
  * - Reuses Nguyễn Minh Anh (APP-2026-DN-102220123) and HERO_SUPPLEMENT_REQUEST from Student fixtures.
- * - Counts in Officer Home (12 assigned: 4 not started, 2 supplement returned, 1 needs recheck),
- *   Manager Home (8 unassigned, 2 high-workload officers, 5 aging cases),
- *   and Committee Home (12 cases: 3 needs review, 4 waiting decision, 5 ready for finalization)
- *   are 100% derived from this dataset — zero hardcoded disconnected numbers.
  */
 
 import {
@@ -24,59 +20,59 @@ import {
 import { HERO_SUPPLEMENT_REQUEST } from '../../demo/fixtures/supplementScenarios';
 
 /**
- * 4 Canonical Prototype Staff Identities (Section 84)
+ * 5 Canonical Prototype Staff Identities
  */
 export const STAFF_DEMO_USERS: Record<StaffRole, StaffUser> = {
   SCHOOL_OFFICER: {
-    id: 'staff-sch-an',
-    fullName: 'Nguyễn Văn An',
-    email: 'an.nv@udn.vn',
+    id: 'staff-sch-dut',
+    fullName: 'Cán bộ sơ tuyển Trường Đại học Bách khoa – ĐHĐN',
+    email: 'canbo.dut@udn.vn',
     primaryRole: 'SCHOOL_OFFICER',
-    roleLabel: 'Cán bộ xét sơ tuyển',
-    unitLabel: 'Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
+    roleLabel: 'Cán bộ xét cấp trường',
+    unitLabel: 'Trường Đại học Bách khoa – ĐHĐN',
+    schoolReviewUnitId: 'unit-dut',
     roles: ['SCHOOL_OFFICER'],
   },
   CITY_OFFICER: {
     id: 'staff-off-nam',
-    fullName: 'Trần Hoàng Nam',
-    email: 'nam.th@hsvdanang.vn',
+    fullName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
+    email: 'canbo.dhdn@udn.vn',
     primaryRole: 'CITY_OFFICER',
     roleLabel: 'Cán bộ xét duyệt',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Hội Sinh viên TP. Đà Nẵng',
+    unitLabel: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
     roles: ['CITY_OFFICER'],
   },
   CITY_MANAGER: {
     id: 'staff-mgr-ha',
-    fullName: 'Nguyễn Thu Hà',
-    email: 'ha.nt@hsvdanang.vn',
+    fullName: 'Quản lý xét duyệt cấp Đại học Đà Nẵng',
+    email: 'quanly.dhdn@udn.vn',
     primaryRole: 'CITY_MANAGER',
     roleLabel: 'Quản lý xét duyệt',
-    unitLabel: 'Ban Thư ký · Hội Sinh viên TP. Đà Nẵng',
+    unitLabel: 'Ban Thư ký · Hội Sinh viên Đại học Đà Nẵng',
     roles: ['CITY_MANAGER'],
   },
   CITY_COMMITTEE: {
     id: 'staff-com-quan',
-    fullName: 'Lê Minh Quân',
-    email: 'quan.lm@hsvdanang.vn',
+    fullName: 'Hội đồng xét chọn cấp Đại học Đà Nẵng',
+    email: 'hoidong.dhdn@udn.vn',
     primaryRole: 'CITY_COMMITTEE',
     roleLabel: 'Hội đồng xét chọn',
-    unitLabel: 'Hội đồng xét chọn cấp Thành phố Đà Nẵng',
+    unitLabel: 'Hội đồng xét chọn cấp Đại học Đà Nẵng',
     roles: ['CITY_COMMITTEE'],
   },
   ADMIN: {
     id: 'staff-adm-lan',
-    fullName: 'Phạm Ngọc Lan',
-    email: 'lan.pn@hsvdanang.vn',
+    fullName: 'Quản trị hệ thống 5TOT Đại học Đà Nẵng',
+    email: 'admin@udn.vn',
     primaryRole: 'ADMIN',
     roleLabel: 'Quản trị hệ thống',
-    unitLabel: 'Văn phòng Hội Sinh viên TP. Đà Nẵng',
+    unitLabel: 'Văn phòng Hội Sinh viên Đại học Đà Nẵng',
     roles: ['ADMIN'],
   },
 };
 
 /**
- * Complete pool of City-level Reviewing Officers (for Manager assignment & workload derivation)
+ * Single canonical University-level Reviewing Officer account
  */
 export const CITY_REVIEW_OFFICERS: {
   id: string;
@@ -86,32 +82,14 @@ export const CITY_REVIEW_OFFICERS: {
 }[] = [
   {
     id: 'staff-off-nam',
-    fullName: 'Trần Hoàng Nam',
-    email: 'nam.th@hsvdanang.vn',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Kỹ thuật & Công nghệ',
-  },
-  {
-    id: 'staff-off-chau',
-    fullName: 'Võ Thị Minh Châu',
-    email: 'chau.vtm@hsvdanang.vn',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Kinh tế & Sư phạm',
-  },
-  {
-    id: 'staff-off-huy',
-    fullName: 'Đặng Quốc Huy',
-    email: 'huy.dq@hsvdanang.vn',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Ngoại ngữ & Y Dược',
-  },
-  {
-    id: 'staff-off-tung',
-    fullName: 'Phan Thanh Tùng',
-    email: 'tung.pt@hsvdanang.vn',
-    unitLabel: 'Tổ Thẩm định Hồ sơ · Khối Đại học & Học viện',
+    fullName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
+    email: 'canbo.dhdn@udn.vn',
+    unitLabel: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   },
 ];
 
 /**
- * Helper to build 5 canonical criteria review summaries (Section 50 & 51)
+ * Helper to build 5 canonical criteria review summaries
  */
 function buildFiveCriteriaReview(
   statuses: [
@@ -178,73 +156,51 @@ function buildFiveCriteriaReview(
 }
 
 /**
- * Current Season Operational Metadata (Sections 28–30, 85, 119)
+ * Current Season Operational Metadata
  */
 export const CURRENT_STAFF_SEASON: StaffSeasonSummary = {
   seasonId: 'season-2025-2026',
   schoolYear: 'Năm học 2025–2026',
-  title: 'Đợt xét chọn danh hiệu Sinh viên 5 tốt cấp Thành phố Đà Nẵng',
-  scopeLabel: 'Cấp Thành phố Đà Nẵng',
+  title: 'Đợt xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+  scopeLabel: 'Cấp Đại học Đà Nẵng',
   statusLabel: 'Đang trong giai đoạn thẩm định & xét chọn',
   submissionWindow: '01/10/2025 – 15/10/2025 · 20:00',
   reviewWindow: '12/10/2025 – 20/10/2025 · 17:00',
   committeeWindow: '21/10/2025 – 24/10/2025',
-  participatingInstitutionCount: 14,
-  activeStaffCount: 7,
-  criteriaConfigStatus: 'Đã khóa cấu hình 05 tiêu chí chuẩn cấp Thành phố',
+  participatingInstitutionCount: 9,
+  activeStaffCount: 13,
+  criteriaConfigStatus: 'Đã khóa cấu hình 05 tiêu chí chuẩn cấp Đại học Đà Nẵng (QĐ 12 QĐ/ĐHĐN-HSV)',
   upcomingDeadlines: [
     {
       id: 'dl-supp',
       title: 'Hạn sinh viên phản hồi bổ sung minh chứng đợt 1',
       dateLabel: '18/10/2025 · 20:00',
-      scopeLabel: 'Toàn đợt xét chọn cấp Thành phố',
+      scopeLabel: 'Toàn đợt xét chọn cấp Đại học Đà Nẵng',
       statusTone: 'warning',
     },
     {
       id: 'dl-review',
       title: 'Hạn hoàn tất thẩm định 05 tiêu chí của Cán bộ xét duyệt',
       dateLabel: '20/10/2025 · 17:00',
-      scopeLabel: 'Tổ Thẩm định Hồ sơ',
+      scopeLabel: 'Tổ Thẩm định Hồ sơ cấp ĐHĐN',
       statusTone: 'brand',
     },
     {
       id: 'dl-committee',
-      title: 'Phiên họp Hội đồng xét chọn cấp Thành phố',
+      title: 'Phiên họp Hội đồng xét chọn cấp Đại học Đà Nẵng',
       dateLabel: '22/10/2025 · 08:30',
-      scopeLabel: 'Hội đồng xét chọn cấp Thành phố',
+      scopeLabel: 'Hội đồng xét chọn cấp Đại học Đà Nẵng',
       statusTone: 'brand',
     },
     {
       id: 'dl-publish',
       title: 'Công bố quyết định công nhận chính thức',
       dateLabel: '24/10/2025 · 09:00',
-      scopeLabel: 'Ban Thư ký Hội Sinh viên TP. Đà Nẵng',
+      scopeLabel: 'Ban Thư ký Hội Sinh viên Đại học Đà Nẵng',
       statusTone: 'neutral',
     },
   ],
 };
-
-/**
- * Canonical Shared Staff Applications Dataset (32 records across all realistic lifecycle states)
- *
- * Breakdown verified for exact consistency (Section 87):
- * - Assigned to Trần Hoàng Nam (staff-off-nam): 12 records
- *   - 4 assigned_not_started ("4 hồ sơ chưa bắt đầu xét")
- *   - 2 supplement_returned ("2 hồ sơ vừa gửi bổ sung")
- *   - 1 needs_recheck ("1 hồ sơ cần xem lại")
- *   - 2 under_review
- *   - 1 supplement_requested (Nguyễn Minh Anh - Hero Student record!)
- *   - 2 review_completed
- * - Assigned to Võ Thị Minh Châu (staff-off-chau): 10 records (High workload #2)
- * - Assigned to Đặng Quốc Huy (staff-off-huy): 4 records
- * - Assigned to Phan Thanh Tùng (staff-off-tung): 4 records
- * - Unassigned: 8 records ("8 hồ sơ chưa phân công")
- * - Committee Queue: 12 records total
- *   - 3 needs_committee_review ("3 hồ sơ có nội dung cần xem xét")
- *   - 4 waiting_decision ("4 hồ sơ chờ quyết định")
- *   - 5 ready_for_finalization ("5 hồ sơ đã đủ thông tin chờ hoàn tất")
- * - Aging cases (isAging: true): 5 records ("5 hồ sơ quá lâu chưa cập nhật")
- */
 
 import { OFFICER_ASSIGNED_APPLICATIONS } from './applications/officerAssignedApplications';
 import { UNASSIGNED_INTAKE_APPLICATIONS } from './applications/unassignedIntakeApplications';

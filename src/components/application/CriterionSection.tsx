@@ -100,7 +100,22 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
   const criterionRequests = supplementRequests.filter((r) => r.criterionId === criterion.id);
   const hasActiveSupplement = criterionRequests.some((r) => r.status === 'active');
 
+  const hasDeclaredItems = criterion.requirements.some(
+    (r) => r.declarations && r.declarations.length > 0
+  );
+
+  const resolvedStatusLabel =
+    customStatusLabel ||
+    (criterion.statusLabel &&
+    criterion.statusLabel !== 'Chưa kê khai' &&
+    criterion.statusLabel !== 'Đã kê khai'
+      ? criterion.statusLabel
+      : hasDeclaredItems
+      ? 'Đã kê khai'
+      : 'Chưa kê khai');
+
   const getCriterionStatus = (label: string): RequirementStatus => {
+    if (label === 'Chưa kê khai' || label === 'Chưa có kê khai') return 'undeclared';
     if (label === 'Đã được xem xét' || label === 'Đã hoàn tất xét') return 'review_completed';
     if (label === 'Đang xét') return 'reviewing';
     if (label === 'Cần bổ sung' || label === 'Có thể kiểm tra thêm' || label === 'Có thể bổ sung')
@@ -215,7 +230,11 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
             </span>
             {/* Secondary line: Factual declaration count with evidence summary */}
             <span className="text-[11.5px] text-[#607483] font-medium truncate mt-0.5 tabular-nums">
-              {criterion.shortSummary || progressSummary}
+              {hasDeclaredItems &&
+              criterion.shortSummary &&
+              criterion.shortSummary.startsWith('0 ')
+                ? progressSummary
+                : criterion.shortSummary || progressSummary}
             </span>
           </div>
         </div>
@@ -254,9 +273,9 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
             <StatusChip
               status={
                 customStatusVariant ||
-                getCriterionStatus(customStatusLabel || criterion.statusLabel)
+                getCriterionStatus(resolvedStatusLabel)
               }
-              customLabel={customStatusLabel || criterion.statusLabel}
+              customLabel={resolvedStatusLabel}
               size="sm"
             />
           )}

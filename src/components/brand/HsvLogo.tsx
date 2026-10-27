@@ -8,6 +8,50 @@ interface HsvLogoProps {
 }
 
 /**
+ * Official Emblem of Đại học Đà Nẵng (Logo Đại học Đà Nẵng - The University of Danang)
+ * Official vector geometry (viewBox 0 0 552 560)
+ */
+export const UdnEmblem: React.FC<{ size?: number; className?: string }> = ({
+  size = 42,
+  className = '',
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 552 560"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`shrink-0 select-none ${className}`}
+      role="img"
+      aria-label="Logo Đại học Đà Nẵng"
+    >
+      <g>
+        <path
+          fill="#FFFFFF"
+          d="M16,16c173.33,0,346.67,0,520,0c0,176,0,352,0,528c-173.33,0-346.67,0-520,0C16,368,16,192,16,16z"
+        />
+        <path
+          fill="#054770"
+          d="M0,0h552v560H0V0z M16,16c0,176,0,352,0,528c173.33,0,346.67,0,520,0c0-176,0-352,0-528C362.67,16,189.33,16,16,16z"
+        />
+        <path
+          fill="#054770"
+          d="M198.13,38.24c51.7,0.51,103.31,16.19,145.94,45.57c48.68,33.03,85.48,83.93,99.28,141.33c11.48,46.56,7.92,96.7-10.11,141.15c-15.06,37.55-40.08,70.92-71.34,96.53c-45.75,37.79-104.88,58.64-164.14,58.86c0.35-1.54,1.99-1.09,3.15-1.21c34.85-0.59,69.65-13.51,95.63-36.91c27.96-24.13,45.22-60.53,45.03-97.59c0.17-29.44-10.52-58.62-29.1-81.38c-14.75-18.1-34.01-32.49-55.53-41.55c-18.53-7.89-38.67-11.84-58.8-11.97c0-10.43-0.01-20.87,0-31.3c32.25-0.99,65.08,7.16,92.3,24.71c24.07,15.38,42.95,38.03,55.66,63.46c9.29,17.72,13.26,37.61,15.51,57.32c1.52-26.25-5.54-52.66-18.25-75.55c-17.25-31.59-45.75-56.83-79.26-69.97c-20.92-8.56-43.44-12.66-65.96-13.63c0-10.28-0.01-20.55,0-30.82c36.98-0.61,74.35,9.75,105.04,30.54c25.43,17.12,45.52,41.53,59.02,68.93c8.8,17.32,14.74,35.92,19.54,54.69c-2.4-33.95-14.27-67.34-34.4-94.84c-20.25-27.71-49.72-48.04-82.12-58.93c-21.58-7.55-44.32-11.33-67.09-12.73c0.01-10.76,0-21.52,0.01-32.28c39.76-0.42,79.85,10.37,113.35,31.96c24.82,15.99,45.54,38.05,60.68,63.34c12.8,20.86,21.52,43.92,28.29,67.35c-0.74-18.19-6.19-35.9-12.97-52.69c-14.42-34.92-39.42-65.41-71.09-86.05c-17.65-11.69-37.16-20.42-57.38-26.57c-19.63-6.37-40.43-7.29-60.87-8.48c-0.03-11.25-0.01-22.49-0.01-33.74c39.77-1.46,79.71,9.16,114.19,28.85c36.97,21.07,66.99,53.09,88.41,89.64c6.37,11.87,10.17,24.9,15.76,37.13c-3.98-26.1-16.68-49.94-31.41-71.51c-21.71-31.18-51.4-56.91-85.85-73.08c-31.48-14.98-66.37-21.84-101.1-22.61C198.13,62.22,198.15,50.23,198.13,38.24z"
+        />
+        <path
+          fill="#054770"
+          d="M185.6,304.78c19.26-2.48,39.33,1.57,56,11.56c17.02,10.04,30.49,26.03,37.28,44.6c7.2,19.31,7.05,41.25-0.43,60.46c-6.9,18.03-20.09,33.53-36.69,43.36c-17.2,10.36-38.03,14.4-57.87,11.42c-19.91-2.85-38.67-12.9-52.13-27.84c-13.26-14.51-21.33-33.69-22.24-53.34c-1.12-19.98,5.14-40.26,17.29-56.16C140.77,320.2,162.48,307.62,185.6,304.78z M185.54,318.79c-23.84,3.46-45.36,19.54-55.41,41.43c-8.16,17.33-8.93,37.97-2.06,55.86c5.74,15.28,16.87,28.42,30.89,36.77c12.56,7.55,27.42,11.16,42.05,10.29c16.41-0.86,32.44-7.48,44.7-18.42c12.19-10.75,20.67-25.69,23.4-41.74c2.65-15.04,0.35-30.91-6.52-44.55c-7.19-14.42-19.31-26.29-33.84-33.23C215.44,318.75,200.15,316.54,185.54,318.79z"
+        />
+        <path
+          fill="#054770"
+          d="M140.01,355.31c7.3,0.01,14.6,0.01,21.9,0.01c0.02,21.95-0.01,43.91,0.02,65.87c-7.3-0.23-14.61-0.19-21.91-0.03c0.95,1.36,1.8,2.84,3,4.02c6.26,0.6,12.61,0.1,18.91,0.26c-0.01-0.97-0.02-2.91-0.03-3.88c9.45,6.73,20.34,12.38,32.21,12.54c9.4,0.29,18.36-3.25,26.47-7.7c3.63-0.89,5.58-4.39,9.02-5.73c0.92,1.56,1.82,3.14,2.72,4.73c4.79,0.07,9.58,0.03,14.37,0.03c0.95-1.46,1.91-2.91,2.87-4.37c-6.52,0.01-13.04-0.03-19.56,0.03c-2.3-3.93-4.42-7.95-6.67-11.9c-0.36,5.18,0.66,10.58-0.46,15.64c-0.4,0.16-1.18,0.47-1.57,0.63c-6.64-0.02-13.29-0.04-19.93-0.03c0.07-11.57-0.16-23.15,0.14-34.72c-1.11,6.77-3.51,13.49-8.22,18.62c-6.67,7.69-16.86,11.88-26.98,11.76c0.01-21.94-0.04-43.89,0.02-65.84c8.82,0.03,17.71,3.04,24.25,9.06c6.41,5.67,10.22,13.94,10.97,22.42c0.59-2.92-0.32-5.86-0.2-8.79c0.04-7.54,0.01-15.08,0.02-22.62c7.32-0.01,14.63,0.01,21.95,0c3.03,6.3,5.99,12.65,9.06,18.95c0.01-6.32,0-12.63,0.01-18.95c7.19,0,14.38-0.01,21.57,0.01c0,23.36-0.01,46.73,0.01,70.09c-2.42,0.01-4.83,0.01-7.24-0.01c-9.41,12.62-23.37,21.87-38.87,24.91c-18.31,4-38.24-0.78-52.88-12.43c-4.63-3.45-8.32-7.96-12.07-12.25c-0.7-0.03-2.11-0.1-2.82-0.14C139.89,402.11,140.05,378.71,140.01,355.31z"
+        />
+      </g>
+    </svg>
+  );
+};
+
+/**
  * Official Emblem of Hội Sinh viên Việt Nam (Huy hiệu Hội Sinh viên Việt Nam)
  * 100% authentic official vector geometry (viewBox 0 0 487.1 487.1):
  * - Cyan-blue circular field (#00AEEF)
@@ -64,10 +108,14 @@ export const HsvEmblem: React.FC<{ size?: number; className?: string }> = ({
   );
 };
 
-export const InstitutionLockup: React.FC<HsvLogoProps> = ({
+export const InstitutionLockup: React.FC<
+  HsvLogoProps & { primaryTitle?: string; subtitle?: string }
+> = ({
   size = 38,
   className = '',
   orientation = 'horizontal',
+  primaryTitle = 'ĐẠI HỌC ĐÀ NẴNG',
+  subtitle = 'HỘI SINH VIÊN VIỆT NAM',
 }) => {
   return (
     <div
@@ -75,13 +123,38 @@ export const InstitutionLockup: React.FC<HsvLogoProps> = ({
         orientation === 'vertical' ? 'flex-col items-start' : ''
       } ${className}`}
     >
-      <HsvEmblem size={size} />
+      <div className="flex items-center gap-2 shrink-0">
+        <UdnEmblem size={size} />
+        <HsvEmblem size={size} />
+      </div>
       <div className="flex flex-col leading-tight min-w-0">
         <span className="text-[11px] font-semibold tracking-[0.06em] text-[#4A6275] uppercase">
-          THÀNH ĐOÀN ĐÀ NẴNG
+          {subtitle}
         </span>
         <span className="text-[13px] font-bold text-[#0D6EB0] tracking-tight uppercase">
-          HỘI SINH VIÊN VIỆT NAM TP. ĐÀ NẴNG
+          {primaryTitle}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export const UdnInstitutionLockup: React.FC<{
+  size?: number;
+  className?: string;
+}> = ({ size = 42, className = '' }) => {
+  return (
+    <div className={`flex items-center gap-3 select-none min-w-0 ${className}`}>
+      <div className="flex items-center gap-2 shrink-0">
+        <UdnEmblem size={size} />
+        <HsvEmblem size={size} />
+      </div>
+      <div className="flex flex-col justify-center min-w-0">
+        <span className="text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.06em] text-[#4A6275] leading-snug">
+          HỘI SINH VIÊN VIỆT NAM
+        </span>
+        <span className="text-[14px] sm:text-[16px] lg:text-[17px] font-extrabold uppercase tracking-[-0.01em] text-[#0B64A0] leading-tight truncate">
+          ĐẠI HỌC ĐÀ NẴNG
         </span>
       </div>
     </div>
@@ -92,14 +165,17 @@ export const ProductBrandLockup: React.FC<{
   size?: number;
   className?: string;
   badgeLabel?: string;
-}> = ({ size = 34, className = '', badgeLabel }) => {
+}> = ({ size = 32, className = '', badgeLabel }) => {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <HsvEmblem size={size} />
+      <div className="flex items-center gap-1.5 shrink-0">
+        <UdnEmblem size={size} />
+        <HsvEmblem size={size} />
+      </div>
       <div className="flex flex-col leading-none">
         <div className="flex items-center gap-1.5">
           <span className="text-[17px] font-bold text-slate-900 tracking-tight">
-            5TOT <span className="text-[#0D6EB0]">Đà Nẵng</span>
+            5TOT <span className="text-[#0D6EB0]">ĐHĐN</span>
           </span>
           {badgeLabel && (
             <span className="text-[10px] font-medium text-slate-500 bg-slate-100/80 px-1.5 py-0.5 rounded">
@@ -108,7 +184,7 @@ export const ProductBrandLockup: React.FC<{
           )}
         </div>
         <span className="text-[11px] font-medium text-slate-500 mt-0.5">
-          Hội Sinh viên TP. Đà Nẵng
+          Hội Sinh viên Việt Nam · Đại học Đà Nẵng
         </span>
       </div>
     </div>

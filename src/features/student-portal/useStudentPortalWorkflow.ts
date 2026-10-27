@@ -393,9 +393,9 @@ export function useStudentPortalWorkflow({
           finalResultSummary: null,
           latestOperationalNote: 'Sinh viên đã hoàn tất gửi hồ sơ xét chọn',
           currentReviewStage: 'SCHOOL',
-          schoolReviewUnitId: resolvedSchoolUnit.unit?.id || 'unit-udn',
+          schoolReviewUnitId: resolvedSchoolUnit.unit?.id || 'unit-dut',
           schoolReviewUnitName:
-            resolvedSchoolUnit.unit?.officialName || 'Đại học Đà Nẵng',
+            resolvedSchoolUnit.unit?.officialName || 'Trường Đại học Bách khoa – ĐHĐN',
           schoolPreliminaryStatus: 'pending_intake',
           schoolRecommendation: 'pending',
         };

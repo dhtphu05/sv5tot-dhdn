@@ -624,7 +624,7 @@ export function useAdminControlPlane(
                 roles: [newRole],
                 schoolReviewUnitId:
                   newRole === 'SCHOOL_OFFICER'
-                    ? schoolReviewUnitId || s.schoolReviewUnitId || 'unit-udn'
+                    ? schoolReviewUnitId || s.schoolReviewUnitId || 'unit-dut'
                     : undefined,
               }
             : s

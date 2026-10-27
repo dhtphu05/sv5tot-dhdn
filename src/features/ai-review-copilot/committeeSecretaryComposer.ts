@@ -160,7 +160,7 @@ export function composeCommitteeSecretaryReport({
         schoolReview?.recommendingOfficerName ||
         (resolvedSchoolUnit.resolved && resolvedSchoolUnit.unit?.unitOfficerName
           ? resolvedSchoolUnit.unit.unitOfficerName
-          : 'Nguyễn Văn An');
+          : 'Cán bộ xét cấp trường Đại học Đà Nẵng');
       let schoolTimestamp =
         schoolReview?.forwardedAt ||
         schoolReview?.recommendationDate ||

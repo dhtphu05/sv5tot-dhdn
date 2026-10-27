@@ -80,10 +80,10 @@ export const SchoolOverviewPage: React.FC<SchoolOverviewPageProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#DCE7EE] pb-4">
         <div>
           <div className="text-[12px] font-semibold text-[#526B7C] flex items-center gap-1.5">
-            <span>5TOT Đà Nẵng</span>
+            <span>5TOT ĐHĐN</span>
             <span>·</span>
             <span className="text-[#0D78AE] font-bold">
-              Xét sơ tuyển cấp Trường
+              Xét sơ tuyển cấp Trường / Đơn vị
             </span>
             <span>·</span>
             <span>{unitName}</span>
@@ -121,8 +121,8 @@ export const SchoolOverviewPage: React.FC<SchoolOverviewPageProps> = ({
               </div>
               <div className="text-[11.5px] text-[#64748B]">
                 {hasMultipleMemberInstitutions
-                  ? `Tổng hợp hồ sơ từ ${memberBreakdowns.length} đơn vị đào tạo trực thuộc kèm 01 tệp văn bản PDF đề nghị chính thức gửi lên Hội Sinh viên Thành phố.`
-                  : `Toàn bộ hồ sơ đủ điều kiện của ${unitName} được tổng hợp kèm 01 tệp văn bản PDF đề nghị chính thức gửi lên Hội Sinh viên Thành phố.`}
+                  ? `Tổng hợp hồ sơ từ ${memberBreakdowns.length} đơn vị đào tạo trực thuộc kèm 01 tệp văn bản PDF đề nghị chính thức trình lên Hội Sinh viên Đại học Đà Nẵng.`
+                  : `Toàn bộ hồ sơ đủ điều kiện của ${unitName} được tổng hợp kèm 01 tệp văn bản PDF đề nghị chính thức trình lên Hội Sinh viên Đại học Đà Nẵng.`}
               </div>
             </div>
           </div>
@@ -308,7 +308,7 @@ export const SchoolOverviewPage: React.FC<SchoolOverviewPageProps> = ({
             className="p-4 text-left hover:bg-[#F7FAFC] transition-colors cursor-pointer"
           >
             <div className="text-[12px] font-semibold text-[#526B7C]">
-              Đã chuyển Thành phố
+              Đã trình ĐHĐN
             </div>
             <div className="text-[24px] font-extrabold text-[#047857] tabular-nums mt-1">
               {metrics.forwardedToCity}

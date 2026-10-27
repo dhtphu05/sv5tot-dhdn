@@ -46,12 +46,12 @@ export const AwardProgramContextBar: React.FC<AwardProgramContextBarProps> = ({
         return role === 'ADMIN'
           ? 'Quản trị hệ thống · Tổng quan'
           : role === 'CITY_COMMITTEE'
-          ? 'Hội đồng xét chọn · Tổng quan phiên họp'
+          ? 'Hội đồng xét chọn cấp ĐHĐN · Tổng quan phiên họp'
           : role === 'SCHOOL_OFFICER'
           ? 'Sơ tuyển cấp trường · Tổng quan đơn vị'
-          : 'Thẩm định hồ sơ · Tổng quan nghiệp vụ';
+          : 'Thẩm định hồ sơ cấp ĐHĐN · Tổng quan nghiệp vụ';
       case 'applications':
-        return 'Hồ sơ cá nhân · Thẩm định Thành phố';
+        return 'Hồ sơ cá nhân · Thẩm định cấp ĐHĐN';
       case 'application_review':
         return 'Không gian thẩm định chi tiết hồ sơ';
       case 'attention':
@@ -59,17 +59,17 @@ export const AwardProgramContextBar: React.FC<AwardProgramContextBarProps> = ({
       case 'supplements':
         return 'Quản lý yêu cầu bổ sung minh chứng';
       case 'collective_review':
-        return 'Hồ sơ tập thể · Thẩm định Thành phố (TT01–TT04)';
+        return 'Hồ sơ tập thể · Thẩm định cấp ĐHĐN (TT01–TT04)';
       case 'deadlines':
         return 'Mốc thời gian quy trình xét chọn';
       case 'committee':
-        return 'Hội đồng xét chọn · Danh sách hồ sơ';
+        return 'Hội đồng xét chọn cấp ĐHĐN · Danh sách hồ sơ';
       case 'committee_decisions':
-        return 'Hội đồng xét chọn · Hồ sơ chờ quyết định';
+        return 'Hội đồng xét chọn cấp ĐHĐN · Hồ sơ chờ quyết định';
       case 'results':
-        return 'Hội đồng xét chọn · Kết quả chính thức';
+        return 'Hội đồng xét chọn cấp ĐHĐN · Kết quả chính thức';
       case 'recognition':
-        return 'Quyết định công nhận danh hiệu';
+        return 'Quyết định công nhận danh hiệu cấp ĐHĐN';
       case 'analytics':
         return 'Thống kê & Báo cáo kết quả';
       case 'notifications':
@@ -99,15 +99,15 @@ export const AwardProgramContextBar: React.FC<AwardProgramContextBarProps> = ({
       case 'school_supplements':
         return 'Sơ tuyển cấp trường · Yêu cầu bổ sung';
       case 'school_awaiting_forward':
-        return 'Sơ tuyển cấp trường · Danh sách đề nghị chuyển TP';
+        return 'Sơ tuyển cấp trường · Danh sách đề nghị trình ĐHĐN';
       case 'school_forwarded':
-        return 'Sơ tuyển cấp trường · Đã chuyển hồ sơ lên TP';
+        return 'Sơ tuyển cấp trường · Đã trình hồ sơ lên ĐHĐN';
       case 'school_analytics':
         return 'Sơ tuyển cấp trường · Thống kê đơn vị';
       case 'school_notifications':
         return 'Sơ tuyển cấp trường · Thông báo';
       default:
-        return 'Hệ thống Quản lý xét chọn 5TOT Đà Nẵng';
+        return 'Hệ thống Quản lý xét chọn 5TOT ĐHĐN';
     }
   };
 

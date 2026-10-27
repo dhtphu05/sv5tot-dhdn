@@ -18,6 +18,14 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      cors: true,
+      allowedHosts: [
+        'api-sv5tot-dhdn.lcdkhoacntt-dut.page',
+        'sv5tot-dhdn.lcdkhoacntt-dut.page',
+        '.lcdkhoacntt-dut.page',
+        'localhost',
+        '127.0.0.1',
+      ],
       proxy: {
         '/api': {
           target: process.env.VITE_BACKEND_PROXY_TARGET || 'http://127.0.0.1:3001',

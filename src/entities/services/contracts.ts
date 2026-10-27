@@ -194,7 +194,7 @@ export interface SchoolReviewServiceContract {
   }): Promise<StaffApplicationRecord>;
   completeSchoolPreliminaryReview(params: {
     applicationId: string;
-    recommendation: 'recommended' | 'not_recommended';
+    recommendation: 'recommended' | 'not_recommended' | 'pending';
     summaryNote: string;
     actor: ServiceActor;
   }): Promise<StaffApplicationRecord>;

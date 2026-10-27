@@ -88,13 +88,13 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
   onRecordRecommendation,
   onForwardToCity,
 }) => {
-  const userUnitId = currentUser.schoolReviewUnitId || 'unit-udn';
-  const isUdn = userUnitId === 'unit-udn';
+  const userUnitId = currentUser.schoolReviewUnitId || 'unit-dut';
+  const isUdn = false;
   const unitConfig = AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find(
     (u) => u.id === userUnitId
   );
   const unitName =
-    unitConfig?.officialName || currentUser.unitLabel || 'Đại học Đà Nẵng';
+    unitConfig?.officialName || currentUser.unitLabel || 'Trường Đại học Bách khoa – ĐHĐN';
   const activeSeasonCode = currentSeason?.schoolYear || '2025–2026';
   const activeSeasonLabel = formatAcademicYearLabel(activeSeasonCode);
 
@@ -510,7 +510,7 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             {isForwarded ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11.5px] font-bold bg-[#FAF5FF] text-[#7E22CE] border border-[#F3E8FF]">
-                Đã gửi Thành phố
+                Đã trình ĐHĐN
               </span>
             ) : rec === 'recommended' ? (
               <div className="flex items-center gap-1.5">
@@ -525,6 +525,14 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
                 >
                   Đổi
                 </button>
+                <button
+                  type="button"
+                  onClick={() => onRecordRecommendation?.(app.applicationId, 'pending')}
+                  title="Hoàn tác kết luận đề nghị"
+                  className="inline-flex items-center gap-0.5 text-[11px] text-[#B45309] hover:text-[#92400E] underline cursor-pointer ml-1"
+                >
+                  <RotateCcw size={10} /> Hoàn tác
+                </button>
               </div>
             ) : rec === 'not_recommended' ? (
               <div className="flex items-center gap-1.5">
@@ -538,6 +546,14 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
                   className="text-[11px] text-[#526B7C] hover:text-[#0F2335] underline cursor-pointer"
                 >
                   Đổi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onRecordRecommendation?.(app.applicationId, 'pending')}
+                  title="Hoàn tác kết luận không đề nghị"
+                  className="inline-flex items-center gap-0.5 text-[11px] text-[#B45309] hover:text-[#92400E] underline cursor-pointer ml-1"
+                >
+                  <RotateCcw size={10} /> Hoàn tác
                 </button>
               </div>
             ) : (
@@ -725,7 +741,7 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
               : 'Hồ sơ sơ tuyển'}
           </h1>
           <p className="text-[13px] text-[#526B7C] mt-0.5">
-            Xét sơ tuyển 05 tiêu chí Sinh viên 5 tốt và lập danh sách đề xuất gửi cấp Thành phố.
+            Xét sơ tuyển 05 tiêu chí Sinh viên 5 tốt và lập danh sách đề xuất trình cấp Đại học Đà Nẵng.
           </p>
         </div>
 
@@ -881,7 +897,7 @@ export const SchoolBackofficeViews: React.FC<SchoolBackofficeViewsProps> = ({
                 onSelectRoute('school_awaiting_forward');
               }}
             >
-              Chuẩn bị gửi Thành phố ({selectedAppIds.length})
+              Chuẩn bị trình ĐHĐN ({selectedAppIds.length})
             </Button>
           </div>
         </div>

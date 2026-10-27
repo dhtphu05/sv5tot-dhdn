@@ -41,9 +41,9 @@ export function createCollectiveApplication(payload: {
   }
 
   const routing = resolveSchoolReviewUnit(payload.institutionId);
-  const resolvedUnitId = payload.schoolReviewUnitId || routing.unit?.id || 'unit-udn';
+  const resolvedUnitId = payload.schoolReviewUnitId || routing.unit?.id || 'unit-dut';
   const resolvedUnitName =
-    payload.schoolReviewUnitName || routing.unit?.officialName || 'Đại học Đà Nẵng';
+    payload.schoolReviewUnitName || routing.unit?.officialName || 'Trường Đại học Bách khoa – ĐHĐN';
   const resolvedInstName =
     payload.institutionName || 'Trường Đại học Bách khoa – ĐHĐN';
 

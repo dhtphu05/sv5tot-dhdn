@@ -52,23 +52,23 @@ describe('5TOT Đà Nẵng — UX-S5 Final Integration & Acceptance Suite', () =
     assert.strictEqual(CRITERIA.integration.number, 5);
   });
 
-  test('UX5-02: UDN 8 member institutions all resolve to unit-udn while preserving school identities', () => {
-    const udnUnit = AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === 'unit-udn');
-    assert.ok(udnUnit, 'UDN Review unit must exist');
-    assert.strictEqual(udnUnit.memberInstitutionIds.length, 8);
+  test('UX5-02: UDN 9 member institutions all resolve to their 9 respective units while preserving school identities', () => {
+    assert.strictEqual(AUTHORITATIVE_SCHOOL_REVIEW_UNITS.length, 9);
 
-    for (const instId of udnUnit.memberInstitutionIds) {
-      const res = resolveSchoolReviewUnit(instId);
-      assert.strictEqual(res.resolved, true, `Institution ${instId} must be resolved`);
-      assert.strictEqual(res.unit?.id, 'unit-udn', `Institution ${instId} must resolve to unit-udn`);
+    for (const unit of AUTHORITATIVE_SCHOOL_REVIEW_UNITS) {
+      for (const instId of unit.memberInstitutionIds) {
+        const res = resolveSchoolReviewUnit(instId);
+        assert.strictEqual(res.resolved, true, `Institution ${instId} must be resolved`);
+        assert.strictEqual(res.unit?.id, unit.id, `Institution ${instId} must resolve to ${unit.id}`);
+      }
     }
   });
 
-  test('UX5-03: Independent schools resolve to their respective review units', () => {
-    assert.strictEqual(resolveSchoolReviewUnit('inst-dtu').unit?.id, 'unit-dtu');
-    assert.strictEqual(resolveSchoolReviewUnit('inst-dau').unit?.id, 'unit-dau');
-    assert.strictEqual(resolveSchoolReviewUnit('inst-donga').unit?.id, 'unit-donga');
-    assert.strictEqual(resolveSchoolReviewUnit('inst-fpt').unit?.id, 'unit-fpt');
+  test('UX5-03: Member schools resolve to their respective review units', () => {
+    assert.strictEqual(resolveSchoolReviewUnit('inst-dut').unit?.id, 'unit-dut');
+    assert.strictEqual(resolveSchoolReviewUnit('inst-due').unit?.id, 'unit-due');
+    assert.strictEqual(resolveSchoolReviewUnit('inst-vku').unit?.id, 'unit-vku');
+    assert.strictEqual(resolveSchoolReviewUnit('inst-kontum').unit?.id, 'unit-kontum');
   });
 
   test('UX5-04: Collective Track uses TT01-TT04 and has canonical requirement metadata', () => {

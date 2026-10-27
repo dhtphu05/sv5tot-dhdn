@@ -54,10 +54,10 @@ export const COLLECTIVE_REQUIREMENTS_META: Record<CollectiveRequirementId, Colle
   TT01: {
     id: 'TT01',
     code: 'TT01',
-    title: 'Đã đạt danh hiệu "Tập thể Sinh viên 5 tốt" cấp Trường',
+    title: 'Đã đạt danh hiệu "Tập thể Sinh viên 5 tốt" cấp Trường / Đơn vị thành viên',
     shortTitle: 'Công nhận cấp Trường',
     ruleBadge: 'Điều kiện tiên quyết',
-    ruleHelper: 'Phải được Hội Sinh viên hoặc Ban Giám hiệu Nhà trường công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Trường trong năm học xét chọn.',
+    ruleHelper: 'Theo Quyết định số 12 QĐ/ĐHĐN-HSV: Tập thể (Liên chi hội, Chi hội, CLB/Đội/Nhóm hoặc Chi đoàn) phải được công nhận danh hiệu Tập thể Sinh viên 5 tốt cấp Trường / Đơn vị trực thuộc và tổ chức ít nhất 01 hoạt động tạo môi trường rèn luyện SV5T.',
     thresholdHelper: 'Bắt buộc đạt',
   },
   TT02: {
@@ -66,16 +66,16 @@ export const COLLECTIVE_REQUIREMENTS_META: Record<CollectiveRequirementId, Colle
     title: '100% sinh viên tham gia phong trào Sinh viên 5 tốt',
     shortTitle: 'Tham gia phong trào',
     ruleBadge: 'Tỷ lệ 100%',
-    ruleHelper: '100% sinh viên trong tập thể đăng ký và tham gia phong trào Sinh viên 5 tốt trong năm học.',
+    ruleHelper: 'Theo Quyết định số 12 QĐ/ĐHĐN-HSV: 100% sinh viên trong tập thể đăng ký và tham gia phong trào Sinh viên 5 tốt trong năm học xét chọn.',
     thresholdHelper: 'Ngưỡng yêu cầu: 100%',
   },
   TT03: {
     id: 'TT03',
     code: 'TT03',
-    title: 'Ít nhất 20% thành viên đạt Sinh viên 5 tốt cấp Trường',
+    title: 'Ít nhất 20% thành viên đạt Sinh viên 5 tốt từ cấp Trường trở lên',
     shortTitle: 'Thành viên đạt SV5T',
     ruleBadge: 'Tỷ lệ >= 20%',
-    ruleHelper: 'Ít nhất 20% sinh viên trong tập thể đạt danh hiệu Sinh viên 5 tốt cấp Trường trong năm học xét chọn.',
+    ruleHelper: 'Theo Quyết định số 12 QĐ/ĐHĐN-HSV: Có ít nhất 20% sinh viên đạt danh hiệu "Sinh viên 5 tốt" từ cấp Liên chi hội, cấp Trường / Đơn vị trực thuộc trở lên (30% đối với Chi hội / Chi đoàn).',
     thresholdHelper: 'Ngưỡng yêu cầu: >= 20%',
   },
   TT04: {
@@ -84,7 +84,7 @@ export const COLLECTIVE_REQUIREMENTS_META: Record<CollectiveRequirementId, Colle
     title: 'Không có sinh viên vi phạm pháp luật và các quy định',
     shortTitle: 'Chấp hành quy định',
     ruleBadge: 'Điều kiện bắt buộc',
-    ruleHelper: '100% sinh viên không vi phạm pháp luật, quy chế, nội quy của Nhà trường, nơi cư trú và cộng đồng.',
+    ruleHelper: 'Theo Quyết định số 12 QĐ/ĐHĐN-HSV: Không có sinh viên vi phạm pháp luật và các quy chế, nội quy của Nhà trường, quy định của địa phương cư trú và cộng đồng.',
     thresholdHelper: 'Không vi phạm',
   },
 };
@@ -164,16 +164,16 @@ export type CollectiveWorkflowStatus =
   | 'draft'                             // Đang kê khai
   | 'submitted_for_unit_confirmation'   // (Legacy) Đã gửi đơn vị chờ xác nhận
   | 'returned_for_correction'           // (Legacy) Đơn vị trả về yêu cầu chỉnh sửa
-  | 'unit_confirmed_and_forwarded'     // (Legacy) Đơn vị đã xác nhận & chuyển Thành phố
-  | 'city_unassigned'                   // Đã nộp Thành phố (Chờ phân công)
-  | 'city_assigned'                     // Đã phân công cán bộ Thành phố
-  | 'city_in_review'                    // Cán bộ Thành phố đang xét
-  | 'city_under_review'                 // Cán bộ Thành phố đang xét
-  | 'city_supplement_pending'           // Thành phố yêu cầu bổ sung (chờ tập thể)
-  | 'city_supplement_requested'         // Thành phố yêu cầu bổ sung
+  | 'unit_confirmed_and_forwarded'     // (Legacy) Đơn vị đã xác nhận & chuyển cấp ĐHĐN
+  | 'city_unassigned'                   // Đã nộp cấp ĐHĐN (Chờ phân công)
+  | 'city_assigned'                     // Đã phân công cán bộ cấp ĐHĐN
+  | 'city_in_review'                    // Cán bộ cấp ĐHĐN đang xét
+  | 'city_under_review'                 // Cán bộ cấp ĐHĐN đang xét
+  | 'city_supplement_pending'           // Cấp ĐHĐN yêu cầu bổ sung (chờ tập thể)
+  | 'city_supplement_requested'         // Cấp ĐHĐN yêu cầu bổ sung
   | 'city_supplement_returned'          // Tập thể đã gửi bổ sung
-  | 'city_review_completed'             // Cán bộ Thành phố hoàn tất xét 4 tiêu chí
-  | 'committee_pending'                 // Chờ Hội đồng Thành phố kết luận
+  | 'city_review_completed'             // Cán bộ cấp ĐHĐN hoàn tất xét 4 tiêu chí
+  | 'committee_pending'                 // Chờ Hội đồng cấp ĐHĐN kết luận
   | 'finalized'                         // Hội đồng đã kết luận
   | 'published';                        // Đã công bố kết quả chính thức
 
@@ -193,7 +193,7 @@ export const COLLECTIVE_STATUS_LABELS: Record<string, string> = {
 };
 
 /**
- * Danh mục các tổ chức tập thể được cấp thẩm quyền kê khai (Prompt S4.8.2 Section 10)
+ * Danh mục các tổ chức tập thể thuộc 09 Trường / Đơn vị thành viên Đại học Đà Nẵng được cấp thẩm quyền kê khai
  */
 export interface RegisteredCollectiveEntity {
   id: string;
@@ -216,8 +216,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'CHI_HOI',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
     facultyName: 'Khoa Điện tử - Viễn thông',
     defaultContactPhone: '0905 123 456',
     authorizedPreparerEmail: 'mai.nt@dut.udn.vn',
@@ -229,8 +229,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'CHI_HOI',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
     facultyName: 'Khoa Công nghệ Thông tin',
     defaultContactPhone: '0905 654 321',
     authorizedPreparerEmail: 'mai.nt@dut.udn.vn',
@@ -242,8 +242,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-dut',
     institutionName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
     facultyName: 'Khoa Điện tử - Viễn thông',
     defaultContactPhone: '0905 123 456',
     authorizedPreparerEmail: 'mai.nt@dut.udn.vn',
@@ -255,8 +255,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'CHI_DOAN',
     institutionId: 'inst-ute',
     institutionName: 'Trường Đại học Sư phạm Kỹ thuật - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ute',
+    schoolReviewUnitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
     facultyName: 'Khoa Kỹ thuật Máy tính',
     defaultContactPhone: '0912 345 678',
     authorizedPreparerEmail: 'mai.nt@dut.udn.vn',
@@ -268,8 +268,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-due',
     institutionName: 'Trường Đại học Kinh tế - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-due',
+    schoolReviewUnitName: 'Trường Đại học Kinh tế – ĐHĐN',
     facultyName: 'Khoa Quản trị Kinh doanh',
     defaultContactPhone: '0905 223 344',
     authorizedPreparerEmail: 'hung.lv@due.udn.vn',
@@ -281,8 +281,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'CHI_HOI',
     institutionId: 'inst-ued',
     institutionName: 'Trường Đại học Sư phạm - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ued',
+    schoolReviewUnitName: 'Trường Đại học Sư phạm – ĐHĐN',
     facultyName: 'Khoa Toán',
     defaultContactPhone: '0905 334 455',
     authorizedPreparerEmail: 'thao.np@ued.udn.vn',
@@ -294,8 +294,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-ufl',
     institutionName: 'Trường Đại học Ngoại ngữ - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ufl',
+    schoolReviewUnitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
     facultyName: 'Khoa Tiếng Anh',
     defaultContactPhone: '0905 445 566',
     authorizedPreparerEmail: 'linh.nk@ufl.udn.vn',
@@ -307,8 +307,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-ute',
     institutionName: 'Trường Đại học Sư phạm Kỹ thuật - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-ute',
+    schoolReviewUnitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
     facultyName: 'Khoa Cơ khí',
     defaultContactPhone: '0905 556 677',
     authorizedPreparerEmail: 'nam.ph@ute.udn.vn',
@@ -320,8 +320,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-vku',
     institutionName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-vku',
+    schoolReviewUnitName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
     facultyName: 'Khoa Khoa học Máy tính',
     defaultContactPhone: '0905 667 788',
     authorizedPreparerEmail: 'khang.dn@vku.udn.vn',
@@ -333,8 +333,8 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-smp',
     institutionName: 'Trường Y Dược - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-smp',
+    schoolReviewUnitName: 'Trường Y Dược – ĐHĐN',
     facultyName: 'Khoa Y',
     defaultContactPhone: '0905 778 899',
     authorizedPreparerEmail: 'vy.lt@smp.udn.vn',
@@ -346,90 +346,25 @@ export const AUTHORIZED_COLLECTIVE_REGISTRY: RegisteredCollectiveEntity[] = [
     type: 'LIEN_CHI_HOI',
     institutionId: 'inst-vnuk',
     institutionName: 'Viện Nghiên cứu và Đào tạo Việt - Anh - Đại học Đà Nẵng',
-    schoolReviewUnitId: 'unit-udn',
-    schoolReviewUnitName: 'Đại học Đà Nẵng',
+    schoolReviewUnitId: 'unit-vnuk',
+    schoolReviewUnitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
     facultyName: 'Khối Đào tạo Quốc tế',
     defaultContactPhone: '0905 889 900',
     authorizedPreparerEmail: 'khoa.nm@vnuk.udn.vn',
     authorizedPreparerName: 'Nguyễn Minh Khoa',
   },
   {
-    id: 'col-dtu-lcd-dtqt',
-    name: 'Liên chi đoàn Viện Đào tạo Quốc tế',
-    type: 'LIEN_CHI_DOAN',
-    institutionId: 'inst-dtu',
-    institutionName: 'Đại học Duy Tân',
-    schoolReviewUnitId: 'unit-dtu',
-    schoolReviewUnitName: 'Trường Đại học Duy Tân',
-    facultyName: 'Viện Đào tạo Quốc tế',
-    defaultContactPhone: '0905 990 011',
-    authorizedPreparerEmail: 'long.vh@dtu.edu.vn',
-    authorizedPreparerName: 'Võ Hoàng Long',
-  },
-  {
-    id: 'col-donga-lch-qtdl',
-    name: 'Liên chi hội Khoa Quản trị Du lịch',
+    id: 'col-kontum-lch-kt',
+    name: 'Liên chi hội Khoa Kinh tế – Phân hiệu ĐHĐN tại Kon Tum',
     type: 'LIEN_CHI_HOI',
-    institutionId: 'inst-donga',
-    institutionName: 'Trường Đại học Đông Á',
-    schoolReviewUnitId: 'unit-donga',
-    schoolReviewUnitName: 'Trường Đại học Đông Á',
-    facultyName: 'Khoa Du lịch',
-    defaultContactPhone: '0905 101 202',
-    authorizedPreparerEmail: 'trang.lth@donga.edu.vn',
-    authorizedPreparerName: 'Lê Thị Huyền Trang',
-  },
-  {
-    id: 'col-dau-lch-kt',
-    name: 'Liên chi hội Khoa Kiến trúc',
-    type: 'LIEN_CHI_HOI',
-    institutionId: 'inst-dau',
-    institutionName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    schoolReviewUnitId: 'unit-dau',
-    schoolReviewUnitName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    facultyName: 'Khoa Kiến trúc',
-    defaultContactPhone: '0905 202 303',
-    authorizedPreparerEmail: 'minh.tqh@dau.edu.vn',
-    authorizedPreparerName: 'Trần Quốc Hoàng Minh',
-  },
-  {
-    id: 'col-upes3-lcd-gdtc',
-    name: 'Liên chi đoàn Khoa Giáo dục Thể chất',
-    type: 'LIEN_CHI_DOAN',
-    institutionId: 'inst-upes3',
-    institutionName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    schoolReviewUnitId: 'unit-upes3',
-    schoolReviewUnitName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    facultyName: 'Khoa Giáo dục Thể chất',
-    defaultContactPhone: '0905 303 404',
-    authorizedPreparerEmail: 'tuan.nq@upes3.edu.vn',
-    authorizedPreparerName: 'Nguyễn Quốc Tuấn',
-  },
-  {
-    id: 'col-tyd-lch-dd',
-    name: 'Liên chi hội Khoa Điều dưỡng',
-    type: 'LIEN_CHI_HOI',
-    institutionId: 'inst-tyd',
-    institutionName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    schoolReviewUnitId: 'unit-tyd',
-    schoolReviewUnitName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    facultyName: 'Khoa Điều dưỡng',
-    defaultContactPhone: '0905 404 505',
-    authorizedPreparerEmail: 'truc.htt@dhktyduocdn.edu.vn',
-    authorizedPreparerName: 'Huỳnh Thị Thanh Trúc',
-  },
-  {
-    id: 'col-fpt-clb-fcode',
-    name: 'CLB Kỹ thuật Phần mềm F-Code',
-    type: 'club_team_group',
-    institutionId: 'inst-fpt',
-    institutionName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    schoolReviewUnitId: 'unit-fpt',
-    schoolReviewUnitName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    facultyName: 'Khối Kỹ thuật Phần mềm',
-    defaultContactPhone: '0905 505 606',
-    authorizedPreparerEmail: 'vy.ntt@fpt.edu.vn',
-    authorizedPreparerName: 'Nguyễn Trần Thảo Vy',
+    institutionId: 'inst-kontum',
+    institutionName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    schoolReviewUnitId: 'unit-kontum',
+    schoolReviewUnitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    facultyName: 'Khoa Kinh tế',
+    defaultContactPhone: '0905 990 112',
+    authorizedPreparerEmail: 'tuan.nh@kontum.udn.vn',
+    authorizedPreparerName: 'Nguyễn Hoàng Tuấn',
   },
 ];
 

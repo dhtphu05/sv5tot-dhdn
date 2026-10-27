@@ -76,6 +76,7 @@ import {
   AlertTriangle,
   Sparkles,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 
 export interface OfficerReviewWorkspaceProps {
@@ -248,7 +249,32 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
     [currentUser, applicationRecord]
   );
 
-  const effectiveCanMutate = accessCheck.canMutate;
+  const isCityPublished =
+    applicationRecord?.workflowStatus === 'finalized_recognized' ||
+    applicationRecord?.workflowStatus === 'finalized_not_recognized' ||
+    Boolean(applicationRecord?.finalResultSummary?.isPublished);
+
+  const isSchoolForwarded =
+    applicationRecord?.schoolPreliminaryStatus === 'forwarded_to_city' ||
+    Boolean(applicationRecord?.schoolReviewSummary?.isForwardedToCity);
+
+  const canReopenCompletedReview = Boolean(
+    applicationRecord &&
+      (isSchoolStage
+        ? currentUser.primaryRole === 'SCHOOL_OFFICER' &&
+          !isSchoolForwarded &&
+          accessCheck.reason !== 'cross_unit_forbidden'
+        : (currentUser.primaryRole === 'CITY_OFFICER' ||
+            currentUser.primaryRole === 'CITY_MANAGER' ||
+            currentUser.primaryRole === 'ADMIN') &&
+          isSchoolForwarded &&
+          !isCityPublished)
+  );
+
+  const effectiveCanMutate = accessCheck.canMutate || canReopenCompletedReview;
+  const effectiveIsReadOnly = Boolean(
+    accessCheck.isReadOnly && !canReopenCompletedReview
+  );
 
   const dossierReview = useMemo(
     () => evaluateApplicationDossierReview(workspaceState, effectiveStudentApp),
@@ -351,13 +377,20 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
     for (const crit of CRITERIA_LIST) {
       const assessment = dossierReview.criteriaAssessments[crit.id];
       if (!assessment) continue;
+      const effectiveVerdict =
+        assessment.humanConclusion?.conclusion ||
+        (workspaceState.criterionCompletedMap?.[crit.id]
+          ? assessment.eligibilityResult === 'fail'
+            ? 'fail'
+            : 'pass'
+          : undefined);
 
       if (assessment.reviewProgress === 'needs_supplement') {
         overrides[crit.id] = { label: 'Chờ bổ sung', variant: 'requires_supplement' };
       } else if (assessment.reviewProgress === 'supplement_returned') {
         overrides[crit.id] = { label: 'Đã nhận bổ sung', variant: 'requires_supplement' };
-      } else if (assessment.hasHumanConclusion) {
-        if (assessment.humanConclusion?.conclusion === 'pass') {
+      } else if (effectiveVerdict) {
+        if (effectiveVerdict === 'pass') {
           overrides[crit.id] = { label: 'Đạt', variant: 'review_completed' };
         } else {
           overrides[crit.id] = { label: 'Không đạt', variant: 'read_failed' };
@@ -371,7 +404,7 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
       }
     }
     return overrides;
-  }, [dossierReview]);
+  }, [dossierReview, workspaceState.criterionCompletedMap]);
 
   const handleSelectCriterion = useCallback(
     (critId: CriterionDefinition['id']) => {
@@ -410,12 +443,16 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
   const {
     handleStartReview,
     handleUpdateScopeStatus,
+    handleUpdateEvidenceStatus,
+    handleSaveEvidenceNote,
     handleSaveInternalNote,
     handleSaveConsiderationReason,
     handleConfirmSendSupplement,
     handleContinueReviewAfterSupplement,
+    handleConfirmCompleteApplicationReview,
     handleRecordCriterionConclusion,
     handleRevokeCriterionConclusion,
+    handleReopenApplicationReview,
   } = useOfficerReviewMutations({
     currentUser,
     applicationRecord,
@@ -442,9 +479,14 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
     );
   }
 
-  const isApplicationCompleted =
-    applicationRecord.workflowStatus === 'review_completed' ||
-    Boolean(workspaceState.completedAt);
+  const isApplicationCompleted = isSchoolStage
+    ? Boolean(workspaceState.completedAt) ||
+      applicationRecord.schoolPreliminaryStatus === 'preliminary_completed' ||
+      applicationRecord.schoolPreliminaryStatus === 'recommended_forwarding' ||
+      applicationRecord.schoolPreliminaryStatus === 'not_recommended' ||
+      applicationRecord.schoolPreliminaryStatus === 'forwarded_to_city'
+    : applicationRecord.workflowStatus === 'review_completed' ||
+      Boolean(workspaceState.completedAt);
 
   return (
     <div className="flex-1 min-w-0 bg-[#F4F7FA] p-4 lg:p-5 xl:p-6 max-w-[1720px] 2xl:max-w-[1840px] w-full mx-auto space-y-3.5">
@@ -482,7 +524,7 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
         onStartReview={handleStartReview}
         reviewStage={effectiveStage}
         schoolReviewUnitName={schoolReviewUnitName}
-        isReadOnly={accessCheck.isReadOnly}
+        isReadOnly={effectiveIsReadOnly}
       />
 
       {/* HORIZONTAL CRITERION ANCHOR BAR (UX-S5.2) */}
@@ -495,7 +537,13 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
           {CRITERIA_LIST.map((crit, idx) => {
             const assessment = dossierReview.criteriaAssessments[crit.id];
             const progress = assessment?.reviewProgress || 'not_reviewed';
-            const humanVerdict = assessment?.humanConclusion?.conclusion;
+            const humanVerdict =
+              assessment?.humanConclusion?.conclusion ||
+              (workspaceState.criterionCompletedMap?.[crit.id]
+                ? assessment?.eligibilityResult === 'fail'
+                  ? 'fail'
+                  : 'pass'
+                : undefined);
 
             let badgeClasses = 'bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]';
             let icon = null;
@@ -569,16 +617,42 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
           </button>
 
           {isApplicationCompleted ? (
-            <span className="h-[34px] px-3.5 rounded-[9px] bg-[#EAFBF1] text-[#136F3A] border border-[#B6E6C9] font-bold text-[12px] inline-flex items-center gap-1.5 shadow-2xs">
-              <CheckCircle2 size={14} />
-              <span>{isSchoolStage ? 'Đã hoàn tất xét sơ tuyển' : 'Đã hoàn tất thẩm định'}</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="h-[34px] px-3.5 rounded-[9px] bg-[#EAFBF1] text-[#136F3A] border border-[#B6E6C9] font-bold text-[12px] inline-flex items-center gap-1.5 shadow-2xs">
+                <CheckCircle2 size={14} />
+                <span>{isSchoolStage ? 'Đã hoàn tất xét sơ tuyển' : 'Đã hoàn tất thẩm định'}</span>
+              </span>
+              {!effectiveIsReadOnly && (
+                <button
+                  type="button"
+                  onClick={handleReopenApplicationReview}
+                  title="Hoàn tác chốt kết quả để mở lại xét duyệt hồ sơ này"
+                  className="h-[34px] px-3 rounded-[9px] bg-white hover:bg-[#FFFBEB] text-[#B45309] border border-[#FADDB6] hover:border-[#F59E0B] font-bold text-[12px] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <RotateCcw size={13} />
+                  <span>Hoàn tác / Xét lại</span>
+                </button>
+              )}
+            </div>
           ) : (
-            completionCheck.allowed && !accessCheck.isReadOnly && (
+            !effectiveIsReadOnly && (
               <button
                 type="button"
-                onClick={() => setIsCompleteDialogOpen(true)}
-                className="h-[34px] px-3.5 rounded-[9px] bg-[#1680DE] hover:bg-[#1371C4] text-white font-bold text-[12px] inline-flex items-center gap-1.5 transition-colors border-0 cursor-pointer shadow-sm"
+                onClick={() => {
+                  if (!completionCheck.allowed) {
+                    showToast(
+                      completionCheck.blockerMessage ||
+                        'Vui lòng kết luận đủ 05 tiêu chí trước khi hoàn tất.'
+                    );
+                    return;
+                  }
+                  setIsCompleteDialogOpen(true);
+                }}
+                className={`h-[34px] px-3.5 rounded-[9px] font-bold text-[12px] inline-flex items-center gap-1.5 transition-colors border-0 cursor-pointer shadow-sm ${
+                  completionCheck.allowed
+                    ? 'bg-[#1680DE] hover:bg-[#1371C4] text-white'
+                    : 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#475569]'
+                }`}
               >
                 <CheckCircle2 size={14} />
                 <span>{isSchoolStage ? 'Hoàn tất xét sơ tuyển' : 'Hoàn tất thẩm định'}</span>
@@ -587,6 +661,47 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
           )}
         </div>
       </div>
+
+      {isApplicationCompleted && !effectiveIsReadOnly && (
+        <div className="w-full rounded-[14px] px-4 py-3 bg-[#EAFBF1] border border-[#86EFAC] text-[#14532D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5 text-[13px]">
+            <CheckCircle2 size={18} className="text-[#16A34A] shrink-0" />
+            <div>
+              <strong className="font-bold">
+                {isSchoolStage
+                  ? 'Đã hoàn tất xét sơ tuyển 05 tiêu chí cấp Trường.'
+                  : 'Đã hoàn tất thẩm định 05 tiêu chí cấp Thành phố.'}
+              </strong>{' '}
+              <span>
+                {isSchoolStage
+                  ? 'Hồ sơ đã sẵn sàng để ghi nhận Kết luận đề xuất chuyển Thành phố tại danh sách hồ sơ sơ tuyển.'
+                  : 'Hồ sơ đã được chuyển sang bước trình Hội đồng xét chọn cấp Thành phố.'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <button
+              type="button"
+              onClick={handleReopenApplicationReview}
+              className="h-[34px] px-3.5 rounded-[9px] bg-white hover:bg-[#FFFBEB] text-[#B45309] border border-[#F59E0B] font-bold text-[12px] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            >
+              <RotateCcw size={13} />
+              <span>Hoàn tác chốt & Xét lại</span>
+            </button>
+            <button
+              type="button"
+              onClick={onBackToQueue}
+              className="h-[34px] px-3.5 rounded-[9px] bg-[#16A34A] hover:bg-[#15803D] text-white font-bold text-[12px] inline-flex items-center gap-1.5 transition-colors cursor-pointer border-0 shrink-0 shadow-xs"
+            >
+              <span>
+                {isSchoolStage
+                  ? 'Quay lại danh sách hồ sơ xét sơ'
+                  : 'Quay lại danh sách hồ sơ'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* LEAN DOSSIER SUMMARY STRIP (Human-concluded progress vs eligibility) */}
       <div className="w-full bg-white rounded-[14px] px-4 py-3 border border-[#DCE7EE] shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[13px]">
@@ -815,7 +930,14 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
           scope={evidenceViewerState.scope}
           requirementTitle={evidenceViewerState.requirementTitle}
           declaration={selectedDeclaration}
-          currentEvidenceStatus="not_reviewed"
+          currentEvidenceStatus={
+            workspaceState.evidenceRecords?.[evidenceViewerState.evidence.id]
+              ?.status || 'not_reviewed'
+          }
+          evidenceRecord={
+            workspaceState.evidenceRecords?.[evidenceViewerState.evidence.id]
+          }
+          evidenceRecordsMap={workspaceState.evidenceRecords}
           canMutate={effectiveCanMutate}
           onClose={() =>
             setEvidenceViewerState((prev) => ({
@@ -830,8 +952,9 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
           onTransitionToSupplementRequest={(sc, draft) =>
             setSupplementModalState({ isOpen: true, scope: sc, initialDraft: draft })
           }
-          onUpdateEvidenceStatus={() => {}}
-          onSaveEvidenceNote={() => {}}
+          onUpdateEvidenceStatus={handleUpdateEvidenceStatus}
+          onSaveEvidenceNote={handleSaveEvidenceNote}
+          reviewStage={effectiveStage}
         />
       )}
 
@@ -872,11 +995,7 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
         effectiveStage={effectiveStage}
         applicationRecord={applicationRecord}
         workspaceState={workspaceState}
-        onConfirmCompleteApplicationReview={() => {
-          setIsCompleteDialogOpen(false);
-          showToast('Đã hoàn tất thẩm định hồ sơ thành công.');
-          return true;
-        }}
+        onConfirmCompleteApplicationReview={handleConfirmCompleteApplicationReview}
         onSelectCriterionFromAiSummary={handleSelectCriterion}
       />
 

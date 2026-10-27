@@ -57,12 +57,12 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
   // LEVEL 1 & LEVEL 2 INFORMATION ARCHITECTURE (UX4-01 to UX4-03)
   // ===========================================================================
 
-  test('UX4-01: Level 1 Program Context exposes canonical 5TOT Đà Nẵng program and active season', () => {
+  test('UX4-01: Level 1 Program Context exposes canonical 5TOT ĐHĐN program and active season', () => {
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.id, 'prog-5tot');
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.name, 'Danh hiệu Sinh viên 5 tốt');
-    assert.strictEqual(CANONICAL_AWARD_PROGRAM.organizationLevel, 'Cấp Thành phố Đà Nẵng');
-    assert.strictEqual(CANONICAL_AWARD_PROGRAM.managingAgency, 'Thành Đoàn Đà Nẵng');
-    assert.strictEqual(CANONICAL_AWARD_PROGRAM.operatingUnit, 'Hội Sinh viên Việt Nam TP. Đà Nẵng');
+    assert.strictEqual(CANONICAL_AWARD_PROGRAM.organizationLevel, 'Cấp Đại học Đà Nẵng');
+    assert.strictEqual(CANONICAL_AWARD_PROGRAM.managingAgency, 'Đại học Đà Nẵng');
+    assert.strictEqual(CANONICAL_AWARD_PROGRAM.operatingUnit, 'Hội Sinh viên Việt Nam Đại học Đà Nẵng');
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.activeSeasonId, 'season-2025-2026');
 
     const tracks = CANONICAL_AWARD_PROGRAM.tracks;
@@ -77,17 +77,17 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
     const adminUser: StaffUser = {
       id: 'staff-admin-01',
       fullName: 'Võ Thị Bích Thảo',
-      email: 'thao.admin@hsvdanang.vn',
+      email: 'thao.admin@udn.vn',
       primaryRole: 'ADMIN',
       roles: ['ADMIN'],
       roleLabel: 'Quản trị hệ thống',
-      unitLabel: 'Ban Kiểm tra · Văn phòng Hội Sinh viên TP. Đà Nẵng',
+      unitLabel: 'Ban Kiểm tra · Văn phòng Hội Sinh viên Đại học Đà Nẵng',
     };
 
     const officerUser: StaffUser = {
       id: 'staff-officer-01',
       fullName: 'Trần Văn Bình',
-      email: 'binh.tv@hsvdanang.vn',
+      email: 'binh.tv@udn.vn',
       primaryRole: 'CITY_OFFICER',
       roles: ['CITY_OFFICER'],
       roleLabel: 'Cán bộ xét duyệt',
@@ -99,7 +99,7 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
   });
 
   test('UX4-03: System contains no fake future award programs, maintaining clean extensible base', () => {
-    // Only canonical 5TOT Đà Nẵng is active; no dummy "Sao Tháng Giêng", "Học sinh 3 rèn luyện" mock data
+    // Only canonical 5TOT ĐHĐN is active; no dummy "Sao Tháng Giêng", "Học sinh 3 rèn luyện" mock data
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.code, '5TOT');
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.tracks.length, 2);
     assert.strictEqual(CANONICAL_AWARD_PROGRAM.isExtensibleFutureReady, true);
@@ -191,52 +191,45 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
   });
 
   // ===========================================================================
-  // THREE-LEVEL INSTITUTIONAL MODEL & UDN INVARIANT (UX4-10 to UX4-14)
+  // TWO-LEVEL UDN INSTITUTIONAL MODEL & 9 MEMBER UNITS INVARIANT (UX4-10 to UX4-14)
   // ===========================================================================
 
-  test('UX4-10: Three-Level Institutional Architecture distinguishes Education vs Review Unit vs Parent', () => {
+  test('UX4-10: Two-Level Institutional Architecture distinguishes Education vs Review Unit vs Parent', () => {
     const dut = INITIAL_INSTITUTIONS.find((i) => i.id === 'inst-dut');
     assert.ok(dut);
     assert.strictEqual(dut.officialName, 'Trường Đại học Bách khoa - Đại học Đà Nẵng');
     assert.strictEqual(dut.isUnderUdn, true);
-    assert.strictEqual(dut.schoolReviewUnitId, 'unit-udn');
-    assert.strictEqual(dut.schoolReviewUnitName, 'Hội đồng Sơ tuyển Đại học Đà Nẵng');
+    assert.strictEqual(dut.schoolReviewUnitId, 'unit-dut');
+    assert.strictEqual(dut.schoolReviewUnitName, 'Hội đồng Sơ tuyển Trường Đại học Bách khoa – ĐHĐN');
     assert.strictEqual(dut.organizationContext, 'Đại học Đà Nẵng');
   });
 
-  test('UX4-11: All 8 UDN member institutions strictly map to exactly 1 review unit (unit-udn)', () => {
+  test('UX4-11: All 9 UDN member institutions strictly map to their 9 respective review units', () => {
     const udnMembers = INITIAL_INSTITUTIONS.filter((i) => i.isUnderUdn);
-    assert.strictEqual(udnMembers.length, 8, 'Must have exactly 8 UDN member institutions');
+    assert.strictEqual(udnMembers.length, 9, 'Must have exactly 9 UDN member institutions');
 
-    const expectedCodes = ['DUT', 'DUE', 'UED', 'UFL', 'UTE', 'VKU', 'VNUK', 'SMP'];
-    const actualCodes = udnMembers.map((m) => m.shortName);
+    const expectedCodes = ['DUT', 'DUE', 'UED', 'UFL', 'UTE', 'VKU', 'VNUK', 'SMP', 'KONTUM'];
+    const actualCodes = udnMembers.map((m) => m.code);
     for (const code of expectedCodes) {
       assert.ok(actualCodes.includes(code), `UDN member ${code} must be present`);
     }
 
-    // CRITICAL INVARIANT: Every single one maps to 'unit-udn'
-    for (const member of udnMembers) {
-      assert.strictEqual(
-        member.schoolReviewUnitId,
-        'unit-udn',
-        `${member.shortName} must map strictly to review unit unit-udn`
-      );
-    }
+    const expectedUnitIds = new Set(udnMembers.map((m) => m.schoolReviewUnitId));
+    assert.strictEqual(expectedUnitIds.size, 9, 'Each of the 9 member schools maps to its own review unit');
   });
 
-  test('UX4-12: Non-UDN Independent institutions map to their own review units or direct city mode', () => {
-    const nonUdnInstitutions = INITIAL_INSTITUTIONS.filter((i) => !i.isUnderUdn);
-    assert.ok(nonUdnInstitutions.length >= 4);
+  test('UX4-12: Member institutions include universities, research institute (VNUK), and Kon Tum campus (KONTUM)', () => {
+    const vnuk = INITIAL_INSTITUTIONS.find((i) => i.id === 'inst-vnuk');
+    assert.ok(vnuk);
+    assert.strictEqual(vnuk.isUnderUdn, true);
+    assert.strictEqual(vnuk.schoolReviewUnitId, 'unit-vnuk');
 
-    const dtu = nonUdnInstitutions.find((i) => i.id === 'inst-dtu');
-    assert.ok(dtu);
-    assert.strictEqual(dtu.isUnderUdn, false);
-    assert.strictEqual(dtu.schoolReviewUnitId, 'unit-dtu');
-
-    const dau = nonUdnInstitutions.find((i) => i.id === 'inst-dau');
-    assert.ok(dau);
-    assert.strictEqual(dau.isUnderUdn, false);
-    assert.strictEqual(dau.shortName, 'DAU');
+    const kontum = INITIAL_INSTITUTIONS.find((i) => i.id === 'inst-kontum');
+    assert.ok(kontum);
+    assert.strictEqual(kontum.isUnderUdn, true);
+    assert.strictEqual(kontum.code, 'KONTUM');
+    assert.strictEqual(kontum.shortName, 'KONTUM');
+    assert.strictEqual(kontum.schoolReviewUnitId, 'unit-kontum');
   });
 
   test('UX4-13: Admin Institution Filter supports filtering by School Review Unit', () => {
@@ -244,34 +237,22 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
     const all = filterInstitutions(INITIAL_INSTITUTIONS, '', 'all', 'all', 'all');
     assert.strictEqual(all.length, INITIAL_INSTITUTIONS.length);
 
-    // Filter UDN review unit
-    const udnOnly = filterInstitutions(INITIAL_INSTITUTIONS, '', 'all', 'all', 'unit-udn');
-    assert.strictEqual(udnOnly.length, 8);
-    for (const inst of udnOnly) {
-      assert.strictEqual(inst.schoolReviewUnitId, 'unit-udn');
-    }
+    // Filter specific member review unit (unit-dut)
+    const dutOnly = filterInstitutions(INITIAL_INSTITUTIONS, '', 'all', 'all', 'unit-dut');
+    assert.strictEqual(dutOnly.length, 1);
+    assert.strictEqual(dutOnly[0].schoolReviewUnitId, 'unit-dut');
 
-    // Filter Non-UDN review units
-    const nonUdn = filterInstitutions(INITIAL_INSTITUTIONS, '', 'all', 'all', 'non-udn');
-    assert.strictEqual(nonUdn.length, INITIAL_INSTITUTIONS.length - 8);
-    for (const inst of nonUdn) {
-      assert.notStrictEqual(inst.schoolReviewUnitId, 'unit-udn');
-    }
+    // Filter UDN group alias ('unit-udn') returns all 9 UDN member institutions
+    const udnGroup = filterInstitutions(INITIAL_INSTITUTIONS, '', 'all', 'all', 'unit-udn');
+    assert.strictEqual(udnGroup.length, 9);
   });
 
-  test('UX4-14: Invariant: 8 UDN members produce 1 consolidated list and 1 decision document (182/QĐ-ĐHĐN)', () => {
-    const udnReviewUnitId = 'unit-udn';
-    const decisionDoc = '182/QĐ-ĐHĐN';
-
-    const udnInstitutions = INITIAL_INSTITUTIONS.filter(
-      (i) => i.schoolReviewUnitId === udnReviewUnitId
+  test('UX4-14: Invariant: Each of the 9 UDN member units produces 1 batch and 1 decision document per season', () => {
+    const dutInstitutions = INITIAL_INSTITUTIONS.filter(
+      (i) => i.schoolReviewUnitId === 'unit-dut'
     );
-    assert.strictEqual(udnInstitutions.length, 8);
-
-    // Must never treat the 8 member institutions as 8 distinct school review committees
-    const reviewUnitIds = new Set(udnInstitutions.map((i) => i.schoolReviewUnitId));
-    assert.strictEqual(reviewUnitIds.size, 1);
-    assert.ok(decisionDoc.includes('ĐHĐN'));
+    assert.strictEqual(dutInstitutions.length, 1);
+    assert.strictEqual(INITIAL_INSTITUTIONS.length, 9);
   });
 
   // ===========================================================================
@@ -406,7 +387,7 @@ describe('5TOT Đà Nẵng — UX-S4 Admin Workspace & Program Navigation Suite'
 
     const udnSchoolOfficer = staff.find((s) => s.primaryRole === 'SCHOOL_OFFICER');
     assert.ok(udnSchoolOfficer);
-    assert.strictEqual(udnSchoolOfficer.schoolReviewUnitId, 'unit-udn');
+    assert.strictEqual(udnSchoolOfficer.schoolReviewUnitId, 'unit-dut');
   });
 
   test('UX4-22: Staff Deactivation Safety Guard prevents deactivating staff with assigned applications', () => {

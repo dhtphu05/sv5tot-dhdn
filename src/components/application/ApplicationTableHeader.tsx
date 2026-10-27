@@ -23,7 +23,7 @@ export const ApplicationTableHeader: React.FC<ApplicationTableHeaderProps> = ({
   return (
     <div
       className={`hidden md:grid app-table-grid items-center px-6 min-h-[48px] bg-[#EAF6FC] text-[13px] font-semibold text-[#466474] select-none border-b border-[#DCE7EE] transition-all rounded-t-[13px] ${
-        isSticky ? (isCompact ? 'sticky top-[53px] z-[15] shadow-xs' : 'sticky top-[86px] z-[15] shadow-xs') : ''
+        isSticky ? 'sticky top-0 z-[15] shadow-xs' : ''
       } ${className}`}
     >
       {/* Column 1: Tiêu chuẩn & yêu cầu */}

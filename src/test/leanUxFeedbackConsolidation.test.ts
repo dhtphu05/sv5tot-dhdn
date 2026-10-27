@@ -131,10 +131,10 @@ describe('5TOT Đà Nẵng — Lean UX Feedback Consolidation (Fix 01–Fix 10)'
   // FIX 06: Consolidated School Recommendation Forwarding Navigation
   // ---------------------------------------------------------------------------
   it('Fix 06: School recommendation forwarding has singular route school_awaiting_forward', () => {
-    assert.ok(AUTHORITATIVE_SCHOOL_REVIEW_UNITS.length >= 7);
-    const udn = AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === 'unit-udn');
-    assert.ok(udn);
-    assert.equal(udn?.memberInstitutionIds.length, 8);
+    assert.equal(AUTHORITATIVE_SCHOOL_REVIEW_UNITS.length, 9);
+    const dut = AUTHORITATIVE_SCHOOL_REVIEW_UNITS.find((u) => u.id === 'unit-dut');
+    assert.ok(dut);
+    assert.equal(dut?.memberInstitutionIds.length, 1);
 
     // Sidebar active resolution
     const activeForwardId = resolveActiveSidebarNavId('school_forwarded', mockSchoolOfficer);
@@ -145,7 +145,7 @@ describe('5TOT Đà Nẵng — Lean UX Feedback Consolidation (Fix 01–Fix 10)'
   // FIX 07: School Functional Routing for Notifications & Analytics
   // ---------------------------------------------------------------------------
   it('Fix 07: School operational metrics and analytics correctly calculate unit progress', () => {
-    const metrics = getSchoolOperationalMetrics(INITIAL_STAFF_APPLICATIONS, 'unit-udn');
+    const metrics = getSchoolOperationalMetrics(INITIAL_STAFF_APPLICATIONS, 'unit-dut');
     assert.ok(metrics.totalReceived >= 0);
     assert.ok(typeof metrics.preliminaryCompleted === 'number');
     assert.ok(typeof metrics.recommendedForwarding === 'number');

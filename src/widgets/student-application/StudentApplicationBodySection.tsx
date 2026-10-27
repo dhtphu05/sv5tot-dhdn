@@ -234,7 +234,7 @@ export const StudentApplicationBodySection: React.FC<
 
       <div className="w-full bg-white rounded-[14px] border border-[#DCE7EE] shadow-2xs min-w-0 overflow-x-auto">
         <div className="min-w-[680px] md:min-w-0">
-          <ApplicationTableHeader isSticky isCompact={isScrolledCompact} />
+          <ApplicationTableHeader isSticky={false} isCompact={isScrolledCompact} />
 
           <div>
             {application.criteria.map((criterion) => (

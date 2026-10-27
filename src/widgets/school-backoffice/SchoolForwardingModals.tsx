@@ -80,7 +80,7 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
   onCloseSnapshotModal,
 }) => {
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
-  const isUdn = (currentUser?.schoolReviewUnitId || 'unit-udn') === 'unit-udn';
+  const isUdn = false;
   const normalizedSeason = seasonCode.startsWith('Năm học')
     ? seasonCode
     : `Năm học ${seasonCode}`;
@@ -88,17 +88,17 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
   return (
     <>
       {/* ===================================================================== */}
-      {/* MODAL 1: XÁC NHẬN GỬI DANH SÁCH LÊN THÀNH PHỐ (LEAN-4.1) */}
+      {/* MODAL 1: XÁC NHẬN TRÌNH DANH SÁCH LÊN ĐẠI HỌC ĐÀ NẴNG (LEAN-4.1) */}
       {/* ===================================================================== */}
       {isBatchConfirmOpen && (
         <Dialog
           isOpen={isBatchConfirmOpen}
           onClose={isConfirmingBatch ? () => {} : onCloseBatchConfirm}
-          title="Xác nhận gửi danh sách lên Thành phố"
-          description={`Xác nhận gửi ${selectedApps.length} hồ sơ của ${unitName} lên Hội Sinh viên Thành phố?`}
+          title="Xác nhận trình danh sách lên Đại học Đà Nẵng"
+          description={`Xác nhận trình ${selectedApps.length} hồ sơ của ${unitName} lên Hội Sinh viên Đại học Đà Nẵng?`}
           maxWidth="max-w-2xl"
           primaryAction={{
-            label: isConfirmingBatch ? 'Đang gửi...' : 'Xác nhận gửi',
+            label: isConfirmingBatch ? 'Đang gửi...' : 'Xác nhận trình',
             onClick: onConfirmBatchForward,
             variant: 'primary',
             isLoading: isConfirmingBatch,
@@ -113,7 +113,7 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
             <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-[8px] flex items-start gap-2.5 text-[12.5px] text-[#92400E]">
               <AlertTriangle size={16} className="text-[#D97706] shrink-0 mt-0.5" />
               <div className="leading-relaxed">
-                Mỗi đơn vị chỉ được gửi danh sách một lần duy nhất trong năm học. Sau khi gửi, danh sách đề xuất và văn bản đính kèm sẽ được cố định và chuyển sang Hội đồng Thành phố thẩm định.
+                Mỗi đơn vị chỉ được trình danh sách một lần duy nhất trong năm học. Sau khi gửi, danh sách đề xuất và văn bản đính kèm sẽ được cố định và chuyển sang Hội đồng xét chọn cấp Đại học Đà Nẵng thẩm định.
               </div>
             </div>
 
@@ -237,7 +237,7 @@ export const SchoolForwardingModals: React.FC<SchoolForwardingModalsProps> = ({
                 rows={2}
                 value={forwardBatchNote}
                 onChange={(e) => onSetForwardBatchNote(e.target.value)}
-                placeholder="Ghi chú thêm nếu cần lưu ý với Hội đồng xét chọn cấp Thành phố..."
+                placeholder="Ghi chú thêm nếu cần lưu ý với Hội đồng xét chọn cấp Đại học Đà Nẵng..."
                 className="w-full p-2 text-[12px] border border-[#DCE7EE] rounded-[8px] bg-white focus:outline-none focus:border-[#0D78AE]"
               />
             </div>

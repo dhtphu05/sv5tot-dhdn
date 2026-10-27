@@ -151,9 +151,9 @@ export const SCHOOL_DEMO_SCENARIOS: SchoolDemoScenarioConfig[] = [
   {
     id: 'I_school_forwarded_history',
     code: 'ST-09',
-    label: 'Đã chuyển Thành phố · Lịch sử chỉ đọc',
-    shortLabel: 'Đã chuyển TP',
-    description: 'Hồ sơ đã được chuyển giao chính thức lên Thành phố. Cán bộ trường chỉ có quyền xem lại lịch sử sơ tuyển.',
+    label: 'Đã chuyển ĐHĐN · Lịch sử chỉ đọc',
+    shortLabel: 'Đã chuyển ĐHĐN',
+    description: 'Hồ sơ đã được chuyển giao chính thức lên cấp Đại học Đà Nẵng. Cán bộ trường chỉ có quyền xem lại lịch sử sơ tuyển.',
     schoolStatus: 'forwarded_to_city',
     defaultCriterionId: 'volunteer',
     defaultRequirementId: 'volunteer-activities',
@@ -176,9 +176,9 @@ export function buildSchoolScenarioWorkspace(
   scenarioId: SchoolDemoScenarioId,
   applicationId = 'APP-2026-DN-102220123'
 ): ApplicationReviewWorkspaceState {
-  const reviewerId = 'staff-sch-an';
+  const reviewerId = 'staff-sch-dut';
   const reviewerName = 'Nguyễn Văn An';
-  const reviewUnitId: SchoolReviewUnitId = 'unit-udn';
+  const reviewUnitId: SchoolReviewUnitId = 'unit-dut';
 
   // Base Pristine School Scope Records
   const scopeRecords: Record<string, StaffScopeReviewRecord> = {};
@@ -214,7 +214,7 @@ export function buildSchoolScenarioWorkspace(
           timestamp: '11/10/2026 · 20:30',
           actorName: 'Nguyễn Minh Anh',
           actorRoleLabel: 'Sinh viên',
-          description: 'Hồ sơ trực tuyến được nộp tới Đơn vị xét sơ tuyển Đại học Đà Nẵng.',
+          description: 'Hồ sơ trực tuyến được nộp tới Đơn vị xét sơ tuyển Trường Đại học Bách khoa – ĐHĐN.',
           scopeBadge: 'Tiếp nhận',
           tone: 'brand',
         },
@@ -380,8 +380,8 @@ export function buildSchoolScenarioWorkspace(
           requestedByRole: 'Cán bộ xét sơ tuyển',
           staffStatus: 'waiting_student',
           originatingReviewStage: 'SCHOOL',
-          requestingReviewUnitId: 'unit-udn',
-          requestingReviewUnitName: 'Đại học Đà Nẵng',
+          requestingReviewUnitId: 'unit-dut',
+          requestingReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
           requestingOfficerId: reviewerId,
           requestingOfficerName: reviewerName,
         },
@@ -459,8 +459,8 @@ export function buildSchoolScenarioWorkspace(
           staffStatus: 'student_returned',
           returnedAt: '16/10/2026 · 14:15',
           originatingReviewStage: 'SCHOOL',
-          requestingReviewUnitId: 'unit-udn',
-          requestingReviewUnitName: 'Đại học Đà Nẵng',
+          requestingReviewUnitId: 'unit-dut',
+          requestingReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
           requestingOfficerId: reviewerId,
           requestingOfficerName: reviewerName,
         },

@@ -39,10 +39,10 @@ export const SchoolForwardingPreValidationBar: React.FC<
       <div className="bg-[#F8FAFC] rounded-[12px] border border-[#CBD5E1] p-4 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-[13px]">
         <div className="flex items-center gap-2 text-[#475569] font-medium">
           <CheckCircle2 size={16} className="text-[#16A34A] shrink-0" />
-          <span>Danh sách đề xuất của đơn vị đã được gửi lên Thành phố và đang ở trạng thái khóa lưu trữ.</span>
+          <span>Danh sách đề xuất của đơn vị đã được trình lên Đại học Đà Nẵng và đang ở trạng thái khóa lưu trữ.</span>
         </div>
         <div className="text-[12px] font-semibold text-[#64748B]">
-          Đã chuyển: <strong className="font-extrabold text-[#0F2335]">{selectedCount}</strong> hồ sơ
+          Đã trình: <strong className="font-extrabold text-[#0F2335]">{selectedCount}</strong> hồ sơ
         </div>
       </div>
     );
@@ -54,7 +54,7 @@ export const SchoolForwardingPreValidationBar: React.FC<
     contextualError ||
     firstFailingCheck?.message ||
     (selectedCount === 0
-      ? 'Chưa chọn hồ sơ nào để gửi lên Thành phố.'
+      ? 'Chưa chọn hồ sơ nào để trình lên Đại học Đà Nẵng.'
       : 'Vui lòng đính kèm tệp văn bản PDF đề nghị của đơn vị để tiếp tục.');
 
   return (
@@ -66,7 +66,7 @@ export const SchoolForwardingPreValidationBar: React.FC<
             <div className="flex items-center gap-2 text-[#15803D] text-[13px] font-semibold">
               <CheckCircle2 size={18} className="text-[#16A34A] shrink-0" />
               <span>
-                Sẵn sàng gửi danh sách lên Hội Sinh viên Thành phố (<strong className="font-bold">{selectedCount}</strong> hồ sơ đã chọn, tệp PDF hợp lệ).
+                Sẵn sàng trình danh sách lên Hội Sinh viên Đại học Đà Nẵng (<strong className="font-bold">{selectedCount}</strong> hồ sơ đã chọn, tệp PDF hợp lệ).
               </span>
             </div>
           ) : (
@@ -89,7 +89,7 @@ export const SchoolForwardingPreValidationBar: React.FC<
             iconLeading={<Send size={15} />}
             onClick={onOpenBatchConfirm}
           >
-            Gửi danh sách lên Thành phố
+            Trình danh sách lên ĐHĐN
           </Button>
         </div>
       </div>

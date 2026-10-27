@@ -173,17 +173,17 @@ const routingDUT = resolveSchoolReviewUnit('inst-dut');
 assert(routingDUT.resolved === true, 'DUT routes successfully');
 assert(
   routingDUT.trainingInstitutionId === 'inst-dut',
-  'Student trainingInstitutionId remains inst-dut (NEVER replaced with unit-udn)'
+  'Student trainingInstitutionId remains inst-dut'
 );
 assert(
-  routingDUT.unit?.id === 'unit-udn',
-  'DUT review routing targets unit-udn (Đại học Đà Nẵng)'
+  routingDUT.unit?.id === 'unit-dut',
+  'DUT review routing targets unit-dut (Trường Đại học Bách khoa – ĐHĐN)'
 );
 
-const routingDTU = resolveSchoolReviewUnit('inst-dtu');
+const routingDUE = resolveSchoolReviewUnit('inst-due');
 assert(
-  routingDTU.unit?.id === 'unit-dtu',
-  'Independent university DTU routes directly to unit-dtu'
+  routingDUE.unit?.id === 'unit-due',
+  'Member university DUE routes directly to unit-due'
 );
 
 // -----------------------------------------------------------------------------

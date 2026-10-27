@@ -1,6 +1,6 @@
 {
-  "name": "Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix Remix 5TOT Đà Nẵng",
-  "description": "Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Thành phố - Hội Sinh viên Việt Nam TP. Đà Nẵng",
+  "name": "Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên Đại học Đà Nẵng",
+  "description": "Cổng thông tin và tiếp nhận hồ sơ xét chọn danh hiệu Sinh viên 5 tốt, Tập thể Sinh viên 5 tốt và Giải thưởng Cánh chim trắng — Hội Sinh viên Việt Nam Đại học Đà Nẵng",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

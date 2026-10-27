@@ -98,7 +98,7 @@ export const CommitteeViews: React.FC<CommitteeViewsProps> = ({
   const [collectiveOutcome, setCollectiveOutcome] =
     useState<'recognized' | 'not_recognized'>('recognized');
   const [collectiveDecisionNotes, setCollectiveDecisionNotes] = useState<string>(
-    'Hội đồng thống nhất thông qua kết luận đạt tiêu chuẩn Tập thể Sinh viên 5 tốt cấp Thành phố.'
+    'Hội đồng thống nhất thông qua kết luận đạt tiêu chuẩn Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng.'
   );
   const [selectedCollectiveDetails, setSelectedCollectiveDetails] =
     useState<CollectiveApplication | null>(null);

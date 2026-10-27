@@ -61,7 +61,9 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     throw new ConfigurationError(`Invalid PORT: "${env.PORT}". Must be a valid port number between 1 and 65535.`);
   }
 
-  const rawOrigins = env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:3001';
+  const rawOrigins =
+    env.CORS_ALLOWED_ORIGINS ||
+    'http://localhost:3000,http://localhost:3001,http://localhost:5173,https://api-sv5tot-dhdn.lcdkhoacntt-dut.page,https://sv5tot-dhdn.lcdkhoacntt-dut.page,https://api-sv5tot-danang.lcdkhoacntt-dut.page,https://sv5tot.thanhdoandanang.org.vn,https://www.sv5tot.thanhdoandanang.org.vn';
   const origins = rawOrigins
     .split(',')
     .map((s) => s.trim())

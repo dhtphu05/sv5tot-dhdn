@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, AlertCircle, ArrowLeft, Info, Clock, Users } from 'lucide-react';
-import { HsvEmblem } from '../brand/HsvLogo';
+import { UdnEmblem, HsvEmblem } from '../brand/HsvLogo';
 import { Button } from '../buttons/Button';
 import { SafeInternalReturnTarget } from './publicTypes';
 import { resolveDomainServices } from '../../entities/services/modeResolver';
@@ -145,11 +145,11 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#466474] hover:text-[#126A9C] transition-colors cursor-pointer"
         >
           <ArrowLeft size={15} />
-          <span>Cổng thông tin xét duyệt 5TOT Đà Nẵng</span>
+          <span>Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên ĐHĐN</span>
         </button>
 
         <div className="hidden sm:flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#607483]">
-          <span>THÀNH ĐOÀN ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM TP. ĐÀ NẴNG</span>
+          <span>HỘI SINH VIÊN VIỆT NAM · ĐẠI HỌC ĐÀ NẴNG</span>
         </div>
       </div>
 
@@ -157,15 +157,18 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
       <main className="w-full max-w-[436px] mx-auto my-auto py-3">
         {/* Institutional Lockup Header */}
         <div className="flex flex-col items-center text-center mb-5">
-          <HsvEmblem size={40} />
+          <div className="flex items-center gap-2.5">
+            <UdnEmblem size={40} />
+            <HsvEmblem size={40} />
+          </div>
           <div className="mt-2 text-[10.5px] font-bold uppercase tracking-[0.07em] text-[#466474]">
-            THÀNH ĐOÀN ĐÀ NẴNG
+            HỘI SINH VIÊN VIỆT NAM
           </div>
           <div className="text-[11.5px] font-extrabold uppercase tracking-[0.05em] text-[#126A9C]">
-            HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+            ĐẠI HỌC ĐÀ NẴNG
           </div>
-          <div className="text-[14.5px] font-extrabold text-[#172A3A] mt-1">
-            Hệ thống xét duyệt Sinh viên 5 tốt cấp Thành phố · 5TOT Đà Nẵng
+          <div className="text-[14px] font-extrabold text-[#172A3A] mt-1">
+            Cổng xét chọn Danh hiệu & Giải thưởng Sinh viên · ĐHĐN
           </div>
         </div>
 
@@ -176,7 +179,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
               Đăng nhập
             </h1>
             <p className="text-[13.5px] text-[#607483] mt-1">
-              Tiếp tục hồ sơ Sinh viên 5 tốt của bạn.
+              Tiếp tục quá trình kê khai hoặc quản lý hồ sơ xét chọn.
             </p>
           </div>
 

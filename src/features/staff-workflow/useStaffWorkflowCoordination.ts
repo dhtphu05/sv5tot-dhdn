@@ -76,8 +76,133 @@ import {
 } from '../../entities/committee/committeeWorkflowMutators';
 import { isBackendMode } from '../../shared/config/executionMode';
 import { resolveDomainServices } from '../../entities/services/modeResolver';
+import { apiRequest } from '../../shared/api/httpClient';
 
 const HERO_STAFF_APP_ID = 'APP-2026-DN-102220123';
+
+const CANONICAL_CRITERIA_META: Array<{
+  criterionId: 'ethics' | 'academic' | 'physical' | 'volunteer' | 'integration';
+  criterionNumber: string;
+  criterionName: string;
+}> = [
+  { criterionId: 'ethics', criterionNumber: '01', criterionName: 'Đạo đức tốt' },
+  { criterionId: 'academic', criterionNumber: '02', criterionName: 'Học tập tốt' },
+  { criterionId: 'physical', criterionNumber: '03', criterionName: 'Thể lực tốt' },
+  { criterionId: 'volunteer', criterionNumber: '04', criterionName: 'Tình nguyện tốt' },
+  { criterionId: 'integration', criterionNumber: '05', criterionName: 'Hội nhập tốt' },
+];
+
+function normalizeCriteriaReviewArray(
+  raw: unknown
+): StaffApplicationRecord['criteriaReview'] {
+  const arr = Array.isArray(raw)
+    ? raw
+    : raw && typeof raw === 'object'
+    ? Object.values(raw as Record<string, any>).filter(
+        (item) => item && typeof item === 'object' && item.criterionId
+      )
+    : [];
+  return CANONICAL_CRITERIA_META.map((meta) => {
+    const existing = arr.find((c: any) => c?.criterionId === meta.criterionId);
+    const rawStatus = existing?.status;
+    const validStatus =
+      rawStatus === 'reviewed' ||
+      rawStatus === 'needs_supplement' ||
+      rawStatus === 'supplement_returned' ||
+      rawStatus === 'needs_discussion'
+        ? rawStatus
+        : rawStatus === 'pass' || rawStatus === 'fail'
+        ? 'reviewed'
+        : rawStatus === 'supplement_requested'
+        ? 'needs_supplement'
+        : 'not_reviewed';
+    return {
+      criterionId: meta.criterionId,
+      criterionNumber: existing?.criterionNumber || meta.criterionNumber,
+      criterionName: existing?.criterionName || meta.criterionName,
+      status: validStatus,
+      noteSummary: existing?.noteSummary,
+      declaredCount:
+        typeof existing?.declaredCount === 'number'
+          ? existing.declaredCount
+          : 1,
+      evidenceCount:
+        typeof existing?.evidenceCount === 'number'
+          ? existing.evidenceCount
+          : 1,
+    };
+  });
+}
+
+function sanitizeBackendWorkspace(
+  appId: string,
+  ws: ApplicationReviewWorkspaceState,
+  currentReviewStage?: string
+): ApplicationReviewWorkspaceState {
+  if (!ws || appId === HERO_STAFF_APP_ID) return ws;
+
+  const isNowCityStage =
+    currentReviewStage === 'CITY' || currentReviewStage === 'COMPLETED';
+  if (isNowCityStage && ws.reviewStage === 'SCHOOL') {
+    const cleanHistory = (ws.historyEvents || []).filter(
+      (ev) =>
+        ev.id !== 'ev-1' &&
+        ev.id !== 'ev-2' &&
+        ev.id !== 'ev-3' &&
+        ev.actorName !== 'Nguyễn Thu Hà' &&
+        ev.actorName !== 'Trần Hoàng Nam'
+    );
+    return {
+      ...ws,
+      reviewStage: 'CITY',
+      completedAt: undefined,
+      criterionCompletedMap: {},
+      criterionConclusions: {},
+      scopeRecords: {},
+      historyEvents: cleanHistory,
+    };
+  }
+
+  const conclusions = { ...(ws.criterionConclusions || {}) };
+  const completedMap = { ...(ws.criterionCompletedMap || {}) };
+  const humanConclusionCount = Object.keys(conclusions).length;
+
+  (['ethics', 'academic', 'physical', 'volunteer', 'integration'] as const).forEach(
+    (cid) => {
+      if (completedMap[cid] && !conclusions[cid]) {
+        if (humanConclusionCount >= 3 || Boolean(ws.completedAt)) {
+          conclusions[cid] = {
+            criterionId: cid,
+            stage: ws.reviewStage || 'SCHOOL',
+            conclusion: 'pass',
+            actorId: 'officer',
+            actorName: 'Cán bộ xét duyệt',
+            actorRole: 'Cán bộ xét duyệt',
+            concludedAt: ws.completedAt || ws.lastReviewedAt || 'Hôm nay',
+          };
+        } else {
+          delete completedMap[cid];
+        }
+      }
+    }
+  );
+
+  const cleanHistory = (ws.historyEvents || []).filter(
+    (ev) =>
+      ev.id !== 'ev-1' &&
+      ev.id !== 'ev-2' &&
+      ev.id !== 'ev-3' &&
+      ev.actorName !== 'Nguyễn Thu Hà' &&
+      ev.actorName !== 'Trần Hoàng Nam'
+  );
+
+  return {
+    ...ws,
+    criterionConclusions: conclusions,
+    criterionCompletedMap: completedMap,
+    historyEvents: cleanHistory,
+  };
+}
 
 export interface StaffWorkflowCoordinationOptions {
   initialStaffRole?: StaffRole;
@@ -161,7 +286,12 @@ export function useStaffWorkflowCoordination({
     StaffApplicationRecord[]
   >(() => {
     if (isBackendMode()) {
-      return loadPersistedStaffApplications<StaffApplicationRecord[]>() || [];
+      const persisted =
+        loadPersistedStaffApplications<StaffApplicationRecord[]>() || [];
+      return persisted.map((app) => ({
+        ...app,
+        criteriaReview: normalizeCriteriaReviewArray(app.criteriaReview),
+      }));
     }
     if (initialStaffRole === 'CITY_COMMITTEE') {
       return initialCommitteeBundle.updatedApplications;
@@ -222,7 +352,12 @@ export function useStaffWorkflowCoordination({
         Record<string, ApplicationReviewWorkspaceState>
       >();
     if (isBackendMode()) {
-      return persisted || {};
+      if (!persisted) return {};
+      const cleaned: Record<string, ApplicationReviewWorkspaceState> = {};
+      Object.entries(persisted).forEach(([appId, ws]) => {
+        cleaned[appId] = sanitizeBackendWorkspace(appId, ws);
+      });
+      return cleaned;
     }
     return {
       [HERO_STAFF_APP_ID]: initialHeroOfficerBundle.workspaceState,
@@ -237,10 +372,50 @@ export function useStaffWorkflowCoordination({
 
     services.individual
       .listApplications()
-      .then(async (records) => {
-        if (cancelled || !Array.isArray(records)) return;
+      .then(async (rawRecords) => {
+        if (cancelled || !Array.isArray(rawRecords)) return;
+        const records = rawRecords.map((rec) => ({
+          ...rec,
+          criteriaReview: normalizeCriteriaReviewArray(rec.criteriaReview),
+        }));
         setStaffApplications(records);
         savePersistedStaffApplications(records);
+
+        const backendWorkspaces: Record<string, ApplicationReviewWorkspaceState> =
+          {};
+        records.forEach((rec) => {
+          const remoteWs = (rec as any).workspaceState as
+            | ApplicationReviewWorkspaceState
+            | undefined;
+          if (remoteWs && remoteWs.applicationId) {
+            backendWorkspaces[rec.applicationId] = sanitizeBackendWorkspace(
+              rec.applicationId,
+              remoteWs,
+              rec.currentReviewStage
+            );
+          }
+        });
+        setOfficerWorkspaceMap((prev) => {
+          if (records.length === 0) {
+            savePersistedOfficerWorkspaces({});
+            return {};
+          }
+          const next: Record<string, ApplicationReviewWorkspaceState> = {
+            ...prev,
+            ...backendWorkspaces,
+          };
+          records.forEach((rec) => {
+            if (next[rec.applicationId]) {
+              next[rec.applicationId] = sanitizeBackendWorkspace(
+                rec.applicationId,
+                next[rec.applicationId],
+                rec.currentReviewStage
+              );
+            }
+          });
+          savePersistedOfficerWorkspaces(next);
+          return next;
+        });
 
         const committeeBundle = buildCommitteeScenarioBundle(
           DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -254,6 +429,9 @@ export function useStaffWorkflowCoordination({
               ? prev
               : records[0].applicationId
           );
+        } else {
+          setOfficerStudentAppMap({});
+          savePersistedOfficerStudentApps({});
         }
 
         const fetchedStudentMap: Record<string, StudentApplicationData> = {};
@@ -440,8 +618,8 @@ export function useStaffWorkflowCoordination({
                 scenarioCfg?.description || app.latestOperationalNote,
               schoolReviewSummary: {
                 ...(app.schoolReviewSummary || {
-                  schoolReviewUnitId: 'unit-udn',
-                  schoolReviewUnitName: 'Đại học Đà Nẵng',
+                  schoolReviewUnitId: 'unit-dut',
+                  schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
                   isForwardedToCity: false,
                   reviewedCriteriaCount: 2,
                   totalCriteriaCount: 5,
@@ -530,21 +708,42 @@ export function useStaffWorkflowCoordination({
       const record = staffApplications.find(
         (a) => a.applicationId === applicationId
       );
-      if (record && !officerWorkspaceMap[applicationId]) {
-        const fallback = buildFallbackBundleForStaffRecord(record);
-        if (staffUser.primaryRole === 'SCHOOL_OFFICER') {
-          fallback.workspaceState.reviewStage = 'SCHOOL';
-          fallback.workspaceState.reviewUnitId =
-            staffUser.schoolReviewUnitId || 'unit-udn';
+      if (record) {
+        const existingWs = officerWorkspaceMap[applicationId];
+        if (!existingWs) {
+          const fallback = buildFallbackBundleForStaffRecord(record);
+          if (staffUser.primaryRole === 'SCHOOL_OFFICER') {
+            fallback.workspaceState.reviewStage = 'SCHOOL';
+            fallback.workspaceState.reviewUnitId =
+              staffUser.schoolReviewUnitId || 'unit-dut';
+          }
+          setOfficerStudentAppMap((prev) => ({
+            ...prev,
+            [applicationId]: prev[applicationId] || fallback.studentApp,
+          }));
+          setOfficerWorkspaceMap((prev) => ({
+            ...prev,
+            [applicationId]: fallback.workspaceState,
+          }));
+        } else if (
+          (record.currentReviewStage === 'CITY' ||
+            record.currentReviewStage === 'COMPLETED' ||
+            staffUser.primaryRole === 'CITY_OFFICER') &&
+          existingWs.reviewStage === 'SCHOOL'
+        ) {
+          setOfficerWorkspaceMap((prev) => {
+            const next = {
+              ...prev,
+              [applicationId]: sanitizeBackendWorkspace(
+                applicationId,
+                existingWs,
+                'CITY'
+              ),
+            };
+            savePersistedOfficerWorkspaces(next);
+            return next;
+          });
         }
-        setOfficerStudentAppMap((prev) => ({
-          ...prev,
-          [applicationId]: prev[applicationId] || fallback.studentApp,
-        }));
-        setOfficerWorkspaceMap((prev) => ({
-          ...prev,
-          [applicationId]: fallback.workspaceState,
-        }));
       }
       if (isBackendMode()) {
         resolveDomainServices()
@@ -582,10 +781,16 @@ export function useStaffWorkflowCoordination({
   >(
     (updater) => {
       const appId = selectedStaffAppId;
+      const targetRecord = staffApplications.find(
+        (a) => a.applicationId === appId
+      );
+      const fallbackBundle = targetRecord
+        ? buildFallbackBundleForStaffRecord(targetRecord)
+        : initialHeroOfficerBundle;
       const currentWorkspace =
-        officerWorkspaceMap[appId] || initialHeroOfficerBundle.workspaceState;
+        officerWorkspaceMap[appId] || fallbackBundle.workspaceState;
       const currentStudentApp =
-        officerStudentAppMap[appId] || initialHeroOfficerBundle.studentApp;
+        officerStudentAppMap[appId] || fallbackBundle.studentApp;
 
       const result = updater(currentWorkspace, currentStudentApp);
 
@@ -609,27 +814,84 @@ export function useStaffWorkflowCoordination({
         });
       }
 
+      const completedCount = Object.values(
+        result.nextWorkspace.criterionCompletedMap || {}
+      ).filter(Boolean).length;
+      const waitingSupp = (result.nextWorkspace.supplementRequests || []).find(
+        (r) => r.staffStatus === 'waiting_student'
+      );
+
+      const nextSchoolStatus =
+        result.nextSchoolPreliminaryStatus ||
+        (staffUser.primaryRole === 'SCHOOL_OFFICER'
+          ? result.nextStaffStatus === 'review_completed'
+            ? 'preliminary_completed'
+            : result.nextStaffStatus === 'supplement_requested'
+            ? 'supplement_requested'
+            : result.nextStaffStatus === 'under_review' &&
+              (!targetRecord?.schoolPreliminaryStatus ||
+                targetRecord.schoolPreliminaryStatus === 'pending_intake')
+            ? 'under_review'
+            : targetRecord?.schoolPreliminaryStatus
+          : targetRecord?.schoolPreliminaryStatus);
+
       setStaffApplications((prev) => {
         const nextApps = prev.map((app): StaffApplicationRecord => {
           if (app.applicationId !== appId) return app;
-          const completedCount = Object.values(
-            result.nextWorkspace.criterionCompletedMap
-          ).filter(Boolean).length;
-          const waitingSupp = result.nextWorkspace.supplementRequests.find(
-            (r) => r.staffStatus === 'waiting_student'
+          const baseCriteriaReview = normalizeCriteriaReviewArray(
+            app.criteriaReview
           );
+          const nextCriteriaReview = baseCriteriaReview.map((cr) => {
+            const cid = cr.criterionId;
+            const cConc = result.nextWorkspace.criterionConclusions?.[cid];
+            const hasWaiting = (
+              result.nextWorkspace.supplementRequests || []
+            ).some(
+              (r) => r.criterionId === cid && r.staffStatus === 'waiting_student'
+            );
+            if (hasWaiting) {
+              return {
+                ...cr,
+                status: 'needs_supplement' as const,
+                noteSummary: waitingSupp?.message || cr.noteSummary,
+              };
+            }
+            if (cConc) {
+              return {
+                ...cr,
+                status: 'reviewed' as const,
+                noteSummary:
+                  cConc.conclusion === 'fail'
+                    ? `Không đạt${cConc.reason ? `: ${cConc.reason}` : ''}`
+                    : cConc.reason || cr.noteSummary || 'Đạt yêu cầu tiêu chí',
+              };
+            }
+            if (result.nextWorkspace.criterionCompletedMap?.[cid]) {
+              return {
+                ...cr,
+                status: 'reviewed' as const,
+                noteSummary: cr.noteSummary || 'Đạt yêu cầu tiêu chí',
+              };
+            }
+            return {
+              ...cr,
+              status: 'not_reviewed' as const,
+              noteSummary: undefined,
+            };
+          });
+
+          const isReopenedSchoolReview =
+            staffUser.primaryRole === 'SCHOOL_OFFICER' &&
+            nextSchoolStatus === 'under_review';
+
           return {
             ...app,
             workflowStatus: result.nextStaffStatus || app.workflowStatus,
             schoolPreliminaryStatus:
-              result.nextSchoolPreliminaryStatus ||
-              (staffUser.primaryRole === 'SCHOOL_OFFICER'
-                ? result.nextStaffStatus === 'review_completed'
-                  ? 'preliminary_completed'
-                  : result.nextStaffStatus === 'supplement_requested'
-                  ? 'supplement_requested'
-                  : app.schoolPreliminaryStatus
-                : app.schoolPreliminaryStatus),
+              nextSchoolStatus || app.schoolPreliminaryStatus,
+            schoolRecommendation: isReopenedSchoolReview
+              ? 'pending'
+              : app.schoolRecommendation,
             assignment: app.assignment
               ? {
                   ...app.assignment,
@@ -640,15 +902,18 @@ export function useStaffWorkflowCoordination({
             latestOperationalNote:
               result.nextOperationalNote || app.latestOperationalNote,
             reviewedCriteriaCount: completedCount,
-            schoolReviewSummary: app.schoolReviewSummary
-              ? {
-                  ...app.schoolReviewSummary,
-                  status:
-                    result.nextSchoolPreliminaryStatus ||
-                    app.schoolReviewSummary.status,
-                  reviewedCriteriaCount: completedCount,
-                }
-              : app.schoolReviewSummary,
+            criteriaReview: nextCriteriaReview,
+            schoolReviewSummary:
+              staffUser.primaryRole === 'SCHOOL_OFFICER' && app.schoolReviewSummary
+                ? {
+                    ...app.schoolReviewSummary,
+                    status: nextSchoolStatus || app.schoolReviewSummary.status,
+                    recommendation: isReopenedSchoolReview
+                      ? 'pending'
+                      : app.schoolReviewSummary.recommendation,
+                    reviewedCriteriaCount: completedCount,
+                  }
+                : app.schoolReviewSummary,
             supplementSummary: waitingSupp
               ? {
                   requestCount:
@@ -665,6 +930,25 @@ export function useStaffWorkflowCoordination({
         savePersistedStaffApplications(nextApps);
         return nextApps;
       });
+
+      if (isBackendMode()) {
+        apiRequest(
+          `/api/v2/portal/individual/applications/${encodeURIComponent(
+            appId
+          )}/review-workspace`,
+          {
+            method: 'PUT',
+            body: {
+              workspaceState: result.nextWorkspace,
+              workflowStatus: result.nextStaffStatus,
+              schoolPreliminaryStatus: nextSchoolStatus,
+              assignmentStatus: result.nextAssignmentStatus,
+              latestOperationalNote: result.nextOperationalNote,
+              studentSupplementCreated: result.studentSupplementCreated,
+            },
+          }
+        ).catch(() => {});
+      }
 
       if (appId === HERO_STAFF_APP_ID) {
         const hasWaitingSupp = result.nextWorkspace.supplementRequests.some(
@@ -686,6 +970,7 @@ export function useStaffWorkflowCoordination({
     },
     [
       selectedStaffAppId,
+      staffApplications,
       officerWorkspaceMap,
       officerStudentAppMap,
       initialHeroOfficerBundle,
@@ -938,7 +1223,7 @@ export function useStaffWorkflowCoordination({
     if (isBackendMode()) {
       resolveDomainServices()
         .committeeDecision.publishIndividualResults({
-          decisionNumber: '108/QĐ-HSV-TP',
+          decisionNumber: '108/QĐ-HSV-ĐHĐN',
           actor: {
             id: staffUser.id,
             name: staffUser.fullName,
@@ -961,7 +1246,7 @@ export function useStaffWorkflowCoordination({
 
     const allCol = getAllCollectiveApplications();
     allCol.forEach((app) => {
-      publishCollectiveResult(app.id, '86/QĐ-HSV-TP', {
+      publishCollectiveResult(app.id, '86/QĐ-HSV-ĐHĐN', {
         name: staffUser.fullName,
         role: staffUser.roleLabel,
       });
@@ -997,6 +1282,8 @@ export function useStaffWorkflowCoordination({
             recommendation:
               recommendation === 'not_recommended'
                 ? 'not_recommended'
+                : recommendation === 'pending'
+                ? 'pending'
                 : 'recommended',
             summaryNote: notes || reason || '',
             actor: {
@@ -1058,6 +1345,17 @@ export function useStaffWorkflowCoordination({
         ]);
         savePersistedStaffApplications(nextApps);
         return nextApps;
+      });
+
+      setOfficerWorkspaceMap((prev) => {
+        const next = { ...prev };
+        applicationIds.forEach((appId) => {
+          if (next[appId]) {
+            next[appId] = sanitizeBackendWorkspace(appId, next[appId], 'CITY');
+          }
+        });
+        savePersistedOfficerWorkspaces(next);
+        return next;
       });
 
       if (applicationIds.includes(HERO_STAFF_APP_ID)) {

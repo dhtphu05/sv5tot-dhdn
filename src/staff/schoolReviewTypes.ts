@@ -1,16 +1,15 @@
 /**
- * 5TOT Đà Nẵng — Two-Level Review Architecture & Institutional Routing (Prompt S1)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT Đại học Đà Nẵng — Two-Level Review Architecture & Institutional Routing (Quyết định số 12 QĐ/ĐHĐN-HSV)
+ * Cơ quan quản lý: Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  *
- * Implements Prompt S1 Sections 1–32, 41–43, 50–57, 66–68:
+ * Implements Two-Level Review Architecture for Đại học Đà Nẵng:
  * - Exactly TWO official review levels:
- *     Level 1: Cấp Trường / Đơn vị xét sơ (School / Base Review Unit)
- *     Level 2: Cấp Thành phố (City Review)
- * - Đại học Đà Nẵng (UDN) is ONE School-Level Review Unit, operationally equivalent
- *   to other university-level review units (ĐH Duy Tân, ĐH Đông Á, v.v.).
- * - UDN member institutions (Bách khoa, Kinh tế, Sư phạm, Ngoại ngữ, v.v.) are routed to UDN.
- * - Training Institution (nơi sinh viên học) vs School Review Unit (đơn vị xét sơ) are strictly separated.
+ *     Level 1: Cấp Trường / Đơn vị thành viên xét sơ tuyển (9 trường/đơn vị thành viên thuộc ĐHĐN)
+ *     Level 2: Cấp Đại học Đà Nẵng (Ban Thư ký Hội Sinh viên ĐHĐN / Hội đồng xét chọn cấp ĐHĐN)
+ * - 09 Trường / Đơn vị thành viên thuộc Đại học Đà Nẵng (Bách khoa, Kinh tế, Sư phạm, Ngoại ngữ,
+ *   Sư phạm Kỹ thuật, CNTT & TT Việt - Hàn, Trường Y Dược, Viện NC&ĐT Việt - Anh, Phân hiệu ĐHĐN tại Kon Tum)
+ *   đảm nhận xét sơ tuyển cấp cơ sở và gửi danh sách đề nghị lên cấp Đại học Đà Nẵng.
  * - Single canonical Student application moving through two independent review stages.
  */
 
@@ -19,8 +18,8 @@
 // =============================================================================
 
 export type ReviewStage =
-  | 'SCHOOL'     // Cấp 1: Xét sơ tuyển cấp Trường / Đơn vị
-  | 'CITY'       // Cấp 2: Xét duyệt cấp Thành phố
+  | 'SCHOOL'     // Cấp 1: Xét sơ tuyển cấp Trường / Đơn vị thành viên ĐHĐN
+  | 'CITY'       // Cấp 2: Xét duyệt cấp Đại học Đà Nẵng
   | 'COMPLETED'; // Đã hoàn tất toàn bộ quy trình xét duyệt hai cấp
 
 export interface ReviewStageMeta {
@@ -38,16 +37,16 @@ export const REVIEW_STAGE_META: Record<ReviewStage, ReviewStageMeta> = {
     id: 'SCHOOL',
     label: 'Cấp Trường / Đơn vị xét sơ tuyển',
     shortLabel: 'Xét sơ tuyển cấp Trường',
-    description: 'Hồ sơ đang trong quy trình thẩm định sơ tuyển tại đơn vị phụ trách.',
+    description: 'Hồ sơ đang trong quy trình thẩm định sơ tuyển tại trường / đơn vị thành viên thuộc Đại học Đà Nẵng.',
     badgeBg: '#EFF6FF',
     badgeText: '#1D4ED8',
     badgeBorder: '#BFDBFE',
   },
   CITY: {
     id: 'CITY',
-    label: 'Cấp Thành phố Đà Nẵng',
-    shortLabel: 'Xét duyệt cấp Thành phố',
-    description: 'Hồ sơ đã được chuyển lên và đang được thẩm định độc lập tại cấp Thành phố.',
+    label: 'Cấp Đại học Đà Nẵng',
+    shortLabel: 'Xét duyệt cấp ĐHĐN',
+    description: 'Hồ sơ đã được các trường thành viên chuyển lên và đang được thẩm định độc lập tại cấp Đại học Đà Nẵng.',
     badgeBg: '#F0FDF4',
     badgeText: '#15803D',
     badgeBorder: '#BBF7D0',
@@ -56,7 +55,7 @@ export const REVIEW_STAGE_META: Record<ReviewStage, ReviewStageMeta> = {
     id: 'COMPLETED',
     label: 'Hoàn tất quy trình hai cấp',
     shortLabel: 'Đã hoàn tất',
-    description: 'Hồ sơ đã hoàn thành toàn bộ quy trình xét sơ và xét duyệt cấp Thành phố.',
+    description: 'Hồ sơ đã hoàn thành toàn bộ quy trình xét sơ tuyển cấp Trường thành viên và xét duyệt cấp Đại học Đà Nẵng.',
     badgeBg: '#F8FAFC',
     badgeText: '#475569',
     badgeBorder: '#E2E8F0',
@@ -64,17 +63,27 @@ export const REVIEW_STAGE_META: Record<ReviewStage, ReviewStageMeta> = {
 };
 
 // =============================================================================
-// 2. SCHOOL REVIEW UNIT (Đơn vị xét sơ tuyển)
+// 2. SCHOOL REVIEW UNIT (09 Đơn vị thành viên xét sơ tuyển thuộc ĐHĐN)
 // =============================================================================
 
 export type SchoolReviewUnitId =
-  | 'unit-udn'     // Đại học Đà Nẵng (Hub xét sơ cho các trường thành viên UDN)
-  | 'unit-dtu'     // Trường Đại học Duy Tân
-  | 'unit-donga'   // Trường Đại học Đông Á
-  | 'unit-dau'     // Trường Đại học Kiến trúc Đà Nẵng
-  | 'unit-upes3'   // Trường Đại học Thể dục Thể thao Đà Nẵng
-  | 'unit-tyd'     // Trường Đại học Kỹ thuật Y - Dược Đà Nẵng
-  | 'unit-fpt';    // Trường Đại học FPT phân hiệu Đà Nẵng
+  | 'unit-dut'     // Trường Đại học Bách khoa – ĐHĐN
+  | 'unit-due'     // Trường Đại học Kinh tế – ĐHĐN
+  | 'unit-ued'     // Trường Đại học Sư phạm – ĐHĐN
+  | 'unit-ufl'     // Trường Đại học Ngoại ngữ – ĐHĐN
+  | 'unit-ute'     // Trường Đại học Sư phạm Kỹ thuật – ĐHĐN
+  | 'unit-vku'     // Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN
+  | 'unit-smp'     // Trường Y Dược – ĐHĐN
+  | 'unit-vnuk'    // Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN
+  | 'unit-kontum'  // Phân hiệu Đại học Đà Nẵng tại Kon Tum
+  // Legacy unit IDs preserved for backward compatibility in historical records
+  | 'unit-udn'
+  | 'unit-dtu'
+  | 'unit-donga'
+  | 'unit-dau'
+  | 'unit-upes3'
+  | 'unit-tyd'
+  | 'unit-fpt';
 
 export interface SchoolReviewUnit {
   id: SchoolReviewUnitId;
@@ -91,101 +100,116 @@ export interface SchoolReviewUnit {
 }
 
 /**
- * Danh mục thẩm quyền chính thức của các Đơn vị xét sơ tuyển tại TP. Đà Nẵng (Prompt S1 Section 4, 5, 8)
+ * Danh mục thẩm quyền chính thức của 09 Trường / Đơn vị thành viên xét sơ tuyển thuộc Đại học Đà Nẵng
  */
 export const AUTHORITATIVE_SCHOOL_REVIEW_UNITS: SchoolReviewUnit[] = [
   {
-    id: 'unit-udn',
-    officialName: 'Đại học Đà Nẵng',
-    shortName: 'ĐHĐN',
-    code: 'UDN',
+    id: 'unit-dut',
+    officialName: 'Trường Đại học Bách khoa – ĐHĐN',
+    shortName: 'ĐH Bách khoa',
+    code: 'DUT',
     status: 'active',
-    contactEmail: 'hsv@udn.vn',
-    contactPhone: '0236 3822 041',
-    unitOfficerName: 'Nguyễn Văn An',
-    memberInstitutionIds: [
-      'inst-dut',  // ĐH Bách khoa - ĐHĐN
-      'inst-due',  // ĐH Kinh tế - ĐHĐN
-      'inst-ued',  // ĐH Sư phạm - ĐHĐN
-      'inst-ufl',  // ĐH Ngoại ngữ - ĐHĐN
-      'inst-ute',  // ĐH Sư phạm Kỹ thuật - ĐHĐN
-      'inst-vku',  // ĐH CNTT & Truyền thông Việt - Hàn - ĐHĐN
-      'inst-smp',  // Trường Y Dược - ĐHĐN
-      'inst-vnuk', // Viện Nghiên cứu & Đào tạo Việt - Anh - ĐHĐN
-    ],
-    description: 'Đơn vị xét sơ tuyển tập trung cho toàn bộ các trường thành viên và đơn vị thuộc Đại học Đà Nẵng.',
+    contactEmail: 'canbo.dut@udn.vn',
+    contactPhone: '0236 3842 308',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học Bách khoa – ĐHĐN',
+    memberInstitutionIds: ['inst-dut'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học Bách khoa – ĐHĐN.',
   },
   {
-    id: 'unit-dtu',
-    officialName: 'Trường Đại học Duy Tân',
-    shortName: 'DTU',
-    code: 'DTU',
+    id: 'unit-due',
+    officialName: 'Trường Đại học Kinh tế – ĐHĐN',
+    shortName: 'ĐH Kinh tế',
+    code: 'DUE',
     status: 'active',
-    contactEmail: 'doanthanhnien@duytan.edu.vn',
-    contactPhone: '0236 3827 111',
-    unitOfficerName: 'Trần Gia Huy',
-    memberInstitutionIds: ['inst-dtu'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Trường Đại học Duy Tân.',
+    contactEmail: 'canbo.due@udn.vn',
+    contactPhone: '0236 3836 169',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học Kinh tế – ĐHĐN',
+    memberInstitutionIds: ['inst-due'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học Kinh tế – ĐHĐN.',
   },
   {
-    id: 'unit-donga',
-    officialName: 'Trường Đại học Đông Á',
-    shortName: 'ĐH Đông Á',
-    code: 'UDA',
+    id: 'unit-ued',
+    officialName: 'Trường Đại học Sư phạm – ĐHĐN',
+    shortName: 'ĐH Sư phạm',
+    code: 'UED',
     status: 'active',
-    contactEmail: 'doantruong@donga.edu.vn',
-    contactPhone: '0236 3519 929',
-    unitOfficerName: 'Hoàng Thị Thu Thảo',
-    memberInstitutionIds: ['inst-donga'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Trường Đại học Đông Á.',
+    contactEmail: 'canbo.ued@udn.vn',
+    contactPhone: '0236 3841 323',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học Sư phạm – ĐHĐN',
+    memberInstitutionIds: ['inst-ued'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học Sư phạm – ĐHĐN.',
   },
   {
-    id: 'unit-dau',
-    officialName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    shortName: 'ĐH Kiến trúc',
-    code: 'DAU',
+    id: 'unit-ufl',
+    officialName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
+    shortName: 'ĐH Ngoại ngữ',
+    code: 'UFL',
     status: 'active',
-    contactEmail: 'hsv@dau.edu.vn',
-    contactPhone: '0236 3622 999',
-    unitOfficerName: 'Lê Thanh Hải',
-    memberInstitutionIds: ['inst-dau'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Trường Đại học Kiến trúc Đà Nẵng.',
+    contactEmail: 'canbo.ufl@udn.vn',
+    contactPhone: '0236 3699 324',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học Ngoại ngữ – ĐHĐN',
+    memberInstitutionIds: ['inst-ufl'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học Ngoại ngữ – ĐHĐN.',
   },
   {
-    id: 'unit-upes3',
-    officialName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    shortName: 'ĐH TDTT',
-    code: 'UPES3',
+    id: 'unit-ute',
+    officialName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
+    shortName: 'ĐH Sư phạm Kỹ thuật',
+    code: 'UTE',
     status: 'active',
-    contactEmail: 'hsv@upes3.edu.vn',
-    contactPhone: '0236 3822 555',
-    unitOfficerName: 'Võ Minh Trí',
-    memberInstitutionIds: ['inst-upes3'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Trường Đại học Thể dục Thể thao Đà Nẵng.',
+    contactEmail: 'canbo.ute@udn.vn',
+    contactPhone: '0236 3822 571',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
+    memberInstitutionIds: ['inst-ute'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học Sư phạm Kỹ thuật – ĐHĐN.',
   },
   {
-    id: 'unit-tyd',
-    officialName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    shortName: 'ĐH KTYD',
-    code: 'DHKTYD',
+    id: 'unit-vku',
+    officialName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
+    shortName: 'VKU',
+    code: 'VKU',
     status: 'active',
-    contactEmail: 'hsv@dhktyduocdn.edu.vn',
-    contactPhone: '0236 3835 380',
-    unitOfficerName: 'Nguyễn Thị Phương',
-    memberInstitutionIds: ['inst-tyd'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Trường Đại học Kỹ thuật Y - Dược Đà Nẵng.',
+    contactEmail: 'canbo.vku@udn.vn',
+    contactPhone: '0236 3667 117',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN',
+    memberInstitutionIds: ['inst-vku'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Đại học CNTT & TT Việt – Hàn – ĐHĐN.',
   },
   {
-    id: 'unit-fpt',
-    officialName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    shortName: 'ĐH FPT',
-    code: 'FPT',
+    id: 'unit-smp',
+    officialName: 'Trường Y Dược – ĐHĐN',
+    shortName: 'Trường Y Dược',
+    code: 'SMP',
     status: 'active',
-    contactEmail: 'hsv.fptdn@fe.edu.vn',
-    contactPhone: '0236 7300 999',
-    unitOfficerName: 'Bùi Đức Anh',
-    memberInstitutionIds: ['inst-fpt'],
-    description: 'Đơn vị xét sơ tuyển độc lập cho sinh viên Phân hiệu Đại học FPT tại Đà Nẵng.',
+    contactEmail: 'canbo.smp@udn.vn',
+    contactPhone: '0236 3848 115',
+    unitOfficerName: 'Cán bộ sơ tuyển Trường Y Dược – ĐHĐN',
+    memberInstitutionIds: ['inst-smp'],
+    description: 'Đơn vị xét sơ tuyển cấp Trường thành viên cho sinh viên Trường Y Dược – ĐHĐN.',
+  },
+  {
+    id: 'unit-vnuk',
+    officialName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+    shortName: 'Viện VNUK',
+    code: 'VNUK',
+    status: 'active',
+    contactEmail: 'canbo.vnuk@udn.vn',
+    contactPhone: '0236 3738 399',
+    unitOfficerName: 'Cán bộ sơ tuyển Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+    memberInstitutionIds: ['inst-vnuk'],
+    description: 'Đơn vị xét sơ tuyển cấp Viện thành viên cho sinh viên Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN.',
+  },
+  {
+    id: 'unit-kontum',
+    officialName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    shortName: 'UDCK (Kon Tum)',
+    code: 'KONTUM',
+    status: 'active',
+    contactEmail: 'canbo.kontum@udn.vn',
+    contactPhone: '0260 3913 029',
+    unitOfficerName: 'Cán bộ sơ tuyển Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    memberInstitutionIds: ['inst-kontum'],
+    description: 'Đơn vị xét sơ tuyển cấp Phân hiệu cho sinh viên Phân hiệu Đại học Đà Nẵng tại Kon Tum.',
   },
 ];
 
@@ -194,26 +218,19 @@ export const AUTHORITATIVE_SCHOOL_REVIEW_UNITS: SchoolReviewUnit[] = [
 // =============================================================================
 
 /**
- * Mapping dứt khoát từ Training Institution ID -> School Review Unit ID (Prompt S1 Section 8 & 9)
+ * Mapping dứt khoát từ Training Institution ID -> School Review Unit ID (09 trường/đơn vị thành viên ĐHĐN)
  */
 export const INSTITUTION_TO_SCHOOL_REVIEW_UNIT_MAP: Record<string, SchoolReviewUnitId> = {
-  // Thành viên Đại học Đà Nẵng -> Định tuyến về 'unit-udn'
-  'inst-dut': 'unit-udn',
-  'inst-due': 'unit-udn',
-  'inst-ued': 'unit-udn',
-  'inst-ufl': 'unit-udn',
-  'inst-ute': 'unit-udn',
-  'inst-vku': 'unit-udn',
-  'inst-smp': 'unit-udn',
-  'inst-vnuk': 'unit-udn',
-
-  // Các trường đại học độc lập -> Tự đảm nhận xét sơ
-  'inst-dtu': 'unit-dtu',
-  'inst-donga': 'unit-donga',
-  'inst-dau': 'unit-dau',
-  'inst-upes3': 'unit-upes3',
-  'inst-tyd': 'unit-tyd',
-  'inst-fpt': 'unit-fpt',
+  'inst-dut': 'unit-dut',
+  'inst-due': 'unit-due',
+  'inst-ued': 'unit-ued',
+  'inst-ufl': 'unit-ufl',
+  'inst-ufls': 'unit-ufl',
+  'inst-ute': 'unit-ute',
+  'inst-vku': 'unit-vku',
+  'inst-smp': 'unit-smp',
+  'inst-vnuk': 'unit-vnuk',
+  'inst-kontum': 'unit-kontum',
 };
 
 export interface SchoolReviewUnitResolutionResult {
@@ -225,8 +242,7 @@ export interface SchoolReviewUnitResolutionResult {
 }
 
 /**
- * Hàm giải quyết đơn vị xét sơ tuyển chuẩn tắc (Prompt S1 Section 10 & 14)
- * Tuyệt đối không dựa vào so sánh chuỗi mờ ("Đà Nẵng") hay văn bản tự do của sinh viên.
+ * Hàm giải quyết đơn vị xét sơ tuyển chuẩn tắc
  */
 export function resolveSchoolReviewUnit(
   trainingInstitutionId: string,
@@ -250,7 +266,7 @@ export function resolveSchoolReviewUnit(
       trainingInstitutionId,
       errorCode: 'NOT_CONFIGURED',
       errorMessage:
-        'Chưa xác định được đơn vị tiếp nhận xét sơ hồ sơ cho trường đào tạo này. Vui lòng liên hệ Hội Sinh viên Thành phố để được hỗ trợ cấu hình.',
+        'Chưa xác định được đơn vị tiếp nhận xét sơ hồ sơ cho trường đào tạo này. Vui lòng liên hệ Hội Sinh viên Đại học Đà Nẵng để được hỗ trợ cấu hình.',
     };
   }
 
@@ -292,9 +308,9 @@ export type SchoolPreliminaryStatus =
   | 'supplement_requested'    // Cần sinh viên bổ sung (Cấp Trường)
   | 'supplement_returned'     // Sinh viên đã gửi bổ sung (Cấp Trường)
   | 'preliminary_completed'   // Đã hoàn tất xét sơ (chờ đưa ra kết luận đề xuất)
-  | 'recommended_forwarding'  // Đề xuất chuyển Thành phố (chưa bấm chuyển chính thức)
-  | 'not_recommended'         // Không đề xuất chuyển Thành phố
-  | 'forwarded_to_city';      // Đã chuyển hồ sơ lên Thành phố
+  | 'recommended_forwarding'  // Đề xuất chuyển ĐHĐN (chưa bấm chuyển chính thức)
+  | 'not_recommended'         // Không đề xuất chuyển ĐHĐN
+  | 'forwarded_to_city';      // Đã chuyển hồ sơ lên cấp ĐHĐN
 
 export type SchoolForwardingRecommendation =
   | 'recommended'
@@ -361,7 +377,7 @@ export const SCHOOL_PRELIMINARY_STATUS_META: Record<
     badgeBorder: '#BFDBFE',
   },
   recommended_forwarding: {
-    label: 'Đề xuất chuyển Thành phố',
+    label: 'Đề xuất chuyển ĐHĐN',
     shortLabel: 'Đề xuất chuyển',
     tone: 'success',
     dotColor: '#16A34A',
@@ -379,8 +395,8 @@ export const SCHOOL_PRELIMINARY_STATUS_META: Record<
     badgeBorder: '#FECDD3',
   },
   forwarded_to_city: {
-    label: 'Đã chuyển Thành phố',
-    shortLabel: 'Đã chuyển TP',
+    label: 'Đã chuyển ĐHĐN',
+    shortLabel: 'Đã chuyển ĐHĐN',
     tone: 'success',
     dotColor: '#059669',
     badgeBg: '#ECFDF5',
@@ -444,11 +460,11 @@ export interface SchoolReviewSummary {
 export type ForwardingBatchStatus = 'DRAFT' | 'FORWARDED';
 
 export interface DecisionDocumentMetadata {
-  decisionNumber?: string; // e.g. "182/QĐ-ĐHĐN" (Optional in LEAN-4.2 PDF-only upload, preserved for historical viewing)
-  decisionTitle?: string;  // e.g. "Quyết định đề xuất danh sách Sinh viên 5 tốt cấp Thành phố năm học 2025–2026"
+  decisionNumber?: string; // e.g. "182/QĐ-ĐHBK"
+  decisionTitle?: string;  // e.g. "Quyết định đề xuất danh sách Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2025–2026"
   decisionDate?: string;   // ISO date string
-  signedByName?: string;   // e.g. "PGS.TS. Nguyễn Ngọc Vũ"
-  signedByTitle?: string;  // e.g. "Giám đốc Đại học Đà Nẵng"
+  signedByName?: string;   // e.g. "PGS.TS. Nguyễn Hữu Hiếu"
+  signedByTitle?: string;  // e.g. "Hiệu trưởng Trường Đại học Bách khoa - ĐHĐN"
   fileId: string;
   fileName: string;
   fileSize: number;
@@ -537,13 +553,13 @@ export interface ConfirmBatchForwardingInput {
 }
 
 // =============================================================================
-// 6. CITY INTAKE ELIGIBILITY CONTRACT (Điều kiện tiếp nhận cấp Thành phố)
+// 6. CITY INTAKE ELIGIBILITY CONTRACT (Điều kiện tiếp nhận cấp Đại học Đà Nẵng)
 // =============================================================================
 
 /**
- * Kiểm tra tính hợp lệ để hồ sơ bước vào quy trình phân công / thẩm định cấp Thành phố (Prompt S1 Section 24, 27, 34 + Prompt S4.8.2 Section 48)
- * - INDIVIDUAL: Bắt buộc phải qua thẩm định sơ tuyển và được Đơn vị xét sơ (Trường/ĐHĐN) xác nhận chuyển lên Thành phố.
- * - COLLECTIVE: Nộp trực tiếp lên Thành phố từ Cổng Tập thể, KHÔNG qua khâu trung gian của Trường.
+ * Kiểm tra tính hợp lệ để hồ sơ bước vào quy trình phân công / thẩm định cấp Đại học Đà Nẵng
+ * - INDIVIDUAL: Bắt buộc phải qua thẩm định sơ tuyển và được Đơn vị thành viên xác nhận chuyển lên cấp Đại học Đà Nẵng.
+ * - COLLECTIVE: Nộp trực tiếp lên cấp Đại học Đà Nẵng từ Cổng Tập thể, KHÔNG qua khâu trung gian của Trường.
  */
 export function isApplicationEligibleForCityIntake(app: {
   applicationType?: 'INDIVIDUAL' | 'COLLECTIVE';
@@ -555,7 +571,7 @@ export function isApplicationEligibleForCityIntake(app: {
   reason?: 'NOT_IN_CITY_STAGE' | 'NOT_FORWARDED_BY_SCHOOL' | 'NOT_RECOMMENDED' | 'SCHOOL_REVIEW_IN_PROGRESS';
   message: string;
 } {
-  // 1. COLLECTIVE DIRECT SUBMISSION INTAKE RULE (Prompt S4.8.2 Section 48)
+  // 1. COLLECTIVE DIRECT SUBMISSION INTAKE RULE
   if (app.applicationType === 'COLLECTIVE') {
     if (
       app.status === 'city_unassigned' ||
@@ -570,13 +586,13 @@ export function isApplicationEligibleForCityIntake(app: {
     ) {
       return {
         eligible: true,
-        message: 'Hồ sơ tập thể đã nộp trực tiếp lên Thành phố hợp lệ, sẵn sàng tiếp nhận và phân công.',
+        message: 'Hồ sơ tập thể đã nộp trực tiếp lên cấp Đại học Đà Nẵng hợp lệ, sẵn sàng tiếp nhận và phân công.',
       };
     }
     return {
       eligible: false,
       reason: 'NOT_IN_CITY_STAGE',
-      message: 'Hồ sơ tập thể đang ở trạng thái kê khai (Draft), chưa nộp lên cấp Thành phố.',
+      message: 'Hồ sơ tập thể đang ở trạng thái kê khai (Draft), chưa nộp lên cấp Đại học Đà Nẵng.',
     };
   }
 
@@ -585,7 +601,7 @@ export function isApplicationEligibleForCityIntake(app: {
     return {
       eligible: false,
       reason: 'SCHOOL_REVIEW_IN_PROGRESS',
-      message: 'Hồ sơ đang trong giai đoạn xét sơ cấp Trường, chưa đủ điều kiện tiếp nhận cấp Thành phố.',
+      message: 'Hồ sơ đang trong giai đoạn xét sơ cấp Trường thành viên, chưa đủ điều kiện tiếp nhận cấp Đại học Đà Nẵng.',
     };
   }
 
@@ -594,27 +610,27 @@ export function isApplicationEligibleForCityIntake(app: {
       return {
         eligible: false,
         reason: 'NOT_RECOMMENDED',
-        message: 'Hồ sơ không được đơn vị xét sơ đề xuất chuyển lên cấp Thành phố.',
+        message: 'Hồ sơ không được đơn vị xét sơ đề xuất chuyển lên cấp Đại học Đà Nẵng.',
       };
     }
     return {
       eligible: false,
       reason: 'NOT_FORWARDED_BY_SCHOOL',
-      message: 'Hồ sơ chưa được Cán bộ xét duyệt cấp Trường xác nhận chuyển lên cấp Thành phố.',
+      message: 'Hồ sơ chưa được Cán bộ xét duyệt cấp Trường xác nhận chuyển lên cấp Đại học Đà Nẵng.',
     };
   }
 
   if (app.currentReviewStage === 'CITY' || app.currentReviewStage === 'COMPLETED') {
     return {
       eligible: true,
-      message: 'Hồ sơ đã được chuyển lên cấp Thành phố hợp lệ và sẵn sàng tiếp nhận/phân công.',
+      message: 'Hồ sơ đã được chuyển lên cấp Đại học Đà Nẵng hợp lệ và sẵn sàng tiếp nhận/phân công.',
     };
   }
 
   return {
     eligible: false,
     reason: 'NOT_IN_CITY_STAGE',
-    message: 'Hồ sơ chưa ở trạng thái tiếp nhận cấp Thành phố.',
+    message: 'Hồ sơ chưa ở trạng thái tiếp nhận cấp Đại học Đà Nẵng.',
   };
 }
 
@@ -623,8 +639,8 @@ export function isApplicationEligibleForCityIntake(app: {
 // =============================================================================
 
 /**
- * Định tuyến đích nhận phản hồi bổ sung chuẩn xác (Prompt S1 Section 37–43)
- * Tuyệt đối không bao giờ trả hồ sơ City về lại School khi City yêu cầu bổ sung.
+ * Định tuyến đích nhận phản hồi bổ sung chuẩn xác
+ * Tuyệt đối không bao giờ trả hồ sơ cấp ĐHĐN về lại cấp Trường khi cấp ĐHĐN yêu cầu bổ sung.
  */
 export function resolveSupplementResponseDestination(request: {
   originatingReviewStage?: ReviewStage;
@@ -641,7 +657,7 @@ export function resolveSupplementResponseDestination(request: {
       targetStage: 'SCHOOL',
       targetReviewUnitId: request.requestingReviewUnitId,
       targetOfficerId: request.requestingOfficerId,
-      destinationDescription: 'Phản hồi được gửi trực tiếp về Cán bộ xét duyệt cấp Trường.',
+      destinationDescription: 'Phản hồi được gửi trực tiếp về Cán bộ xét duyệt cấp Trường thành viên.',
     };
   }
 
@@ -650,6 +666,6 @@ export function resolveSupplementResponseDestination(request: {
     targetStage: 'CITY',
     targetReviewUnitId: undefined,
     targetOfficerId: request.requestingOfficerId,
-    destinationDescription: 'Phản hồi được gửi trực tiếp về Cán bộ xét duyệt cấp Thành phố (không trả về cấp Trường).',
+    destinationDescription: 'Phản hồi được gửi trực tiếp về Cán bộ xét duyệt cấp Đại học Đà Nẵng (không trả về cấp Trường).',
   };
 }

@@ -97,11 +97,11 @@ describe('5TOT Đà Nẵng — LEAN-6 Full End-to-End System Integration Suite',
       assert.ok(studentProfile.fullName.includes('Nguyễn'), 'Supports Vietnamese diacritics');
     });
 
-    it('ST04: Routes Student Application from UDN member to unit-udn Review Unit', () => {
+    it('ST04: Routes Student Application from UDN member to unit-dut Review Unit', () => {
       const routing = resolveSchoolReviewUnit('inst-dut');
       assert.strictEqual(routing.resolved, true);
-      assert.strictEqual(routing.unit?.id, 'unit-udn');
-      assert.strictEqual(routing.unit?.officialName, 'Đại học Đà Nẵng');
+      assert.strictEqual(routing.unit?.id, 'unit-dut');
+      assert.strictEqual(routing.unit?.officialName, 'Trường Đại học Bách khoa – ĐHĐN');
     });
 
     it('ST05 & ST06: LEAN declaration entry supports compact forms and stable numbering', () => {
@@ -306,22 +306,30 @@ describe('5TOT Đà Nẵng — LEAN-6 Full End-to-End System Integration Suite',
   // 4. UDN01–UDN09 & FW01–FW17: UDN Consolidation & One-Time Batch Forwarding
   // =========================================================================
   describe('UDN01–UDN09 & FW01–FW17: UDN Consolidation & One-Time Forwarding', () => {
-    it('UDN01–UDN03: All 8 UDN member institutions resolve to unit-udn while preserving student identity', () => {
-      const udnMembers = ['inst-dut', 'inst-due', 'inst-ued', 'inst-ufl', 'inst-ute', 'inst-vku', 'inst-vnuk', 'inst-smp'];
-      assert.strictEqual(udnMembers.length, 8);
+    it('UDN01–UDN03: All 9 UDN member institutions resolve to their 9 respective units while preserving student identity', () => {
+      const udnMembers: Array<[string, string]> = [
+        ['inst-dut', 'unit-dut'],
+        ['inst-due', 'unit-due'],
+        ['inst-ued', 'unit-ued'],
+        ['inst-ufl', 'unit-ufl'],
+        ['inst-ute', 'unit-ute'],
+        ['inst-vku', 'unit-vku'],
+        ['inst-vnuk', 'unit-vnuk'],
+        ['inst-smp', 'unit-smp'],
+        ['inst-kontum', 'unit-kontum'],
+      ];
+      assert.strictEqual(udnMembers.length, 9);
 
-      for (const instId of udnMembers) {
+      for (const [instId, expectedUnitId] of udnMembers) {
         const r = resolveSchoolReviewUnit(instId);
         assert.strictEqual(r.resolved, true, `Must resolve ${instId}`);
-        assert.strictEqual(r.unit?.id, 'unit-udn', `${instId} must resolve to unit-udn`);
+        assert.strictEqual(r.unit?.id, expectedUnitId, `${instId} must resolve to ${expectedUnitId}`);
       }
     });
 
     it('UDN09: Independent universities resolve to their own isolated Review Units', () => {
-      const independentUnits = AUTHORITATIVE_SCHOOL_REVIEW_UNITS.filter((u) => u.id !== 'unit-udn');
-      assert.ok(independentUnits.length >= 4, 'Must have at least 4 independent review units');
-      for (const unit of independentUnits) {
-        assert.notStrictEqual(unit.id, 'unit-udn');
+      assert.strictEqual(AUTHORITATIVE_SCHOOL_REVIEW_UNITS.length, 9, 'Must have 9 member review units');
+      for (const unit of AUTHORITATIVE_SCHOOL_REVIEW_UNITS) {
         assert.ok(unit.memberInstitutionIds.length > 0);
       }
     });

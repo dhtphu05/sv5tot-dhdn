@@ -17,6 +17,7 @@ import {
   ApplicationReviewWorkspaceState,
   OfficerDemoScenarioId,
 } from '../../staff/reviewTypes';
+import { buildFallbackBundleForStaffRecord } from '../../staff/fixtures/officerReviewFixtures';
 import { SchoolDemoScenarioId } from '../../staff/fixtures/schoolReviewFixtures';
 import {
   CommitteeCaseDetail,
@@ -379,7 +380,9 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
       : initialHeroOfficerBundle.studentApp);
   const activeOfficerWorkspace =
     officerWorkspaceMap[selectedStaffAppId] ||
-    initialHeroOfficerBundle.workspaceState;
+    (selectedStaffRecord
+      ? buildFallbackBundleForStaffRecord(selectedStaffRecord).workspaceState
+      : initialHeroOfficerBundle.workspaceState);
   const activeCommitteeCase =
     committeeCasesMap[selectedStaffAppId] ||
     (selectedStaffRecord

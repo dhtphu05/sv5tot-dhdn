@@ -100,8 +100,8 @@ console.log('\n--- 3. SCHOOL OFFICER PRELIMINARY REVIEW CONTRACT ---');
 
 const schoolUser = STAFF_DEMO_USERS.SCHOOL_OFFICER;
 assert(
-  Boolean(schoolUser && schoolUser.schoolReviewUnitId === 'unit-udn'),
-  'School Officer is correctly assigned to unit-udn review unit'
+  Boolean(schoolUser && schoolUser.schoolReviewUnitId === 'unit-dut'),
+  'School Officer is correctly assigned to unit-dut review unit'
 );
 
 const schoolRecord = {
@@ -114,15 +114,15 @@ const schoolRecord = {
     email: '',
   },
   institution: {
-    id: 'dut',
+    id: 'inst-dut',
     code: 'DUT',
     name: 'Trường Đại học Bách khoa - ĐHĐN',
     officialName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
     category: 'member_university' as const,
     isActive: true,
   },
-  schoolReviewUnitId: 'unit-udn',
-  schoolReviewUnitName: 'Đại học Đà Nẵng',
+  schoolReviewUnitId: 'unit-dut',
+  schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
   season: '2025–2026',
   workflowStatus: 'school_in_review' as const,
   criteriaReview: [],

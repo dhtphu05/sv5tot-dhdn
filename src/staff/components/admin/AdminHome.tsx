@@ -344,9 +344,8 @@ export const AdminHome: React.FC<AdminHomeProps> = ({
               <span>Đơn vị &amp; Phân tuyến</span>
             </div>
             <p className="text-[12px] text-[#526B7C] mt-2 leading-relaxed">
-              Quản lý danh mục {institutions.length} trường ĐH/HV/CĐ và phân
-              tuyến Đơn vị xét sơ tuyển cấp Trường (bao gồm khối ĐHĐN{' '}
-              <code>unit-udn</code>).
+              Quản lý danh mục {institutions.length} trường/đơn vị thành viên ĐHĐN và phân
+              tuyến 09 Đơn vị xét sơ tuyển cấp Trường.
             </p>
           </div>
           <button
@@ -368,7 +367,7 @@ export const AdminHome: React.FC<AdminHomeProps> = ({
             </div>
             <p className="text-[12px] text-[#526B7C] mt-2 leading-relaxed">
               Quản lý {staffAccounts.length} tài khoản cán bộ sơ tuyển Trường,
-              thẩm định Thành phố, Hội đồng. Cấp mã kích hoạt và đặt lại mật
+              thẩm định cấp Đại học Đà Nẵng, Hội đồng. Cấp mã kích hoạt và đặt lại mật
               khẩu.
             </p>
           </div>

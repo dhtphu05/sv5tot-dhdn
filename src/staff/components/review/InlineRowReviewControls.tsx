@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   XCircle,
   FileText,
+  RotateCcw,
 } from 'lucide-react';
 import { CriterionDefinition } from '../../../tokens';
 import {
@@ -384,6 +385,30 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
           <X size={14} strokeWidth={isFail ? 2.8 : 2.2} />
           <span>Không đạt</span>
         </button>
+
+        {/* Explicit Undo Button when evaluated or supplement requested */}
+        {(isPass || isFail || isNeedsSupplement) && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!canMutate) return;
+              onUpdateScopeStatus(
+                {
+                  criterionId,
+                  requirementId: requirement.id,
+                  declarationId: declId,
+                },
+                'not_reviewed'
+              );
+            }}
+            title="Hoàn tác kết quả đánh giá mục này về Chưa xét"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[38px] rounded-[7px] text-[12px] font-bold bg-white text-[#475569] hover:text-[#0F172A] hover:bg-[#F8FAFC] border border-[#CBD5E1] transition-colors cursor-pointer"
+          >
+            <RotateCcw size={12.5} />
+            <span>Hoàn tác</span>
+          </button>
+        )}
       </div>
 
       {/* Secondary discreet actions: Ghi nhận xét & Yêu cầu bổ sung */}

@@ -1,28 +1,22 @@
 /**
- * 5TOT Đà Nẵng — Official Public Entry Page (Rebuilt from Approved Visual Reference)
- * Cơ quan quản lý: Thành Đoàn Đà Nẵng
- * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Thành phố Đà Nẵng
+ * 5TOT UDN — Minimal Single-Page Landing for University of Da Nang
+ * Đơn vị tổ chức: Hội Sinh viên Việt Nam Đại học Đà Nẵng
+ * Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên Đại học Đà Nẵng
  *
- * Implements Sections 1–51:
- * - Page architecture:
- *   1. InstitutionalHeader
- *   2. HeroIdentity
- *   3. AuthorityMeta
- *   4. SelectionCyclePanel
- *   5. PublicActionRow
- *   6. FiveCriteriaStrip
- *   7. ApplicationPreview
- *   8. PublicFooter (minimal institutional footer)
- *   9. OfficialGuidanceModal (for "Quy định 05 tiêu chuẩn" & "Hướng dẫn nộp minh chứng")
+ * Implements the 4 core areas:
+ * A. Header (Institutional masthead + single Đăng nhập action)
+ * B. Hero (Campus photo at 41 Lê Duẩn + title, subtitle, description)
+ * C. Ba hạng mục xét chọn (01 Sinh viên 5 tốt, 02 Tập thể SV5T, 03 Cánh chim trắng)
+ * D. Footer (Institutional footer with verified UDN contact)
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { InstitutionalHeader } from './landing/InstitutionalHeader';
 import { PublicHero } from './landing/PublicHero';
+import { AwardCategoriesSection } from './landing/AwardCategoriesSection';
 import { PublicFooter } from './landing/PublicFooter';
-import { OfficialGuidanceModal } from './landing/OfficialGuidanceModal';
 
-export interface PublicEntryPageProps {
+export interface PublicLandingPageProps {
   isAuthenticated?: boolean;
   onStartApplication: () => void;
   onNavigateToLogin: () => void;
@@ -30,60 +24,39 @@ export interface PublicEntryPageProps {
   onEnterAuthenticatedHome?: () => void;
 }
 
-export type PublicLandingPageProps = PublicEntryPageProps;
-
-export const PublicEntryPage: React.FC<PublicEntryPageProps> = ({
+export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   isAuthenticated = false,
-  onStartApplication,
   onNavigateToLogin,
-  onNavigateToCollectiveLogin,
   onEnterAuthenticatedHome,
 }) => {
-  const [guidanceModalOpen, setGuidanceModalOpen] = useState<boolean>(false);
-  const [guidanceModalTab, setGuidanceModalTab] = useState<
-    'criteria' | 'guide'
-  >('criteria');
-
-  const handleOpenGuidanceModal = (tab: 'criteria' | 'guide') => {
-    setGuidanceModalTab(tab);
-    setGuidanceModalOpen(true);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#F5FAFE] via-[#FAFDFF] to-[#F1F8FD] text-[#0F2335] overflow-x-clip">
-      {/* 1. InstitutionalHeader */}
+    <div className="min-h-screen flex flex-col justify-between bg-white text-[#0F2335] overflow-x-clip">
+      {/* A. Header */}
       <InstitutionalHeader
         isAuthenticated={isAuthenticated}
-        onStartApplication={onStartApplication}
         onNavigateToLogin={onNavigateToLogin}
-        onNavigateToCollectiveLogin={onNavigateToCollectiveLogin}
         onEnterAuthenticatedHome={onEnterAuthenticatedHome}
       />
 
-      {/* 2–7. MainHero (HeroIdentity, AuthorityMeta, SelectionCyclePanel, PublicActionRow, FiveCriteriaStrip, ApplicationPreview) */}
+      {/* Main Content: Hero + 3 Award Cards */}
       <main className="flex-1 flex flex-col">
+        {/* B. Hero */}
         <PublicHero
-          isAuthenticated={isAuthenticated}
-          onStartApplication={onStartApplication}
-          onNavigateToLogin={onNavigateToLogin}
-          onEnterAuthenticatedHome={onEnterAuthenticatedHome}
-          onOpenGuidanceModal={handleOpenGuidanceModal}
+          onNavigateToLogin={
+            isAuthenticated && onEnterAuthenticatedHome
+              ? onEnterAuthenticatedHome
+              : onNavigateToLogin
+          }
         />
+
+        {/* C. Ba hạng mục xét chọn */}
+        <AwardCategoriesSection />
       </main>
 
-      {/* 8. Minimal Institutional Footer */}
-      <PublicFooter onOpenGuidanceModal={handleOpenGuidanceModal} />
-
-      {/* Official Regulations & Operational Guidance Modal */}
-      <OfficialGuidanceModal
-        isOpen={guidanceModalOpen}
-        activeTab={guidanceModalTab}
-        onTabChange={setGuidanceModalTab}
-        onClose={() => setGuidanceModalOpen(false)}
-        onStartApplication={onStartApplication}
-      />
+      {/* D. Footer */}
+      <PublicFooter />
     </div>
   );
 };
 
-export const PublicLandingPage = PublicEntryPage;
+export const PublicEntryPage = PublicLandingPage;

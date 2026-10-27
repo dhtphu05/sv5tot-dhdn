@@ -190,11 +190,16 @@ export function buildUpdateScopeStatusMutation(
     (r) => r.status === 'active'
   ).length;
 
+  const isSchoolStage =
+    prevWs.reviewStage === 'SCHOOL' ||
+    currentUser.primaryRole === 'SCHOOL_OFFICER';
+
   const nextWs: ApplicationReviewWorkspaceState = {
     ...prevWs,
     hasStartedReview: true,
     startedAt: prevWs.startedAt || nowStr,
     lastReviewedAt: nowStr,
+    completedAt: undefined,
     scopeRecords: nextScopeRecords,
     supplementRequests: nextSupplementRequests,
     historyEvents: nextHistory,
@@ -207,13 +212,23 @@ export function buildUpdateScopeStatusMutation(
       (currentWorkflowStatus === 'supplement_requested' ||
         currentWorkflowStatus === 'supplement_returned')
         ? 'under_review'
-        : currentWorkflowStatus === 'assigned_not_started'
+        : currentWorkflowStatus === 'assigned_not_started' ||
+          currentWorkflowStatus === 'review_completed' ||
+          Boolean(prevWs.completedAt)
+        ? 'under_review'
+        : undefined,
+    nextSchoolPreliminaryStatus:
+      isSchoolStage &&
+      (remainingActiveSupplements === 0 || Boolean(prevWs.completedAt))
         ? 'under_review'
         : undefined,
     nextAssignmentStatus: 'in_progress',
-    nextOperationalNote: wasSupplemented
-      ? `Đã xét lại sau bổ sung Tiêu chí 0${CRITERIA[scope.criterionId]?.number || ''} · ${critName}`
-      : `Đang xét Tiêu chí 0${CRITERIA[scope.criterionId]?.number || ''} · ${critName}`,
+    nextOperationalNote:
+      nextStatus === 'not_reviewed'
+        ? `Đã hoàn tác đánh giá mục kê khai thuộc Tiêu chí 0${CRITERIA[scope.criterionId]?.number || ''} · ${critName}`
+        : wasSupplemented
+        ? `Đã xét lại sau bổ sung Tiêu chí 0${CRITERIA[scope.criterionId]?.number || ''} · ${critName}`
+        : `Đang xét Tiêu chí 0${CRITERIA[scope.criterionId]?.number || ''} · ${critName}`,
   };
 }
 
@@ -460,9 +475,9 @@ export function buildSendSupplementMutation(
       : 'Cán bộ xét duyệt',
     staffStatus: 'waiting_student' as const,
     originatingReviewStage: effectiveStage,
-    requestingReviewUnitId: currentUser.schoolReviewUnitId || 'unit-udn',
+    requestingReviewUnitId: currentUser.schoolReviewUnitId || 'unit-dut',
     requestingReviewUnitName:
-      schoolReviewUnitName || currentUser.unitLabel || 'Đại học Đà Nẵng',
+      schoolReviewUnitName || currentUser.unitLabel || 'Trường Đại học Bách khoa – ĐHĐN',
     requestingOfficerId: currentUser.id,
     requestingOfficerName: currentUser.fullName,
   };
@@ -617,7 +632,58 @@ export function buildCompleteApplicationMutation(
   currentUser: StaffUser,
   isSchoolStage: boolean
 ): OfficerWorkspaceMutationResult {
-  const nowStr = '17/10/2026 · 16:40';
+  const now = new Date();
+  const nowStr = `${now.getDate().toString().padStart(2, '0')}/${(
+    now.getMonth() + 1
+  )
+    .toString()
+    .padStart(2, '0')}/${now.getFullYear()} · ${now
+    .getHours()
+    .toString()
+    .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  const stage: ReviewStage = isSchoolStage ? 'SCHOOL' : 'CITY';
+  const allCriterionIds: Array<CriterionDefinition['id']> = [
+    'ethics',
+    'academic',
+    'physical',
+    'volunteer',
+    'integration',
+  ];
+
+  const nextConclusions: NonNullable<
+    ApplicationReviewWorkspaceState['criterionConclusions']
+  > = {
+    ...(prevWs.criterionConclusions || {}),
+  };
+
+  for (const cid of allCriterionIds) {
+    if (!nextConclusions[cid]) {
+      const hasFailScope = Object.values(prevWs.scopeRecords || {}).some(
+        (r) => r.criterionId === cid && r.status === 'unsuitable'
+      );
+      nextConclusions[cid] = {
+        criterionId: cid,
+        stage,
+        conclusion: hasFailScope ? 'fail' : 'pass',
+        actorId: currentUser.id,
+        actorName: currentUser.fullName,
+        actorRole: currentUser.roleLabel,
+        concludedAt: nowStr,
+      };
+    }
+  }
+
+  const nextSupplementRequests = (prevWs.supplementRequests || []).map((r) =>
+    r.status === 'active' || r.staffStatus === 'waiting_student'
+      ? {
+          ...r,
+          status: 'completed' as const,
+          staffStatus: 'resumed_review' as const,
+          completedAt: nowStr,
+        }
+      : r
+  );
+
   const nextHistory: ReviewHistoryEvent[] = [
     {
       id: `hist-complete-${Date.now()}`,
@@ -630,12 +696,14 @@ export function buildCompleteApplicationMutation(
       scopeBadge: isSchoolStage ? 'Hoàn tất xét sơ tuyển' : 'Hoàn tất xét',
       tone: 'green',
     },
-    ...prevWs.historyEvents,
+    ...(prevWs.historyEvents || []),
   ];
 
   return {
     nextWorkspace: {
       ...prevWs,
+      hasStartedReview: true,
+      startedAt: prevWs.startedAt || nowStr,
       lastReviewedAt: nowStr,
       completedAt: nowStr,
       criterionCompletedMap: {
@@ -645,6 +713,8 @@ export function buildCompleteApplicationMutation(
         volunteer: true,
         integration: true,
       },
+      criterionConclusions: nextConclusions,
+      supplementRequests: nextSupplementRequests,
       historyEvents: nextHistory,
     },
     nextStaffStatus: 'review_completed',
@@ -698,6 +768,18 @@ export function buildRecordCriterionConclusionMutation(
     [critId]: true,
   };
 
+  const nextSupplementRequests = (prevWs.supplementRequests || []).map((r) =>
+    r.criterionId === critId &&
+    (r.status === 'active' || r.staffStatus === 'waiting_student')
+      ? {
+          ...r,
+          status: 'completed' as const,
+          staffStatus: 'resumed_review' as const,
+          completedAt: nowStr,
+        }
+      : r
+  );
+
   const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Thành phố';
   const outcomeLabel = conclusion === 'pass' ? 'Đạt tiêu chí' : 'Không đạt tiêu chí';
   const nextHistory: ReviewHistoryEvent = {
@@ -715,12 +797,18 @@ export function buildRecordCriterionConclusionMutation(
   return {
     nextWorkspace: {
       ...prevWs,
+      hasStartedReview: true,
+      startedAt: prevWs.startedAt || nowStr,
+      completedAt: undefined,
       criterionConclusions: nextConclusions,
       criterionCompletedMap: nextCompletedMap,
+      supplementRequests: nextSupplementRequests,
       lastReviewedAt: nowStr,
       historyEvents: [nextHistory, ...(prevWs.historyEvents || [])],
     },
     nextStaffStatus: 'under_review',
+    nextSchoolPreliminaryStatus: stage === 'SCHOOL' ? 'under_review' : undefined,
+    nextAssignmentStatus: 'in_progress',
     nextOperationalNote: `Đã kết luận ${outcomeLabel.toLowerCase()} cho ${critName} (${stageLabel})`,
   };
 }
@@ -756,21 +844,68 @@ export function buildRevokeCriterionConclusionMutation(
     timestamp: nowStr,
     actorName: currentUser.fullName,
     actorRoleLabel: currentUser.roleLabel,
-    description: `[${stageLabel}] Đã hủy kết luận tiêu chí ${critName}. Tiêu chí chuyển về trạng thái đang xét duyệt.`,
-    scopeBadge: `Hủy kết luận 0${CRITERIA[critId]?.number || ''}`,
+    description: `[${stageLabel}] Đã hoàn tác kết luận tiêu chí ${critName}. Tiêu chí chuyển về trạng thái đang xét duyệt.`,
+    scopeBadge: `Hoàn tác 0${CRITERIA[critId]?.number || ''}`,
     tone: 'brand',
   };
 
   return {
     nextWorkspace: {
       ...prevWs,
+      completedAt: undefined,
       criterionConclusions: nextConclusions,
       criterionCompletedMap: nextCompletedMap,
       lastReviewedAt: nowStr,
       historyEvents: [nextHistory, ...(prevWs.historyEvents || [])],
     },
     nextStaffStatus: 'under_review',
-    nextOperationalNote: `Đã hủy kết luận cho ${critName} (${stageLabel})`,
+    nextSchoolPreliminaryStatus: stage === 'SCHOOL' ? 'under_review' : undefined,
+    nextAssignmentStatus: 'in_progress',
+    nextOperationalNote: `Đã hoàn tác kết luận cho ${critName} (${stageLabel})`,
   };
 }
+
+export function buildReopenApplicationReviewMutation(
+  prevWs: ApplicationReviewWorkspaceState,
+  currentUser: StaffUser,
+  isSchoolStage: boolean
+): OfficerWorkspaceMutationResult {
+  const now = new Date();
+  const nowStr = `${now.getDate().toString().padStart(2, '0')}/${(
+    now.getMonth() + 1
+  )
+    .toString()
+    .padStart(2, '0')}/${now.getFullYear()} · ${now
+    .getHours()
+    .toString()
+    .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  const stageLabel = isSchoolStage ? 'Cấp Trường' : 'Cấp Thành phố';
+
+  const nextHistory: ReviewHistoryEvent = {
+    id: `hist-reopen-${Date.now()}`,
+    timestamp: nowStr,
+    actorName: currentUser.fullName,
+    actorRoleLabel: currentUser.roleLabel,
+    description: `[${stageLabel}] ${currentUser.fullName} đã hoàn tác trạng thái hoàn tất để mở lại xét duyệt hồ sơ.`,
+    scopeBadge: 'Mở lại xét duyệt',
+    tone: 'brand',
+  };
+
+  return {
+    nextWorkspace: {
+      ...prevWs,
+      hasStartedReview: true,
+      completedAt: undefined,
+      lastReviewedAt: nowStr,
+      historyEvents: [nextHistory, ...(prevWs.historyEvents || [])],
+    },
+    nextStaffStatus: 'under_review',
+    nextSchoolPreliminaryStatus: isSchoolStage ? 'under_review' : undefined,
+    nextAssignmentStatus: 'in_progress',
+    nextOperationalNote: isSchoolStage
+      ? 'Đã hoàn tác chốt sơ tuyển · Đang mở lại xét sơ tuyển cấp Trường'
+      : 'Đã hoàn tác chốt thẩm định · Đang mở lại thẩm định cấp Thành phố',
+  };
+}
+
 

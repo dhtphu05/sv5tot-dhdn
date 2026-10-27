@@ -468,9 +468,9 @@ export const CANONICAL_AWARD_PROGRAM: AwardProgram = {
   id: 'prog-5tot',
   code: '5TOT',
   name: 'Danh hiệu Sinh viên 5 tốt',
-  organizationLevel: 'Cấp Thành phố Đà Nẵng',
-  managingAgency: 'Thành Đoàn Đà Nẵng',
-  operatingUnit: 'Hội Sinh viên Việt Nam TP. Đà Nẵng',
+  organizationLevel: 'Cấp Đại học Đà Nẵng',
+  managingAgency: 'Đại học Đà Nẵng',
+  operatingUnit: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   tracks: [
     {
       id: 'track-individual',

@@ -62,7 +62,7 @@ export const DANANG_INSTITUTION_REGISTRY: ParticipatingInstitution[] = [
     id: 'inst-smp',
     officialName: 'Trường Y Dược - Đại học Đà Nẵng',
     organizationContext: 'Đại học Đà Nẵng',
-    searchKeywords: ['y duoc', 'khoa y duoc', 'smp'],
+    searchKeywords: ['y duoc', 'khoa y duoc', 'smp', 'truong y duoc'],
   },
   {
     id: 'inst-vnuk',
@@ -71,40 +71,10 @@ export const DANANG_INSTITUTION_REGISTRY: ParticipatingInstitution[] = [
     searchKeywords: ['viet anh', 'vnuk'],
   },
   {
-    id: 'inst-dtu',
-    officialName: 'Đại học Duy Tân',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['duy tan', 'dtu'],
-  },
-  {
-    id: 'inst-dau',
-    officialName: 'Trường Đại học Kiến trúc Đà Nẵng',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['kien truc', 'dau'],
-  },
-  {
-    id: 'inst-upes3',
-    officialName: 'Trường Đại học Thể dục Thể thao Đà Nẵng',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['the duc the thao', 'tdtt', 'upes3'],
-  },
-  {
-    id: 'inst-donga',
-    officialName: 'Trường Đại học Đông Á',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['dong a', 'uda'],
-  },
-  {
-    id: 'inst-tyd',
-    officialName: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['ky thuat y duoc', 'dhktyd'],
-  },
-  {
-    id: 'inst-fpt',
-    officialName: 'Trường Đại học FPT phân hiệu Đà Nẵng',
-    organizationContext: 'Đơn vị đào tạo trên địa bàn TP. Đà Nẵng',
-    searchKeywords: ['fpt', 'dai hoc fpt'],
+    id: 'inst-kontum',
+    officialName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    organizationContext: 'Đại học Đà Nẵng',
+    searchKeywords: ['kon tum', 'phan hieu kon tum', 'udn kon tum', 'kontum'],
   },
 ];
 
@@ -170,3 +140,13 @@ export async function fetchParticipatingInstitutions(options?: {
   }
   return [...DANANG_INSTITUTION_REGISTRY];
 }
+
+/**
+ * Filtered list of member universities, colleges, and training institutes
+ * officially belonging to Đại học Đà Nẵng.
+ */
+export const UDN_MEMBER_INSTITUTIONS: ParticipatingInstitution[] =
+  DANANG_INSTITUTION_REGISTRY.filter(
+    (item) => item.organizationContext === 'Đại học Đà Nẵng'
+  );
+
