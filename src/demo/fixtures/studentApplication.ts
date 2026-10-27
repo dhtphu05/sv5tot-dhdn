@@ -300,4 +300,14 @@ export function buildCleanStudentApplication(params: {
   };
 }
 
-export { type PersonalLibraryItem, MOCK_PERSONAL_LIBRARY_EVIDENCE } from './mockEvidenceLibrary';
+export {
+  type PersonalLibraryItem,
+  MOCK_PERSONAL_LIBRARY_EVIDENCE,
+  loadPersonalLibraryItems,
+  savePersonalLibraryItems,
+  uploadFilesToPersonalLibrary,
+  syncEvidenceFilesToPersonalLibrary,
+  removePersonalLibraryItem,
+  getActiveStudentCombinedLibrary,
+  usePersonalEvidenceLibrary,
+} from './mockEvidenceLibrary';

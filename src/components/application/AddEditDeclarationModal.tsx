@@ -22,7 +22,8 @@ import {
   ApplicationCriterion,
   ApplicationRequirement,
   PersonalLibraryItem,
-  MOCK_PERSONAL_LIBRARY_EVIDENCE,
+  usePersonalEvidenceLibrary,
+  syncEvidenceFilesToPersonalLibrary,
 } from '../../demo/fixtures/studentApplication';
 import { FileTypeIcon } from '../evidence/FileTypeIcon';
 import { DropZone } from '../forms/DropZone';
@@ -170,9 +171,10 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
   const [attachedFiles, setAttachedFiles] = useState<ApplicationEvidence[]>([]);
 
   // Evidence picker drawer state
+  const { libraryItems } = usePersonalEvidenceLibrary();
   const [showLibraryPicker, setShowLibraryPicker] = useState(false);
   const [librarySearch, setLibrarySearch] = useState('');
-  const [libraryFilter] = useState('all');
+  const [libraryFilter, setLibraryFilter] = useState<'all' | 'current'>('all');
 
   // State flags
   const [isDirty, setIsDirty] = useState(false);
@@ -198,6 +200,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
     setSaveError(null);
     setValidationError(null);
     setShowLibraryPicker(false);
+    setLibraryFilter('all');
     setShowDiscardConfirm(false);
   }, [isOpen, declaration, reqId]);
 
@@ -269,29 +272,42 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
       };
     });
 
+    syncEvidenceFilesToPersonalLibrary(newItems, {
+      criterionId: criterion.id,
+      criterionName: criterion.name,
+      title: content.trim() || requirement.title,
+    });
+
     setAttachedFiles((prev) => [...prev, ...newItems]);
     setIsDirty(true);
     setValidationError(null);
   };
 
-  // Add file from personal library
+  // Add or toggle file from personal library
   const handleToggleLibraryItem = (item: PersonalLibraryItem) => {
-    const exists = attachedFiles.some((f) => f.name.toLowerCase() === item.name.toLowerCase());
+    const exists = attachedFiles.some(
+      (f) => f.id === item.id || f.name.toLowerCase() === item.name.toLowerCase()
+    );
     if (exists) {
-      setDuplicateNotice(`Minh chứng "${item.name}" đã được đính kèm.`);
+      setAttachedFiles((prev) =>
+        prev.filter((f) => f.id !== item.id && f.name.toLowerCase() !== item.name.toLowerCase())
+      );
+      setDuplicateNotice(null);
+      setIsDirty(true);
       return;
     }
     setDuplicateNotice(null);
     setAttachedFiles((prev) => [
       ...prev,
       {
-        id: `ev-lib-${Date.now()}-${item.id}`,
+        id: item.id,
         name: item.name,
         fileType: item.fileType,
         size: item.size,
-        uploadedAt: new Date().toLocaleDateString('vi-VN'),
+        uploadedAt: item.uploadedAt || new Date().toLocaleDateString('vi-VN'),
         status: item.status || 'ready',
         isNewlyAddedSupplement: isSupplementMode,
+        url: item.url,
       },
     ]);
     setIsDirty(true);
@@ -332,6 +348,14 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
 
     const finalEvidenceFiles = [...attachedFiles];
 
+    if (finalEvidenceFiles.length > 0) {
+      syncEvidenceFilesToPersonalLibrary(finalEvidenceFiles, {
+        criterionId: criterion.id,
+        criterionName: criterion.name,
+        title: finalValue || requirement.title,
+      });
+    }
+
     onSaveDeclaration(
       requirement.id,
       {
@@ -347,12 +371,13 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
     onClose();
   };
 
-  const filteredLibrary = MOCK_PERSONAL_LIBRARY_EVIDENCE.filter((item) => {
+  const filteredLibrary = libraryItems.filter((item) => {
     const matchSearch =
       item.name.toLowerCase().includes(librarySearch.toLowerCase()) ||
-      item.title.toLowerCase().includes(librarySearch.toLowerCase());
+      item.title.toLowerCase().includes(librarySearch.toLowerCase()) ||
+      (item.criterionName || '').toLowerCase().includes(librarySearch.toLowerCase());
     const matchCriterion =
-      libraryFilter === 'all' || item.criterionId === libraryFilter;
+      libraryFilter === 'all' || item.criterionId === criterion.id;
     return matchSearch && matchCriterion;
   });
 
@@ -479,7 +504,11 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
                 className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#126A9C] hover:text-[#0D78AE] bg-[#EAF6FC] hover:bg-[#DDF0FA] border border-[#D0E8F5] px-2.5 py-1 rounded-[6px] transition-colors cursor-pointer select-none"
               >
                 <FolderArchive size={13} />
-                <span>{showLibraryPicker ? 'Ẩn kho cá nhân' : 'Kho cá nhân'}</span>
+                <span>
+                  {showLibraryPicker
+                    ? 'Ẩn kho cá nhân'
+                    : `Kho cá nhân (${libraryItems.length})`}
+                </span>
               </button>
             </div>
 
@@ -501,27 +530,57 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
             {/* Personal Library Picker Accordion/Drawer */}
             {showLibraryPicker && (
               <div className="p-3 bg-[#F8FAFC] border border-[#DCE7EE] rounded-[10px] space-y-2.5 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[12px] font-bold text-[#172A3A]">
-                    Kho minh chứng đã tải lên
-                  </span>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12px] font-bold text-[#172A3A]">
+                      Kho minh chứng đã tải lên
+                    </span>
+                    <div className="inline-flex items-center bg-white border border-[#DCE7EE] rounded-[6px] p-0.5 text-[10.5px]">
+                      <button
+                        type="button"
+                        onClick={() => setLibraryFilter('all')}
+                        className={`px-2 py-0.5 rounded-[4px] font-semibold transition-colors cursor-pointer ${
+                          libraryFilter === 'all'
+                            ? 'bg-[#126A9C] text-white'
+                            : 'text-[#607483] hover:text-[#172A3A]'
+                        }`}
+                      >
+                        Tất cả ({libraryItems.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLibraryFilter('current')}
+                        className={`px-2 py-0.5 rounded-[4px] font-semibold transition-colors cursor-pointer ${
+                          libraryFilter === 'current'
+                            ? 'bg-[#126A9C] text-white'
+                            : 'text-[#607483] hover:text-[#172A3A]'
+                        }`}
+                      >
+                        {criterion.name}
+                      </button>
+                    </div>
+                  </div>
                   <input
                     type="text"
                     value={librarySearch}
                     onChange={(e) => setLibrarySearch(e.target.value)}
-                    placeholder="Tìm tên tệp..."
+                    placeholder="Tìm tên tệp, tiêu chí..."
                     className="px-2 py-1 bg-white border border-[#DCE7EE] rounded-[6px] text-[11px] outline-hidden w-36 sm:w-44"
                   />
                 </div>
 
-                <div className="max-h-36 overflow-y-auto divide-y divide-[#EBF1F5] bg-white rounded-[7px] border border-[#E3EBF1]">
+                <div className="max-h-44 overflow-y-auto divide-y divide-[#EBF1F5] bg-white rounded-[7px] border border-[#E3EBF1]">
                   {filteredLibrary.length === 0 ? (
                     <div className="p-3 text-center text-[11.5px] text-[#728391] italic">
-                      Không tìm thấy minh chứng phù hợp trong kho.
+                      {libraryItems.length === 0
+                        ? 'Kho minh chứng cá nhân đang trống. Hãy tải tệp ở mục "Kho minh chứng" hoặc ngay bên trên.'
+                        : 'Không tìm thấy minh chứng phù hợp trong kho.'}
                     </div>
                   ) : (
                     filteredLibrary.map((item) => {
-                      const isAdded = attachedFiles.some((f) => f.name === item.name);
+                      const isAdded = attachedFiles.some(
+                        (f) => f.id === item.id || f.name.toLowerCase() === item.name.toLowerCase()
+                      );
                       return (
                         <div
                           key={item.id}
@@ -533,8 +592,8 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
                               <span className="text-[12px] font-semibold text-[#172A3A] truncate" title={item.name}>
                                 {item.name}
                               </span>
-                              <span className="text-[10px] text-[#728391]">
-                                {item.size} · {item.uploadedAt}
+                              <span className="text-[10.5px] text-[#728391] truncate">
+                                {item.criterionName} · {item.size} · {item.uploadedAt}
                               </span>
                             </div>
                           </div>
@@ -542,14 +601,13 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
                           <button
                             type="button"
                             onClick={() => handleToggleLibraryItem(item)}
-                            disabled={isAdded}
                             className={`px-2 py-0.5 rounded-[5px] text-[11px] font-semibold transition-all cursor-pointer shrink-0 ${
                               isAdded
-                                ? 'bg-[#DCFCE7] text-[#166534] cursor-default'
+                                ? 'bg-[#DCFCE7] text-[#166534] hover:bg-[#FEE2E2] hover:text-[#B91C1C]'
                                 : 'bg-[#EAF6FC] text-[#126A9C] hover:bg-[#DDF0FA]'
                             }`}
                           >
-                            {isAdded ? 'Đã thêm' : '+ Chọn'}
+                            {isAdded ? 'Đã chọn (Bỏ)' : '+ Chọn'}
                           </button>
                         </div>
                       );

@@ -1,4 +1,6 @@
-import { RequirementStatus } from '../../tokens';
+import { useState, useEffect, useCallback } from 'react';
+import { CRITERIA, RequirementStatus } from '../../tokens';
+import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
 
 export interface PersonalLibraryItem {
   id: string;
@@ -10,6 +12,8 @@ export interface PersonalLibraryItem {
   size: string;
   uploadedAt: string;
   status: RequirementStatus;
+  url?: string;
+  isStandaloneLibraryItem?: boolean;
   aiSuggestedInfo?: {
     achievementName?: string;
     date?: string;
@@ -162,3 +166,387 @@ export const MOCK_PERSONAL_LIBRARY_EVIDENCE: PersonalLibraryItem[] = [
     status: 'ready',
   },
 ];
+
+const PERSONAL_LIBRARY_STORAGE_PREFIX = '5tot_dhdn_personal_library_v1_';
+const PERSONAL_LIBRARY_UPDATED_EVENT = '5tot-personal-library-updated';
+
+export function resolveActiveStudentLibraryId(explicitStudentId?: string): string {
+  if (explicitStudentId && explicitStudentId.trim()) {
+    return explicitStudentId.trim();
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const sessionRaw = window.sessionStorage.getItem('5tot_dhdn_prototype_session_v1');
+      if (sessionRaw) {
+        const parsed = JSON.parse(sessionRaw);
+        if (parsed?.student?.studentId) {
+          return String(parsed.student.studentId).trim();
+        }
+      }
+      const liveStoreRaw = window.localStorage.getItem('5tot_dhdn_student_live_store_v1');
+      if (liveStoreRaw) {
+        const parsedLive = JSON.parse(liveStoreRaw);
+        if (parsedLive?.application?.student?.studentId) {
+          return String(parsedLive.application.student.studentId).trim();
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+  return 'default';
+}
+
+const inMemoryPersonalLibraryStore = new Map<string, PersonalLibraryItem[]>();
+
+export function loadPersonalLibraryItems(studentId?: string): PersonalLibraryItem[] {
+  const resolvedId = resolveActiveStudentLibraryId(studentId);
+  const storageKey = `${PERSONAL_LIBRARY_STORAGE_PREFIX}${resolvedId}`;
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return (inMemoryPersonalLibraryStore.get(storageKey) || []).filter(
+      (item) =>
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.name === 'string' &&
+        !item.id.startsWith('ev-auto-') &&
+        !item.name.startsWith('Minh_chung_')
+    );
+  }
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return inMemoryPersonalLibraryStore.get(storageKey) || [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item: PersonalLibraryItem) =>
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.name === 'string' &&
+        !item.id.startsWith('ev-auto-') &&
+        !item.name.startsWith('Minh_chung_')
+    );
+  } catch {
+    return inMemoryPersonalLibraryStore.get(storageKey) || [];
+  }
+}
+
+export function savePersonalLibraryItems(
+  items: PersonalLibraryItem[],
+  studentId?: string
+): void {
+  const resolvedId = resolveActiveStudentLibraryId(studentId);
+  const storageKey = `${PERSONAL_LIBRARY_STORAGE_PREFIX}${resolvedId}`;
+  inMemoryPersonalLibraryStore.set(storageKey, [...items]);
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(items));
+    window.dispatchEvent(new CustomEvent(PERSONAL_LIBRARY_UPDATED_EVENT));
+  } catch {
+    // ignore storage quota errors
+  }
+}
+
+export function uploadFilesToPersonalLibrary(
+  files: FileList | File[],
+  options?: {
+    criterionId?: PersonalLibraryItem['criterionId'];
+    criterionName?: string;
+    title?: string;
+    studentId?: string;
+  }
+): PersonalLibraryItem[] {
+  const incoming = Array.from(files);
+  if (incoming.length === 0) return [];
+
+  const resolvedId = resolveActiveStudentLibraryId(options?.studentId);
+  const critId = options?.criterionId || 'ethics';
+  const critName = options?.criterionName || CRITERIA[critId]?.name || 'Đạo đức tốt';
+  const existing = loadPersonalLibraryItems(resolvedId);
+
+  const createdItems: PersonalLibraryItem[] = incoming.map((file, idx) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+    const sizeStr =
+      file.size > 1024 * 1024
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+    const evId = `lib-upl-${Date.now()}-${idx}`;
+    const objectUrl =
+      typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
+        ? URL.createObjectURL(file)
+        : undefined;
+
+    saveEvidenceFile(evId, file, file.name, ext, {
+      size: sizeStr,
+      applicationId: resolvedId,
+    }).catch(() => {});
+
+    const baseTitle = file.name.replace(/\.[^/.]+$/, '');
+    const customTitle = options?.title?.trim();
+    const itemTitle =
+      customTitle && incoming.length === 1
+        ? customTitle
+        : customTitle
+        ? `${customTitle} (${baseTitle})`
+        : baseTitle;
+
+    return {
+      id: evId,
+      name: file.name,
+      title: itemTitle,
+      criterionId: critId,
+      criterionName: critName,
+      fileType: ext,
+      size: sizeStr,
+      uploadedAt: new Date().toLocaleDateString('vi-VN'),
+      status: 'ready',
+      url: objectUrl,
+      isStandaloneLibraryItem: true,
+    };
+  });
+
+  const existingFiltered = existing.filter(
+    (ex) => !createdItems.some((c) => c.name.toLowerCase() === ex.name.toLowerCase())
+  );
+  const nextList = [...createdItems, ...existingFiltered];
+  savePersonalLibraryItems(nextList, resolvedId);
+  return createdItems;
+}
+
+export function syncEvidenceFilesToPersonalLibrary(
+  evidenceFiles: Array<{
+    id: string;
+    name: string;
+    fileType: string;
+    size: string;
+    uploadedAt: string;
+    status: RequirementStatus;
+    url?: string;
+  }>,
+  context?: {
+    criterionId?: PersonalLibraryItem['criterionId'];
+    criterionName?: string;
+    title?: string;
+    studentId?: string;
+  }
+): void {
+  if (!evidenceFiles || evidenceFiles.length === 0) return;
+  const resolvedId = resolveActiveStudentLibraryId(context?.studentId);
+  const critId = context?.criterionId || 'ethics';
+  const critName = context?.criterionName || CRITERIA[critId]?.name || 'Đạo đức tốt';
+  const existing = loadPersonalLibraryItems(resolvedId);
+
+  const syncedItems: PersonalLibraryItem[] = evidenceFiles.map((ev) => ({
+    id: ev.id,
+    name: ev.name,
+    title: context?.title?.trim() || ev.name.replace(/\.[^/.]+$/, ''),
+    criterionId: critId,
+    criterionName: critName,
+    fileType: ev.fileType || 'pdf',
+    size: ev.size || '500 KB',
+    uploadedAt: ev.uploadedAt || new Date().toLocaleDateString('vi-VN'),
+    status: ev.status || 'ready',
+    url: ev.url,
+    isStandaloneLibraryItem: false,
+  }));
+
+  const merged = [...existing];
+  for (const item of syncedItems) {
+    const idx = merged.findIndex(
+      (m) => m.id === item.id || m.name.toLowerCase() === item.name.toLowerCase()
+    );
+    if (idx >= 0) {
+      merged[idx] = {
+        ...merged[idx],
+        ...item,
+        url: item.url || merged[idx].url,
+        isStandaloneLibraryItem: false,
+      };
+    } else {
+      merged.unshift(item);
+    }
+  }
+
+  savePersonalLibraryItems(merged, resolvedId);
+}
+
+export function removePersonalLibraryItem(itemId: string, studentId?: string): void {
+  const resolvedId = resolveActiveStudentLibraryId(studentId);
+  const existing = loadPersonalLibraryItems(resolvedId);
+  const next = existing.filter((item) => item.id !== itemId);
+  savePersonalLibraryItems(next, resolvedId);
+}
+
+export function getActiveStudentCombinedLibrary(
+  application?: {
+    student?: { studentId?: string };
+    criteria?: Array<{
+      id: PersonalLibraryItem['criterionId'];
+      name: string;
+      requirements: Array<{
+        title: string;
+        declarations: Array<{
+          value: string;
+          evidenceFiles: Array<{
+            id: string;
+            name: string;
+            fileType: string;
+            size: string;
+            uploadedAt: string;
+            status: RequirementStatus;
+            url?: string;
+            aiSuggestedInfo?: PersonalLibraryItem['aiSuggestedInfo'];
+          }>;
+        }>;
+      }>;
+    }>;
+  },
+  studentId?: string
+): PersonalLibraryItem[] {
+  const resolvedId = resolveActiveStudentLibraryId(
+    studentId || application?.student?.studentId
+  );
+
+  let effectiveApp = application;
+  if (!effectiveApp && typeof window !== 'undefined') {
+    try {
+      const liveRaw = window.localStorage.getItem('5tot_dhdn_student_live_store_v1');
+      if (liveRaw) {
+        const parsedLive = JSON.parse(liveRaw);
+        if (parsedLive?.application) {
+          effectiveApp = parsedLive.application;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const seenNames = new Set<string>();
+  const seenIds = new Set<string>();
+  const combined: PersonalLibraryItem[] = [];
+
+  // 1. Live declarations from the student's application
+  if (effectiveApp?.criteria) {
+    for (const criterion of effectiveApp.criteria) {
+      for (const req of criterion.requirements || []) {
+        for (const decl of req.declarations || []) {
+          for (const ev of decl.evidenceFiles || []) {
+            if (ev.id.startsWith('ev-auto-') || ev.name.startsWith('Minh_chung_')) {
+              continue;
+            }
+            const lowerName = ev.name.toLowerCase();
+            if (!seenIds.has(ev.id) && !seenNames.has(lowerName)) {
+              seenIds.add(ev.id);
+              seenNames.add(lowerName);
+              combined.push({
+                id: ev.id,
+                name: ev.name,
+                fileType: ev.fileType,
+                title: `${decl.value} (${req.title})`,
+                criterionId: criterion.id,
+                criterionName: criterion.name,
+                size: ev.size,
+                uploadedAt: ev.uploadedAt,
+                status: ev.status,
+                url: ev.url,
+                isStandaloneLibraryItem: false,
+                aiSuggestedInfo: ev.aiSuggestedInfo,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 2. Standalone or synced items in Personal Library storage
+  const storedItems = loadPersonalLibraryItems(resolvedId);
+  for (const item of storedItems) {
+    const lowerName = item.name.toLowerCase();
+    if (!seenIds.has(item.id) && !seenNames.has(lowerName)) {
+      seenIds.add(item.id);
+      seenNames.add(lowerName);
+      combined.push({
+        ...item,
+        isStandaloneLibraryItem: true,
+      });
+    } else {
+      // Enrich url if stored item has a newer url
+      const existingIdx = combined.findIndex(
+        (c) => c.id === item.id || c.name.toLowerCase() === lowerName
+      );
+      if (existingIdx >= 0 && item.url && !combined[existingIdx].url) {
+        combined[existingIdx].url = item.url;
+      }
+    }
+  }
+
+  // 3. Fallback mock items ONLY for the built-in demo student account (102220123)
+  if (resolvedId === '102220123') {
+    for (const mockItem of MOCK_PERSONAL_LIBRARY_EVIDENCE) {
+      const lowerName = mockItem.name.toLowerCase();
+      if (!seenIds.has(mockItem.id) && !seenNames.has(lowerName)) {
+        seenIds.add(mockItem.id);
+        seenNames.add(lowerName);
+        combined.push(mockItem);
+      }
+    }
+  }
+
+  return combined;
+}
+
+export function usePersonalEvidenceLibrary(
+  application?: Parameters<typeof getActiveStudentCombinedLibrary>[0],
+  studentId?: string
+) {
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleUpdated = () => setVersion((v) => v + 1);
+    window.addEventListener(PERSONAL_LIBRARY_UPDATED_EVENT, handleUpdated);
+    window.addEventListener('storage', handleUpdated);
+    return () => {
+      window.removeEventListener(PERSONAL_LIBRARY_UPDATED_EVENT, handleUpdated);
+      window.removeEventListener('storage', handleUpdated);
+    };
+  }, []);
+
+  const libraryItems = getActiveStudentCombinedLibrary(application, studentId);
+
+  const uploadToLibrary = useCallback(
+    (
+      files: FileList | File[],
+      options?: {
+        criterionId?: PersonalLibraryItem['criterionId'];
+        criterionName?: string;
+        title?: string;
+      }
+    ) => {
+      return uploadFilesToPersonalLibrary(files, {
+        ...options,
+        studentId: studentId || application?.student?.studentId,
+      });
+    },
+    [application?.student?.studentId, studentId]
+  );
+
+  const removeFromLibrary = useCallback(
+    (itemId: string) => {
+      removePersonalLibraryItem(
+        itemId,
+        studentId || application?.student?.studentId
+      );
+    },
+    [application?.student?.studentId, studentId]
+  );
+
+  return {
+    libraryItems,
+    version,
+    uploadToLibrary,
+    removeFromLibrary,
+  };
+}
+

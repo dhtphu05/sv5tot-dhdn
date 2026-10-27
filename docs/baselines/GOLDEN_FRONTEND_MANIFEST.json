@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T17:31:31.820Z",
+  "createdAt": "2026-10-27T17:47:17.690Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -446,13 +446,13 @@
     },
     {
       "path": "src/components/application/AddEditDeclarationModal.tsx",
-      "sizeBytes": 26197,
-      "sha256": "a891e8c88dfc383c960a866df65c1e28f892b6e4b070f2c35de9584f3073a098"
+      "sizeBytes": 28813,
+      "sha256": "c88f5b0ad5c6b54fa4bc0e235e4078c25070086e61cfd8c9b9ec77aa00b28812"
     },
     {
       "path": "src/components/application/AddEvidenceModal.tsx",
-      "sizeBytes": 29737,
-      "sha256": "b0da9e800f700623c8140de89bbede36812a7f786776a65743f12d2049111913"
+      "sizeBytes": 29935,
+      "sha256": "d55552f6dd5be678b0e3447c5e94059d73cc66f4a9ab049dde5e6e20b296acb5"
     },
     {
       "path": "src/components/application/ApplicationHeader.tsx",
@@ -701,8 +701,8 @@
     },
     {
       "path": "src/components/evidence/EvidenceLibraryView.tsx",
-      "sizeBytes": 18934,
-      "sha256": "3ac71207f4405f5b412c2a6f10af2f0bd49b5d474049c1059db9afaa3681eb1d"
+      "sizeBytes": 25967,
+      "sha256": "50c39d70bebdd223dd9b0b6ef6796c8c628e76557fbed99fc255bdebefe7987c"
     },
     {
       "path": "src/components/evidence/EvidenceSummary.tsx",
@@ -721,8 +721,8 @@
     },
     {
       "path": "src/components/evidence/detail/DocumentViewer.tsx",
-      "sizeBytes": 15915,
-      "sha256": "25e9322f6897557ba69a2347718459ab395ab68e01936497f7d1adae90911f3c"
+      "sizeBytes": 15952,
+      "sha256": "1a53f5129c158001ec68fb07350bbc5852877b27b47f818db4a67222ae3407f4"
     },
     {
       "path": "src/components/evidence/detail/EvidenceDetailWorkspace.tsx",
@@ -806,8 +806,8 @@
     },
     {
       "path": "src/components/inspector/AddEvidenceInspector.tsx",
-      "sizeBytes": 18192,
-      "sha256": "c98f2954ba66713b87dfa9e665691de173412a8e7872047ae701e7638373efb4"
+      "sizeBytes": 18345,
+      "sha256": "2ba4d63724f9d29f29de1269822ec3b01dccbcf74ad855f4941a7fa2e76d2f14"
     },
     {
       "path": "src/components/inspector/EvidenceInspectorContent.tsx",
@@ -1176,8 +1176,8 @@
     },
     {
       "path": "src/demo/fixtures/mockEvidenceLibrary.ts",
-      "sizeBytes": 4719,
-      "sha256": "b041749ef2a71a44fe50f33bc67a47844c12ca9ea3f31d243b971e2fac19851e"
+      "sizeBytes": 17035,
+      "sha256": "a0776c7e8bdcb7c45b2651da7eaa46bb643a8ab07d7130dbf60b17ae34146f11"
     },
     {
       "path": "src/demo/fixtures/notificationScenarios.ts",
@@ -1196,8 +1196,8 @@
     },
     {
       "path": "src/demo/fixtures/studentApplication.ts",
-      "sizeBytes": 11181,
-      "sha256": "b7ffaa0d16835147616a906b67f3f45e0210e2a7f9db5e04f6aa6489947f65bc"
+      "sizeBytes": 11406,
+      "sha256": "6091ce6287edab1b870ed3197b80388c7357e859e1aa98e03db562a5f9f8c865"
     },
     {
       "path": "src/demo/fixtures/studentProfileFixtures.ts",
@@ -1221,8 +1221,8 @@
     },
     {
       "path": "src/demo/studentSelectors.ts",
-      "sizeBytes": 9432,
-      "sha256": "b5430ec8ad42ae3f762c65db1a6cb5bd04e2e3fc8b809ca9dd785c3c76360efb"
+      "sizeBytes": 9893,
+      "sha256": "a9d87e68e2183499a0c8a94c873d38a7e177a42f17bb12c8e46b751ca4de6d5d"
     },
     {
       "path": "src/demo/useDevQaMode.ts",
@@ -1511,8 +1511,8 @@
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
-      "sizeBytes": 9820,
-      "sha256": "da7d9fe90edda1f3fa6a08f17cc8fe764d190a19402a3115cbf9ce02ab23180f"
+      "sizeBytes": 10284,
+      "sha256": "575ae456b563a782c9bb8cab59bdae432025856630f66223c3b79259a0dd0d6e"
     },
     {
       "path": "src/features/student-application/useStudentSupplementWorkflow.ts",
@@ -2346,8 +2346,8 @@
     },
     {
       "path": "src/test/lean1DeclarationSimplification.test.ts",
-      "sizeBytes": 32515,
-      "sha256": "f4311cb7dda6e3f78976e2f58915ca9cb7d2afbbeeeb8aa11e382e7d01c85290"
+      "sizeBytes": 35157,
+      "sha256": "108ee93ade757602a19171153e4d134d351a1ad22d3acd7b017287559ecad342"
     },
     {
       "path": "src/test/lean2DirectInlineReview.test.ts",

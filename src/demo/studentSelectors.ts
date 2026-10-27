@@ -264,22 +264,28 @@ export function canManageEvidence(
 
 /**
  * 6. Derive Personal Evidence Library from Live Application (`deriveEvidenceLibraryFromApplication`)
- * Guarantees that Evidence Library ("Kho minh chứng") always reflects the live declarations
- * and evidence files in the Student's application without disconnected mock arrays.
+ * Guarantees that Evidence Library ("Kho minh chứng") always reflects the live declarations,
+ * standalone uploaded library files, and evidence files in the Student's application.
  */
 export function deriveEvidenceLibraryFromApplication(
   application: StudentApplication,
   fallbackLibrary: PersonalLibraryItem[] = []
 ): PersonalLibraryItem[] {
   const seenIds = new Set<string>();
+  const seenNames = new Set<string>();
   const items: PersonalLibraryItem[] = [];
 
   for (const criterion of application.criteria as ApplicationCriterion[]) {
     for (const req of criterion.requirements) {
       for (const decl of req.declarations) {
         for (const ev of decl.evidenceFiles) {
-          if (!seenIds.has(ev.id)) {
+          if (ev.id.startsWith('ev-auto-') || ev.name.startsWith('Minh_chung_')) {
+            continue;
+          }
+          const lowerName = ev.name.toLowerCase();
+          if (!seenIds.has(ev.id) && !seenNames.has(lowerName)) {
             seenIds.add(ev.id);
+            seenNames.add(lowerName);
             items.push({
               id: ev.id,
               name: ev.name,
@@ -290,6 +296,8 @@ export function deriveEvidenceLibraryFromApplication(
               size: ev.size,
               uploadedAt: ev.uploadedAt,
               status: ev.status,
+              url: ev.url,
+              isStandaloneLibraryItem: false,
               aiSuggestedInfo: ev.aiSuggestedInfo,
             });
           }
@@ -299,8 +307,10 @@ export function deriveEvidenceLibraryFromApplication(
   }
 
   for (const libItem of fallbackLibrary) {
-    if (!seenIds.has(libItem.id)) {
+    const lowerName = libItem.name.toLowerCase();
+    if (!seenIds.has(libItem.id) && !seenNames.has(lowerName)) {
       seenIds.add(libItem.id);
+      seenNames.add(lowerName);
       items.push(libItem);
     }
   }

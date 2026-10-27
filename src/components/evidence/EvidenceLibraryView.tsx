@@ -21,20 +21,22 @@ import {
   FolderArchive,
   Layers,
   ArrowRight,
+  UploadCloud,
+  Trash2,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import {
   PersonalLibraryItem,
-  MOCK_PERSONAL_LIBRARY_EVIDENCE,
-  ApplicationEvidence,
   StudentApplication,
+  usePersonalEvidenceLibrary,
 } from '../../demo/fixtures/studentApplication';
-import { deriveEvidenceLibraryFromApplication } from '../../demo/studentSelectors';
 import { useDevQaMode } from '../../demo/useDevQaMode';
 import { Button } from '../buttons/Button';
+import { DropZone } from '../forms/DropZone';
 import { StatusChip } from '../status/StatusChip';
 import { CRITERIA, RequirementStatus } from '../../tokens';
-import { RightInspector } from '../inspector/RightInspector';
-import { EvidenceInspectorContent } from '../inspector/EvidenceInspectorContent';
+import { EvidenceDetailWorkspace } from './detail/EvidenceDetailWorkspace';
 import { FileTypeIcon } from './FileTypeIcon';
 
 export interface EvidenceLibraryViewProps {
@@ -60,30 +62,40 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCriterionFilter, setActiveCriterionFilter] = useState('all');
 
+  // Upload panel state
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadCriterionId, setUploadCriterionId] =
+    useState<PersonalLibraryItem['criterionId']>('ethics');
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   // Localized view state for E2E Scenario I (Load failures, Skeleton, Empty)
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isForceEmpty, setIsForceEmpty] = useState(false);
 
-  // Preview file in inspector
-  const [previewFile, setPreviewFile] = useState<ApplicationEvidence | null>(
+  // Full document preview state
+  const [previewItem, setPreviewItem] = useState<PersonalLibraryItem | null>(
     null
   );
 
+  const { libraryItems, uploadToLibrary, removeFromLibrary } =
+    usePersonalEvidenceLibrary(application as any);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 3500);
+  };
+
   const libraryFiles: PersonalLibraryItem[] = useMemo(() => {
-    if (isForceEmpty || !hasApplication) return [];
-    if (application) {
-      const fallbackEvidence =
-        application.student?.studentId === '102220123'
-          ? MOCK_PERSONAL_LIBRARY_EVIDENCE
-          : [];
-      return deriveEvidenceLibraryFromApplication(
-        application,
-        fallbackEvidence
-      );
+    if (isForceEmpty) return [];
+    if (!hasApplication) {
+      return libraryItems.filter((item) => item.isStandaloneLibraryItem);
     }
-    return MOCK_PERSONAL_LIBRARY_EVIDENCE;
-  }, [application, hasApplication, isForceEmpty]);
+    return libraryItems;
+  }, [libraryItems, hasApplication, isForceEmpty]);
 
   // Filter logic
   const filteredItems = useMemo(() => {
@@ -100,6 +112,29 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
     });
   }, [libraryFiles, searchQuery, activeCriterionFilter]);
 
+  const handleFilesUploaded = (files: FileList | File[]) => {
+    const created = uploadToLibrary(files, {
+      criterionId: uploadCriterionId,
+      criterionName: CRITERIA[uploadCriterionId]?.name,
+      title: uploadTitle.trim() || undefined,
+    });
+    if (created.length > 0) {
+      setUploadTitle('');
+      setIsUploadOpen(false);
+      showToast(
+        `Đã tải ${created.length} tệp minh chứng lên Kho cá nhân. Bạn có thể chọn ngay khi kê khai hồ sơ!`
+      );
+    }
+  };
+
+  const handleDeleteItem = (item: PersonalLibraryItem) => {
+    removeFromLibrary(item.id);
+    if (previewItem?.id === item.id) {
+      setPreviewItem(null);
+    }
+    showToast(`Đã xóa "${item.name}" khỏi Kho minh chứng cá nhân.`);
+  };
+
   const renderFileTypeIcon = (item: PersonalLibraryItem) => {
     return (
       <FileTypeIcon fileName={item.name} fileType={item.fileType} size="md" />
@@ -108,6 +143,53 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
 
   return (
     <div className="flex-1 max-w-7xl w-full mx-auto px-6 lg:px-8 py-6 flex flex-col gap-5 text-[#172A3A]">
+      {/* Full-screen Split Document Viewer when inspecting a library item */}
+      {previewItem && (
+        <EvidenceDetailWorkspace
+          evidence={{
+            id: previewItem.id,
+            name: previewItem.name,
+            fileType: previewItem.fileType,
+            size: previewItem.size,
+            uploadedAt: previewItem.uploadedAt,
+            status: previewItem.status,
+            url: previewItem.url,
+            aiSuggestedInfo: previewItem.aiSuggestedInfo,
+          }}
+          allEvidenceList={filteredItems.map((it) => ({
+            id: it.id,
+            name: it.name,
+            fileType: it.fileType,
+            size: it.size,
+            uploadedAt: it.uploadedAt,
+            status: it.status,
+            url: it.url,
+            aiSuggestedInfo: it.aiSuggestedInfo,
+          }))}
+          criterionId={previewItem.criterionId}
+          criterionName={
+            previewItem.criterionName ||
+            CRITERIA[previewItem.criterionId]?.name ||
+            'Minh chứng cá nhân'
+          }
+          requirementId={`${previewItem.criterionId}-score`}
+          requirementTitle={
+            previewItem.isStandaloneLibraryItem
+              ? 'Tài liệu lưu sẵn trong Kho minh chứng cá nhân'
+              : previewItem.title
+          }
+          declarationTitle={previewItem.title}
+          onClose={() => setPreviewItem(null)}
+          onConfirmEvidence={() => {
+            showToast('Đã xác nhận thông tin minh chứng');
+          }}
+          onSwitchEvidence={(nextEv) => {
+            const found = filteredItems.find((it) => it.id === nextEv.id);
+            if (found) setPreviewItem(found);
+          }}
+        />
+      )}
+
       {/* Top Header */}
       <header className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex flex-col">
@@ -122,21 +204,110 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
             )}
           </div>
           <p className="text-[13px] text-[#607483] mt-1">
-            Quản lý và tra cứu các tài liệu minh chứng gắn với nội dung kê khai trong hồ sơ Sinh viên 5 tốt của bạn.
+            Tải lên và lưu trữ trước các tệp minh chứng (bảng điểm, giấy chứng nhận, bằng khen) để tái sử dụng nhanh khi kê khai hồ sơ Sinh viên 5 tốt.
           </p>
         </div>
 
-        {onOpenApplication && (
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={() => onOpenApplication()}
+            iconLeading={<UploadCloud size={15} />}
+            onClick={() => {
+              if (
+                activeCriterionFilter !== 'all' &&
+                activeCriterionFilter in CRITERIA
+              ) {
+                setUploadCriterionId(
+                  activeCriterionFilter as PersonalLibraryItem['criterionId']
+                );
+              }
+              setIsUploadOpen((prev) => !prev);
+            }}
           >
-            <span>Mở hồ sơ của tôi</span>
-            <ArrowRight size={14} className="ml-1" />
+            {isUploadOpen ? 'Đóng khung tải lên' : 'Tải minh chứng lên kho'}
           </Button>
-        )}
+
+          {onOpenApplication && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onOpenApplication()}
+            >
+              <span>Mở hồ sơ của tôi</span>
+              <ArrowRight size={14} className="ml-1" />
+            </Button>
+          )}
+        </div>
       </header>
+
+      {/* Inline Upload Panel */}
+      {isUploadOpen && (
+        <div className="bg-white rounded-[14px] border-2 border-[#BCE0F5] shadow-sm p-5 space-y-4 animate-in fade-in duration-150">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[15px] font-bold text-[#172A3A] flex items-center gap-2">
+                <UploadCloud size={17} className="text-[#0D78AE]" />
+                <span>Tải tài liệu mới vào Kho minh chứng cá nhân</span>
+              </h2>
+              <p className="text-[12.5px] text-[#607483] mt-0.5">
+                Tài liệu sau khi tải lên sẽ được lưu trữ cục bộ và xuất hiện ngay trong mục <strong>“Kho cá nhân”</strong> ở mọi cửa sổ kê khai tiêu chí.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsUploadOpen(false)}
+              className="p-1.5 rounded-[7px] text-[#607483] hover:text-[#172A3A] hover:bg-[#F1F6F9] transition-colors cursor-pointer"
+              title="Đóng"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label className="block text-[12px] font-bold text-[#172A3A] mb-1">
+                Phân loại theo tiêu chí gợi ý
+              </label>
+              <select
+                value={uploadCriterionId}
+                onChange={(e) =>
+                  setUploadCriterionId(
+                    e.target.value as PersonalLibraryItem['criterionId']
+                  )
+                }
+                className="w-full h-9.5 px-3 text-[13px] font-medium text-[#172A3A] bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none focus:border-[#18A6E0]"
+              >
+                <option value="ethics">1. Đạo đức tốt</option>
+                <option value="academic">2. Học tập tốt</option>
+                <option value="physical">3. Thể lực tốt</option>
+                <option value="volunteer">4. Tình nguyện tốt</option>
+                <option value="integration">5. Hội nhập tốt</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-bold text-[#172A3A] mb-1">
+                Tên gợi nhớ / Mô tả minh chứng (tùy chọn)
+              </label>
+              <input
+                type="text"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="VD: Bảng điểm rèn luyện năm học 2025–2026..."
+                className="w-full h-9.5 px-3 text-[13px] text-[#172A3A] bg-[#F8FBFD] border border-[#DCE7EE] rounded-[8px] outline-none focus:border-[#18A6E0]"
+              />
+            </div>
+          </div>
+
+          <DropZone
+            onFilesSelected={handleFilesUploaded}
+            label="Kéo thả tệp minh chứng vào đây hoặc bấm để chọn tệp từ máy tính"
+            subtext="Hỗ trợ PDF, JPG, PNG, WEBP, DOCX (tối đa 100MB/tệp) — Chọn một hoặc nhiều tệp cùng lúc"
+            className="py-5 px-4 bg-[#F8FBFD] border-[#BCE0F5]"
+          />
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="bg-white p-3.5 rounded-[12px] border border-[#DCE7EE] shadow-2xs flex flex-wrap items-center justify-between gap-3">
@@ -229,11 +400,11 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
           <table className="w-full text-left text-[13px] border-collapse table-fixed">
             <thead>
               <tr className="bg-[#EFF6FB] border-b border-[#DCE7EE] text-[#466474] font-bold text-[12px] uppercase tracking-wider">
-                <th className="py-3 px-5 w-[44%]">Tài liệu & Nội dung kê khai</th>
+                <th className="py-3 px-5 w-[42%]">Tài liệu & Nội dung kê khai</th>
                 <th className="py-3 px-4 w-[18%]">Tiêu chí</th>
-                <th className="py-3 px-4 w-[14%]">Ngày tải lên</th>
-                <th className="py-3 px-4 w-[15%]">Ghi chú</th>
-                <th className="py-3 px-5 text-right w-[9%]">Xem</th>
+                <th className="py-3 px-4 w-[13%]">Ngày tải lên</th>
+                <th className="py-3 px-4 w-[16%]">Trạng thái</th>
+                <th className="py-3 px-5 text-right w-[11%]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DCE7EE]">
@@ -246,23 +417,33 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
                       </div>
                       <p className="font-bold text-[14.5px] text-[#172A3A]">
                         {libraryFiles.length === 0
-                          ? 'Chưa có tài liệu minh chứng nào'
+                          ? 'Chưa có tài liệu minh chứng nào trong kho'
                           : 'Không tìm thấy minh chứng phù hợp bộ lọc'}
                       </p>
                       <p className="text-[12.5px] text-[#607483]">
                         {libraryFiles.length === 0
-                          ? 'Khi bạn đính kèm minh chứng cho các nội dung kê khai trong Hồ sơ của tôi, tệp sẽ được lưu trữ tại đây.'
+                          ? 'Bạn có thể tải trước các tệp minh chứng lên Kho cá nhân ngay tại đây, hoặc đính kèm trực tiếp khi kê khai trong Hồ sơ của tôi.'
                           : 'Hãy thử từ khóa khác hoặc chọn "Tất cả tiêu chí" để xem toàn bộ tài liệu.'}
                       </p>
-                      {libraryFiles.length === 0 && onOpenApplication && (
-                        <div className="pt-2">
+                      {libraryFiles.length === 0 && (
+                        <div className="pt-2 flex items-center justify-center gap-2.5 flex-wrap">
                           <Button
                             variant="primary"
                             size="sm"
-                            onClick={() => onOpenApplication()}
+                            iconLeading={<UploadCloud size={14} />}
+                            onClick={() => setIsUploadOpen(true)}
                           >
-                            Mở hồ sơ để thêm minh chứng
+                            Tải minh chứng lên kho ngay
                           </Button>
+                          {onOpenApplication && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => onOpenApplication()}
+                            >
+                              Mở hồ sơ của tôi
+                            </Button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -282,29 +463,11 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          setPreviewFile({
-                            id: item.id,
-                            name: item.name,
-                            fileType: item.fileType,
-                            size: item.size,
-                            uploadedAt: item.uploadedAt,
-                            status: item.status,
-                            aiSuggestedInfo: item.aiSuggestedInfo,
-                          });
+                          setPreviewItem(item);
                         }
                       }}
                       className="hover:bg-[#F8FBFD] transition-colors group cursor-pointer"
-                      onClick={() =>
-                        setPreviewFile({
-                          id: item.id,
-                          name: item.name,
-                          fileType: item.fileType,
-                          size: item.size,
-                          uploadedAt: item.uploadedAt,
-                          status: item.status,
-                          aiSuggestedInfo: item.aiSuggestedInfo,
-                        })
-                      }
+                      onClick={() => setPreviewItem(item)}
                     >
                       {/* Tài liệu & Nội dung kê khai */}
                       <td className="py-3 px-5 min-w-0">
@@ -345,12 +508,16 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
                         {item.uploadedAt}
                       </td>
 
-                      {/* Ghi chú trạng thái (Section 20: Only show badge when attention needed) */}
+                      {/* Ghi chú trạng thái */}
                       <td className="py-3 px-4 min-w-0">
                         {showAttentionChip ? (
                           <StatusChip status={item.status} size="sm" />
+                        ) : item.isStandaloneLibraryItem ? (
+                          <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#0D78AE] bg-[#EAF6FC] border border-[#D0E8F5] px-2 py-0.5 rounded-[5px]">
+                            Lưu sẵn trong kho
+                          </span>
                         ) : (
-                          <span className="text-[12px] text-[#607483] font-medium">
+                          <span className="text-[12px] text-[#1B7C49] font-semibold">
                             Đã gắn vào kê khai
                           </span>
                         )}
@@ -364,23 +531,24 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
                         >
                           <button
                             type="button"
-                            onClick={() =>
-                              setPreviewFile({
-                                id: item.id,
-                                name: item.name,
-                                fileType: item.fileType,
-                                size: item.size,
-                                uploadedAt: item.uploadedAt,
-                                status: item.status,
-                                aiSuggestedInfo: item.aiSuggestedInfo,
-                              })
-                            }
+                            onClick={() => setPreviewItem(item)}
                             aria-label={`Xem chi tiết ${item.name}`}
                             className="p-1.5 rounded-[6px] text-[#607483] hover:text-[#172A3A] hover:bg-[#EAF6FC] transition-colors cursor-pointer"
-                            title="Xem chi tiết minh chứng"
+                            title="Xem trước tệp minh chứng"
                           >
                             <Eye size={15} />
                           </button>
+                          {item.isStandaloneLibraryItem && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem(item)}
+                              aria-label={`Xóa ${item.name} khỏi kho`}
+                              className="p-1.5 rounded-[6px] text-[#728391] hover:text-[#DC2626] hover:bg-[#FEE2E2]/60 transition-colors cursor-pointer"
+                              title="Xóa khỏi Kho minh chứng cá nhân"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -425,20 +593,11 @@ export const EvidenceLibraryView: React.FC<EvidenceLibraryViewProps> = ({
         </div>
       )}
 
-      {/* File Inspector Preview Drawer */}
-      {previewFile && (
-        <RightInspector
-          isOpen={previewFile !== null}
-          onClose={() => setPreviewFile(null)}
-          title="Chi tiết minh chứng"
-          subtitle={previewFile.name}
-          width={410}
-        >
-          <EvidenceInspectorContent
-            file={previewFile}
-            onClose={() => setPreviewFile(null)}
-          />
-        </RightInspector>
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#172A3A] text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150 select-none">
+          <CheckCircle2 size={16} className="text-[#34D399]" />
+          <span>{toastMessage}</span>
+        </div>
       )}
     </div>
   );

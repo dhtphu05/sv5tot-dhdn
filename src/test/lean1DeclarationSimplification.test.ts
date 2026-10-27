@@ -11,6 +11,10 @@ import {
   StudentApplicationData,
   ApplicationDeclaration,
   ApplicationEvidence,
+  uploadFilesToPersonalLibrary,
+  syncEvidenceFilesToPersonalLibrary,
+  removePersonalLibraryItem,
+  getActiveStudentCombinedLibrary,
 } from '../demo/fixtures/studentApplication';
 import {
   CRITERIA_DEFINITIONS,
@@ -725,5 +729,63 @@ describe('5TOT ĐHĐN — LEAN-1 Student Declaration Simplification Suite (D01�
       'Allows valid conduct score 88 / 100'
     );
   });
+
+  // ---------------------------------------------------------------------------
+  // D28 — Personal Evidence Library upload, modal sync, and reuse
+  // Verifies that uploading in Kho minh chứng or syncing from modals persists
+  // items per student and allows reuse across declaration modals.
+  // ---------------------------------------------------------------------------
+  test('D28: Personal Evidence Library supports standalone upload, modal sync, and deletion', () => {
+    const testStudentId = 'sv-test-lib-d28';
+    const mockFile = new File(['%PDF-1.4 test content'], 'Chung_nhận_Olympiad_2026.pdf', {
+      type: 'application/pdf',
+    });
+
+    const uploaded = uploadFilesToPersonalLibrary([mockFile], {
+      criterionId: 'academic',
+      criterionName: 'Học tập tốt',
+      title: 'Giải Nhất Olympic Tin học 2026',
+      studentId: testStudentId,
+    });
+
+    assert.equal(uploaded.length, 1, '1 file uploaded to personal library');
+    assert(uploaded[0].id.startsWith('lib-upl-'), 'Uses lib-upl- prefix for IndexedDB binary lookup');
+    assert.equal(uploaded[0].name, 'Chung_nhận_Olympiad_2026.pdf');
+    assert.equal(uploaded[0].title, 'Giải Nhất Olympic Tin học 2026');
+    assert.equal(uploaded[0].criterionId, 'academic');
+    assert.equal(uploaded[0].isStandaloneLibraryItem, true);
+
+    // Syncing an evidence file uploaded inside a declaration modal
+    syncEvidenceFilesToPersonalLibrary(
+      [
+        {
+          id: 'ev-new-modal-999',
+          name: 'Bang_diem_HK2_2026.pdf',
+          fileType: 'pdf',
+          size: '420 KB',
+          uploadedAt: '28/10/2026',
+          status: 'ready',
+        },
+      ],
+      {
+        criterionId: 'academic',
+        criterionName: 'Học tập tốt',
+        title: 'Bảng điểm học kỳ 2',
+        studentId: testStudentId,
+      }
+    );
+
+    const combined = getActiveStudentCombinedLibrary(undefined, testStudentId);
+    assert.equal(combined.length, 2, 'Both standalone and modal-synced files appear in library');
+    assert(combined.some((i) => i.name === 'Chung_nhận_Olympiad_2026.pdf'));
+    assert(combined.some((i) => i.name === 'Bang_diem_HK2_2026.pdf'));
+
+    // Removing standalone item
+    removePersonalLibraryItem(uploaded[0].id, testStudentId);
+    const afterRemove = getActiveStudentCombinedLibrary(undefined, testStudentId);
+    assert.equal(afterRemove.length, 1, 'Standalone item removed cleanly');
+    assert.equal(afterRemove[0].name, 'Bang_diem_HK2_2026.pdf');
+  });
 });
+
 

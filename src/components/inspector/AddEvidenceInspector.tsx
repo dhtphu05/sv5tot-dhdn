@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import {
   ApplicationEvidence,
-  PersonalLibraryItem,
-  MOCK_PERSONAL_LIBRARY_EVIDENCE,
+  usePersonalEvidenceLibrary,
+  syncEvidenceFilesToPersonalLibrary,
 } from '../../demo/fixtures/studentApplication';
 import { Button } from '../buttons/Button';
 import { DropZone } from '../forms/DropZone';
@@ -39,6 +39,7 @@ export const AddEvidenceInspector: React.FC<AddEvidenceInspectorProps> = ({
   existingEvidenceFiles = [],
   onAddFiles,
 }) => {
+  const { libraryItems } = usePersonalEvidenceLibrary();
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
 
   // Tab 1: Upload state
@@ -100,6 +101,11 @@ export const AddEvidenceInspector: React.FC<AddEvidenceInspectorProps> = ({
           };
         });
 
+        syncEvidenceFilesToPersonalLibrary(newEvs, {
+          criterionName,
+          title: requirementTitle,
+        });
+
         onAddFiles(newEvs);
         setUploadState('done');
 
@@ -115,7 +121,7 @@ export const AddEvidenceInspector: React.FC<AddEvidenceInspectorProps> = ({
   // -------------------------------------------------------------
   // TAB 2 HANDLERS: Library Selection
   // -------------------------------------------------------------
-  const filteredLibrary = MOCK_PERSONAL_LIBRARY_EVIDENCE.filter((item) => {
+  const filteredLibrary = libraryItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -136,17 +142,18 @@ export const AddEvidenceInspector: React.FC<AddEvidenceInspectorProps> = ({
   const handleAttachFromLibrary = () => {
     if (selectedLibraryIds.length === 0) return;
 
-    const chosenItems = MOCK_PERSONAL_LIBRARY_EVIDENCE.filter((item) =>
+    const chosenItems = libraryItems.filter((item) =>
       selectedLibraryIds.includes(item.id)
     );
 
     const newEvs: ApplicationEvidence[] = chosenItems.map((item) => ({
-      id: `ev-lib-${Date.now()}-${item.id}`,
+      id: item.id,
       name: item.name,
       fileType: item.fileType,
       size: item.size,
       uploadedAt: item.uploadedAt,
       status: item.status,
+      url: item.url,
     }));
 
     onAddFiles(newEvs);

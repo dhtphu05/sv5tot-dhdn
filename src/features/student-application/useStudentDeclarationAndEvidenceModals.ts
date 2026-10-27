@@ -11,6 +11,7 @@ import {
   ApplicationRequirement,
   ApplicationDeclaration,
   ApplicationEvidence,
+  syncEvidenceFilesToPersonalLibrary,
 } from '../../demo/fixtures/studentApplication';
 import {
   ApplicationSubmissionState,
@@ -286,6 +287,17 @@ export function useStudentDeclarationAndEvidenceModals({
         isNewlyAddedSupplement: isSupplementActive,
         url: objectUrl,
       };
+    });
+
+    const { criterion, requirement } = findCriterionAndRequirementById(
+      application,
+      reqId
+    );
+    const decl = requirement?.declarations.find((d) => d.id === declId);
+    syncEvidenceFilesToPersonalLibrary(newFiles, {
+      criterionId: criterion?.id || 'academic',
+      criterionName: criterion?.name || 'Kho cá nhân',
+      title: decl?.value || requirement?.title || 'Minh chứng đính kèm',
     });
 
     setApplication((prev) =>

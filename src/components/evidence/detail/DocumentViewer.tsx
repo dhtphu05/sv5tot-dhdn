@@ -95,6 +95,7 @@ function isUserUploadedEvidenceId(fileId?: string, explicitUrl?: string): boolea
   return (
     fileId.startsWith('ev-new-') ||
     fileId.startsWith('ev-uploaded-') ||
+    fileId.startsWith('lib-upl-') ||
     fileId.startsWith('upl-') ||
     /^ev-\d{10,}/.test(fileId)
   );

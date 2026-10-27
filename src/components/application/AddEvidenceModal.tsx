@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import {
   ApplicationEvidence,
-  MOCK_PERSONAL_LIBRARY_EVIDENCE,
+  usePersonalEvidenceLibrary,
+  syncEvidenceFilesToPersonalLibrary,
 } from '../../demo/fixtures/studentApplication';
 import { FileTypeIcon } from '../evidence/FileTypeIcon';
 import { Button } from '../buttons/Button';
@@ -54,6 +55,7 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
   onRemoveEvidence,
 }) => {
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
+  const { libraryItems } = usePersonalEvidenceLibrary();
 
   // Mode 1: Upload state
   const [uploadedFiles, setUploadedFiles] = useState<
@@ -173,7 +175,7 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
   };
 
   // Filter personal library items
-  const filteredLibrary = MOCK_PERSONAL_LIBRARY_EVIDENCE.filter((item) => {
+  const filteredLibrary = libraryItems.filter((item) => {
     const matchSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -182,7 +184,7 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
   });
 
   const toggleSelectLibraryItem = (id: string) => {
-    const item = MOCK_PERSONAL_LIBRARY_EVIDENCE.find((m) => m.id === id);
+    const item = libraryItems.find((m) => m.id === id);
     if (!item) return;
 
     const alreadyAttached = existingFiles.some(
@@ -230,18 +232,23 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
           url: f.url,
         });
       });
+      syncEvidenceFilesToPersonalLibrary(finalFiles, {
+        criterionName,
+        title: declarationTitle || requirementTitle,
+      });
     } else {
       selectedLibraryIds.forEach((libId) => {
-        const item = MOCK_PERSONAL_LIBRARY_EVIDENCE.find((m) => m.id === libId);
+        const item = libraryItems.find((m) => m.id === libId);
         if (item) {
           finalFiles.push({
-            id: `ev-lib-${Date.now()}-${item.id}`,
+            id: item.id,
             name: item.name,
             fileType: item.fileType,
             size: item.size,
-            uploadedAt: new Date().toLocaleDateString('vi-VN'),
+            uploadedAt: item.uploadedAt || new Date().toLocaleDateString('vi-VN'),
             status: item.status || 'ready',
             isNewlyAddedSupplement: isSupplementMode,
+            url: item.url,
           });
         }
       });
