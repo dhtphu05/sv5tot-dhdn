@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T17:02:58.889Z",
+  "createdAt": "2026-10-27T17:31:31.820Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -446,8 +446,8 @@
     },
     {
       "path": "src/components/application/AddEditDeclarationModal.tsx",
-      "sizeBytes": 22239,
-      "sha256": "58677a9b629ef12697283f43529854d8a2bc8d7ab3d0637b13020f4f70902942"
+      "sizeBytes": 26197,
+      "sha256": "a891e8c88dfc383c960a866df65c1e28f892b6e4b070f2c35de9584f3073a098"
     },
     {
       "path": "src/components/application/AddEvidenceModal.tsx",
@@ -506,13 +506,13 @@
     },
     {
       "path": "src/components/application/RequirementRow.tsx",
-      "sizeBytes": 18986,
-      "sha256": "c0570ceaae07a3df6694d1b7991237f2a1d9c6c4451997d618489538f8d0340b"
+      "sizeBytes": 20515,
+      "sha256": "09e9daa40dcc42c72986c2825eecbbc80fcccb46d5dcba5b6ebb20c8bdefe52d"
     },
     {
       "path": "src/components/application/StudentApplicationWorkspace.tsx",
-      "sizeBytes": 30953,
-      "sha256": "3aad2191521a160ef7273dd3cc027239cb609d98711ee2b0a78df04784a0e6bc"
+      "sizeBytes": 31878,
+      "sha256": "4bd3aaac09b5b0f0173e86ac0ea07d6bc683db7e6345dd61477224dca8e0e264"
     },
     {
       "path": "src/components/application/modal/InlineEvidenceSection.tsx",
@@ -521,8 +521,8 @@
     },
     {
       "path": "src/components/application/modal/SpecializedCriteriaFields.tsx",
-      "sizeBytes": 22125,
-      "sha256": "f2ab7e179b9bbf3eb617c1f250540d63e94681d3aefe386fcd54279da1c16e93"
+      "sizeBytes": 22205,
+      "sha256": "a2b928ecf4809e6d3123c6e2a2d0932733e20466a420fba91f560ccbc8789531"
     },
     {
       "path": "src/components/brand/HsvLogo.tsx",
@@ -1231,8 +1231,8 @@
     },
     {
       "path": "src/entities/application/studentApplicationMutators.ts",
-      "sizeBytes": 13945,
-      "sha256": "1b67bfbcdb7c2c817aaf7c3477f3d1e12cb4bd5fed3673c24aa6a4b0cda20d72"
+      "sizeBytes": 14142,
+      "sha256": "e8b6e651e67b859cbc181474f7510b9442cb3f2c053c156f8a6b0286ab98567a"
     },
     {
       "path": "src/entities/application/studentApplicationTypes.ts",
@@ -1276,18 +1276,18 @@
     },
     {
       "path": "src/entities/services/backendAdapter.ts",
-      "sizeBytes": 26536,
-      "sha256": "ab8f6c70187a789d68f537aa0e77e112e8861b50455121f66c1480007affcee4"
+      "sizeBytes": 27016,
+      "sha256": "603ae6cfd77bf9a0d823e0432ea6609b2b716d5ad2a1ff74615848f885064961"
     },
     {
       "path": "src/entities/services/contracts.ts",
-      "sizeBytes": 13435,
-      "sha256": "6453ef2f79efa88f45cebc6a21a4415251ad2f8a5106fbe4c03b786c23b47b2a"
+      "sizeBytes": 13611,
+      "sha256": "a18f88cbed888ddfa3b26af02b806c8f82bd60c0484ce32386bdcd487de738fd"
     },
     {
       "path": "src/entities/services/demoAdapter.ts",
-      "sizeBytes": 58070,
-      "sha256": "fa3620e32a1660afe243afc05acc2cc05b9e8c54164a8bc1834b8533d3b6f492"
+      "sizeBytes": 59512,
+      "sha256": "9dcad3f3d8a2f823d4814975cda3235d03e800ac7ea4d3097f1f7baaf3f960da"
     },
     {
       "path": "src/entities/services/index.ts",
@@ -2346,8 +2346,8 @@
     },
     {
       "path": "src/test/lean1DeclarationSimplification.test.ts",
-      "sizeBytes": 27842,
-      "sha256": "6231e5428b8dab9692db72194e6a81cafc05a4243af9652576cf53744e2966a1"
+      "sizeBytes": 32515,
+      "sha256": "f4311cb7dda6e3f78976e2f58915ca9cb7d2afbbeeeb8aa11e382e7d01c85290"
     },
     {
       "path": "src/test/lean2DirectInlineReview.test.ts",
@@ -2571,8 +2571,8 @@
     },
     {
       "path": "src/widgets/student-application/StudentApplicationInspectorsAndModals.tsx",
-      "sizeBytes": 10995,
-      "sha256": "9196385df044000c39bc10d852b7a70d6ff06668e7b54af55fde400206aa2ee6"
+      "sizeBytes": 11135,
+      "sha256": "b4f53592338ac3dc3bf4b862ff77387aa30792437d9d08ed7ae94be1c963f11e"
     },
     {
       "path": "src/widgets/student-application/StudentApplicationTopBanners.tsx",

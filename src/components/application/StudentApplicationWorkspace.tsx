@@ -5,7 +5,7 @@
  * StudentApplicationBodySection, and StudentApplicationInspectorsAndModals.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   INITIAL_STUDENT_APPLICATION,
   StudentApplicationData,
@@ -182,6 +182,7 @@ export const StudentApplicationWorkspace: React.FC<
 
   const [application, setApplication] =
     useState<StudentApplicationData>(() => initialData);
+  const hasLocalMutationRef = useRef(false);
 
   useEffect(() => {
     setAdvisories(isDemoPersona ? DEFAULT_ADVISORIES : []);
@@ -220,9 +221,13 @@ export const StudentApplicationWorkspace: React.FC<
 
       if (
         prev.applicationId !== initialData.applicationId ||
-        prev.student.studentId !== initialData.student.studentId ||
-        (prevDeclCount === 0 && nextDeclCount > 0)
+        prev.student.studentId !== initialData.student.studentId
       ) {
+        hasLocalMutationRef.current = false;
+        return initialData;
+      }
+
+      if (!hasLocalMutationRef.current && prevDeclCount === 0 && nextDeclCount > 0) {
         return initialData;
       }
       return {
@@ -721,7 +726,8 @@ export const StudentApplicationWorkspace: React.FC<
               onToggleRowExpand={(reqId) =>
                 setExpandedRowId((prev) => (prev === reqId ? null : reqId))
               }
-              onUpdateDeclaration={(reqId, declarationId, updated) =>
+              onUpdateDeclaration={(reqId, declarationId, updated) => {
+                hasLocalMutationRef.current = true;
                 setApplication((prev) =>
                   applyUpdateDeclarationInlineMutation(
                     prev,
@@ -729,18 +735,21 @@ export const StudentApplicationWorkspace: React.FC<
                     declarationId,
                     updated
                   )
-                )
-              }
-              onAddDeclaration={(reqId, newDecl) =>
+                );
+              }}
+              onAddDeclaration={(reqId, newDecl) => {
+                hasLocalMutationRef.current = true;
                 setApplication((prev) =>
                   applyAddDeclarationInlineMutation(prev, reqId, newDecl)
-                )
-              }
-              onDeleteDeclaration={(reqId, declId) =>
+                );
+              }}
+              onDeleteDeclaration={(reqId, declId) => {
+                hasLocalMutationRef.current = true;
                 setApplication((prev) =>
                   applyDeleteDeclarationMutation(prev, reqId, declId)
-                )
-              }
+                );
+                showToast('Đã xóa kê khai');
+              }}
               onOpenRegulation={handleOpenRegulation}
               onInspectEvidence={handleInspectEvidence}
               onAddEvidence={handleAddEvidence}
@@ -810,7 +819,27 @@ export const StudentApplicationWorkspace: React.FC<
         onCloseAddEditModal={() =>
           setAddEditModalState((prev) => ({ ...prev, isOpen: false }))
         }
-        onSaveDeclarationFromModal={handleSaveDeclarationFromModal}
+        onSaveDeclarationFromModal={(
+          reqId,
+          declData,
+          evidenceFiles,
+          existingDeclId
+        ) => {
+          hasLocalMutationRef.current = true;
+          handleSaveDeclarationFromModal(
+            reqId,
+            declData,
+            evidenceFiles,
+            existingDeclId
+          );
+        }}
+        onDeleteDeclaration={(reqId, declId) => {
+          hasLocalMutationRef.current = true;
+          setApplication((prev) =>
+            applyDeleteDeclarationMutation(prev, reqId, declId)
+          );
+          showToast('Đã xóa kê khai');
+        }}
         addEvidenceModalState={addEvidenceModalState}
         onCloseAddEvidenceModal={() =>
           setAddEvidenceModalState((prev) => ({ ...prev, isOpen: false }))

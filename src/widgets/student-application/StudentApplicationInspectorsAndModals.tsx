@@ -93,6 +93,7 @@ export interface StudentApplicationInspectorsAndModalsProps {
     evidenceFiles: ApplicationEvidence[],
     existingDeclId?: string
   ) => void;
+  onDeleteDeclaration?: (reqId: string, declId: string) => void;
   addEvidenceModalState: {
     isOpen: boolean;
     reqId: string;
@@ -146,6 +147,7 @@ export const StudentApplicationInspectorsAndModals: React.FC<
   addEditModalState,
   onCloseAddEditModal,
   onSaveDeclarationFromModal,
+  onDeleteDeclaration,
   addEvidenceModalState,
   onCloseAddEvidenceModal,
   onSaveEvidenceFromModal,
@@ -292,6 +294,7 @@ export const StudentApplicationInspectorsAndModals: React.FC<
           declaration={addEditModalState.declaration}
           isSupplementMode={submissionState === 'supplement_required'}
           onSaveDeclaration={onSaveDeclarationFromModal}
+          onDeleteDeclaration={onDeleteDeclaration}
         />
       )}
 

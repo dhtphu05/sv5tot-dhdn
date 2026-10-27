@@ -261,6 +261,8 @@ export const SpecializedCriteriaFields: React.FC<SpecializedCriteriaFieldsProps>
                   onChange={(e) => handleFieldChange(setGpaScore, e.target.value)}
                   placeholder={gpaScale === '4' ? 'Ví dụ: 3.45' : 'Ví dụ: 8.2'}
                   type="number"
+                  min="0"
+                  max={gpaScale === '4' ? '4' : '10'}
                   step="0.01"
                   required
                 />

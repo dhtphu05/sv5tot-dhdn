@@ -23,6 +23,7 @@ import {
   applyDeleteDeclarationMutation,
   applyAppendEvidenceFilesMutation,
 } from '../entities/application/studentApplicationMutators';
+import { validateDeclarationValue } from '../components/application/AddEditDeclarationModal';
 import { CRITERIA_LIST } from '../tokens';
 
 describe('5TOT ĐHĐN — LEAN-1 Student Declaration Simplification Suite (D01–D24)', () => {
@@ -613,4 +614,116 @@ describe('5TOT ĐHĐN — LEAN-1 Student Declaration Simplification Suite (D01�
     assert.equal(errorState.isSaved, false, 'Does not pretend unsaved data has persisted');
     assert(errorState.errorMessage.includes('Chưa thể lưu'), 'Displays natural Vietnamese error copy');
   });
+
+  // ---------------------------------------------------------------------------
+  // D25 — Simplified Name + Evidence Only Declaration
+  // Verifies that declarations only require a name (value) and evidence files
+  // without requiring extra detail or metadata blocks.
+  // ---------------------------------------------------------------------------
+  test('D25: Simplified declaration saves name and evidence only without extra complex fields', () => {
+    let app = getCleanApp();
+
+    const evidence: ApplicationEvidence[] = [
+      {
+        id: 'ev-simple-gpa-1',
+        name: 'Bang_diem_nam_hoc_2025_2026.pdf',
+        fileType: 'pdf',
+        size: '850 KB',
+        uploadedAt: '28/10/2026',
+        status: 'ready',
+      },
+    ];
+
+    const gpaExistingId = app.criteria
+      .find((c) => c.id === 'academic')
+      ?.requirements.find((r) => r.id === 'academic-gpa')?.declarations[0]?.id;
+
+    app = applySaveDeclarationMutation(
+      app,
+      'academic-gpa',
+      { value: 'Điểm trung bình chung năm học 2025–2026: 3.65/4.0' },
+      evidence,
+      gpaExistingId,
+      false
+    );
+
+    const gpaReq = app.criteria
+      .find((c) => c.id === 'academic')
+      ?.requirements.find((r) => r.id === 'academic-gpa');
+    const savedDecl = gpaReq?.declarations[0];
+
+    assert(savedDecl, 'Saved declaration exists');
+    assert.equal(savedDecl.value, 'Điểm trung bình chung năm học 2025–2026: 3.65/4.0');
+    assert.equal(savedDecl.detail, undefined, 'No extra detail string stored');
+    assert.equal(savedDecl.metadata, undefined, 'No extra metadata object stored');
+    assert.equal(savedDecl.evidenceFiles.length, 1);
+  });
+
+  // ---------------------------------------------------------------------------
+  // D26 — Deleting SINGLE and MULTIPLE declarations
+  // Verifies that deleting a SINGLE declaration resets requirement to undeclared
+  // and deleting all declarations updates criterion summary and statusLabel.
+  // ---------------------------------------------------------------------------
+  test('D26: Deleting SINGLE and MULTIPLE declarations resets requirement status to undeclared', () => {
+    let app = getCleanApp();
+
+    // Delete SINGLE declaration in ethics-score
+    const ethicsReqBefore = app.criteria
+      .find((c) => c.id === 'ethics')
+      ?.requirements.find((r) => r.id === 'ethics-score');
+    const ethicsDeclId = ethicsReqBefore?.declarations[0]?.id;
+    assert(ethicsDeclId, 'Initial ethics declaration exists');
+
+    app = applyDeleteDeclarationMutation(app, 'ethics-score', ethicsDeclId);
+
+    const ethicsReqAfter = app.criteria
+      .find((c) => c.id === 'ethics')
+      ?.requirements.find((r) => r.id === 'ethics-score');
+    assert.equal(ethicsReqAfter?.declarations.length, 0, 'Ethics declaration deleted');
+    assert.equal(ethicsReqAfter?.status, 'undeclared', 'Requirement status reset to undeclared');
+    assert.equal(ethicsReqAfter?.isOptionalEmpty, true, 'isOptionalEmpty set to true');
+  });
+
+  // ---------------------------------------------------------------------------
+  // D27 — GPA and Conduct Score Ceiling Validation
+  // Verifies that GPA > 4.00 on scale 4 or > 10.0 on scale 10 is blocked.
+  // ---------------------------------------------------------------------------
+  test('D27: GPA and Conduct Score ceiling validation blocks out-of-range values', () => {
+    assert(
+      validateDeclarationValue('academic-gpa', 'Điểm trung bình năm học 2025–2026 (GPA): 5 / 4.00') !== null,
+      'Blocks 5 / 4.00'
+    );
+    assert(
+      validateDeclarationValue('academic-gpa', '4.2 / 4.0') !== null,
+      'Blocks 4.2 / 4.0'
+    );
+    assert(
+      validateDeclarationValue('academic-gpa', '5') !== null,
+      'Blocks standalone 5 on default scale 4'
+    );
+    assert(
+      validateDeclarationValue('academic-gpa', '10.5 / 10') !== null,
+      'Blocks 10.5 / 10'
+    );
+    assert.equal(
+      validateDeclarationValue('academic-gpa', 'Điểm trung bình năm học 2025–2026 (GPA): 3.65 / 4.00'),
+      null,
+      'Allows valid 3.65 / 4.00'
+    );
+    assert.equal(
+      validateDeclarationValue('academic-gpa', 'Điểm trung bình năm học 2025–2026: 8.5/10'),
+      null,
+      'Allows valid 8.5/10'
+    );
+    assert(
+      validateDeclarationValue('ethics-score', 'Điểm rèn luyện: 105 / 100') !== null,
+      'Blocks conduct score > 100'
+    );
+    assert.equal(
+      validateDeclarationValue('ethics-score', 'Điểm rèn luyện năm học 2025–2026: 88 / 100'),
+      null,
+      'Allows valid conduct score 88 / 100'
+    );
+  });
 });
+

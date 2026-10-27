@@ -28,6 +28,7 @@ import { FileTypeIcon } from '../evidence/FileTypeIcon';
 import { DropZone } from '../forms/DropZone';
 import { Button } from '../buttons/Button';
 import { CRITERIA } from '../../tokens';
+import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
 
 export interface AddEditDeclarationModalProps {
   isOpen: boolean;
@@ -49,6 +50,102 @@ export interface AddEditDeclarationModalProps {
     existingDeclId?: string
   ) => void;
   onDeleteDeclaration?: (reqId: string, declId: string) => void;
+}
+
+export function validateDeclarationValue(
+  reqId: string,
+  rawValue: string
+): string | null {
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return 'Vui lòng nhập tên kê khai.';
+  }
+
+  const withoutDatesAndYears = trimmed
+    .replace(/\b\d{1,2}\/\d{1,2}\/20\d{2}\b/g, ' ')
+    .replace(/\b20\d{2}\s*[-–/]\s*20\d{2}\b/g, ' ')
+    .replace(/\b20\d{2}\b/g, ' ');
+
+  if (reqId === 'academic-gpa') {
+    const scale4Match = withoutDatesAndYears.match(
+      /(-?\d+(?:[.,]\d+)?)\s*\/\s*4(?:[.,]0+)?\b/
+    );
+    if (scale4Match) {
+      const score = parseFloat(scale4Match[1].replace(',', '.'));
+      if (!isNaN(score) && (score < 0 || score > 4.0)) {
+        return 'Điểm trung bình (GPA) theo thang điểm 4 không được vượt quá trần 4.00 (từ 0.00 đến 4.00).';
+      }
+    }
+
+    const scale10Match = withoutDatesAndYears.match(
+      /(-?\d+(?:[.,]\d+)?)\s*\/\s*10(?:[.,]0+)?\b/
+    );
+    if (scale10Match) {
+      const score = parseFloat(scale10Match[1].replace(',', '.'));
+      if (!isNaN(score) && (score < 0 || score > 10.0)) {
+        return 'Điểm trung bình (GPA) theo thang điểm 10 không được vượt quá trần 10.0 (từ 0.0 đến 10.0).';
+      }
+    }
+
+    if (!scale4Match && !scale10Match) {
+      const isExplicitScale10 = /(?:thang(?:\s*điểm)?|hệ)\s*10\b/i.test(
+        withoutDatesAndYears
+      );
+      const isExplicitScale4 = /(?:thang(?:\s*điểm)?|hệ)\s*4\b/i.test(
+        withoutDatesAndYears
+      );
+      const cleanedForNumbers = withoutDatesAndYears.replace(
+        /(?:thang(?:\s*điểm)?|hệ)\s*(?:4|10)\b/gi,
+        ' '
+      );
+      const numberMatches = Array.from(
+        cleanedForNumbers.matchAll(/-?\d+(?:[.,]\d+)?/g)
+      );
+
+      for (const m of numberMatches) {
+        const val = parseFloat(m[0].replace(',', '.'));
+        if (isNaN(val)) continue;
+        if (val < 0) {
+          return 'Điểm trung bình (GPA) không được nhỏ hơn 0.';
+        }
+        if (isExplicitScale4 && val > 4.0) {
+          return 'Điểm trung bình (GPA) theo thang điểm 4 không được vượt quá trần 4.00 (từ 0.00 đến 4.00).';
+        }
+        if (val > 10.0) {
+          return 'Điểm trung bình (GPA) vượt quá mức trần cho phép (tối đa 4.00 trên thang 4 hoặc 10.0 trên thang 10).';
+        }
+        if (!isExplicitScale10 && val > 4.0 && val < 7.0) {
+          return 'Điểm trung bình (GPA) vượt quá trần thang điểm 4 (tối đa 4.00). Nếu kê khai theo thang điểm 10, vui lòng ghi rõ thang 10 (ví dụ: 8.2/10).';
+        }
+      }
+    }
+  }
+
+  if (reqId === 'ethics-score') {
+    const scale100Match = withoutDatesAndYears.match(
+      /(-?\d+(?:[.,]\d+)?)\s*\/\s*100\b/
+    );
+    if (scale100Match) {
+      const score = parseFloat(scale100Match[1].replace(',', '.'));
+      if (!isNaN(score) && (score < 0 || score > 100)) {
+        return 'Điểm rèn luyện không được vượt quá trần 100 điểm (từ 0 đến 100).';
+      }
+    } else {
+      const cleaned = withoutDatesAndYears.replace(
+        /thang(?:\s*điểm)?\s*100\b/gi,
+        ' '
+      );
+      const numberMatches = Array.from(cleaned.matchAll(/-?\d+(?:[.,]\d+)?/g));
+      for (const m of numberMatches) {
+        const val = parseFloat(m[0].replace(',', '.'));
+        if (!isNaN(val) && (val < 0 || val > 100)) {
+          return 'Điểm rèn luyện không được vượt quá trần 100 điểm (từ 0 đến 100).';
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = ({
@@ -150,15 +247,25 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
         f.size > 1024 * 1024
           ? `${sizeMb} MB`
           : `${Math.max(1, Math.round(f.size / 1024))} KB`;
+      const evId = `ev-new-${Date.now()}-${i}`;
+      const objectUrl =
+        typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
+          ? URL.createObjectURL(f)
+          : undefined;
+      saveEvidenceFile(evId, f, f.name, ext, {
+        size: sizeStr,
+        reqId,
+      }).catch(() => {});
 
       return {
-        id: `ev-new-${Date.now()}-${i}`,
+        id: evId,
         name: f.name,
         fileType: ext,
         size: sizeStr,
         uploadedAt: new Date().toLocaleDateString('vi-VN'),
         status: 'ready',
         isNewlyAddedSupplement: isSupplementMode,
+        url: objectUrl,
       };
     });
 
@@ -211,11 +318,12 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
       return;
     }
 
-    const finalValue = content.trim();
-    if (!finalValue) {
-      setValidationError('Vui lòng nhập tên kê khai.');
+    const validationMsg = validateDeclarationValue(reqId, content);
+    if (validationMsg) {
+      setValidationError(validationMsg);
       return;
     }
+    const finalValue = content.trim();
 
     const metadataObj: Record<string, string> = {
       criterionId: criterion.id,
@@ -492,7 +600,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
               </div>
             ) : (
               <div className="p-2 text-center text-[11.5px] text-[#64748B] italic bg-[#F8FAFC] rounded-[7px] border border-dashed border-[#CBD5E1]">
-                Chưa có tệp minh chứng nào được đính kèm.
+                Chưa có tệp nào được tải lên.
               </div>
             )}
           </div>

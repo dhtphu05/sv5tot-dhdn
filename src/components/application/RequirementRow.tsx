@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { ApplicationRequirement, ApplicationDeclaration, ApplicationEvidence } from '../../demo/fixtures/studentApplication';
 import { CriterionDefinition, RequirementStatus } from '../../tokens';
 import { StatusChip } from '../status/StatusChip';
@@ -207,9 +207,25 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
 
         {/* Declaration value on mobile */}
         <div className="bg-[#F8FBFD] p-2.5 rounded-[8px] border border-[#E3EBF1]">
-          <span className="text-[10.5px] font-bold text-[#607483] block uppercase tracking-wider mb-1">
-            Kê khai của sinh viên
-          </span>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="text-[10.5px] font-bold text-[#607483] block uppercase tracking-wider">
+              Kê khai của sinh viên
+            </span>
+            {!readOnly && !isSupplementMode && declarationCount === 1 && primaryDecl && onDeleteDeclaration && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteDeclaration(requirement.id, primaryDecl.id);
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#DC2626] hover:text-[#B91C1C] cursor-pointer"
+                title="Xóa kê khai"
+              >
+                <Trash2 size={12} />
+                <span>Xóa</span>
+              </button>
+            )}
+          </div>
           <div className="text-[13px] font-bold text-[#172A3A] tabular-nums">
             {displayValue || <span className="text-[#728391] italic font-normal">Chưa khai báo</span>}
           </div>
@@ -365,17 +381,33 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex flex-col min-w-0">
-              <div
-                className="text-[13px] font-bold text-[#172A3A] whitespace-normal break-words leading-snug tabular-nums"
-                title={displayValue}
-              >
-                {displayValue || <span className="text-[#728391] italic font-normal">Chưa khai báo</span>}
-              </div>
-              {displayDetail && (
-                <div className="text-[11.5px] text-[#607483] whitespace-normal break-words mt-0.5 min-w-0" title={displayDetail}>
-                  {displayDetail}
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <div
+                  className="text-[13px] font-bold text-[#172A3A] whitespace-normal break-words leading-snug tabular-nums"
+                  title={displayValue}
+                >
+                  {displayValue || <span className="text-[#728391] italic font-normal">Chưa khai báo</span>}
                 </div>
+                {displayDetail && (
+                  <div className="text-[11.5px] text-[#607483] whitespace-normal break-words mt-0.5 min-w-0" title={displayDetail}>
+                    {displayDetail}
+                  </div>
+                )}
+              </div>
+              {!readOnly && !isSupplementMode && declarationCount === 1 && primaryDecl && onDeleteDeclaration && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteDeclaration(requirement.id, primaryDecl.id);
+                  }}
+                  className="p-1.5 text-[#728391] hover:text-[#DC2626] hover:bg-[#FEE2E2]/60 rounded-[6px] transition-colors cursor-pointer shrink-0"
+                  title="Xóa kê khai"
+                  aria-label="Xóa kê khai"
+                >
+                  <Trash2 size={13.5} />
+                </button>
               )}
             </div>
           )}
