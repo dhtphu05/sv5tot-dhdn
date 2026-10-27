@@ -163,7 +163,7 @@ export const StudentApplicationBodySection: React.FC<
       <div className="bg-white rounded-[14px] p-12 border border-[#DCE7EE] shadow-2xs">
         <EmptyState
           title="Bạn chưa bắt đầu hồ sơ Sinh viên 5 tốt"
-          description="Năm học 2026–2027 đang mở đợt nhận hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng."
+          description="Năm học 2025–2026 đang mở đợt nhận hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng."
           action={{
             label: 'Bắt đầu tạo hồ sơ',
             onClick: onResetViewStateToNormal,

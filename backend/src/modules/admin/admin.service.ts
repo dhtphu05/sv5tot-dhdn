@@ -819,7 +819,7 @@ export class AdminService {
       applicationCode: 'HS-2026-DN001',
       seasonName: activeContext?.academicYearLabel || 'Năm học 2025–2026',
       institutionName: 'Trường Đại học Bách khoa – ĐH Đà Nẵng',
-      deadline: '23:59 30/11/2026 (GMT+7)',
+      deadline: '20:00 10/11/2026 (GMT+7)',
       ...(sampleVariables || {}),
     };
 

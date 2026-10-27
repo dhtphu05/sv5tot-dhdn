@@ -52,7 +52,7 @@ export interface UdnMemberUnit {
 }
 
 export const UDN_PORTAL_CONFIG = {
-  academicYear: '2026–2027',
+  academicYear: '2025–2026',
   organizer: 'Hội Sinh viên Việt Nam Đại học Đà Nẵng',
   parentOrganization: 'Đại học Đà Nẵng',
   portalName: 'Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên Đại học Đà Nẵng',

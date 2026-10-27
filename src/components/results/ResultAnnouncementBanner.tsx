@@ -20,7 +20,7 @@ export interface ResultAnnouncementBannerProps {
 export const ResultAnnouncementBanner: React.FC<ResultAnnouncementBannerProps> = ({
   resultState = 'recognized',
   awardTitle = 'Sinh viên 5 tốt cấp Đại học Đà Nẵng',
-  schoolYear = '2026–2027',
+  schoolYear = '2025–2026',
   publishedAt = '24/10/2026',
   onViewResult,
   className = '',

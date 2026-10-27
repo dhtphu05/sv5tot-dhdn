@@ -105,7 +105,7 @@ export const ADMIN_DEMO_SCENARIOS: AdminDemoScenarioConfig[] = [
     label: 'Mùa xét đang hoạt động (Tổng quan)',
     shortToolbarLabel: 'Tổng quan quản trị',
     description:
-      'Bàn điều khiển quản trị năm học 2026–2027: theo dõi 32 đơn vị đào tạo và các cảnh báo an toàn hệ thống.',
+      'Bàn điều khiển quản trị năm học 2025–2026: theo dõi 09 trường/đơn vị thành viên ĐHĐN và các cảnh báo an toàn hệ thống.',
     defaultRoute: 'overview',
   },
   {
@@ -114,7 +114,7 @@ export const ADMIN_DEMO_SCENARIOS: AdminDemoScenarioConfig[] = [
     label: 'Chuẩn bị mùa xét mới (Dự thảo)',
     shortToolbarLabel: 'Mùa xét dự thảo',
     description:
-      'Cấu hình mùa xét dự thảo năm học 2027–2028, liên kết phiên bản tiêu chí và thiết lập các mốc thời gian.',
+      'Cấu hình mùa xét dự thảo năm học 2026–2027, liên kết phiên bản tiêu chí và thiết lập các mốc thời gian.',
     defaultRoute: 'admin_season',
   },
   {

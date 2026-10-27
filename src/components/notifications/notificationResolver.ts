@@ -346,10 +346,10 @@ export function getNextStudentAction(
       kind: 'no_application',
       priority: 1,
       tone: 'brand_blue',
-      eyebrow: 'Bắt đầu hồ sơ năm học 2026–2027',
+      eyebrow: 'Bắt đầu hồ sơ năm học 2025–2026',
       title: 'Bắt đầu hồ sơ Sinh viên 5 tốt',
       description:
-        'Tạo hồ sơ cho năm học 2026–2027 để bắt đầu kê khai 5 tiêu chí xét chọn cấp Đại học Đà Nẵng.',
+        'Tạo hồ sơ cho năm học 2025–2026 để bắt đầu kê khai 5 tiêu chí xét chọn cấp Đại học Đà Nẵng.',
       actionLabel: 'Bắt đầu hồ sơ',
       target: { targetType: 'APPLICATION' },
       notificationTypeForResolver: 'system_information',
@@ -510,7 +510,7 @@ export function getNextStudentAction(
           ? `Có ${snapshot.advisoryCount} nội dung bạn có thể kiểm tra thêm.`
           : undefined,
       deadlineLabel: 'Hạn gửi hồ sơ',
-      deadlineValue: snapshot.submissionDeadlineText || '15/10/2026 · 20:00',
+      deadlineValue: snapshot.submissionDeadlineText || '10/11/2026 · 20:00',
       actionLabel: 'Kiểm tra & gửi hồ sơ',
       target: { targetType: 'PRE_SUBMIT' },
       notificationTypeForResolver: 'submission_deadline',
@@ -523,7 +523,7 @@ export function getNextStudentAction(
       kind: 'draft',
       priority: 4,
       tone: 'brand_blue',
-      eyebrow: 'Hồ sơ năm học 2026–2027',
+      eyebrow: 'Hồ sơ năm học 2025–2026',
       title: 'Hồ sơ đang hoàn thiện',
       description:
         'Bạn đã bắt đầu hồ sơ Sinh viên 5 tốt cấp Đại học Đà Nẵng. Bạn có thể tiếp tục kê khai và bổ sung minh chứng trước khi gửi hồ sơ.',

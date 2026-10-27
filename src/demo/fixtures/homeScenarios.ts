@@ -49,7 +49,7 @@ export type HomeDevScenarioId =
   | 'state_a_no_app'            // A. No application ("Bắt đầu hồ sơ Sinh viên 5 tốt")
   | 'state_b_draft_clean'       // B. Draft (Clean, 0 advisories)
   | 'state_c_draft_advisories'  // C. Draft + advisories ("Có 3 nội dung bạn có thể kiểm tra thêm")
-  | 'state_d_ready_to_submit'   // D. Ready to submit ("Kiểm tra hồ sơ trước khi gửi" · Hạn 15/10/2026 · 20:00)
+  | 'state_d_ready_to_submit'   // D. Ready to submit ("Kiểm tra hồ sơ trước khi gửi" · Hạn 10/11/2026 · 20:00)
   | 'state_e_eligibility_wait'  // E. Eligibility waiting ("Đang chờ xác nhận điều kiện nộp hồ sơ")
   | 'state_f_submitted'         // F. Submitted ("Hồ sơ đã được gửi")
   | 'state_g_under_review'      // G. Under review ("Hồ sơ đang được xem xét")
@@ -124,7 +124,7 @@ export const HOME_COHERENT_SCENARIOS: Record<
     submissionState: 'draft',
     eligibilityState: 'verified',
     deadlineState: 'active',
-    submissionDeadlineText: '15/10/2026 · 20:00',
+    submissionDeadlineText: '10/11/2026 · 20:00',
     advisoryCount: 3,
     supplementRequests: [],
     notifications: [
@@ -143,6 +143,7 @@ export const HOME_COHERENT_SCENARIOS: Record<
     submissionState: 'draft',
     eligibilityState: 'verified',
     deadlineState: 'active',
+    submissionDeadlineText: '10/11/2026 · 20:00',
     advisoryCount: 0,
     supplementRequests: [],
     notifications: [NOTIF_ELIGIBILITY_CONFIRMED],
@@ -152,13 +153,13 @@ export const HOME_COHERENT_SCENARIOS: Record<
     scenarioId: 'state_d_ready_to_submit',
     label: 'D. Kiểm tra trước khi gửi (Sắp hết hạn)',
     description:
-      'Kiểm tra hồ sơ trước khi gửi · Hạn gửi 15/10/2026 · 20:00 · Mở trực tiếp Pre-submit Review.',
+      'Kiểm tra hồ sơ trước khi gửi · Hạn gửi 10/11/2026 · 20:00 · Mở trực tiếp Pre-submit Review.',
     hasApplication: true,
     application: INITIAL_STUDENT_APPLICATION,
     submissionState: 'draft',
     eligibilityState: 'verified',
     deadlineState: 'active',
-    submissionDeadlineText: '15/10/2026 · 20:00',
+    submissionDeadlineText: '10/11/2026 · 20:00',
     isReadyToReview: true,
     advisoryCount: 2,
     supplementRequests: [],
@@ -191,7 +192,7 @@ export const HOME_COHERENT_SCENARIOS: Record<
     submissionState: 'draft',
     eligibilityState: 'not_found',
     deadlineState: 'active',
-    submissionDeadlineText: '15/10/2026 · 20:00',
+    submissionDeadlineText: '10/11/2026 · 20:00',
     advisoryCount: 2,
     supplementRequests: [],
     notifications: [],
@@ -326,12 +327,13 @@ export const HOME_COHERENT_SCENARIOS: Record<
     scenarioId: 'state_a_no_app',
     label: 'A. Sinh viên mới (Chưa tạo hồ sơ)',
     description:
-      'Bắt đầu hồ sơ Sinh viên 5 tốt năm học 2026–2027 kèm giới thiệu ngắn gọn 5 tiêu chí.',
+      'Bắt đầu hồ sơ Sinh viên 5 tốt năm học 2025–2026 kèm giới thiệu ngắn gọn 5 tiêu chí.',
     hasApplication: false,
     application: INITIAL_STUDENT_APPLICATION,
     submissionState: 'draft',
     eligibilityState: 'verified',
     deadlineState: 'active',
+    submissionDeadlineText: '10/11/2026 · 20:00',
     advisoryCount: 0,
     supplementRequests: [],
     notifications: [],

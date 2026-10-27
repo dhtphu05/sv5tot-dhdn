@@ -1,6 +1,6 @@
 /**
  * 5TOT ĐHĐN — Student Home ("Trang chủ" — Calm Orientation & Next-Action Hub)
- * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2026–2027
+ * Hội Sinh viên Việt Nam Đại học Đà Nẵng — Năm học 2025–2026
  *
  * Refactored into Feature-Sliced Widgets under src/widgets/student-home/:
  * - StudentHomeHeroBanner: Deterministic Single Primary Action Selector across all 14 states
@@ -163,7 +163,10 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
             <span>
               Đơn vị xét sơ:{' '}
               <strong className="text-[#0D78AE]">
-                {storeState.schoolReviewUnitName || application?.schoolReviewUnitName || 'Đại học Đà Nẵng'}
+                {storeState.schoolReviewUnitName ||
+                  application?.schoolReviewUnitName ||
+                  application?.student?.university ||
+                  MOCK_STUDENT.university}
               </strong>
             </span>
             {(storeState.isSchoolForwarded ||

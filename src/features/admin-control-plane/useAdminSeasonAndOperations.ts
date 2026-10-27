@@ -558,7 +558,7 @@ export function useAdminSeasonAndOperations({
       };
       setAdminAuditLogs((prev) => [auditEv, ...prev]);
       void syncAdminActionToServer(
-        '/api/v2/seasons/season-2026-2027/criteria/clone',
+        '/api/v2/seasons/season-2025-2026/criteria/clone',
         'POST',
         {
           copyFromVersionId: sourceId,
@@ -642,7 +642,7 @@ export function useAdminSeasonAndOperations({
         message: `Đã lưu cấu hình bộ tiêu chuẩn ${target.versionCode}.`,
       });
       void syncAdminActionToServer(
-        '/api/v2/seasons/season-2026-2027/criteria',
+        '/api/v2/seasons/season-2025-2026/criteria',
         'PUT',
         {
           versionId,

@@ -166,27 +166,12 @@ export function applySaveDeclarationMutation(
     detail: declData.detail,
     date: declData.date || new Date().toLocaleDateString('vi-VN'),
     metadata: declData.metadata,
-    evidenceFiles:
-      evidenceFiles.length > 0
-        ? evidenceFiles.map((f) => ({
-            ...f,
-            isNewlyAddedSupplement: isSupplementActive
-              ? true
-              : f.isNewlyAddedSupplement,
-          }))
-        : [
-            {
-              id: `ev-new-${Date.now()}`,
-              name: `Minh_chung_${declData.value
-                .replace(/\s+/g, '_')
-                .substring(0, 20)}.pdf`,
-              fileType: 'pdf',
-              size: '1.2 MB',
-              uploadedAt: new Date().toLocaleDateString('vi-VN'),
-              status: 'ready',
-              isNewlyAddedSupplement: isSupplementActive,
-            },
-          ],
+    evidenceFiles: evidenceFiles.map((f) => ({
+      ...f,
+      isNewlyAddedSupplement: isSupplementActive
+        ? true
+        : f.isNewlyAddedSupplement,
+    })),
   };
 
   return {

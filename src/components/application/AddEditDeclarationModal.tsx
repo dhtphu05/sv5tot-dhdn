@@ -426,27 +426,7 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
       detailParts.push(notes);
     }
 
-    // Default evidence fallback for test/real demo integrity if user hasn't selected a file yet
-    let finalEvidenceFiles = [...attachedFiles];
-    if (finalEvidenceFiles.length === 0) {
-      const cleanSafeName = (finalValue || 'minh_chung')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]/g, '_')
-        .substring(0, 24);
-      finalEvidenceFiles = [
-        {
-          id: `ev-auto-${Date.now()}`,
-          name: `Minh_chung_${cleanSafeName}.pdf`,
-          fileType: 'pdf',
-          size: '1.2 MB',
-          uploadedAt: new Date().toLocaleDateString('vi-VN'),
-          status: 'ready',
-          isNewlyAddedSupplement: isSupplementMode,
-        },
-      ];
-    }
+    const finalEvidenceFiles = [...attachedFiles];
 
     onSaveDeclaration(
       requirement.id,

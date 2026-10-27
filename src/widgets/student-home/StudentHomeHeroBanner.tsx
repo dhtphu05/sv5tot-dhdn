@@ -74,7 +74,9 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
           <div className="space-y-2.5 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-[7px] bg-[#E5F5FC] text-[#0D78AE] text-[12px] font-bold">
               <Sparkles size={13.5} />
-              <span>Đợt xét chọn năm học 2026–2027 đang mở</span>
+              <span>
+                Đợt xét chọn năm học {application?.student?.academicYear || '2025–2026'} đang mở
+              </span>
             </div>
             <h2 className="text-[20px] sm:text-[22px] font-extrabold text-[#172A3A] tracking-tight">
               Bắt đầu hồ sơ Sinh viên 5 tốt
@@ -89,7 +91,7 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
                 <Calendar size={14} className="text-[#0D78AE]" />
                 Hạn nhận hồ sơ:{' '}
                 <strong className="text-[#172A3A]">
-                  {storeState.submissionDeadlineText || '15/10/2026 · 20:00'}
+                  {storeState.submissionDeadlineText || '10/11/2026 · 20:00'}
                 </strong>
               </span>
             </div>
@@ -176,7 +178,10 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
               <span className="font-bold text-[#172A3A]">
                 {primarySupplement.originatingReviewStage === 'CITY'
                   ? 'Hội Sinh viên Đại học Đà Nẵng'
-                  : primarySupplement.requestingReviewUnitName || storeState.schoolReviewUnitName || 'Đại học Đà Nẵng'}{' '}
+                  : primarySupplement.requestingReviewUnitName ||
+                    storeState.schoolReviewUnitName ||
+                    application?.student?.university ||
+                    'Trường Đại học Bách khoa – ĐHĐN'}{' '}
                 yêu cầu bổ sung:{' '}
               </span>
               {primarySupplement.message}
@@ -322,7 +327,8 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
             Thời gian nhận hồ sơ đã kết thúc
           </h2>
           <p className="text-[13.5px] text-[#466474] leading-relaxed">
-            Đợt nhận hồ sơ xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học 2026–2027 đã đóng.
+            Đợt nhận hồ sơ xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng năm học{' '}
+            {application?.student?.academicYear || '2025–2026'} đã đóng.
             Bạn vẫn có thể xem lại các thông tin và minh chứng đã chuẩn bị trong hồ sơ.
           </p>
         </div>
@@ -620,7 +626,11 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
   }
 
   // 11. Two-Level Workflow States
-  const unitName = storeState.schoolReviewUnitName || application?.schoolReviewUnitName || 'Đại học Đà Nẵng';
+  const unitName =
+    storeState.schoolReviewUnitName ||
+    application?.schoolReviewUnitName ||
+    application?.student?.university ||
+    'Trường Đại học Bách khoa – ĐHĐN';
   const isNotRecommended =
     storeState.schoolPreliminaryStatus === 'not_recommended' ||
     storeState.schoolRecommendation === 'not_recommended';

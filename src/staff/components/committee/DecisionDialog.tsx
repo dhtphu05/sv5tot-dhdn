@@ -205,7 +205,7 @@ export const DecisionDialog: React.FC<DecisionDialogProps> = ({
                     Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng
                   </div>
                   <div className="text-[12px] text-[#4A6275] mt-0.5">
-                    Sinh viên đáp ứng đầy đủ tiêu chuẩn 05 tiêu chí theo Quy chế xét chọn năm học 2026–2027.
+                    Sinh viên đáp ứng đầy đủ tiêu chuẩn 05 tiêu chí theo Quy chế xét chọn năm học 2025–2026.
                   </div>
                 </div>
               </label>

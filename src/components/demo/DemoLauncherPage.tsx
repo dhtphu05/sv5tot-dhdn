@@ -141,7 +141,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
             <HsvEmblem size={38} />
             <div className="flex flex-col leading-tight min-w-0">
               <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#4A6275]">
-                THÀNH ĐOÀN ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM TP. ĐÀ NẴNG
+                ĐẠI HỌC ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
               </span>
               <span className="text-[14.5px] font-extrabold text-[#0B64A0] tracking-tight truncate">
                 Hệ thống xét duyệt Sinh viên 5 tốt cấp Đại học Đà Nẵng
@@ -188,7 +188,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 className="inline-flex items-center gap-1.5 h-[36px] px-3.5 rounded-[8px] bg-[#0F2335] hover:bg-[#1B3752] text-white text-[13px] font-bold transition-colors cursor-pointer"
               >
                 <FolderKanban size={14} className="text-[#7CC4EE]" />
-                <span>Thẩm định cấp TP</span>
+                <span>Thẩm định cấp ĐHĐN</span>
               </button>
             )}
 
@@ -212,7 +212,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[6px] bg-[#E5F4FC] text-[#0B64A0] text-[11.5px] font-bold mb-2">
               <span>5TOT ĐHĐN</span>
               <span>·</span>
-              <span>Năm học 2026–2027</span>
+              <span>Năm học 2025–2026</span>
             </div>
             <h1 className="text-[24px] sm:text-[26px] font-extrabold text-[#0F2335] tracking-tight leading-tight">
               5TOT ĐHĐN — Chế độ trình diễn
@@ -328,7 +328,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 </h2>
               </div>
               <span className="text-[12px] font-semibold text-[#526B7C]">
-                12 hồ sơ trong phạm vi Hội đồng · Năm học 2026–2027
+                Hồ sơ trong phạm vi Hội đồng · Năm học 2025–2026
               </span>
             </div>
 
@@ -577,7 +577,7 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                 </h2>
               </div>
               <span className="text-[12px] font-semibold text-[#526B7C]">
-                Toàn quyền cấu hình · 32 Đơn vị đào tạo · 05 Tiêu chí cấp Đại học Đà Nẵng
+                Toàn quyền cấu hình · 09 Trường thành viên ĐHĐN · 05 Tiêu chí cấp Đại học Đà Nẵng
               </span>
             </div>
 
@@ -587,19 +587,19 @@ export const DemoLauncherPage: React.FC<DemoLauncherPageProps> = ({
                   routeId: 'overview' as StaffRouteId,
                   code: 'TỔNG QUAN',
                   title: 'Tổng quan Quản trị & Cảnh báo an toàn hệ thống',
-                  desc: 'Theo dõi mốc thời gian, trạng thái mùa xét 2026–2027, đơn vị chưa nộp và tài khoản chờ kích hoạt.',
+                  desc: 'Theo dõi mốc thời gian, trạng thái mùa xét 2025–2026 (Hạn nhận hồ sơ: 10/11/2026), đơn vị chưa nộp và tài khoản chờ kích hoạt.',
                 },
                 {
                   routeId: 'admin_institutions' as StaffRouteId,
                   code: 'ĐƠN VỊ',
-                  title: 'Quản lý 32 Đơn vị đào tạo tại Đà Nẵng',
-                  desc: 'Đầy đủ ĐH Đà Nẵng, trường thành viên, phân hiệu, CĐ, trung cấp; cơ chế nộp trực tiếp / cấp trường, địa chỉ và mã định danh.',
+                  title: 'Quản lý 09 Trường & Đơn vị thành viên Đại học Đà Nẵng',
+                  desc: 'Đầy đủ 09 trường/viện/khoa/phân hiệu thuộc ĐH Đà Nẵng; cơ chế sơ tuyển cấp trường, địa chỉ và mã định danh.',
                 },
                 {
                   routeId: 'admin_users' as StaffRouteId,
                   code: 'CÁN BỘ',
                   title: 'Người dùng & Phân quyền cán bộ cấp Đại học Đà Nẵng',
-                  desc: 'Quản lý 18 tài khoản cán bộ xét duyệt, quản lý, hội đồng; kích hoạt an toàn, kiểm tra phụ trách hồ sơ trước khi đổi quyền.',
+                  desc: 'Quản lý 13 tài khoản cán bộ sơ tuyển cấp trường, xét duyệt, quản lý, hội đồng; kích hoạt an toàn trước khi đổi quyền.',
                 },
                 {
                   routeId: 'admin_criteria' as StaffRouteId,

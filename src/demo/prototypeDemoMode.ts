@@ -369,6 +369,29 @@ export function loadPersistedDemoSession(): PersistedDemoSession {
     const parsedApp = rawApp
       ? (JSON.parse(rawApp) as StudentApplicationData)
       : null;
+    if (parsedApp?.criteria) {
+      for (const crit of parsedApp.criteria) {
+        const cleanReq = (r: any) => {
+          if (!Array.isArray(r.declarations)) return;
+          for (const d of r.declarations) {
+            if (Array.isArray(d.evidenceFiles)) {
+              d.evidenceFiles = d.evidenceFiles.filter(
+                (f: any) =>
+                  !(
+                    typeof f?.id === 'string' &&
+                    (f.id.startsWith('ev-auto-') ||
+                      (f.id.startsWith('ev-new-') &&
+                        typeof f?.name === 'string' &&
+                        f.name.startsWith('Minh_chung_')))
+                  )
+              );
+            }
+          }
+        };
+        crit.requirements?.forEach(cleanReq);
+        crit.groups?.forEach((g: any) => g.requirements?.forEach(cleanReq));
+      }
+    }
     const mutatedApplication =
       isBackendMode() &&
       parsedApp &&

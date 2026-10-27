@@ -507,7 +507,7 @@ export const PrototypeDemoToolbar: React.FC<PrototypeDemoToolbarProps> = ({
                 },
                 {
                   id: 'admin_season' as StaffRouteId,
-                  label: 'Mùa xét chọn (2026–2027)',
+                  label: 'Mùa xét chọn (2025–2026)',
                 },
                 {
                   id: 'admin_criteria' as StaffRouteId,

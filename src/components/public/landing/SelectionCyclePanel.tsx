@@ -19,7 +19,7 @@ export const SelectionCyclePanel: React.FC = () => {
   return (
     <div
       id="dot-xet-chon"
-      aria-label="Thông tin đợt xét chọn năm học 2026–2027"
+      aria-label="Thông tin đợt xét chọn năm học 2025–2026"
       className="gsap-selection-panel bg-white/92 backdrop-blur-xs rounded-[16px] border border-[#DCEAF3] shadow-[0_8px_28px_rgba(13,110,176,0.055)] overflow-hidden"
     >
       {/* Top Header Strip */}
@@ -27,7 +27,7 @@ export const SelectionCyclePanel: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <Calendar size={16.5} strokeWidth={2.1} className="text-[#0D6EB0] shrink-0" />
           <span className="text-[12.5px] sm:text-[13px] font-extrabold uppercase tracking-[0.06em] text-[#243B53]">
-            THÔNG TIN ĐỢT XÉT CHỌN NĂM HỌC 2026–2027
+            THÔNG TIN ĐỢT XÉT CHỌN NĂM HỌC 2025–2026
           </span>
         </div>
 
@@ -51,7 +51,7 @@ export const SelectionCyclePanel: React.FC = () => {
               Thời hạn tiếp nhận
             </div>
             <div className="text-[15.5px] sm:text-[16.5px] font-extrabold text-[#0F2335] tabular-nums mt-0.5">
-              15/10/2026 – 20/11/2026
+              01/10/2025 – 10/11/2026
             </div>
             <div className="text-[13px] text-[#526B7E] mt-0.5">
               Nộp & rà soát tại cấp Trường / Đơn vị
@@ -74,7 +74,7 @@ export const SelectionCyclePanel: React.FC = () => {
               Sinh viên chính quy
             </div>
             <div className="text-[13px] text-[#526B7E] mt-0.5">
-              Các ĐH, Học viện, Trường ĐH, CĐ tại Đà Nẵng
+              09 trường, đơn vị thành viên Đại học Đà Nẵng
             </div>
           </div>
         </div>

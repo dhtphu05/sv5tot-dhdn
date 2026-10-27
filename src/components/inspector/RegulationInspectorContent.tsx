@@ -25,7 +25,7 @@ export interface RegulationInspectorContentProps {
 
 export const RegulationInspectorContent: React.FC<RegulationInspectorContentProps> = ({
   criterion,
-  season = 'Năm học 2026–2027',
+  season = 'Năm học 2025–2026',
   focusedSectionId = null,
   onSelectCriterion,
   onScrollToTableRow,

@@ -9,7 +9,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     label: 'Danh sách toàn bộ hồ sơ đã nộp',
     shortLabel: 'Toàn bộ hồ sơ đã nộp',
     description:
-      'Tổng hợp toàn bộ hồ sơ sinh viên đã nộp trong mùa xét chọn cấp Đại học Đà Nẵng năm học 2026–2027.',
+      'Tổng hợp toàn bộ hồ sơ sinh viên đã nộp trong mùa xét chọn cấp Đại học Đà Nẵng năm học 2025–2026.',
     fileSlug: 'HoSoDaNop',
     requiredCapabilities: ['EXPORT_APPLICATIONS', 'EXPORT_OPERATIONAL_REPORTS'],
     defaultColumns: [

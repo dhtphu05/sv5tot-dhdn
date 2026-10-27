@@ -494,7 +494,7 @@ export const CommitteeResultsView: React.FC<CommitteeResultsViewProps> = ({
           <div className="flex items-center gap-2.5 text-[13px] text-[#136F3A] font-bold">
             <CheckCircle2 size={17} />
             <span>
-              Danh sách kết quả xét chọn năm học 2026–2027 đã được công bố chính thức ({summaryMetrics.publishedCount} hồ sơ).
+              Danh sách kết quả xét chọn năm học 2025–2026 đã được công bố chính thức ({summaryMetrics.publishedCount} hồ sơ).
             </span>
           </div>
         ) : publicationReadiness.undecidedCount > 0 ? (

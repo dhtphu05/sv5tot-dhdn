@@ -48,7 +48,7 @@ export const WaitingFinalResultPanel: React.FC<WaitingFinalResultPanelProps> = (
 
           <p className="text-[13.5px] text-[#334E68] leading-relaxed">
             {!hasApplication
-              ? 'Bạn chưa bắt đầu hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng trong năm học 2026–2027. Kết quả xét chọn chính thức sẽ được hiển thị tại đây sau khi bạn nộp hồ sơ và Hội đồng công bố quyết định.'
+              ? 'Bạn chưa bắt đầu hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng trong năm học 2025–2026. Kết quả xét chọn chính thức sẽ được hiển thị tại đây sau khi bạn nộp hồ sơ và Hội đồng công bố quyết định.'
               : submissionState === 'draft'
               ? 'Hồ sơ của bạn hiện đang trong quá trình chuẩn bị và chưa được gửi đến Hội đồng xét chọn. Vui lòng hoàn tất kê khai 5 tiêu chí và gửi hồ sơ trước thời hạn để tham gia đợt xét chọn.'
               : activeResult.isReviewStillOngoing

@@ -433,10 +433,13 @@ export default function App() {
     const base = HOME_COHERENT_SCENARIOS[homeScenario];
     const configuredDeadline =
       adminControlPlane.adminDeadlines.find(
-        (d) => d.id === 'dl-submission-end'
+        (d) =>
+          d.id === 'dl-t01-individual-close' ||
+          d.key === 'submission_end' ||
+          d.id === 'dl-submission-end'
       )?.dateTime ||
       base.submissionDeadlineText ||
-      '15/10/2026 · 20:00';
+      '10/11/2026 · 20:00';
     const activeSeasonYear =
       adminControlPlane.adminSeasons.find((s) => s.isCurrentActive)
         ?.schoolYear || sharedApplication.student.academicYear;
@@ -463,8 +466,14 @@ export default function App() {
       advisoryCount: isNonDemo ? 0 : base.advisoryCount,
       submissionState: appSubmissionState,
       submissionDeadlineText: configuredDeadline,
+      schoolReviewUnitName:
+        effectiveSharedApp.schoolReviewUnitName ||
+        studentIdentity.university ||
+        base.schoolReviewUnitName,
       application: {
         ...effectiveSharedApp,
+        schoolReviewUnitName:
+          effectiveSharedApp.schoolReviewUnitName || studentIdentity.university,
         student: {
           ...effectiveSharedApp.student,
           fullName: studentIdentity.fullName,

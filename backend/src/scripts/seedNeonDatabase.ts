@@ -301,17 +301,22 @@ async function main() {
     update: {
       name: 'Năm học 2025 – 2026',
       isActive: true,
+      individualSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+      individualSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
+      schoolForwardingDeadline: new Date('2026-11-20T17:00:00+07:00'),
+      collectiveSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+      collectiveSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
     },
     create: {
       id: 'season-2025-2026',
       code: '2025-2026',
       name: 'Năm học 2025 – 2026',
       isActive: true,
-      individualSubmissionStart: new Date('2025-10-01T00:00:00Z'),
-      individualSubmissionEnd: new Date('2026-11-15T23:59:59Z'),
-      schoolForwardingDeadline: new Date('2026-11-25T23:59:59Z'),
-      collectiveSubmissionStart: new Date('2025-10-01T00:00:00Z'),
-      collectiveSubmissionEnd: new Date('2026-11-20T23:59:59Z'),
+      individualSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+      individualSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
+      schoolForwardingDeadline: new Date('2026-11-20T17:00:00+07:00'),
+      collectiveSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+      collectiveSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
     },
   });
   console.log(`✅ Seeded Active AwardSeason: ${season.code} (${season.id}).`);

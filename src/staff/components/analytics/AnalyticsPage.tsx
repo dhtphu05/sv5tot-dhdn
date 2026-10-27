@@ -588,7 +588,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
                 <div className="font-extrabold text-[#0F2335] text-[13.5px]">
                   Tỷ lệ đáp ứng 04 Tiêu chuẩn tập thể
                 </div>
-                <span className="text-[11.5px] text-[#526B7C]">Mùa xét 2026–2027</span>
+                <span className="text-[11.5px] text-[#526B7C]">Mùa xét 2025–2026</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-[12px]">

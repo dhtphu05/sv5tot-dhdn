@@ -94,7 +94,7 @@ export const StudentApplicationTopBanners: React.FC<
         <ResultAnnouncementBanner
           resultState={publishedResultState}
           awardTitle="Sinh viên 5 tốt cấp Đại học Đà Nẵng"
-          schoolYear="2026–2027"
+          schoolYear={application.student?.academicYear || '2025–2026'}
           publishedAt="24/10/2026"
           onViewResult={onNavigateToResults}
         />

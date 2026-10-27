@@ -181,8 +181,8 @@ export const ApplicationPreview: React.FC<ApplicationPreviewProps> = ({
           </div>
 
           <div className="pt-3 border-t border-[#E5EFF6] flex items-center justify-between text-[11px] text-[#5A7184] font-medium">
-            <span>Đợt xét chọn cấp TP</span>
-            <span className="font-bold text-[#0D6EB0] tabular-nums">2026–2027</span>
+            <span>Đợt xét chọn cấp ĐHĐN</span>
+            <span className="font-bold text-[#0D6EB0] tabular-nums">2025–2026</span>
           </div>
         </div>
 
@@ -202,7 +202,7 @@ export const ApplicationPreview: React.FC<ApplicationPreviewProps> = ({
                   Hồ sơ Sinh viên 5 tốt · Cấp Đại học Đà Nẵng
                 </div>
                 <div className="text-[13px] text-[#526B7E] font-medium mt-0.5 truncate">
-                  Nguyễn Minh Anh · Trường ĐH Bách khoa – ĐHĐN · MSSV: 102220123 · Năm học 2026–2027
+                  Nguyễn Minh Anh · Trường ĐH Bách khoa – ĐHĐN · MSSV: 102220123 · Năm học 2025–2026
                 </div>
               </div>
 

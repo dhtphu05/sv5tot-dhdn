@@ -336,7 +336,7 @@ export const StaffApplicationQueueRouteView: React.FC<
           studentCode: app.student.studentCode,
           institutionId: app.institution.id,
           institutionName: app.institution.officialName,
-          schoolYear: app.schoolYear || '2026–2027',
+          schoolYear: app.schoolYear || '2025–2026',
           submittedAt: app.submittedAt,
           workflowStatusLabel: statusMeta.label,
           officerName: app.assignment?.officerName || 'Tổ thẩm định ĐHĐN',

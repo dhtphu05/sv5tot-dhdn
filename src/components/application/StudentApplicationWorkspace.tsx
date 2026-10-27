@@ -602,7 +602,7 @@ export const StudentApplicationWorkspace: React.FC<
                 Hồ sơ của tôi
               </h1>
               <p className="text-[12.5px] text-[#607483] mt-0.5">
-                Năm học 2026–2027 · Xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng
+                Năm học {application?.student?.academicYear || '2025–2026'} · Xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng
               </p>
             </div>
             <span className="inline-flex items-center px-2.5 py-1 rounded-[7px] bg-[#F1F5F9] text-[#475569] text-[12px] font-bold">
@@ -617,7 +617,7 @@ export const StudentApplicationWorkspace: React.FC<
           <div className="bg-white rounded-[14px] p-12 border border-[#DCE7EE] shadow-2xs">
             <EmptyState
               title="Bạn chưa bắt đầu hồ sơ Sinh viên 5 tốt"
-              description="Năm học 2026–2027 đang mở đợt nhận hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng. Hãy khởi tạo hồ sơ để kê khai 5 tiêu chí và đính kèm minh chứng."
+              description="Năm học 2025–2026 đang mở đợt nhận hồ sơ đề nghị xét chọn danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng. Hãy khởi tạo hồ sơ để kê khai 5 tiêu chí và đính kèm minh chứng."
               action={{
                 label: 'Bắt đầu hồ sơ',
                 onClick: () => {

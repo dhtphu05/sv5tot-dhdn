@@ -180,4 +180,38 @@ describe('Session Guard & Unauthenticated Redirect to /login', () => {
     assert.equal(env.mockWindow.location.pathname, '/login');
     assert.equal(afterClearResolved.store.application.student.fullName, '');
   });
+
+  it('does not auto-attach mock Minh_chung_*.pdf when saving a new declaration without uploaded evidence', async () => {
+    const { buildCleanStudentApplication } = await import(
+      '../demo/fixtures/studentApplication'
+    );
+    const { applySaveDeclarationMutation } = await import(
+      '../entities/application/studentApplicationMutators'
+    );
+
+    let app = buildCleanStudentApplication({
+      fullName: 'Trần Văn B',
+      studentId: '102240999',
+      university: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
+    });
+
+    app = applySaveDeclarationMutation(
+      app,
+      'ethics-score',
+      {
+        value: 'Điểm rèn luyện năm học 2025–2026: 100 / 100 điểm',
+        detail: 'Thang điểm 100 · Xếp loại Xuất sắc · Xác nhận: Phòng Công tác Sinh viên',
+        date: '10/09/2025',
+      },
+      [],
+      undefined,
+      false
+    );
+
+    const ethicsReq = app.criteria
+      .find((c) => c.id === 'ethics')
+      ?.requirements.find((r) => r.id === 'ethics-score');
+    assert.equal(ethicsReq?.declarations.length, 1);
+    assert.deepEqual(ethicsReq?.declarations[0].evidenceFiles, []);
+  });
 });

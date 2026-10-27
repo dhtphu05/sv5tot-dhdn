@@ -295,6 +295,7 @@ export function buildCleanStudentApplication(params: {
       academicYear: INITIAL_STUDENT_APPLICATION.student.academicYear,
     },
     trainingInstitutionName: params.university,
+    schoolReviewUnitName: params.university || 'Trường Đại học Bách khoa – ĐHĐN',
     criteria: emptyCriteria,
   };
 }
