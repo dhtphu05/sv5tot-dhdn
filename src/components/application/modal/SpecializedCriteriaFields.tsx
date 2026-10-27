@@ -283,8 +283,8 @@ export const SpecializedCriteriaFields: React.FC<SpecializedCriteriaFieldsProps>
             </div>
           )}
 
-          {/* 3. Hoạt động tình nguyện & Hiến máu (TC4.1) */}
-          {reqId === 'volunteer-activities' && (
+          {/* 3. Hoạt động tình nguyện & Hiến máu (TC4.1 & TC4.2) */}
+          {(reqId === 'volunteer-activities' || reqId === 'volunteer-campaign') && (
             <div className="space-y-4 p-4 bg-[#F8FBFD] border border-[#DCE7EE] rounded-[12px]">
               <div>
                 <label className="block text-[12.5px] font-semibold text-[#172A3A] mb-1.5">

@@ -80,9 +80,9 @@ export const RequirementGroupHeader: React.FC<RequirementGroupHeaderProps> = ({
 
         <div className="flex items-center gap-2 min-w-0">
           <Layers size={13.5} className="text-[#4B6476] shrink-0" />
-          {/* Section 1 & 14: Title in normal title casing, allowed up to 2 lines without premature truncation */}
+          {/* Full group title without truncation */}
           <span
-            className="text-[13px] font-bold text-[#1B3242] line-clamp-2 leading-snug"
+            className="text-[13px] font-bold text-[#1B3242] whitespace-normal break-words leading-snug"
             title={group.title}
           >
             {group.title}
@@ -92,7 +92,7 @@ export const RequirementGroupHeader: React.FC<RequirementGroupHeaderProps> = ({
 
       {/* Column 2: Clean Rule Badge (Section 16: e.g. [Cần ít nhất 1 nội dung]) */}
       <div className="grid-col-2 px-6 border-l border-[#E3EBF1] min-w-0 flex items-center h-full">
-        <span className="text-[11px] font-semibold text-[#3D5A6C] bg-white/90 border border-[#CEE1ED] px-2 py-0.5 rounded-[5px] shrink-0">
+        <span className="text-[11px] font-semibold text-[#3D5A6C] bg-white/90 border border-[#CEE1ED] px-2 py-0.5 rounded-[5px] whitespace-normal break-words leading-snug">
           {group.ruleBadge}
         </span>
       </div>

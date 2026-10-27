@@ -198,11 +198,11 @@ export function buildCriteriaFromDefinitions(
             totalDays += dayMatch ? parseInt(dayMatch[1], 10) : 1;
           }
         }
-        resolvedShortSummary = `${totalActivities} hoạt động đã khai · ${totalEvidence} minh chứng · ${totalDays}/5 ngày tích lũy${
+        resolvedShortSummary = `${totalActivities} hoạt động đã khai · ${totalEvidence} minh chứng · ${totalDays}/3 ngày tình nguyện${
           bloodCount > 0 ? ` (${bloodCount} lần hiến máu)` : ''
         }`;
       } else if (critDef.id === 'physical') {
-        resolvedShortSummary = `${declaredReqs.length}/2 hình thức đã kê khai · ${totalEvidence} minh chứng`;
+        resolvedShortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
       } else {
         resolvedShortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
       }

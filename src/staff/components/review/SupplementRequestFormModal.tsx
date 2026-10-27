@@ -138,7 +138,7 @@ export const SupplementRequestFormModal: React.FC<
     const draftText =
       initialDraftMessage ||
       (scope.criterionId === 'volunteer'
-        ? `Kính gửi sinh viên, minh chứng cho nội dung "${targetContentLabel}" chưa thể hiện rõ số ngày hoặc mốc thời gian hoạt động thực tế theo quy định (tối thiểu 05 ngày). Đề nghị bạn bổ sung giấy xác nhận có con dấu xác nhận hợp lệ.`
+        ? `Kính gửi sinh viên, minh chứng cho nội dung "${targetContentLabel}" chưa thể hiện rõ số ngày hoặc mốc thời gian hoạt động thực tế theo quy định (tối thiểu 03 ngày tình nguyện/năm). Đề nghị bạn bổ sung giấy xác nhận có con dấu xác nhận hợp lệ.`
         : scope.criterionId === 'academic'
         ? `Kính gửi sinh viên, minh chứng bảng điểm cho nội dung "${targetContentLabel}" cần bổ sung bảng điểm chính thức cả năm học 2025–2026 có xác nhận của Phòng Đào tạo.`
         : `Kính gửi sinh viên, để đảm bảo tính xác thực cho nội dung "${targetContentLabel}", đề nghị bạn bổ sung văn bản minh chứng có đầy đủ con dấu, chữ ký của đơn vị ban hành trong thời hạn quy định.`);

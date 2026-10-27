@@ -45,11 +45,11 @@ export function syncCriteriaWithUpdate(
 
     let shortSummary = crit.shortSummary;
     if (crit.id === 'volunteer') {
-      const volReq = updatedReqs.find((r) => r.id === 'volunteer-activities');
-      const totalActivities = volReq?.declarations?.length || 0;
+      const allDecls = updatedReqs.flatMap((r) => r.declarations || []);
+      const totalActivities = allDecls.length;
       let totalDays = 0;
       let bloodCount = 0;
-      for (const d of volReq?.declarations || []) {
+      for (const d of allDecls) {
         const combined = `${d.value} ${d.detail || ''}`.toLowerCase();
         if (
           d.metadata?.volActivityType === 'blood_donation' ||
@@ -58,19 +58,19 @@ export function syncCriteriaWithUpdate(
         ) {
           bloodCount++;
           totalDays += 1;
-        } else if (d.metadata?.days) {
-          const p = parseInt(d.metadata.days, 10);
+        } else if (d.metadata?.days || d.metadata?.volDaysCount) {
+          const p = parseInt(d.metadata.days || d.metadata.volDaysCount || '1', 10);
           totalDays += isNaN(p) ? 1 : p;
         } else {
           const dayMatch = combined.match(/(\d+)\s*ngày/i);
           totalDays += dayMatch ? parseInt(dayMatch[1], 10) : 1;
         }
       }
-      shortSummary = `${totalActivities} hoạt động đã khai · ${totalEvidence} minh chứng · ${totalDays}/5 ngày tích lũy${
+      shortSummary = `${totalActivities} hoạt động đã khai · ${totalEvidence} minh chứng · ${totalDays}/3 ngày tình nguyện${
         bloodCount > 0 ? ` (${bloodCount} lần hiến máu)` : ''
       }`;
     } else if (crit.id === 'physical') {
-      shortSummary = `${declaredReqs.length}/2 hình thức đã kê khai · ${totalEvidence} minh chứng`;
+      shortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
     } else {
       shortSummary = `${declaredReqs.length} nội dung đã kê khai · ${totalEvidence} minh chứng`;
     }

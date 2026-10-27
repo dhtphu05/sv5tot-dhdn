@@ -134,14 +134,11 @@ export const CriterionRequirementRow: React.FC<CriterionRequirementRowProps> = (
               </button>
             </div>
 
-            <div className="text-[12.5px] text-[#607483] flex items-center gap-1.5 flex-wrap">
-              {reqDef.ruleBadge && (
-                <span className="font-medium text-[#334E68]">
-                  {reqDef.ruleBadge} ·
-                </span>
-              )}
-              {reqDef.ruleHelper && <span>{reqDef.ruleHelper}</span>}
-            </div>
+            {reqDef.ruleHelper && reqDef.ruleHelper !== reqDef.title && (
+              <div className="text-[12.5px] text-[#607483] flex items-center gap-1.5 flex-wrap">
+                <span>{reqDef.ruleHelper}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-2.5 text-[12.5px] text-[#607483] pt-1 flex-wrap">
               {declarations.length > 0 ? (

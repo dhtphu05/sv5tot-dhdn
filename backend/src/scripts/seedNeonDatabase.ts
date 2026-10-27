@@ -360,7 +360,7 @@ async function main() {
       title: 'Tình nguyện tốt',
       shortTitle: 'Tình nguyện',
       displayOrder: 4,
-      ruleConfig: { minVolunteerDays: 5 },
+      ruleConfig: { minVolunteerDays: 3 },
     },
     {
       track: 'INDIVIDUAL',

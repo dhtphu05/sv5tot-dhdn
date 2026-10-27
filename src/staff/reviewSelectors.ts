@@ -1263,11 +1263,10 @@ export function calculateVolunteerAggregation(
   threshold: number;
   summaryText: string;
 } {
-  const decls = getDeclarationsForRequirement(
-    studentApp,
-    'volunteer',
-    'volunteer-activities'
-  );
+  const decls = [
+    ...getDeclarationsForRequirement(studentApp, 'volunteer', 'volunteer-campaign'),
+    ...getDeclarationsForRequirement(studentApp, 'volunteer', 'volunteer-activities'),
+  ];
   const activityCount = decls.length;
   let totalDaysDeclared = 0;
   let bloodDonationCount = 0;
@@ -1282,8 +1281,8 @@ export function calculateVolunteerAggregation(
     if (isBlood) {
       bloodDonationCount += 1;
       totalDaysDeclared += 1; // 1 blood donation = 1 volunteer day equivalent per regulation example
-    } else if (d.metadata?.days) {
-      const parsed = parseInt(d.metadata.days, 10);
+    } else if (d.metadata?.days || d.metadata?.volDaysCount) {
+      const parsed = parseInt(d.metadata.days || d.metadata.volDaysCount || '1', 10);
       totalDaysDeclared += isNaN(parsed) ? 1 : parsed;
     } else {
       const dayMatch = combinedText.match(/(\d+)\s*ngày/i);
@@ -1295,7 +1294,7 @@ export function calculateVolunteerAggregation(
     }
   }
 
-  const threshold = 5;
+  const threshold = 3;
   const thresholdMet = totalDaysDeclared >= threshold;
 
   return {

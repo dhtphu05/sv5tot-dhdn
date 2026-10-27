@@ -93,10 +93,10 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
   if (declarationCount === 0) {
     if (isAlternativeOption && isGroupSatisfied) {
       displayValue = 'Phương án khác';
-      displayDetail = 'Tùy chọn bổ sung (không bắt buộc)';
+      displayDetail = '';
     } else {
       displayValue = 'Chưa kê khai';
-      displayDetail = requirement.ruleBadge || 'Tùy chọn phù hợp';
+      displayDetail = '';
     }
   } else if (declarationCount > 1) {
     const unitLabel =
@@ -106,17 +106,17 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
         ? 'hoạt động tình nguyện'
         : requirement.criterionId === 'physical'
         ? 'thành tích'
-        : requirement.id === 'academic-nckh'
-        ? 'thành tích nghiên cứu'
-        : requirement.id === 'academic-paper'
-        ? 'bài báo'
+        : requirement.id === 'academic-nckh' || requirement.id === 'academic-thesis'
+        ? 'công trình / đề tài'
+        : requirement.id === 'academic-paper' || requirement.id === 'academic-presentation'
+        ? 'bài báo / báo cáo'
         : requirement.id === 'integration-lang'
         ? 'chứng chỉ ngoại ngữ'
-        : requirement.id === 'ethics-commendation'
+        : requirement.id === 'ethics-commendation' || requirement.id === 'volunteer-award' || requirement.id === 'integration-union-award'
         ? 'khen thưởng'
-        : requirement.id === 'ethics-politics'
-        ? 'cuộc thi'
-        : 'thành tích';
+        : requirement.id === 'ethics-politics-team' || requirement.id === 'ethics-politics-paper'
+        ? 'cuộc thi / tham luận'
+        : 'nội dung';
     displayValue = `${declarationCount} ${unitLabel} đã kê khai`;
     displayDetail = primaryDecl
       ? `${primaryDecl.value} (+${declarationCount - 1} nội dung khác)`
@@ -190,17 +190,12 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
               {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
             <div className="min-w-0">
-              <span className="text-[13.5px] font-bold text-[#172A3A] leading-snug">
+              <span className="text-[13.5px] font-bold text-[#172A3A] leading-relaxed whitespace-normal break-words block">
                 {requirement.code && (
                   <span className="text-[#0D78AE] font-bold mr-1.5">{requirement.code}</span>
                 )}
                 {requirement.title}
               </span>
-              <div className="mt-1">
-                <span className="text-[10.5px] font-semibold text-[#466474] bg-[#EAF6FC] px-1.5 py-0.5 rounded-[4px]">
-                  {requirement.ruleBadge}
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -311,29 +306,15 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
               <ChevronRight size={12.5} strokeWidth={2.0} />
             )}
           </div>
-          <div className="flex flex-col min-w-0 flex-1">
+          <div className="flex flex-col min-w-0 flex-1 py-0.5">
             <span
-              className="text-[13px] font-semibold text-[#172A3A] leading-snug whitespace-normal break-words"
-              title={`${requirement.code ? `${requirement.code} · ` : ''}${requirement.title}`}
+              className="text-[13px] font-semibold text-[#172A3A] leading-relaxed whitespace-normal break-words"
             >
               {requirement.code && (
                 <span className="text-[#0D78AE] font-bold mr-1.5 text-[12px]">{requirement.code}</span>
               )}
               {requirement.title}
             </span>
-            <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-              <span className="text-[10.5px] font-semibold text-[#466474] bg-[#EAF6FC] px-1.5 py-0.2 rounded-[4px] shrink-0">
-                {requirement.ruleBadge}
-              </span>
-              {requirement.ruleHelper && (
-                <span
-                  className="text-[11px] text-[#728391] truncate min-w-0 block"
-                  title={requirement.ruleHelper}
-                >
-                  · {requirement.ruleHelper}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
@@ -350,11 +331,6 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
                   }`}
                 >
                   {isAlternativeOption && isGroupSatisfied ? 'Phương án khác' : 'Chưa kê khai'}
-                </span>
-                <span className="text-[11px] text-[#728391] truncate mt-0.5">
-                  {isAlternativeOption && isGroupSatisfied
-                    ? 'Tùy chọn bổ sung · Chưa kê khai'
-                    : requirement.ruleBadge || 'Tùy chọn phù hợp'}
                 </span>
               </div>
               {!readOnly && (

@@ -87,7 +87,6 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 }) => {
   const token = CRITERIA[criterion.id];
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-  const [showAllOptionsMap, setShowAllOptionsMap] = useState<Record<string, boolean>>({});
 
   const toggleGroupCollapse = (groupId: string) => {
     setCollapsedGroups((prev) => ({
@@ -158,7 +157,7 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
           }
         }
       }
-      return `${totalActivities} hoạt động · ${totalDays}/5 ngày tích lũy${
+      return `${totalActivities} hoạt động · ${totalDays}/3 ngày tình nguyện${
         bloodDonations > 0 ? ` (${bloodDonations} lần hiến máu)` : ''
       }`;
     }
@@ -167,7 +166,7 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
     ).length;
 
     if (criterion.id === 'physical') {
-      return `${declaredCount} hình thức đã kê khai`;
+      return `${declaredCount} nội dung đã kê khai`;
     }
     return `${declaredCount} nội dung đã kê khai`;
   };
@@ -225,11 +224,11 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 
           <div className="flex flex-col min-w-0">
             {/* Primary line: Canonical criterion title never truncated */}
-            <span className="text-[16px] xl:text-[17px] font-bold text-[#172A3A] tracking-tight whitespace-nowrap">
+            <span className="text-[16px] xl:text-[17px] font-bold text-[#172A3A] tracking-tight whitespace-normal break-words">
               {criterion.name}
             </span>
             {/* Secondary line: Factual declaration count with evidence summary */}
-            <span className="text-[11.5px] text-[#607483] font-medium truncate mt-0.5 tabular-nums">
+            <span className="text-[11.5px] text-[#607483] font-medium whitespace-normal break-words mt-0.5 tabular-nums">
               {hasDeclaredItems &&
               criterion.shortSummary &&
               criterion.shortSummary.startsWith('0 ')
@@ -241,7 +240,7 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 
         {/* Column 2: Requirement groups structure hint (Clean & quiet) */}
         <div className="grid-col-2 px-6 border-l border-[#E3EBF1] min-w-0 text-[12.5px] text-[#607483] font-medium flex items-center h-full">
-          <span className="truncate">
+          <span className="whitespace-normal break-words">
             {totalGroups > 1
               ? `${totalGroups} nhóm tiêu chuẩn`
               : 'Yêu cầu quy định'}
@@ -300,26 +299,15 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
                       onToggleCollapse={() => toggleGroupCollapse(group.id)}
                     />
 
-                    {/* Group Option Rows (Level 3 - declared-only in review mode with expandable alternatives) */}
+                    {/* Group Option Rows (Level 3 - always display all official criteria rows) */}
                     {!isGroupCollapsed && (() => {
                       const isAtLeastNOrOptional =
                         group.groupType === 'AT_LEAST_N' || group.groupType === 'OPTIONAL';
                       const declaredRequirements = group.requirements.filter(
                         (r) => r.declarations && r.declarations.length > 0
                       );
-                      const undeclaredRequirements = group.requirements.filter(
-                        (r) => !r.declarations || r.declarations.length === 0
-                      );
-                      const showAll = !!showAllOptionsMap[group.id];
 
-                      const visibleRequirements =
-                        isAtLeastNOrOptional && !showAll
-                          ? declaredRequirements.length > 0
-                            ? declaredRequirements
-                            : readOnly
-                            ? []
-                            : group.requirements
-                          : group.requirements;
+                      const visibleRequirements = group.requirements;
 
                       const declaredCountInGroup = declaredRequirements.length;
                       const isGroupSatisfied =
@@ -328,30 +316,6 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
                           : group.groupType === 'OPTIONAL'
                           ? true
                           : false;
-
-                      if (
-                        isAtLeastNOrOptional &&
-                        declaredRequirements.length === 0 &&
-                        !showAll &&
-                        readOnly
-                      ) {
-                        return (
-                          <div className="px-6 py-4 bg-[#F8FAFC] border-t border-[#EBF1F5] flex flex-col sm:flex-row items-center justify-between gap-2">
-                            <span className="text-[12.5px] text-[#64748B]">
-                              Chưa có kê khai cho nhóm tiêu chuẩn này (Cần đạt ít nhất {group.minSelections || 1} hình thức).
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowAllOptionsMap((prev) => ({ ...prev, [group.id]: true }))
-                              }
-                              className="text-[12px] font-semibold text-[#0D78AE] hover:underline cursor-pointer select-none"
-                            >
-                              Xem các hình thức lựa chọn ({group.requirements.length})
-                            </button>
-                          </div>
-                        );
-                      }
 
                       return (
                         <div className="divide-y divide-[#EBF1F5] bg-white">
@@ -398,39 +362,6 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
                               />
                             );
                           })}
-
-                          {/* Expand / Collapse toggles for unselected alternative options */}
-                          {isAtLeastNOrOptional &&
-                            declaredRequirements.length > 0 &&
-                            undeclaredRequirements.length > 0 &&
-                            (!showAll ? (
-                              <div className="px-6 py-2.5 bg-[#F8FAFC] flex items-center justify-between border-t border-[#EBF1F5]">
-                                <span className="text-[12px] text-[#64748B]">
-                                  Đã kê khai {declaredRequirements.length}/{group.requirements.length} hình thức lựa chọn.
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setShowAllOptionsMap((prev) => ({ ...prev, [group.id]: true }))
-                                  }
-                                  className="text-[12px] font-semibold text-[#0D78AE] hover:text-[#0B64A0] hover:underline cursor-pointer select-none"
-                                >
-                                  Xem các hình thức khác (+{undeclaredRequirements.length})
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="px-6 py-2 bg-[#F8FAFC] flex items-center justify-end border-t border-[#EBF1F5]">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setShowAllOptionsMap((prev) => ({ ...prev, [group.id]: false }))
-                                  }
-                                  className="text-[12px] font-semibold text-[#64748B] hover:text-[#0F172A] hover:underline cursor-pointer select-none"
-                                >
-                                  Thu gọn các hình thức chưa kê khai
-                                </button>
-                              </div>
-                            ))}
                         </div>
                       );
                     })()}

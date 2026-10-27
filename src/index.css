@@ -127,7 +127,7 @@
 */
 .app-table-grid {
   display: grid;
-  grid-template-columns: 34% 28% 22% 16%;
+  grid-template-columns: 44% 24% 18% 14%;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -135,7 +135,7 @@
 
 @media (min-width: 1440px) {
   .app-table-grid {
-    grid-template-columns: 34% 28% 22% 16%;
+    grid-template-columns: 44% 24% 18% 14%;
   }
 }
 

@@ -261,7 +261,7 @@ Quyết định số: 12 QĐ/ĐHĐN-HSV (ngày 22/9/2022) — Mục I.2.3: TIÊU
       guidanceNote: 'Hệ thống hỗ trợ kê khai nhiều hoạt động tình nguyện cộng dồn số ngày và đính kèm minh chứng độc lập.',
     },
     importantNotes: [
-      'Đạt 01 trong 03 tiêu chuẩn: (1) Có giấy chứng nhận tham gia Mùa hè xanh, Xuân tình nguyện – Đông yêu thương, hoặc Tiếp sức mùa thi; (2) Tham gia ít nhất 03 ngày tình nguyện/năm cộng dồn (hoặc 05 ngày tích lũy); (3) Được giấy khen cấp trường trở lên về hoạt động tình nguyện.',
+      'Đạt 01 trong 03 tiêu chuẩn: (1) Có giấy chứng nhận tham gia Mùa hè xanh, Xuân tình nguyện – Đông yêu thương, hoặc Tiếp sức mùa thi; (2) Tham gia ít nhất 03 ngày tình nguyện/năm cộng dồn; (3) Được giấy khen cấp trường trở lên về hoạt động tình nguyện.',
       'Ví dụ quy chuẩn theo QĐ 12 QĐ/ĐHĐN-HSV: Sinh viên A tham gia 01 ngày tình nguyện tại các mái ấm, nhà mở + 01 lần hiến máu tình nguyện + 01 ngày Chủ nhật xanh => đủ tiêu chuẩn về số ngày tình nguyện.',
     ],
     source: {

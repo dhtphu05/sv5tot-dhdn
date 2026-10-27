@@ -412,9 +412,8 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
               >
                 {isEditMode ? 'Chỉnh sửa kê khai' : 'Thêm kê khai'}
               </h3>
-              <p className="text-[11.5px] text-[#607483] truncate">
-                {criterion.name} · {requirement.code ? `${requirement.code} · ` : ''}
-                {requirement.title}
+              <p className="text-[11.5px] text-[#607483]">
+                {criterion.name}{requirement.code ? ` · Mã tiêu chuẩn ${requirement.code}` : ''}
               </p>
             </div>
           </div>
@@ -432,14 +431,16 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5 space-y-4">
           {/* Rule Guidance Context Pill */}
-          <div className="p-3 bg-[#F4F9FD] border border-[#DCEBF4] rounded-[10px] text-[12px] text-[#1E3A4D] flex items-start gap-2.5">
+          <div className="p-3 bg-[#F4F9FD] border border-[#DCEBF4] rounded-[10px] text-[12.5px] text-[#1E3A4D] flex items-start gap-2.5">
             <Info size={15} className="text-[#0D78AE] shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <span className="font-semibold text-[#0D78AE] mr-1">
-                {requirement.ruleBadge || 'Tiêu chuẩn xét chọn'}:
-              </span>
-              <span className="text-[#354E5F] leading-relaxed">
-                {requirement.ruleHelper || requirement.title}
+              {requirement.code && (
+                <span className="font-bold text-[#0D78AE] mr-1.5">
+                  {requirement.code}:
+                </span>
+              )}
+              <span className="text-[#172A3A] font-medium leading-relaxed whitespace-normal break-words">
+                {requirement.title}
               </span>
             </div>
           </div>

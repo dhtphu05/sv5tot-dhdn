@@ -352,9 +352,9 @@ describe('5TOT ĐHĐN — AI Review Copilot (AI-UX2 Suite)', () => {
       assert.ok(volAgg);
       assert.equal(volAgg.activityCount, 3);
       assert.equal(volAgg.bloodDonationCount, 1);
-      assert.equal(volAgg.threshold, 5);
+      assert.equal(volAgg.threshold, 3);
       assert.equal(volAgg.thresholdMet, true);
-      assert.ok(volAgg.totalDaysDeclared >= 5);
+      assert.ok(volAgg.totalDaysDeclared >= 3);
     });
   });
 });
