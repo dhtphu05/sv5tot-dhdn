@@ -656,6 +656,43 @@ export const demoServicesAdapter: DomainServicesBundle = {
       return updated;
     },
 
+    async deleteDeclaration({ applicationId, requirementId, declarationId, actor }) {
+      const app =
+        demoStudentApps.get(applicationId) || structuredClone(STUDENT_APPLICATION_FIXTURE);
+      const nextCriteria = app.criteria.map((c: any) => {
+        const updateReqs = (reqs: any[]) =>
+          reqs.map((r: any) => {
+            if (r.id !== requirementId) return r;
+            const nextDecls = (r.declarations || []).filter((d: any) => d.id !== declarationId);
+            return {
+              ...r,
+              declarations: nextDecls,
+              status: nextDecls.length > 0 ? r.status : 'undeclared',
+              isOptionalEmpty: nextDecls.length === 0,
+            };
+          });
+        return {
+          ...c,
+          requirements: updateReqs(c.requirements || []),
+          groups: c.groups
+            ? c.groups.map((g: any) => ({ ...g, requirements: updateReqs(g.requirements || []) }))
+            : c.groups,
+        };
+      });
+      const updated: StudentApplicationData = { ...app, criteria: nextCriteria };
+      demoStudentApps.set(applicationId, updated);
+      recordDemoAudit({
+        track: 'INDIVIDUAL',
+        applicationId,
+        action: 'DELETE_INDIVIDUAL_DECLARATION',
+        actorId: actor.id,
+        actorName: actor.name,
+        actorRole: actor.role,
+        details: `Xóa kê khai ${declarationId} - yêu cầu ${requirementId}`,
+      });
+      return updated;
+    },
+
     async submitToSchoolReview({ applicationId, actor }) {
       const app =
         demoStudentApps.get(applicationId) || structuredClone(STUDENT_APPLICATION_FIXTURE);

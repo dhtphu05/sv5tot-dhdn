@@ -186,6 +186,18 @@ export const backendServicesAdapter: DomainServicesBundle = {
       return res.data;
     },
 
+    async deleteDeclaration({ applicationId, requirementId, declarationId, actor }) {
+      const res = await apiRequest<{ success: boolean; data: StudentApplicationData }>(
+        `/api/v2/portal/individual/applications/${encodeURIComponent(applicationId)}/declarations/${encodeURIComponent(declarationId)}`,
+        {
+          method: 'DELETE',
+          actor: toActorHeader(actor),
+          body: { requirementId, actor },
+        }
+      );
+      return res.data;
+    },
+
     async submitToSchoolReview({ applicationId, actor }) {
       const res = await apiRequest<{
         success: boolean;

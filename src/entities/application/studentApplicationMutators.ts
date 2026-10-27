@@ -152,7 +152,7 @@ export function applySaveDeclarationMutation(
             value: declData.value,
             detail: declData.detail,
             date: declData.date || d.date,
-            metadata: { ...d.metadata, ...declData.metadata },
+            metadata: declData.metadata,
             evidenceFiles,
           };
         }),
@@ -337,6 +337,14 @@ export function findCriterionAndRequirementById(
     const r = c.requirements.find((req) => req.id === reqId);
     if (r) {
       return { criterion: c, requirement: r };
+    }
+    if (c.groups) {
+      for (const grp of c.groups) {
+        const gr = grp.requirements.find((req) => req.id === reqId);
+        if (gr) {
+          return { criterion: c, requirement: gr };
+        }
+      }
     }
   }
   return { criterion: null, requirement: null };

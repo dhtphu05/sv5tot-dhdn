@@ -925,6 +925,104 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     res.status(200).json({ success: true, data: app });
   });
 
+  router.delete('/individual/applications/:id/declarations/:declarationId', (req: Request, res: Response): void => {
+    const { id, declarationId } = req.params;
+    const { requirementId } = (req.body || {}) as { requirementId?: string };
+
+    const app = portalState.studentApplications[id];
+    if (!app) {
+      res.status(404).json({
+        success: false,
+        errorCode: 'APPLICATION_NOT_FOUND',
+        error: `Không tìm thấy hồ sơ ${id}`,
+      });
+      return;
+    }
+
+    if (Array.isArray(app.criteria)) {
+      for (const crit of app.criteria) {
+        if (Array.isArray(crit.requirements)) {
+          for (const reqObj of crit.requirements) {
+            if (!requirementId || reqObj.id === requirementId) {
+              if (Array.isArray(reqObj.declarations)) {
+                reqObj.declarations = reqObj.declarations.filter(
+                  (d: Record<string, any>) => d.id !== declarationId
+                );
+                if (reqObj.declarations.length === 0) {
+                  reqObj.status = 'undeclared';
+                  reqObj.isOptionalEmpty = true;
+                }
+              }
+            }
+          }
+          const declaredReqCount = crit.requirements.filter(
+            (r: Record<string, any>) => Array.isArray(r.declarations) && r.declarations.length > 0
+          ).length;
+          const totalCritEvidence = crit.requirements.reduce(
+            (sum: number, r: Record<string, any>) =>
+              sum +
+              (r.declarations || []).reduce(
+                (dSum: number, d: Record<string, any>) => dSum + (d.evidenceFiles?.length || 0),
+                0
+              ),
+            0
+          );
+          crit.statusLabel = declaredReqCount > 0 ? 'Đã kê khai' : 'Chưa kê khai';
+          crit.shortSummary =
+            crit.id === 'physical'
+              ? `${declaredReqCount}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
+              : `${declaredReqCount} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
+        }
+      }
+    }
+
+    const staffIdx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
+    if (staffIdx >= 0) {
+      const rec = portalState.individualStaffRecords[staffIdx];
+      let totalDecl = 0;
+      let totalEv = 0;
+      const updatedCriteriaReview = (rec.criteriaReview || createDefaultCriteriaReviewList()).map(
+        (cr: Record<string, any>) => {
+          const matchingCrit = (app.criteria || []).find((c: Record<string, any>) => c.id === cr.criterionId);
+          const allReqs = matchingCrit?.requirements || [];
+          const allDecls = allReqs.flatMap((r: Record<string, any>) => r.declarations || []);
+          const evCount = allDecls.reduce(
+            (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+            0
+          );
+          totalDecl += allDecls.length;
+          totalEv += evCount;
+          return {
+            ...cr,
+            declaredCount: allDecls.length,
+            evidenceCount: evCount,
+          };
+        }
+      );
+      portalState.individualStaffRecords[staffIdx] = {
+        ...rec,
+        criteriaReview: updatedCriteriaReview,
+        totalDeclarations: totalDecl,
+        totalEvidence: totalEv,
+        updatedAt: 'Vừa cập nhật',
+        updatedSortKey: Date.now(),
+      };
+    }
+
+    const actor = resolveSessionActor(req);
+    appendPortalAuditLog({
+      track: 'INDIVIDUAL',
+      applicationId: id,
+      action: 'DELETE_INDIVIDUAL_DECLARATION',
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: actor.role,
+      details: `Xóa kê khai ${declarationId} (${requirementId || 'all'})`,
+    });
+
+    res.status(200).json({ success: true, data: app });
+  });
+
   router.post('/individual/applications/:id/submit', (req: Request, res: Response): void => {
     const { id } = req.params;
     const app =

@@ -164,6 +164,12 @@ export interface IndividualApplicationServiceContract {
     declaration: ApplicationDeclaration;
     actor: ServiceActor;
   }): Promise<StudentApplicationData>;
+  deleteDeclaration?(params: {
+    applicationId: string;
+    requirementId: string;
+    declarationId: string;
+    actor: ServiceActor;
+  }): Promise<StudentApplicationData>;
   submitToSchoolReview(params: {
     applicationId: string;
     actor: ServiceActor;
