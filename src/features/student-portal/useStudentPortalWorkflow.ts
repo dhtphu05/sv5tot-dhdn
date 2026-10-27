@@ -364,10 +364,9 @@ export function useStudentPortalWorkflow({
         );
         const instId = resolvedInst.institutionId;
         const resolvedSchoolUnit = resolveSchoolReviewUnit(instId);
-        const unitId =
-          submittedApp.schoolReviewUnitId ||
+        const unitId = (submittedApp.schoolReviewUnitId ||
           resolvedSchoolUnit.unit?.id ||
-          resolvedInst.schoolReviewUnitId;
+          resolvedInst.schoolReviewUnitId) as import('../../staff/schoolReviewTypes').SchoolReviewUnitId;
         const unitName =
           submittedApp.schoolReviewUnitName ||
           resolvedSchoolUnit.unit?.officialName ||

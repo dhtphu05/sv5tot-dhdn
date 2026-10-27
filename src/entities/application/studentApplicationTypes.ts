@@ -167,6 +167,9 @@ export interface StudentApplicationData {
   applicantProfileSnapshot?: StudentProfileDto | null;
   criteria: ApplicationCriterion[];
   supplementRequests?: any[];
+  councilFeedback?: string;
+  decisionCode?: string;
+  awardedAt?: string;
 }
 
 export type StudentApplication = StudentApplicationData;

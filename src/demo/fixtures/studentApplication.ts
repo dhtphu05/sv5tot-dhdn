@@ -237,10 +237,21 @@ INITIAL_STUDENT_APPLICATION.criteria = buildCriteriaFromDefinitions(
 export function resolveInstitutionFromUniversity(
   university?: string,
   fallbackInstId?: string
-): { institutionId: string; schoolReviewUnitId: string; schoolReviewUnitName: string } {
+): {
+  institutionId: string;
+  institutionName: string;
+  schoolReviewUnitId: import('../../staff/schoolReviewTypes').SchoolReviewUnitId;
+  schoolReviewUnitName: string;
+} {
   const norm = (university || '').toLowerCase();
   if (fallbackInstId) {
-    const map: Record<string, { unitId: string; unitName: string }> = {
+    const map: Record<
+      string,
+      {
+        unitId: import('../../staff/schoolReviewTypes').SchoolReviewUnitId;
+        unitName: string;
+      }
+    > = {
       'inst-dut': { unitId: 'unit-dut', unitName: 'Trường Đại học Bách khoa – ĐHĐN' },
       'inst-due': { unitId: 'unit-due', unitName: 'Trường Đại học Kinh tế – ĐHĐN' },
       'inst-ued': { unitId: 'unit-ued', unitName: 'Trường Đại học Sư phạm – ĐHĐN' },
@@ -265,6 +276,7 @@ export function resolveInstitutionFromUniversity(
     if (matched) {
       return {
         institutionId: fallbackInstId === 'inst-ufls' ? 'inst-ufl' : fallbackInstId,
+        institutionName: university || matched.unitName,
         schoolReviewUnitId: matched.unitId,
         schoolReviewUnitName: matched.unitName,
       };
@@ -273,6 +285,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('kinh tế')) {
     return {
       institutionId: 'inst-due',
+      institutionName: university || 'Trường Đại học Kinh tế – ĐHĐN',
       schoolReviewUnitId: 'unit-due',
       schoolReviewUnitName: 'Trường Đại học Kinh tế – ĐHĐN',
     };
@@ -280,6 +293,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('sư phạm kỹ thuật')) {
     return {
       institutionId: 'inst-ute',
+      institutionName: university || 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
       schoolReviewUnitId: 'unit-ute',
       schoolReviewUnitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
     };
@@ -287,6 +301,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('sư phạm')) {
     return {
       institutionId: 'inst-ued',
+      institutionName: university || 'Trường Đại học Sư phạm – ĐHĐN',
       schoolReviewUnitId: 'unit-ued',
       schoolReviewUnitName: 'Trường Đại học Sư phạm – ĐHĐN',
     };
@@ -294,6 +309,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('ngoại ngữ')) {
     return {
       institutionId: 'inst-ufl',
+      institutionName: university || 'Trường Đại học Ngoại ngữ – ĐHĐN',
       schoolReviewUnitId: 'unit-ufl',
       schoolReviewUnitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
     };
@@ -301,6 +317,9 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('việt – hàn') || norm.includes('việt - hàn') || norm.includes('cntt')) {
     return {
       institutionId: 'inst-vku',
+      institutionName:
+        university ||
+        'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
       schoolReviewUnitId: 'unit-vku',
       schoolReviewUnitName:
         'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
@@ -309,6 +328,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('y dược')) {
     return {
       institutionId: 'inst-smp',
+      institutionName: university || 'Trường Y Dược – ĐHĐN',
       schoolReviewUnitId: 'unit-smp',
       schoolReviewUnitName: 'Trường Y Dược – ĐHĐN',
     };
@@ -316,6 +336,7 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('việt – anh') || norm.includes('việt - anh') || norm.includes('vnuk')) {
     return {
       institutionId: 'inst-vnuk',
+      institutionName: university || 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
       schoolReviewUnitId: 'unit-vnuk',
       schoolReviewUnitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
     };
@@ -323,12 +344,14 @@ export function resolveInstitutionFromUniversity(
   if (norm.includes('kon tum')) {
     return {
       institutionId: 'inst-kontum',
+      institutionName: university || 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
       schoolReviewUnitId: 'unit-kontum',
       schoolReviewUnitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
     };
   }
   return {
     institutionId: 'inst-dut',
+    institutionName: university || 'Trường Đại học Bách khoa – ĐHĐN',
     schoolReviewUnitId: 'unit-dut',
     schoolReviewUnitName: university || 'Trường Đại học Bách khoa – ĐHĐN',
   };
@@ -371,8 +394,11 @@ export function buildCleanStudentApplication(params: {
   fullName: string;
   studentId: string;
   university: string;
+  faculty?: string;
   email?: string;
+  academicYear?: string;
   institutionId?: string;
+  institutionName?: string;
   existingProfileSnapshot?: import('../../entities/application/studentApplicationTypes').StudentProfileDto | null;
 }): StudentApplicationData {
   const emptyCriteria = buildCriteriaFromDefinitions([]).map((crit) => ({

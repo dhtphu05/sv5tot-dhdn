@@ -606,7 +606,7 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
     await services.individual.createStudentApplication({
       studentFullName: studentApp.student.fullName,
       studentCode: studentApp.student.studentId,
-      email: studentApp.student.email,
+      email: studentApp.student.email || 'thuha.le@due.udn.vn',
       institutionId: 'inst-due',
       institutionName: 'Trường Đại học Kinh tế - Đại học Đà Nẵng',
       faculty: studentApp.student.faculty,
@@ -774,10 +774,14 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       'academic-thesis'
     );
     assert.equal(thesisDecls.length, 1);
-    assert.equal(thesisDecls[0].title, 'Khóa luận tốt nghiệp đạt 9.2/10 điểm');
+    assert.equal(
+      (thesisDecls[0] as any).title || thesisDecls[0].value,
+      'Khóa luận tốt nghiệp đạt 9.2/10 điểm'
+    );
     assert.equal(thesisDecls[0].metadata?.thesisScore, '9.2');
-    assert.equal(thesisDecls[0].evidence.length, 1);
-    assert.equal(thesisDecls[0].evidence[0].id, clientEvId);
+    const thesisEvList = thesisDecls[0].evidence || thesisDecls[0].evidenceFiles || [];
+    assert.equal(thesisEvList.length, 1);
+    assert.equal(thesisEvList[0].id, clientEvId);
 
     const langDecls = getDeclarationsForRequirement(
       schoolWsBundle.studentApplication,
@@ -907,7 +911,8 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       'volunteer-campaign'
     );
     assert.equal(cityVolDecls.length, 1);
-    assert.ok(cityVolDecls[0].title.includes('QĐ số 45/QĐ-HSV'));
+    const cityVolTitle = (cityVolDecls[0] as any).title || cityVolDecls[0].value || '';
+    assert.ok(cityVolTitle.includes('QĐ số 45/QĐ-HSV'));
     assert.equal(cityVolDecls[0].metadata?.decisionNo, '45/QĐ-HSV');
 
     const cityThesisDecls = getDeclarationsForRequirement(
@@ -916,6 +921,7 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       'academic-thesis'
     );
     assert.equal(cityThesisDecls.length, 1);
-    assert.equal(cityThesisDecls[0].evidence[0].id, clientEvId);
+    const cityThesisEvList = cityThesisDecls[0].evidence || cityThesisDecls[0].evidenceFiles || [];
+    assert.equal(cityThesisEvList[0].id, clientEvId);
   });
 });
