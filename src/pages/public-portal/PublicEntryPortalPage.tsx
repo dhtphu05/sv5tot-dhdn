@@ -124,6 +124,15 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
   handleOpenPublicFromDemo,
   handleEnterStudentAppFromDemo,
 }) => {
+  const syncPublicUrl = (route: PublicEntryRoute) => {
+    if (typeof window === 'undefined') return;
+    const targetPath =
+      route === 'login' ? '/login' : route === 'signup' ? '/signup' : '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+  };
+
   return (
     <>
       {publicRoute === 'landing' && (
@@ -132,12 +141,14 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
           onStartApplication={() => {
             setSignupPresetMode('normal');
             setPublicRoute('signup');
+            syncPublicUrl('signup');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           onNavigateToLogin={() => {
             setLoginPresetError(null);
             setIsSessionExpiredNotice(false);
             setPublicRoute('login');
+            syncPublicUrl('login');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           onNavigateToCollectiveLogin={onNavigateToCollectiveLogin}
@@ -160,10 +171,12 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
           onNavigateToSignup={() => {
             setSignupPresetMode('normal');
             setPublicRoute('signup');
+            syncPublicUrl('signup');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           onNavigateToLanding={() => {
             setPublicRoute('landing');
+            syncPublicUrl('landing');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           sessionExpired={isSessionExpiredNotice}
@@ -180,10 +193,12 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
             if (prefill) setLoginPrefillEmail(prefill);
             setLoginPresetError(null);
             setPublicRoute('login');
+            syncPublicUrl('login');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           onNavigateToLanding={() => {
             setPublicRoute('landing');
+            syncPublicUrl('landing');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
           presetMode={signupPresetMode}

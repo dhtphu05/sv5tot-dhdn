@@ -37,6 +37,10 @@ import {
 import { AuthSessionPayload } from '../../entities/services/contracts';
 import { isBackendMode } from '../../shared/config/executionMode';
 import { resolveDomainServices } from '../../entities/services/modeResolver';
+import {
+  hasActiveAuthSession,
+  setApiActorContext,
+} from '../../shared/api/httpClient';
 
 export interface UsePublicAuthSessionTransitionOptions {
   safeReturnTarget: SafeInternalReturnTarget | null;
@@ -125,13 +129,32 @@ export function usePublicAuthSessionTransition({
       const resolvedRole = (session?.user?.role ||
         matchedStaffAccount?.primaryRole) as StaffRole | undefined;
 
+      if (!hasActiveAuthSession()) {
+        setApiActorContext({
+          userId:
+            session?.user?.id ||
+            matchedStaffAccount?.id ||
+            matchedCollectiveAccount?.id ||
+            lower ||
+            'authenticated-user',
+          userName:
+            session?.user?.fullName ||
+            matchedStaffAccount?.fullName ||
+            matchedCollectiveAccount?.authorizedPreparerName ||
+            lower,
+          userEmail: session?.user?.email || lower,
+          role:
+            resolvedRole ||
+            (matchedCollectiveAccount ? 'COLLECTIVE_PREPARER' : 'STUDENT'),
+          unitId:
+            session?.user?.unitId || matchedStaffAccount?.schoolReviewUnitId,
+          token: session?.token || `session-${Date.now()}`,
+        });
+      }
+
       if (
         session?.accountType === 'COLLECTIVE_PREPARER' ||
-        Boolean(matchedCollectiveAccount) ||
-        lower.includes('mai.nt') ||
-        lower.includes('collective') ||
-        lower.includes('chihoi') ||
-        lower.includes('lch')
+        Boolean(matchedCollectiveAccount)
       ) {
         const resolvedCollectiveEmail =
           session?.user?.email ||
@@ -177,14 +200,7 @@ export function usePublicAuthSessionTransition({
         };
       };
 
-      if (
-        resolvedRole === 'SCHOOL_OFFICER' ||
-        (!resolvedRole &&
-          (lower.includes('an.nv') ||
-            (lower.startsWith('canbo.') &&
-              !lower.includes('thanhpho') &&
-              !lower.includes('dhdn'))))
-      ) {
+      if (resolvedRole === 'SCHOOL_OFFICER') {
         const nextStaffUser = buildResolvedStaffUser('SCHOOL_OFFICER');
         setStaffUser(nextStaffUser);
         setStaffRouteId('school_overview');
@@ -203,9 +219,9 @@ export function usePublicAuthSessionTransition({
 
       if (
         resolvedRole === 'CITY_OFFICER' ||
-        lower.includes('nam.th') ||
-        lower.includes('canbo.dhdn') ||
-        lower.includes('canbo.thanhpho')
+        lower === 'nam.th@hsvdanang.vn' ||
+        lower === 'canbo.dhdn@udn.vn' ||
+        lower === 'canbo.thanhpho@hsvdanang.vn'
       ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_OFFICER');
         setStaffUser(nextStaffUser);
@@ -225,9 +241,9 @@ export function usePublicAuthSessionTransition({
 
       if (
         resolvedRole === 'CITY_MANAGER' ||
-        lower.includes('ha.nt') ||
-        lower.includes('quanly.dhdn') ||
-        lower.includes('quanly.thanhpho')
+        lower === 'ha.nt@hsvdanang.vn' ||
+        lower === 'quanly.dhdn@udn.vn' ||
+        lower === 'quanly.thanhpho@hsvdanang.vn'
       ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_MANAGER');
         setStaffUser(nextStaffUser);
@@ -247,9 +263,9 @@ export function usePublicAuthSessionTransition({
 
       if (
         resolvedRole === 'CITY_COMMITTEE' ||
-        lower.includes('quan.lm') ||
-        lower.includes('hoidong.dhdn') ||
-        lower.includes('hoidong.thanhpho')
+        lower === 'quan.lm@hsvdanang.vn' ||
+        lower === 'hoidong.dhdn@udn.vn' ||
+        lower === 'hoidong.thanhpho@hsvdanang.vn'
       ) {
         const nextStaffUser = buildResolvedStaffUser('CITY_COMMITTEE');
         setStaffUser(nextStaffUser);
@@ -269,9 +285,10 @@ export function usePublicAuthSessionTransition({
 
       if (
         resolvedRole === 'ADMIN' ||
-        lower.includes('lan.pn') ||
-        lower.includes('khoa.nd') ||
-        lower.includes('admin')
+        lower === 'lan.pn@hsvdanang.vn' ||
+        lower === 'khoa.nd@hsvdanang.vn' ||
+        lower === 'admin@udn.vn' ||
+        lower === 'admin@hsvdanang.vn'
       ) {
         const nextStaffUser = buildResolvedStaffUser('ADMIN');
         setStaffUser(nextStaffUser);
@@ -456,6 +473,16 @@ export function usePublicAuthSessionTransition({
 
   const handleSignupSuccess = useCallback(
     (payload: StudentRegistrationPayload) => {
+      if (!hasActiveAuthSession()) {
+        setApiActorContext({
+          userId: payload.studentId || payload.email,
+          userName: payload.fullName,
+          userEmail: payload.email,
+          role: 'STUDENT',
+          unitId: payload.institutionId,
+          token: `session-${Date.now()}`,
+        });
+      }
       const newIdentity = {
         fullName: payload.fullName,
         studentId: payload.studentId,

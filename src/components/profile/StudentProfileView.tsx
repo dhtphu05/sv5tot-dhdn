@@ -48,6 +48,11 @@ import {
   isBackendMode,
 } from '../../entities/services/modeResolver';
 import { resolveSchoolReviewUnit } from '../../staff/schoolReviewTypes';
+import { IS_DEMO_MODE_ENABLED } from '../../demo/prototypeDemoMode';
+import {
+  hasActiveAuthSession,
+  notifySessionExpired,
+} from '../../shared/api/httpClient';
 
 export interface StudentProfileViewProps {
   onProfileUpdated?: (updated: StudentProfileDto) => void;
@@ -83,8 +88,7 @@ function buildFallbackStudentProfile(
 ): StudentProfileDto {
   if (
     !isBackendMode() &&
-    (!fallbackStudent?.fullName ||
-      fallbackStudent.fullName === DEFAULT_CANONICAL_STUDENT_PROFILE.fullName)
+    fallbackStudent?.fullName === DEFAULT_CANONICAL_STUDENT_PROFILE.fullName
   ) {
     return structuredClone(DEFAULT_CANONICAL_STUDENT_PROFILE);
   }
@@ -154,6 +158,10 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
   useEffect(() => {
     let isMounted = true;
     const fetchProfile = async () => {
+      if (!hasActiveAuthSession() && !IS_DEMO_MODE_ENABLED) {
+        notifySessionExpired();
+        return;
+      }
       try {
         setIsLoading(true);
         const services = resolveDomainServices();

@@ -61,13 +61,13 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
           {/* Institutional Crest & Decision Heading */}
           <div className="border-b border-[#E3EBF1] pb-5">
             <div className="text-[11px] font-bold tracking-[0.08em] uppercase text-[#466474]">
-              HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+              HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
             </div>
             <div className="text-[13px] font-extrabold uppercase text-[#126A9C] mt-0.5">
-              HỘI ĐỒNG XÉT CHỌN DANH HIỆU SINH VIÊN 5 TỐT CẤP THÀNH PHỐ
+              HỘI ĐỒNG XÉT CHỌN DANH HIỆU SINH VIÊN 5 TỐT CẤP ĐẠI HỌC ĐÀ NẴNG
             </div>
             <div className="text-[12px] text-[#728391] mt-1">
-              Số: {res?.decisionNumber || '86/QĐ-HSV-TP'} · Đà Nẵng, ngày {res?.decisionDate || '24/10/2026'}
+              Số: {res?.decisionNumber || '86/QĐ-HSV-ĐHĐN'} · Đà Nẵng, ngày {res?.decisionDate || '24/10/2026'}
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
                 CÔNG NHẬN DANH HIỆU
               </div>
               <div className="text-[22px] font-black text-[#172A3A] tracking-tight">
-                TẬP THỂ SINH VIÊN 5 TỐT CẤP THÀNH PHỐ
+                TẬP THỂ SINH VIÊN 5 TỐT CẤP ĐẠI HỌC ĐÀ NẴNG
               </div>
               <div className="text-[14.5px] font-bold text-[#0B64A0]">
                 {COLLECTIVE_TYPE_LABELS[application.collectiveType]}: {application.collectiveName}
@@ -149,7 +149,7 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
           {/* Signatory Footer */}
           <div className="pt-2 flex justify-end text-right text-[12.5px]">
             <div>
-              <div className="font-bold text-[#172A3A]">{res?.signedBy || 'TM. BAN THƯ KÝ — CHỦ TỊCH HỘI SINH VIÊN TP. ĐÀ NẴNG'}</div>
+              <div className="font-bold text-[#172A3A]">{res?.signedBy || 'TM. BAN THƯ KÝ — CHỦ TỊCH HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG'}</div>
               <div className="text-[11px] text-[#728391] mt-1">(Đã ký số và ban hành chính thức)</div>
             </div>
           </div>

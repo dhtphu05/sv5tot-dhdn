@@ -1,8 +1,8 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-27T11:02:02.596Z",
-  "totalProtectedFiles": 519,
+  "createdAt": "2026-10-27T16:10:23.953Z",
+  "totalProtectedFiles": 520,
   "files": [
     {
       "path": "index.html",
@@ -436,13 +436,13 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 40356,
-      "sha256": "534cf735bff0af7007fa8b64852c32d44ed61fe4ca2f97d722db1e2a77a04e34"
+      "sizeBytes": 44843,
+      "sha256": "ba0b0ce2de2c027a51b405db83baa09683975ff66f80707bc64187f0e0469036"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
-      "sizeBytes": 15922,
-      "sha256": "74049371533341a9ad73e55cdf08442cdd5bfbb7e2de2838deedbfdc17983caa"
+      "sizeBytes": 22913,
+      "sha256": "320c236bf988afb01328bf161722454e041f786188dfccf643086a838229e571"
     },
     {
       "path": "src/components/application/AddEditDeclarationModal.tsx",
@@ -547,7 +547,7 @@
     {
       "path": "src/components/collective/CollectiveLoginPage.tsx",
       "sizeBytes": 7823,
-      "sha256": "605fba2445f850bbb34c8db79bfb1633c64a22bb52b1884172526da9b40506fd"
+      "sha256": "f95ebf859b3ce509c85e86185ca37e92a80074ea1887981002c20f43af7d2798"
     },
     {
       "path": "src/components/collective/CollectivePortal.tsx",
@@ -561,8 +561,8 @@
     },
     {
       "path": "src/components/collective/CollectiveResultModal.tsx",
-      "sizeBytes": 8945,
-      "sha256": "2ef5379f9045d30cdbc4887273a2c372790d0ffa65b579ee6f5bbf2c1be96cc9"
+      "sizeBytes": 8982,
+      "sha256": "b6d9bf05b68d4a5593867ba87a42aca85d75b11df657c4931fbd1b362f27d6ff"
     },
     {
       "path": "src/components/collective/CollectiveWorkspace.tsx",
@@ -632,7 +632,7 @@
     {
       "path": "src/components/collective/portal/CollectiveOverviewTab.tsx",
       "sizeBytes": 10524,
-      "sha256": "6f7c4407cbbbb856483b7b8c6d1866ea3c882b1fc7b992caf21873d09711652e"
+      "sha256": "e709fb1a74b747c9817b1a0c04bd8e33318919c8d85f8124b0302788a62ec90d"
     },
     {
       "path": "src/components/collective/portal/CollectiveResultsTab.tsx",
@@ -851,8 +851,8 @@
     },
     {
       "path": "src/components/profile/StudentProfileView.tsx",
-      "sizeBytes": 34810,
-      "sha256": "3eefb7865a44b96ac5ab492ec48f39439e8cdfb929cc7b95cf7ae0208744d0bc"
+      "sizeBytes": 35055,
+      "sha256": "3ce17a6e5f9857f49e48eb517289eb2058724deca96cba570a2b8629def9ae1b"
     },
     {
       "path": "src/components/public/InstitutionCombobox.tsx",
@@ -1286,8 +1286,8 @@
     },
     {
       "path": "src/entities/services/demoAdapter.ts",
-      "sizeBytes": 57170,
-      "sha256": "3b09c9b7abd104d6c38b27bddd417ca409e8a54ff0bfebdc2e8d10be36dad939"
+      "sizeBytes": 58070,
+      "sha256": "fa3620e32a1660afe243afc05acc2cc05b9e8c54164a8bc1834b8533d3b6f492"
     },
     {
       "path": "src/entities/services/index.ts",
@@ -1486,8 +1486,8 @@
     },
     {
       "path": "src/features/public-auth/usePublicAuthSessionTransition.ts",
-      "sizeBytes": 17934,
-      "sha256": "7257b1da45f5b78febd0991992728742a233ec6aa4d39845c7e0ae810b4626fa"
+      "sizeBytes": 18887,
+      "sha256": "b8e543937694fae03fb3c27cdc49df1ac529b5ffe33c8d924c9047cbb344f883"
     },
     {
       "path": "src/features/result-publication/index.ts",
@@ -1556,8 +1556,8 @@
     },
     {
       "path": "src/pages/public-portal/PublicEntryPortalPage.tsx",
-      "sizeBytes": 8579,
-      "sha256": "de28948b5a3f418104ea3662a7600d967fffc8e5589338397a095cfdf11c0533"
+      "sizeBytes": 9116,
+      "sha256": "20263ee5c36710d2bfdfe7ad02f4cd36c17ade914b8ab8e84374e49dbbacb34e"
     },
     {
       "path": "src/pages/school-backoffice/SchoolAnalyticsPage.tsx",
@@ -1626,8 +1626,8 @@
     },
     {
       "path": "src/shared/api/httpClient.ts",
-      "sizeBytes": 5367,
-      "sha256": "dd211fc1f5e36801841299db4803e53599798c5f76715f1c1552419e07daeffa"
+      "sizeBytes": 6148,
+      "sha256": "a9808a59a299e7abf21a1e7932ad61b24dbd17cae2dba240a8b93b10a808f58f"
     },
     {
       "path": "src/shared/api/r2EvidenceClient.ts",
@@ -1866,8 +1866,8 @@
     },
     {
       "path": "src/staff/components/analytics/ReportsHub.tsx",
-      "sizeBytes": 26376,
-      "sha256": "739372a6d426bf94d7eef1dbcd57efff94d4c35dc7c993c08d52b882319246a4"
+      "sizeBytes": 26375,
+      "sha256": "adaeea1f7293633cbe35afdaef88d02bdc4bebac79c91ca1cb213cec6638220c"
     },
     {
       "path": "src/staff/components/analytics/analyticsTableColumns.tsx",
@@ -2403,6 +2403,11 @@
       "path": "src/test/schoolBatchForwardingSrw3.test.ts",
       "sizeBytes": 21454,
       "sha256": "e3556462d6bf5b1ca115494ef8484d370e8b77994eaee50741950dc8d0f1753e"
+    },
+    {
+      "path": "src/test/sessionGuardAndLoginRedirect.test.ts",
+      "sizeBytes": 6493,
+      "sha256": "e22b093e0cc1e236e73aff3df4ff99e2fbbb5c4753af5222faabb12846235592"
     },
     {
       "path": "src/test/sharedDossierSrw2.test.ts",

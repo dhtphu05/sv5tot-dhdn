@@ -848,6 +848,7 @@ export async function issueZeroTrustJwtToken(
     institutionId?: string;
     unitId?: string;
     studentCode?: string;
+    password?: string;
   }
 ): Promise<{ userId: string; accessToken: string }> {
   try {
@@ -856,7 +857,7 @@ export async function issueZeroTrustJwtToken(
       existing = await deps.identityRepo.findByStudentCode(params.studentCode);
     }
     if (!existing) {
-      const passwordHash = await defaultPasswordHasher.hash('PortalAuthPass123!');
+      const passwordHash = await defaultPasswordHasher.hash(params.password || 'MatKhau@2026');
       if (params.role === 'STUDENT') {
         existing = await deps.identityRepo.createStudent({
           email: params.email,

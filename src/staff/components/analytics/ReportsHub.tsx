@@ -485,12 +485,12 @@ export const ReportsHub: React.FC<ReportsHubProps> = ({
       {/* Print-Only Institutional Report Header (Sections 88 & 89) */}
       <div className="hidden print:block border-b-2 border-[#0F2335] pb-4 mb-4 text-center">
         <div className="text-[11px] font-bold uppercase tracking-wider text-[#334E68]">
-          THÀNH ĐOÀN ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+          ĐẠI HỌC ĐÀ NẴNG · HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
         </div>
         <h1 className="text-[18px] font-extrabold uppercase text-[#0F2335] mt-1">
           {activeReport.id.startsWith('COLLECTIVE_')
-            ? 'DANH SÁCH TẬP THỂ SINH VIÊN 5 TỐT CẤP THÀNH PHỐ ĐÀ NẴNG'
-            : 'DANH SÁCH HỒ SƠ SINH VIÊN 5 TỐT CẤP THÀNH PHỐ ĐÀ NẴNG'}
+            ? 'DANH SÁCH TẬP THỂ SINH VIÊN 5 TỐT CẤP ĐẠI HỌC ĐÀ NẴNG'
+            : 'DANH SÁCH HỒ SƠ SINH VIÊN 5 TỐT CẤP ĐẠI HỌC ĐÀ NẴNG'}
         </h1>
         <div className="text-[13px] font-bold text-[#172A3A] mt-0.5">
           {activeReport.label} · {formatAcademicYearLabel(filters.season)}

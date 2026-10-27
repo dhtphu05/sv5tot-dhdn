@@ -30,6 +30,7 @@ export class BackendApiError extends Error {
 }
 
 const ACTOR_STORAGE_KEY = '5tot_auth_actor_context_v1';
+export const AUTH_SESSION_EXPIRED_EVENT = '5tot:session-expired';
 
 let activeApiBaseUrl = '';
 let activeActorContext: ApiActorContext | null = null;
@@ -62,19 +63,37 @@ export function setApiActorContext(actor: ApiActorContext | null): void {
 }
 
 export function getApiActorContext(): ApiActorContext | null {
-  if (activeActorContext) return activeActorContext;
   if (typeof window !== 'undefined') {
     try {
       const raw = window.sessionStorage.getItem(ACTOR_STORAGE_KEY);
-      if (raw) {
-        activeActorContext = JSON.parse(raw) as ApiActorContext;
-        return activeActorContext;
+      if (!raw) {
+        activeActorContext = null;
+        return null;
       }
+      activeActorContext = JSON.parse(raw) as ApiActorContext;
+      return activeActorContext;
+    } catch {
+      return activeActorContext;
+    }
+  }
+  return activeActorContext;
+}
+
+export function hasActiveAuthSession(): boolean {
+  const actor = getApiActorContext();
+  return Boolean(actor && (actor.userId || actor.userEmail || actor.token));
+}
+
+export function notifySessionExpired(): void {
+  activeActorContext = null;
+  if (typeof window !== 'undefined') {
+    try {
+      window.sessionStorage.removeItem(ACTOR_STORAGE_KEY);
     } catch {
       // Ignore storage errors
     }
+    window.dispatchEvent(new CustomEvent(AUTH_SESSION_EXPIRED_EVENT));
   }
-  return null;
 }
 
 export interface ApiRequestOptions {
@@ -168,6 +187,11 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       payload?.message ||
       `Yêu cầu Backend thất bại với mã trạng thái HTTP ${response.status}`;
     const errCode = payload?.errorCode || payload?.code || `HTTP_${response.status}`;
+    const isAuthLoginEndpoint =
+      normalizedPath.includes('/auth/login') || normalizedPath.includes('/auth/register');
+    if (response.status === 401 && !isAuthLoginEndpoint) {
+      notifySessionExpired();
+    }
     throw new BackendApiError(errMsg, response.status, errCode, payload);
   }
 

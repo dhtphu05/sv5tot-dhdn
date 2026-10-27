@@ -29,6 +29,9 @@ import {
   DEFAULT_COMMITTEE_SCENARIO_ID,
 } from '../../staff/fixtures/committeeFixtures';
 import { parseStaffUrlPath } from '../../staff/permissions';
+import { PublicEntryRoute } from '../../components/public/publicTypes';
+import { buildCleanStudentApplication } from '../../demo/fixtures/studentApplication';
+import { hasActiveAuthSession } from '../../shared/api/httpClient';
 
 export type TopLevelViewMode =
   | 'public'
@@ -39,6 +42,18 @@ export type TopLevelViewMode =
   | 'collective_login';
 
 export const HERO_STAFF_APP_ID = 'APP-2026-DN-102220123';
+
+function buildCleanUnauthenticatedStore() {
+  const baseStore = clonePristineStoreForScenario('new_student');
+  baseStore.application = buildCleanStudentApplication({
+    fullName: '',
+    studentId: '',
+    university: '',
+  });
+  baseStore.notifications = [];
+  baseStore.advisoryCount = 0;
+  return baseStore;
+}
 
 export function resolveOfficerScenarioFromParam(
   rawParam: string | null | undefined
@@ -75,11 +90,11 @@ export function resolveInitialRouteAndSession() {
   const persisted = loadPersistedDemoSession();
 
   if (typeof window === 'undefined') {
-    const defaultStore = clonePristineStoreForScenario(
-      DEFAULT_PROTOTYPE_SCENARIO_ID
-    );
+    const defaultStore = buildCleanUnauthenticatedStore();
     return {
       viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: DEFAULT_PROTOTYPE_SCENARIO_ID,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -98,6 +113,44 @@ export function resolveInitialRouteAndSession() {
   const urlScenarioParam = params.get('scenario');
   const urlOfficerParam = params.get('officer');
   const urlCommitteeParam = params.get('committee');
+  const isAuthenticated =
+    hasActiveAuthSession() || (IS_DEMO_MODE_ENABLED && persisted.isDemoActive);
+
+  if (pathname === '/login') {
+    return {
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'login' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
+      scenarioId: 'new_student' as PrototypeScenarioId,
+      officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+      committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+      schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+      staffRole: 'CITY_OFFICER' as StaffRole,
+      staffRouteId: 'application_review' as StaffRouteId,
+      isDemoActive: false,
+      isToolbarHidden: false,
+      navId: 'overview',
+      store: buildCleanUnauthenticatedStore(),
+    };
+  }
+
+  if (pathname === '/signup' || pathname === '/register') {
+    return {
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'signup' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
+      scenarioId: 'new_student' as PrototypeScenarioId,
+      officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+      committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+      schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+      staffRole: 'CITY_OFFICER' as StaffRole,
+      staffRouteId: 'application_review' as StaffRouteId,
+      isDemoActive: false,
+      isToolbarHidden: false,
+      navId: 'overview',
+      store: buildCleanUnauthenticatedStore(),
+    };
+  }
 
   if (
     pathname === '/collective/login' ||
@@ -105,6 +158,8 @@ export function resolveInitialRouteAndSession() {
   ) {
     return {
       viewMode: 'collective_login' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: DEFAULT_PROTOTYPE_SCENARIO_ID,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -114,18 +169,57 @@ export function resolveInitialRouteAndSession() {
       isDemoActive: false,
       isToolbarHidden: false,
       navId: 'overview',
-      store: clonePristineStoreForScenario(DEFAULT_PROTOTYPE_SCENARIO_ID),
+      store: buildCleanUnauthenticatedStore(),
     };
   }
 
   if (
     pathname === '/collective' ||
     pathname.startsWith('/collective') ||
-    urlScenarioParam === 'collective' ||
-    params.get('persona') === 'collective'
+    (IS_DEMO_MODE_ENABLED &&
+      (urlScenarioParam === 'collective' ||
+        params.get('persona') === 'collective'))
   ) {
+    if (
+      !isAuthenticated &&
+      !(
+        IS_DEMO_MODE_ENABLED &&
+        (urlScenarioParam === 'collective' ||
+          params.get('persona') === 'collective')
+      )
+    ) {
+      savePersistedDemoSession({
+        viewMode: 'public',
+        isDemoActive: false,
+        staffRole: '',
+        staffRouteId: '',
+        staffUserOverride: null,
+        collectiveUserEmail: '',
+        mutatedApplication: null,
+        mutatedNotifications: null,
+      });
+      window.history.replaceState({}, '', '/login');
+      return {
+        viewMode: 'public' as TopLevelViewMode,
+        publicRoute: 'login' as PublicEntryRoute,
+        isSessionExpiredNotice: true,
+        scenarioId: 'new_student' as PrototypeScenarioId,
+        officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+        committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+        schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+        staffRole: 'CITY_OFFICER' as StaffRole,
+        staffRouteId: 'application_review' as StaffRouteId,
+        isDemoActive: false,
+        isToolbarHidden: false,
+        navId: 'overview',
+        store: buildCleanUnauthenticatedStore(),
+      };
+    }
+
     return {
       viewMode: 'collective_portal' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: DEFAULT_PROTOTYPE_SCENARIO_ID,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -134,7 +228,7 @@ export function resolveInitialRouteAndSession() {
       staffRouteId: 'application_review' as StaffRouteId,
       staffUserOverride: persisted.staffUserOverride,
       collectiveUserEmail: persisted.collectiveUserEmail,
-      isDemoActive: true,
+      isDemoActive: persisted.isDemoActive,
       isToolbarHidden: false,
       navId: 'overview',
       store: clonePristineStoreForScenario(DEFAULT_PROTOTYPE_SCENARIO_ID),
@@ -171,6 +265,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'staff_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: 'waiting_final' as PrototypeScenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: scId,
@@ -199,6 +295,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'staff_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: 'waiting_final' as PrototypeScenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -240,6 +338,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'staff_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: 'waiting_final' as PrototypeScenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -268,6 +368,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'staff_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: persisted.scenarioId,
       officerScenarioId: matchedOfficerScenario,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -284,6 +386,35 @@ export function resolveInitialRouteAndSession() {
   }
 
   if (pathname.startsWith('/staff')) {
+    if (!isAuthenticated) {
+      savePersistedDemoSession({
+        viewMode: 'public',
+        isDemoActive: false,
+        staffRole: '',
+        staffRouteId: '',
+        staffUserOverride: null,
+        collectiveUserEmail: '',
+        mutatedApplication: null,
+        mutatedNotifications: null,
+      });
+      window.history.replaceState({}, '', '/login');
+      return {
+        viewMode: 'public' as TopLevelViewMode,
+        publicRoute: 'login' as PublicEntryRoute,
+        isSessionExpiredNotice: true,
+        scenarioId: 'new_student' as PrototypeScenarioId,
+        officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+        committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+        schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+        staffRole: 'CITY_OFFICER' as StaffRole,
+        staffRouteId: 'application_review' as StaffRouteId,
+        isDemoActive: false,
+        isToolbarHidden: false,
+        navId: 'overview',
+        store: buildCleanUnauthenticatedStore(),
+      };
+    }
+
     const baseStore = clonePristineStoreForScenario(persisted.scenarioId);
     const parsedRoute = parseStaffUrlPath(pathname).routeId;
     const initialStaffRoute: StaffRouteId =
@@ -304,6 +435,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'staff_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: persisted.scenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -334,6 +467,8 @@ export function resolveInitialRouteAndSession() {
       });
       return {
         viewMode: 'student_app' as TopLevelViewMode,
+        publicRoute: 'landing' as PublicEntryRoute,
+        isSessionExpiredNotice: false,
         scenarioId: matched.id,
         officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
         committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -365,6 +500,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'demo_launcher' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: persisted.scenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -381,6 +518,35 @@ export function resolveInitialRouteAndSession() {
   }
 
   if (pathname.startsWith('/app')) {
+    if (!isAuthenticated) {
+      savePersistedDemoSession({
+        viewMode: 'public',
+        isDemoActive: false,
+        staffRole: '',
+        staffRouteId: '',
+        staffUserOverride: null,
+        collectiveUserEmail: '',
+        mutatedApplication: null,
+        mutatedNotifications: null,
+      });
+      window.history.replaceState({}, '', '/login');
+      return {
+        viewMode: 'public' as TopLevelViewMode,
+        publicRoute: 'login' as PublicEntryRoute,
+        isSessionExpiredNotice: true,
+        scenarioId: 'new_student' as PrototypeScenarioId,
+        officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+        committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+        schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+        staffRole: 'CITY_OFFICER' as StaffRole,
+        staffRouteId: 'application_review' as StaffRouteId,
+        isDemoActive: false,
+        isToolbarHidden: false,
+        navId: 'overview',
+        store: buildCleanUnauthenticatedStore(),
+      };
+    }
+
     const baseStore = clonePristineStoreForScenario(persisted.scenarioId);
     if (persisted.mutatedApplication) {
       baseStore.application = persisted.mutatedApplication;
@@ -400,6 +566,8 @@ export function resolveInitialRouteAndSession() {
     });
     return {
       viewMode: 'student_app' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
       scenarioId: persisted.scenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
@@ -415,6 +583,26 @@ export function resolveInitialRouteAndSession() {
     };
   }
 
+  if (!isAuthenticated) {
+    return {
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'landing' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
+      scenarioId: 'new_student' as PrototypeScenarioId,
+      officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+      committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+      schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+      staffRole: 'CITY_OFFICER' as StaffRole,
+      staffRouteId: 'overview' as StaffRouteId,
+      staffUserOverride: null,
+      collectiveUserEmail: undefined,
+      isDemoActive: false,
+      isToolbarHidden: false,
+      navId: 'overview',
+      store: buildCleanUnauthenticatedStore(),
+    };
+  }
+
   const baseStore = clonePristineStoreForScenario(persisted.scenarioId);
   if (persisted.mutatedApplication) {
     baseStore.application = persisted.mutatedApplication;
@@ -425,6 +613,8 @@ export function resolveInitialRouteAndSession() {
 
   return {
     viewMode: persisted.viewMode,
+    publicRoute: 'landing' as PublicEntryRoute,
+    isSessionExpiredNotice: false,
     scenarioId: persisted.scenarioId,
     officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
     committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,

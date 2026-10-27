@@ -103,7 +103,7 @@ export const CollectiveLoginPage: React.FC<CollectiveLoginPageProps> = ({
             </div>
           </div>
           <div className="mt-2 text-[11px] font-extrabold uppercase tracking-wider text-[#4A6275]">
-            HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+            HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
           </div>
           <h1 className="text-[20px] font-extrabold text-[#172A3A] mt-1">
             Cổng Kê khai Tập thể "Sinh viên 5 tốt"

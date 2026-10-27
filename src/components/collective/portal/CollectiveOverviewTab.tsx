@@ -32,7 +32,7 @@ export const CollectiveOverviewTab: React.FC<CollectiveOverviewTabProps> = ({
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E0F2FE] text-[11.5px] font-bold tracking-wide text-[#0369A1] border border-[#BAE6FD]">
             <Building2 size={13} />
-            <span>HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG</span>
+            <span>HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG</span>
           </div>
           <h1 className="text-[24px] font-black tracking-tight text-[#0F2335]">
             {currentApp.collectiveName} — Hồ sơ Tập thể "Sinh viên 5 tốt"

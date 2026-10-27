@@ -43,6 +43,7 @@ import {
   DEFAULT_PROTOTYPE_SCENARIO_ID,
   resolveScenarioFromUrlParam,
   clonePristineStoreForScenario,
+  loadPersistedDemoSession,
   savePersistedDemoSession,
 } from './demo/prototypeDemoMode';
 import { MOCK_STUDENT } from './tokens';
@@ -62,7 +63,11 @@ import { StaffPortalPage } from './pages/staff-portal/StaffPortalPage';
 import { StudentPortalPage } from './pages/student-portal/StudentPortalPage';
 import { PublicEntryPortalPage } from './pages/public-portal/PublicEntryPortalPage';
 import { resolveDomainServices } from './entities/services';
-import { setApiActorContext } from './shared/api/httpClient';
+import {
+  AUTH_SESSION_EXPIRED_EVENT,
+  hasActiveAuthSession,
+  setApiActorContext,
+} from './shared/api/httpClient';
 import { isBackendMode } from './shared/config/executionMode';
 
 export default function App() {
@@ -79,13 +84,15 @@ export default function App() {
   );
   const [scenarioResetKey, setScenarioResetKey] = useState<number>(0);
 
-  const [publicRoute, setPublicRoute] = useState<PublicEntryRoute>('landing');
+  const [publicRoute, setPublicRoute] = useState<PublicEntryRoute>(
+    initialSession.publicRoute || 'landing'
+  );
   const [loginPrefillEmail, setLoginPrefillEmail] = useState<string>('');
   const [loginPresetError, setLoginPresetError] = useState<
     'invalid_credentials' | 'general_error' | null
   >(null);
   const [isSessionExpiredNotice, setIsSessionExpiredNotice] =
-    useState<boolean>(false);
+    useState<boolean>(initialSession.isSessionExpiredNotice || false);
   const [safeReturnTarget, setSafeReturnTarget] =
     useState<SafeInternalReturnTarget | null>(null);
   const [signupPresetMode, setSignupPresetMode] = useState<
@@ -95,6 +102,9 @@ export default function App() {
     | 'institution_load_error'
   >('normal');
 
+  const allowMockStudentFallback =
+    !isBackendMode() && IS_DEMO_MODE_ENABLED && initialSession.isDemoActive;
+
   const [studentIdentity, setStudentIdentity] = useState<{
     fullName: string;
     studentId: string;
@@ -102,13 +112,13 @@ export default function App() {
   }>(() => ({
     fullName:
       initialSession.store.application.student.fullName ||
-      (isBackendMode() ? '' : MOCK_STUDENT.fullName),
+      (allowMockStudentFallback ? MOCK_STUDENT.fullName : ''),
     studentId:
       initialSession.store.application.student.studentId ||
-      (isBackendMode() ? '' : MOCK_STUDENT.studentId),
+      (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
     university:
       initialSession.store.application.student.university ||
-      (isBackendMode() ? '' : MOCK_STUDENT.university),
+      (allowMockStudentFallback ? MOCK_STUDENT.university : ''),
   }));
 
   const [activeNavId, setActiveNavId] = useState<string>(initialSession.navId);
@@ -527,12 +537,100 @@ export default function App() {
       updateBrowserUrl,
     });
 
+  const redirectToLoginOnExpiredSession = useCallback(() => {
+    setApiActorContext(null);
+    const cleanApp = buildCleanStudentApplication({
+      fullName: '',
+      studentId: '',
+      university: '',
+    });
+    setStudentIdentity({ fullName: '', studentId: '', university: '' });
+    setSharedApplication(cleanApp);
+    setNotifications([]);
+    setIsDemoActive(false);
+    setViewMode('public');
+    setPublicRoute('login');
+    setIsSessionExpiredNotice(true);
+    savePersistedDemoSession({
+      viewMode: 'public',
+      isDemoActive: false,
+      staffRole: '',
+      staffRouteId: '',
+      staffUserOverride: null,
+      collectiveUserEmail: '',
+      mutatedApplication: null,
+      mutatedNotifications: null,
+    });
+    updateBrowserUrl('/login');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [updateBrowserUrl]);
+
+  // Enforce runtime session guard across protected portals (student_app, staff_app, collective_portal)
+  useEffect(() => {
+    const isProtectedView =
+      viewMode === 'student_app' ||
+      viewMode === 'staff_app' ||
+      viewMode === 'collective_portal';
+    if (!isProtectedView) return;
+
+    const verifySession = () => {
+      const persistedDemoActive =
+        IS_DEMO_MODE_ENABLED && loadPersistedDemoSession().isDemoActive;
+      const hasValidSession = hasActiveAuthSession() || persistedDemoActive;
+      if (!hasValidSession) {
+        redirectToLoginOnExpiredSession();
+      }
+    };
+
+    verifySession();
+
+    if (typeof window === 'undefined') return;
+    const handleSessionExpiredEvent = () => {
+      redirectToLoginOnExpiredSession();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        verifySession();
+      }
+    };
+
+    window.addEventListener(
+      AUTH_SESSION_EXPIRED_EVENT,
+      handleSessionExpiredEvent
+    );
+    window.addEventListener('focus', verifySession);
+    window.addEventListener('storage', verifySession);
+    window.addEventListener('pointerdown', verifySession, true);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener(
+        AUTH_SESSION_EXPIRED_EVENT,
+        handleSessionExpiredEvent
+      );
+      window.removeEventListener('focus', verifySession);
+      window.removeEventListener('storage', verifySession);
+      window.removeEventListener('pointerdown', verifySession, true);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [
+    viewMode,
+    activeNavId,
+    staffRouteId,
+    isDemoActive,
+    redirectToLoginOnExpiredSession,
+  ]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const handlePopState = () => {
       const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
       const params = new URLSearchParams(window.location.search);
       const urlScenario = resolveScenarioFromUrlParam(params.get('scenario'));
+      const hasValidSession =
+        hasActiveAuthSession() || (IS_DEMO_MODE_ENABLED && isDemoActive);
 
       if (IS_DEMO_MODE_ENABLED && urlScenario) {
         applyPrototypeScenario(urlScenario.id, {
@@ -554,15 +652,47 @@ export default function App() {
         return;
       }
 
+      if (pathname === '/login') {
+        setViewMode('public');
+        setPublicRoute('login');
+        savePersistedDemoSession({ viewMode: 'public' });
+        return;
+      }
+
+      if (pathname === '/signup' || pathname === '/register') {
+        setViewMode('public');
+        setPublicRoute('signup');
+        savePersistedDemoSession({ viewMode: 'public' });
+        return;
+      }
+
       if (pathname === '/collective/login') {
         setViewMode('collective_login');
         savePersistedDemoSession({ viewMode: 'collective_login' });
         return;
       }
 
+      if (
+        pathname === '/collective' ||
+        pathname.startsWith('/collective') ||
+        pathname.startsWith('/staff') ||
+        pathname.startsWith('/app')
+      ) {
+        if (!hasValidSession) {
+          redirectToLoginOnExpiredSession();
+          return;
+        }
+      }
+
       if (pathname === '/collective' || pathname.startsWith('/collective')) {
         setViewMode('collective_portal');
         savePersistedDemoSession({ viewMode: 'collective_portal' });
+        return;
+      }
+
+      if (pathname.startsWith('/staff')) {
+        setViewMode('staff_app');
+        savePersistedDemoSession({ viewMode: 'staff_app' });
         return;
       }
 
@@ -584,7 +714,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [applyPrototypeScenario]);
+  }, [applyPrototypeScenario, isDemoActive, redirectToLoginOnExpiredSession]);
 
   const actionableBadgeCount = useMemo(
     () => getActionableNotifications(notifications).length,
@@ -642,6 +772,14 @@ export default function App() {
         return;
       }
 
+      if (
+        !hasActiveAuthSession() &&
+        !(IS_DEMO_MODE_ENABLED && isDemoActive)
+      ) {
+        redirectToLoginOnExpiredSession();
+        return;
+      }
+
       setCameFromNotifications(false);
       setResultUnavailableNotice(null);
       setActiveNavId(navId);
@@ -651,7 +789,7 @@ export default function App() {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
     },
-    [updateBrowserUrl]
+    [updateBrowserUrl, isDemoActive, redirectToLoginOnExpiredSession]
   );
 
   const handleConsumeDeepLink = useCallback(() => {
@@ -815,6 +953,15 @@ export default function App() {
     return (
       <CollectiveLoginPage
         onLoginSuccess={(email) => {
+          if (!hasActiveAuthSession()) {
+            setApiActorContext({
+              userId: email,
+              userName: email,
+              userEmail: email,
+              role: 'COLLECTIVE_PREPARER',
+              token: `session-${Date.now()}`,
+            });
+          }
           setCollectiveUserEmail(email);
           setViewMode('collective_portal');
           savePersistedDemoSession({ viewMode: 'collective_portal' });

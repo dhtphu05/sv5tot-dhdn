@@ -212,6 +212,7 @@ let activeDemoSession: AuthSessionPayload | null = null;
 let demoStudentProfile: StudentProfileDto =
   loadPersistedDemoProfile() || structuredClone(DEFAULT_CANONICAL_STUDENT_PROFILE);
 let demoRegisteredProfiles = new Map<string, StudentProfileDto>();
+let demoRegisteredPasswords = new Map<string, string>();
 let demoIndividualRecords: StaffApplicationRecord[] = [...INITIAL_STAFF_APPLICATIONS];
 let demoStudentApps = new Map<string, StudentApplicationData>([
   [STUDENT_APPLICATION_FIXTURE.applicationId, structuredClone(STUDENT_APPLICATION_FIXTURE)],
@@ -241,7 +242,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
     async loginWithCredentials({ email, password, preferredTrack }) {
       const normalized = email.trim().toLowerCase();
 
-      if (normalized === 'sai@example.com' || password === 'wrongpassword') {
+      const throwInvalidCredentials = (): never => {
         const err = new Error('Email hoặc mật khẩu chưa chính xác.') as Error & {
           status?: number;
           code?: string;
@@ -249,7 +250,13 @@ export const demoServicesAdapter: DomainServicesBundle = {
         err.status = 401;
         err.code = 'INVALID_CREDENTIALS';
         throw err;
+      };
+
+      if (normalized === 'sai@example.com' || password === 'wrongpassword') {
+        throwInvalidCredentials();
       }
+
+      const hasPasswordInput = typeof password === 'string' && password.length > 0;
 
       // Check full Staff accounts list first (includes all School Officers across 9 member units)
       const matchedStaffAccount = INITIAL_STAFF_ACCOUNTS.find(
@@ -282,7 +289,10 @@ export const demoServicesAdapter: DomainServicesBundle = {
               normalized === 'admin@udn.vn'))
       );
 
-      if (matchedStaffAccount || staffRoleEntry || preferredTrack === 'STAFF') {
+      if (matchedStaffAccount || staffRoleEntry) {
+        if (hasPasswordInput && password !== 'MatKhau@2026') {
+          throwInvalidCredentials();
+        }
         if (matchedStaffAccount) {
           activeDemoSession = {
             authenticated: true,
@@ -301,7 +311,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
           };
           return activeDemoSession;
         }
-        const [role, user] = staffRoleEntry || ['CITY_OFFICER', STAFF_DEMO_USERS.CITY_OFFICER];
+        const [role, user] = staffRoleEntry!;
         activeDemoSession = {
           authenticated: true,
           mode: 'DEMO',
@@ -320,26 +330,27 @@ export const demoServicesAdapter: DomainServicesBundle = {
         return activeDemoSession;
       }
 
+      if (preferredTrack === 'STAFF') {
+        throwInvalidCredentials();
+      }
+
       // Check Authorized Collective Preparer
       const collectiveEntity = AUTHORIZED_COLLECTIVE_REGISTRY.find(
         (c) => c.authorizedPreparerEmail.toLowerCase() === normalized
       );
       if (collectiveEntity || preferredTrack === 'COLLECTIVE') {
-        if (
-          preferredTrack === 'COLLECTIVE' &&
-          !collectiveEntity &&
-          (normalized.includes('minhanh.nguyen') ||
-            normalized.includes('student') ||
-            normalized.startsWith('sv.'))
-        ) {
+        if (!collectiveEntity) {
           const err = new Error(
-            'Tài khoản này là tài khoản sinh viên cá nhân, không có quyền truy cập Cổng Tập thể. Vui lòng chuyển sang Cổng Sinh viên cá nhân.'
+            'Tài khoản này chưa được cấp thẩm quyền lập hồ sơ Tập thể Sinh viên 5 tốt.'
           ) as Error & { status?: number; code?: string };
           err.status = 403;
           err.code = 'UNAUTHORIZED_COLLECTIVE_PREPARER';
           throw err;
         }
-        const target = collectiveEntity || AUTHORIZED_COLLECTIVE_REGISTRY[0];
+        if (hasPasswordInput && password !== 'MatKhau@2026') {
+          throwInvalidCredentials();
+        }
+        const target = collectiveEntity;
         activeDemoSession = {
           authenticated: true,
           mode: 'DEMO',
@@ -360,11 +371,31 @@ export const demoServicesAdapter: DomainServicesBundle = {
         return activeDemoSession;
       }
 
-      // Check Seeded Multi-School Student or fallback to default Student
+      // Check Seeded Multi-School Student or registered student
       const matchedStudent = DEMO_SEEDED_STUDENTS.find(
         (s) => s.email.toLowerCase() === normalized
       );
       const registeredProf = demoRegisteredProfiles.get(normalized);
+      const isCanonicalDemoStudent =
+        normalized === 'minhanh.nguyen@dut.udn.vn' ||
+        normalized === 'minh.nv@dut.udn.vn' ||
+        normalized === 'minhquan.tran@dut.udn.vn';
+
+      if (!matchedStudent && !registeredProf && !isCanonicalDemoStudent) {
+        throwInvalidCredentials();
+      }
+
+      if (hasPasswordInput) {
+        if (registeredProf) {
+          const savedPwd = demoRegisteredPasswords.get(normalized);
+          if (savedPwd && savedPwd !== password) {
+            throwInvalidCredentials();
+          }
+        } else if (password !== 'MatKhau@2026') {
+          throwInvalidCredentials();
+        }
+      }
+
       if (registeredProf) {
         demoStudentProfile = structuredClone(registeredProf);
         savePersistedDemoProfile(demoStudentProfile);
@@ -425,7 +456,7 @@ export const demoServicesAdapter: DomainServicesBundle = {
       return activeDemoSession;
     },
 
-    async registerStudent({ fullName, email, studentCode, institutionId, institutionName }) {
+    async registerStudent({ fullName, email, studentCode, institutionId, institutionName, password }) {
       const normalizedEmail = email.trim().toLowerCase();
       const normalizedCode = studentCode.trim().toUpperCase();
 
@@ -468,6 +499,9 @@ export const demoServicesAdapter: DomainServicesBundle = {
       };
       demoStudentProfile = structuredClone(freshProfile);
       demoRegisteredProfiles.set(normalizedEmail, structuredClone(freshProfile));
+      if (password) {
+        demoRegisteredPasswords.set(normalizedEmail, password);
+      }
       savePersistedDemoProfile(demoStudentProfile);
 
       activeDemoSession = {
