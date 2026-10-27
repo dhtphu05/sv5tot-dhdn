@@ -358,22 +358,54 @@ export function usePublicAuthSessionTransition({
                   ...(remoteApp.student || {}),
                 },
               };
+              const st = hydrated.status;
               const isSubmitted =
-                remoteApp.status === 'under_review' ||
-                remoteApp.status === 'submitted' ||
+                st === 'under_review' ||
+                (st as string) === 'submitted' ||
                 remoteApp.schoolPreliminaryStatus === 'pending_intake' ||
                 remoteApp.schoolPreliminaryStatus === 'under_review' ||
                 remoteApp.schoolPreliminaryStatus === 'recommended_forwarding' ||
                 remoteApp.schoolPreliminaryStatus === 'forwarded_to_city';
-              const nextScId: PrototypeScenarioId = isSubmitted
-                ? 'under_review'
-                : 'draft';
-              const nextHomeSc: HomeDevScenarioId = isSubmitted
-                ? 'state_g_under_review'
-                : 'state_b_draft_clean';
-              const nextSubState: ApplicationSubmissionState = isSubmitted
-                ? 'submitted'
-                : 'draft';
+              const nextScId: PrototypeScenarioId =
+                st === 'supplement_required'
+                  ? 'supplement_required'
+                  : st === 'supplement_sent'
+                  ? 'supplement_submitted'
+                  : st === 'recognized'
+                  ? 'final_recognized'
+                  : st === 'not_recognized'
+                  ? 'final_not_recognized'
+                  : st === 'all_reviewed'
+                  ? 'waiting_final'
+                  : isSubmitted
+                  ? 'under_review'
+                  : 'draft';
+              const nextHomeSc: HomeDevScenarioId =
+                st === 'supplement_required'
+                  ? 'state_h_supplement_active'
+                  : st === 'supplement_sent'
+                  ? 'state_i_supplement_sent'
+                  : st === 'recognized'
+                  ? 'state_k_recognized'
+                  : st === 'not_recognized'
+                  ? 'state_l_not_recognized'
+                  : st === 'all_reviewed'
+                  ? 'state_j_waiting_final'
+                  : isSubmitted
+                  ? 'state_g_under_review'
+                  : 'state_b_draft_clean';
+              const nextSubState: ApplicationSubmissionState =
+                st === 'supplement_required'
+                  ? 'supplement_required'
+                  : st === 'supplement_sent'
+                  ? 'supplement_sent'
+                  : st === 'recognized' || st === 'not_recognized'
+                  ? 'result_published'
+                  : st === 'all_reviewed'
+                  ? 'all_reviewed'
+                  : isSubmitted
+                  ? 'under_review'
+                  : 'draft';
 
               setPrototypeScenarioId(nextScId);
               setHomeScenario(nextHomeSc);

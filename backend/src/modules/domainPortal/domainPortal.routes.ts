@@ -593,11 +593,213 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
   // =========================================================================
   // 2. INDIVIDUAL APPLICATIONS & SCHOOL PRELIMINARY REVIEW
   // =========================================================================
+  function collectCriterionDeclarations(crit: Record<string, any> | undefined): Record<string, any>[] {
+    if (!crit) return [];
+    const byId = new Map<string, Record<string, any>>();
+    const pushDecls = (reqs: unknown) => {
+      if (!Array.isArray(reqs)) return;
+      for (const r of reqs) {
+        if (r && Array.isArray(r.declarations)) {
+          for (const d of r.declarations) {
+            if (d && typeof d === 'object') {
+              const key = d.id || `${r.id}-${byId.size}`;
+              byId.set(key, d);
+            }
+          }
+        }
+      }
+    };
+    if (Array.isArray(crit.groups)) {
+      for (const g of crit.groups) {
+        pushDecls(g?.requirements);
+      }
+    }
+    pushDecls(crit.requirements);
+    return Array.from(byId.values());
+  }
+
+  function resolveSchoolMappingForApp(app: Record<string, any>): {
+    instId: string;
+    unitId: string;
+    unitName: string;
+    instName: string;
+  } {
+    const rawInstId =
+      app.applicantProfileSnapshot?.institutionId ||
+      app.trainingInstitutionId ||
+      app.institution?.id ||
+      '';
+    if (rawInstId && SCHOOL_UNIT_MAP[rawInstId]) {
+      return { instId: rawInstId, ...SCHOOL_UNIT_MAP[rawInstId] };
+    }
+    const rawUni = String(
+      app.student?.university ||
+        app.trainingInstitutionName ||
+        app.applicantProfileSnapshot?.institutionName ||
+        app.schoolReviewUnitName ||
+        ''
+    ).toLowerCase();
+    for (const [instId, info] of Object.entries(SCHOOL_UNIT_MAP)) {
+      if (
+        rawUni.includes(info.instName.toLowerCase()) ||
+        rawUni.includes(info.unitName.toLowerCase())
+      ) {
+        return { instId, ...info };
+      }
+    }
+    if (rawUni.includes('kinh tế')) return { instId: 'inst-due', ...SCHOOL_UNIT_MAP['inst-due'] };
+    if (rawUni.includes('sư phạm kỹ thuật')) return { instId: 'inst-ute', ...SCHOOL_UNIT_MAP['inst-ute'] };
+    if (rawUni.includes('sư phạm')) return { instId: 'inst-ued', ...SCHOOL_UNIT_MAP['inst-ued'] };
+    if (rawUni.includes('ngoại ngữ')) return { instId: 'inst-ufl', ...SCHOOL_UNIT_MAP['inst-ufl'] };
+    if (rawUni.includes('việt - hàn') || rawUni.includes('vku')) return { instId: 'inst-vku', ...SCHOOL_UNIT_MAP['inst-vku'] };
+    if (rawUni.includes('y dược')) return { instId: 'inst-smp', ...SCHOOL_UNIT_MAP['inst-smp'] };
+    if (rawUni.includes('việt - anh') || rawUni.includes('vnuk')) return { instId: 'inst-vnuk', ...SCHOOL_UNIT_MAP['inst-vnuk'] };
+    if (rawUni.includes('kon tum')) return { instId: 'inst-kontum', ...SCHOOL_UNIT_MAP['inst-kontum'] };
+    return { instId: 'inst-dut', ...SCHOOL_UNIT_MAP['inst-dut'] };
+  }
+
+  function syncStaffRecordFromStudentApplication(
+    app: Record<string, any>,
+    options?: { createIfMissing?: boolean; markSubmitted?: boolean }
+  ): Record<string, any> | null {
+    const appId = app.applicationId;
+    if (!appId) return null;
+
+    const existingIdx = portalState.individualStaffRecords.findIndex(
+      (r) => r.applicationId === appId
+    );
+    if (existingIdx === -1 && !options?.createIfMissing) {
+      return null;
+    }
+
+    const existing = existingIdx >= 0 ? portalState.individualStaffRecords[existingIdx] : null;
+    const mapped = resolveSchoolMappingForApp(app);
+    const studentCode =
+      app.student?.studentId ||
+      app.student?.studentCode ||
+      existing?.student?.studentCode ||
+      appId.replace(/^APP-\d{4}-DN-/, '');
+    const studentFullName =
+      app.student?.fullName ||
+      app.applicantProfileSnapshot?.fullName ||
+      existing?.student?.fullName ||
+      'Sinh viên ĐHĐN';
+    const studentEmail =
+      app.student?.email ||
+      app.applicantProfileSnapshot?.email ||
+      existing?.student?.email ||
+      `${studentCode}@sv.udn.vn`;
+
+    let totalDecl = 0;
+    let totalEv = 0;
+    const baseCriteriaReview = existing?.criteriaReview || createDefaultCriteriaReviewList();
+    const updatedCriteriaReview = baseCriteriaReview.map((cr: Record<string, any>) => {
+      const matchingCrit = (app.criteria || []).find(
+        (c: Record<string, any>) => c.id === cr.criterionId
+      );
+      const allDecls = collectCriterionDeclarations(matchingCrit);
+      const evCount = allDecls.reduce(
+        (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+        0
+      );
+      totalDecl += allDecls.length;
+      totalEv += evCount;
+      return {
+        ...cr,
+        declaredCount: allDecls.length,
+        evidenceCount: evCount,
+      };
+    });
+
+    const resolvedSnapshot = app.applicantProfileSnapshot || existing?.applicantProfileSnapshot || {
+      fullName: studentFullName,
+      gender: 'Nam',
+      dateOfBirth: '15/05/2004',
+      ethnicity: 'Kinh',
+      academicYearNumber: 3,
+      educationLevel: 'Đại học',
+      className: app.student?.class || '22CLC1',
+      homeProvince: 'Thành phố Đà Nẵng',
+      institutionId: mapped.instId,
+      institutionName: mapped.instName,
+      unionPosition: 'Đoàn viên',
+      politicalStatus: 'Đoàn viên',
+      phoneNumber: '',
+      email: studentEmail,
+    };
+
+    const nowFormatted = new Date().toLocaleDateString('vi-VN');
+    const staffRec: Record<string, any> = {
+      ...(existing || {
+        applicationId: appId,
+        schoolYear: app.season || 'Năm học 2025–2026',
+        levelLabel: app.level || 'Cấp Đại học Đà Nẵng',
+        submittedAt: app.submittedAt || nowFormatted,
+        submittedDateSortKey: new Date().toISOString(),
+        internalDeadline: '10/11/2026',
+        eligibilityStatus: 'verified',
+        eligibilityLabel: 'Đủ điều kiện nộp hồ sơ',
+        currentReviewStage: app.reviewStage || 'SCHOOL',
+        schoolPreliminaryStatus: app.schoolPreliminaryStatus || 'pending_intake',
+        schoolRecommendation: app.schoolRecommendation || 'pending',
+        workflowStatus: 'unassigned',
+        assignment: null,
+        reviewedCriteriaCount: 0,
+        totalCriteriaCount: 5,
+        supplementSummary: {
+          requestCount: Array.isArray(app.supplementRequests) ? app.supplementRequests.length : 0,
+          activeStatus: null,
+        },
+        committeeSummary: null,
+        finalResultSummary: null,
+        latestOperationalNote: `Sinh viên đã nộp hồ sơ về ${app.schoolReviewUnitName || mapped.unitName}`,
+      }),
+      applicationId: appId,
+      student: {
+        fullName: studentFullName,
+        studentCode,
+        email: studentEmail,
+      },
+      applicantProfileSnapshot: resolvedSnapshot,
+      institution: {
+        id: mapped.instId,
+        officialName: app.trainingInstitutionName || mapped.instName,
+      },
+      schoolReviewUnitId: app.schoolReviewUnitId || existing?.schoolReviewUnitId || mapped.unitId,
+      schoolReviewUnitName: app.schoolReviewUnitName || existing?.schoolReviewUnitName || mapped.unitName,
+      criteriaReview: updatedCriteriaReview,
+      totalDeclarations: totalDecl,
+      totalEvidence: totalEv,
+      updatedAt: 'Vừa cập nhật',
+      updatedSortKey: Date.now(),
+    };
+
+    if (options?.markSubmitted) {
+      staffRec.currentReviewStage = 'SCHOOL';
+      staffRec.schoolPreliminaryStatus = 'pending_intake';
+      staffRec.submittedAt = app.submittedAt || nowFormatted;
+      staffRec.submittedDateSortKey = new Date().toISOString();
+      staffRec.latestOperationalNote = `Sinh viên đã nộp hồ sơ chính thức về ${staffRec.schoolReviewUnitName}`;
+    }
+
+    if (existingIdx >= 0) {
+      portalState.individualStaffRecords[existingIdx] = staffRec;
+    } else {
+      portalState.individualStaffRecords.unshift(staffRec);
+    }
+
+    return staffRec;
+  }
+
   router.get('/individual/applications', (_req: Request, res: Response): void => {
+    const enriched = portalState.individualStaffRecords.map((r) => ({
+      ...r,
+      studentApplication: portalState.studentApplications[r.applicationId] || undefined,
+    }));
     res.status(200).json({
       success: true,
-      count: portalState.individualStaffRecords.length,
-      data: portalState.individualStaffRecords,
+      count: enriched.length,
+      data: enriched,
     });
   });
 
@@ -613,7 +815,13 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       });
       return;
     }
-    res.status(200).json({ success: true, data: record });
+    res.status(200).json({
+      success: true,
+      data: {
+        ...record,
+        studentApplication: portalState.studentApplications[record.applicationId] || undefined,
+      },
+    });
   });
 
   router.get('/individual/applications/:id/student-view', (req: Request, res: Response): void => {
@@ -627,6 +835,38 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       return;
     }
     res.status(200).json({ success: true, data: app });
+  });
+
+  router.put('/individual/applications/:id/student-view', (req: Request, res: Response): void => {
+    const { id } = req.params;
+    const incoming = (req.body?.application || req.body || {}) as Record<string, any>;
+    if (!incoming || typeof incoming !== 'object') {
+      res.status(400).json({
+        success: false,
+        errorCode: 'INVALID_APPLICATION_PAYLOAD',
+        error: 'Dữ liệu hồ sơ sinh viên không hợp lệ.',
+      });
+      return;
+    }
+
+    const existing = portalState.studentApplications[id] || {};
+    const merged: Record<string, any> = {
+      ...existing,
+      ...incoming,
+      applicationId: id,
+    };
+    const mapped = resolveSchoolMappingForApp(merged);
+    if (!merged.schoolReviewUnitId) merged.schoolReviewUnitId = mapped.unitId;
+    if (!merged.schoolReviewUnitName) merged.schoolReviewUnitName = mapped.unitName;
+    if (!merged.trainingInstitutionName) merged.trainingInstitutionName = mapped.instName;
+
+    portalState.studentApplications[id] = merged;
+    syncStaffRecordFromStudentApplication(merged, {
+      createIfMissing: merged.status && merged.status !== 'draft',
+    });
+    savePortalStateToDisk();
+
+    res.status(200).json({ success: true, data: merged });
   });
 
   router.post('/individual/applications', (req: Request, res: Response): void => {
@@ -683,80 +923,37 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     };
 
     const appId = `APP-2026-DN-${studentCode}`;
+    const existingApp = portalState.studentApplications[appId];
     const created: Record<string, any> = {
       applicationId: appId,
       season: 'Năm học 2025–2026',
       level: 'Cấp Đại học Đà Nẵng',
-      status: 'draft',
-      reviewStage: 'SCHOOL',
+      status: existingApp?.status || 'draft',
+      reviewStage: existingApp?.reviewStage || 'SCHOOL',
       trainingInstitutionName: institutionName || mapped.instName,
       schoolReviewUnitId: mapped.unitId,
       schoolReviewUnitName: mapped.unitName,
-      schoolPreliminaryStatus: 'school_not_submitted',
+      schoolPreliminaryStatus: existingApp?.schoolPreliminaryStatus || 'school_not_submitted',
       applicantProfileSnapshot: resolvedSnapshot,
       student: {
         fullName: studentFullName,
         studentId: studentCode,
         university: institutionName || mapped.instName,
-        faculty: faculty || 'Khoa Đào tạo',
-        class: className || '22CLC1',
+        faculty: faculty || existingApp?.student?.faculty || 'Khoa Đào tạo',
+        class: className || existingApp?.student?.class || '22CLC1',
         email: email || `${studentCode}@sv.udn.vn`,
         academicYear: 'Năm học 2025–2026',
       },
-      criteria: createDefaultCriteriaList(),
-      supplementRequests: [],
+      criteria:
+        Array.isArray(existingApp?.criteria) && existingApp.criteria.length > 0
+          ? existingApp.criteria
+          : createDefaultCriteriaList(),
+      supplementRequests: existingApp?.supplementRequests || [],
     };
 
     portalState.studentApplications[appId] = created;
-
-    const staffRec = {
-      applicationId: appId,
-      schoolYear: 'Năm học 2025–2026',
-      levelLabel: 'Cấp Đại học Đà Nẵng',
-      submittedAt: '10/10/2026 · 09:30',
-      submittedDateSortKey: new Date().toISOString(),
-      updatedAt: 'Vừa cập nhật',
-      updatedSortKey: Date.now(),
-      internalDeadline: '20/10/2026',
-      eligibilityStatus: 'verified',
-      eligibilityLabel: 'Đủ điều kiện nộp hồ sơ',
-      student: {
-        fullName: studentFullName,
-        studentCode,
-        email: email || `${studentCode}@sv.udn.vn`,
-      },
-      applicantProfileSnapshot: resolvedSnapshot,
-      institution: {
-        id: institutionId,
-        officialName: institutionName || mapped.instName,
-      },
-      currentReviewStage: 'SCHOOL',
-      schoolReviewUnitId: mapped.unitId,
-      schoolReviewUnitName: mapped.unitName,
-      schoolPreliminaryStatus: 'pending_intake',
-      schoolRecommendation: 'pending',
-      workflowStatus: 'unassigned',
-      assignment: null,
-      reviewedCriteriaCount: 0,
-      totalCriteriaCount: 5,
-      totalDeclarations: 0,
-      totalEvidence: 0,
-      supplementSummary: {
-        requestCount: 0,
-        activeStatus: null,
-      },
-      committeeSummary: null,
-      finalResultSummary: null,
-      latestOperationalNote: `Khởi tạo hồ sơ trực tuyến · Định tuyến về ${mapped.unitName}`,
-      criteriaReview: createDefaultCriteriaReviewList(),
-    };
-
-    const existingIdx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === appId);
-    if (existingIdx >= 0) {
-      portalState.individualStaffRecords[existingIdx] = staffRec;
-    } else {
-      portalState.individualStaffRecords.unshift(staffRec);
-    }
+    syncStaffRecordFromStudentApplication(created, { createIfMissing: true });
+    savePortalStateToDisk();
 
     appendPortalAuditLog({
       track: 'INDIVIDUAL',
@@ -809,19 +1006,6 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       if (!Array.isArray(crit.requirements)) {
         crit.requirements = [];
       }
-      let reqObj = crit.requirements.find((r: Record<string, any>) => r.id === requirementId);
-      if (!reqObj) {
-        reqObj = {
-          id: requirementId,
-          criterionId,
-          status: 'completed',
-          declarations: [],
-        };
-        crit.requirements.push(reqObj);
-      }
-      if (!Array.isArray(reqObj.declarations)) {
-        reqObj.declarations = [];
-      }
       const rawEvFiles = Array.isArray(declaration.evidenceFiles)
         ? declaration.evidenceFiles
         : [];
@@ -837,6 +1021,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         status: ev.status || 'completed',
       }));
       const normalizedDecl = {
+        ...declaration,
         id: declaration.id || `decl-${requirementId}-${Date.now()}`,
         title: declaration.title || declaration.value || 'Nội dung kê khai',
         value: declaration.value || declaration.title || 'Nội dung kê khai',
@@ -846,70 +1031,61 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         authority: declaration.authority || '',
         status: 'completed',
         evidenceFiles: normalizedEvFiles,
+        metadata: declaration.metadata ? { ...declaration.metadata } : undefined,
       };
-      const existingDeclIdx = reqObj.declarations.findIndex(
-        (d: Record<string, any>) => d.id === normalizedDecl.id
-      );
-      if (existingDeclIdx >= 0) {
-        reqObj.declarations[existingDeclIdx] = normalizedDecl;
-      } else {
-        reqObj.declarations.push(normalizedDecl);
+
+      const upsertIntoReqList = (reqList: Record<string, any>[], addIfMissing: boolean) => {
+        let reqObj = reqList.find((r: Record<string, any>) => r.id === requirementId);
+        if (!reqObj && addIfMissing) {
+          reqObj = {
+            id: requirementId,
+            criterionId,
+            status: 'completed',
+            declarations: [],
+          };
+          reqList.push(reqObj);
+        }
+        if (reqObj) {
+          if (!Array.isArray(reqObj.declarations)) {
+            reqObj.declarations = [];
+          }
+          const existingDeclIdx = reqObj.declarations.findIndex(
+            (d: Record<string, any>) => d.id === normalizedDecl.id
+          );
+          if (existingDeclIdx >= 0) {
+            reqObj.declarations[existingDeclIdx] = normalizedDecl;
+          } else {
+            reqObj.declarations.push(normalizedDecl);
+          }
+          reqObj.status = 'completed';
+          reqObj.isOptionalEmpty = false;
+        }
+      };
+
+      upsertIntoReqList(crit.requirements, true);
+      if (Array.isArray(crit.groups)) {
+        for (const group of crit.groups) {
+          if (Array.isArray(group?.requirements)) {
+            upsertIntoReqList(group.requirements, false);
+          }
+        }
       }
-      reqObj.status = 'completed';
-      crit.statusLabel = 'Đã kê khai';
-      const declaredReqCount = crit.requirements.filter(
-        (r: Record<string, any>) => Array.isArray(r.declarations) && r.declarations.length > 0
-      ).length;
-      const totalCritEvidence = crit.requirements.reduce(
-        (sum: number, r: Record<string, any>) =>
-          sum +
-          (r.declarations || []).reduce(
-            (dSum: number, d: Record<string, any>) => dSum + (d.evidenceFiles?.length || 0),
-            0
-          ),
+
+      const allDecls = collectCriterionDeclarations(crit);
+      const totalCritEvidence = allDecls.reduce(
+        (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
         0
       );
+      crit.statusLabel = 'Đã kê khai';
       crit.shortSummary =
         criterionId === 'physical'
-          ? `${declaredReqCount}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
-          : `${declaredReqCount} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
+          ? `${allDecls.length}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
+          : `${allDecls.length} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
     }
 
     portalState.studentApplications[id] = app;
-
-    // Sync declaredCount & evidenceCount to individualStaffRecords
-    const staffIdx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
-    if (staffIdx >= 0) {
-      const rec = portalState.individualStaffRecords[staffIdx];
-      let totalDecl = 0;
-      let totalEv = 0;
-      const updatedCriteriaReview = (rec.criteriaReview || createDefaultCriteriaReviewList()).map(
-        (cr: Record<string, any>) => {
-          const matchingCrit = app.criteria.find((c: Record<string, any>) => c.id === cr.criterionId);
-          const allReqs = matchingCrit?.requirements || [];
-          const allDecls = allReqs.flatMap((r: Record<string, any>) => r.declarations || []);
-          const evCount = allDecls.reduce(
-            (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
-            0
-          );
-          totalDecl += allDecls.length;
-          totalEv += evCount;
-          return {
-            ...cr,
-            declaredCount: allDecls.length,
-            evidenceCount: evCount,
-          };
-        }
-      );
-      portalState.individualStaffRecords[staffIdx] = {
-        ...rec,
-        criteriaReview: updatedCriteriaReview,
-        totalDeclarations: totalDecl,
-        totalEvidence: totalEv,
-        updatedAt: 'Vừa cập nhật',
-        updatedSortKey: Date.now(),
-      };
-    }
+    syncStaffRecordFromStudentApplication(app, { createIfMissing: false });
+    savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({
@@ -939,75 +1115,49 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       return;
     }
 
+    const removeFromReqList = (reqList: Record<string, any>[]) => {
+      for (const reqObj of reqList) {
+        if (!requirementId || reqObj.id === requirementId) {
+          if (Array.isArray(reqObj.declarations)) {
+            reqObj.declarations = reqObj.declarations.filter(
+              (d: Record<string, any>) => d.id !== declarationId
+            );
+            if (reqObj.declarations.length === 0) {
+              reqObj.status = 'undeclared';
+              reqObj.isOptionalEmpty = true;
+            }
+          }
+        }
+      }
+    };
+
     if (Array.isArray(app.criteria)) {
       for (const crit of app.criteria) {
         if (Array.isArray(crit.requirements)) {
-          for (const reqObj of crit.requirements) {
-            if (!requirementId || reqObj.id === requirementId) {
-              if (Array.isArray(reqObj.declarations)) {
-                reqObj.declarations = reqObj.declarations.filter(
-                  (d: Record<string, any>) => d.id !== declarationId
-                );
-                if (reqObj.declarations.length === 0) {
-                  reqObj.status = 'undeclared';
-                  reqObj.isOptionalEmpty = true;
-                }
-              }
+          removeFromReqList(crit.requirements);
+        }
+        if (Array.isArray(crit.groups)) {
+          for (const group of crit.groups) {
+            if (Array.isArray(group?.requirements)) {
+              removeFromReqList(group.requirements);
             }
           }
-          const declaredReqCount = crit.requirements.filter(
-            (r: Record<string, any>) => Array.isArray(r.declarations) && r.declarations.length > 0
-          ).length;
-          const totalCritEvidence = crit.requirements.reduce(
-            (sum: number, r: Record<string, any>) =>
-              sum +
-              (r.declarations || []).reduce(
-                (dSum: number, d: Record<string, any>) => dSum + (d.evidenceFiles?.length || 0),
-                0
-              ),
-            0
-          );
-          crit.statusLabel = declaredReqCount > 0 ? 'Đã kê khai' : 'Chưa kê khai';
-          crit.shortSummary =
-            crit.id === 'physical'
-              ? `${declaredReqCount}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
-              : `${declaredReqCount} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
         }
+        const allDecls = collectCriterionDeclarations(crit);
+        const totalCritEvidence = allDecls.reduce(
+          (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+          0
+        );
+        crit.statusLabel = allDecls.length > 0 ? 'Đã kê khai' : 'Chưa kê khai';
+        crit.shortSummary =
+          crit.id === 'physical'
+            ? `${allDecls.length}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
+            : `${allDecls.length} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
       }
     }
 
-    const staffIdx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
-    if (staffIdx >= 0) {
-      const rec = portalState.individualStaffRecords[staffIdx];
-      let totalDecl = 0;
-      let totalEv = 0;
-      const updatedCriteriaReview = (rec.criteriaReview || createDefaultCriteriaReviewList()).map(
-        (cr: Record<string, any>) => {
-          const matchingCrit = (app.criteria || []).find((c: Record<string, any>) => c.id === cr.criterionId);
-          const allReqs = matchingCrit?.requirements || [];
-          const allDecls = allReqs.flatMap((r: Record<string, any>) => r.declarations || []);
-          const evCount = allDecls.reduce(
-            (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
-            0
-          );
-          totalDecl += allDecls.length;
-          totalEv += evCount;
-          return {
-            ...cr,
-            declaredCount: allDecls.length,
-            evidenceCount: evCount,
-          };
-        }
-      );
-      portalState.individualStaffRecords[staffIdx] = {
-        ...rec,
-        criteriaReview: updatedCriteriaReview,
-        totalDeclarations: totalDecl,
-        totalEvidence: totalEv,
-        updatedAt: 'Vừa cập nhật',
-        updatedSortKey: Date.now(),
-      };
-    }
+    syncStaffRecordFromStudentApplication(app, { createIfMissing: false });
+    savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({
@@ -1025,8 +1175,10 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
   router.post('/individual/applications/:id/submit', (req: Request, res: Response): void => {
     const { id } = req.params;
-    const app =
+    const incomingApp = (req.body?.application || undefined) as Record<string, any> | undefined;
+    const baseApp =
       portalState.studentApplications[id] ||
+      incomingApp ||
       (portalState.studentApplications['APP-2026-DN-00142']
         ? structuredClone(portalState.studentApplications['APP-2026-DN-00142'])
         : {
@@ -1036,24 +1188,26 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
             criteria: createDefaultCriteriaList(),
             supplementRequests: [],
           });
+    const app: Record<string, any> = incomingApp
+      ? { ...baseApp, ...incomingApp, applicationId: id }
+      : { ...baseApp, applicationId: id };
+
+    const mapped = resolveSchoolMappingForApp(app);
     app.applicationId = id;
     app.status = 'under_review';
     app.reviewStage = 'SCHOOL';
     app.schoolPreliminaryStatus = 'pending_intake';
-    app.submittedAt = new Date().toLocaleDateString('vi-VN');
+    app.schoolReviewUnitId = app.schoolReviewUnitId || mapped.unitId;
+    app.schoolReviewUnitName = app.schoolReviewUnitName || mapped.unitName;
+    app.trainingInstitutionName = app.trainingInstitutionName || mapped.instName;
+    app.submittedAt = app.submittedAt || new Date().toLocaleDateString('vi-VN');
     portalState.studentApplications[id] = app;
 
-    const idx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
-    if (idx >= 0) {
-      portalState.individualStaffRecords[idx] = {
-        ...portalState.individualStaffRecords[idx],
-        currentReviewStage: 'SCHOOL',
-        schoolPreliminaryStatus: 'pending_intake',
-        submittedAt: '12/10/2026 · 14:20',
-        updatedAt: '12/10/2026 · 14:20',
-        latestOperationalNote: `Sinh viên đã nộp hồ sơ chính thức về ${app.schoolReviewUnitName || 'Đơn vị xét sơ tuyển'}`,
-      };
-    }
+    syncStaffRecordFromStudentApplication(app, {
+      createIfMissing: true,
+      markSubmitted: true,
+    });
+    savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({
@@ -1077,7 +1231,48 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
   router.post('/individual/applications/:id/supplement', (req: Request, res: Response): void => {
     const { id } = req.params;
-    const { explanation } = (req.body || {}) as { explanation?: string };
+    const {
+      explanation: rawExplanation,
+      note,
+      updatedApplication: rawUpdatedApp,
+      application,
+    } = (req.body || {}) as {
+      explanation?: string;
+      note?: string;
+      updatedApplication?: Record<string, any>;
+      application?: Record<string, any>;
+    };
+    const explanation = rawExplanation || note;
+    const updatedApplication = rawUpdatedApp || application;
+
+    if (updatedApplication && typeof updatedApplication === 'object') {
+      const existingStuApp = portalState.studentApplications[id] || {};
+      portalState.studentApplications[id] = {
+        ...existingStuApp,
+        ...updatedApplication,
+        applicationId: id,
+        status: 'supplement_sent',
+      };
+      syncStaffRecordFromStudentApplication(portalState.studentApplications[id], {
+        createIfMissing: true,
+      });
+    } else if (portalState.studentApplications[id]) {
+      portalState.studentApplications[id].status = 'supplement_sent';
+      if (Array.isArray(portalState.studentApplications[id].supplementRequests)) {
+        portalState.studentApplications[id].supplementRequests =
+          portalState.studentApplications[id].supplementRequests.map((s: Record<string, any>) =>
+            s.status === 'active' || s.status === 'open'
+              ? {
+                  ...s,
+                  status: 'responded',
+                  respondedAt: new Date().toLocaleDateString('vi-VN'),
+                  studentExplanation: explanation || s.studentExplanation,
+                }
+              : s
+          );
+      }
+    }
+
     const idx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
     if (idx === -1) {
       res.status(404).json({
@@ -1088,10 +1283,41 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     }
 
     const current = portalState.individualStaffRecords[idx];
+    const isSchoolStage = current.currentReviewStage === 'SCHOOL';
+    const nextWorkspaceState = current.workspaceState
+      ? {
+          ...current.workspaceState,
+          supplementRequests: Array.isArray(current.workspaceState.supplementRequests)
+            ? current.workspaceState.supplementRequests.map((sr: Record<string, any>) =>
+                sr.status === 'active' && sr.staffStatus === 'waiting_student'
+                  ? {
+                      ...sr,
+                      staffStatus: 'student_returned',
+                      studentRespondedAt: new Date().toLocaleDateString('vi-VN'),
+                      studentExplanation: explanation || sr.studentExplanation,
+                    }
+                  : sr
+              )
+            : current.workspaceState.supplementRequests,
+        }
+      : current.workspaceState;
+
     const updated = {
       ...current,
+      workspaceState: nextWorkspaceState,
       workflowStatus: 'supplement_returned',
+      schoolPreliminaryStatus: isSchoolStage
+        ? 'supplement_returned'
+        : current.schoolPreliminaryStatus,
+      schoolReviewSummary:
+        isSchoolStage && current.schoolReviewSummary
+          ? {
+              ...current.schoolReviewSummary,
+              status: 'supplement_returned',
+            }
+          : current.schoolReviewSummary,
       updatedAt: new Date().toISOString(),
+      updatedSortKey: Date.now(),
       latestOperationalNote: explanation
         ? `Sinh viên giải trình: ${explanation}`
         : 'Sinh viên đã gửi bổ sung minh chứng.',
@@ -1102,6 +1328,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       },
     };
     portalState.individualStaffRecords[idx] = updated;
+    savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({
@@ -1119,9 +1346,14 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
   router.get('/school-review/applications', (req: Request, res: Response): void => {
     const unitId = req.query.unitId as string | undefined;
-    const list = unitId
-      ? portalState.individualStaffRecords.filter((r) => r.schoolReviewUnitId === unitId)
-      : portalState.individualStaffRecords;
+    const list = (
+      unitId
+        ? portalState.individualStaffRecords.filter((r) => r.schoolReviewUnitId === unitId)
+        : portalState.individualStaffRecords
+    ).map((r) => ({
+      ...r,
+      studentApplication: portalState.studentApplications[r.applicationId] || undefined,
+    }));
     res.status(200).json({ success: true, count: list.length, data: list });
   });
 
@@ -1154,6 +1386,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         reviewedCriteriaCount: nextCriteria.filter((c: Record<string, any>) => c.status === 'reviewed').length,
       };
       portalState.individualStaffRecords[idx] = updated;
+      savePortalStateToDisk();
 
       const actor = resolveSessionActor(req);
       appendPortalAuditLog({
@@ -1170,24 +1403,55 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     }
   );
 
+  router.get('/individual/applications/:id/review-workspace', (req: Request, res: Response): void => {
+    const { id } = req.params;
+    const record = portalState.individualStaffRecords.find((r) => r.applicationId === id);
+    const studentApplication = portalState.studentApplications[id];
+    if (!record && !studentApplication) {
+      res.status(404).json({ success: false, error: `Không tìm thấy hồ sơ ${id}` });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: {
+        applicationId: id,
+        workspace: record?.workspaceState || null,
+        workspaceState: record?.workspaceState || null,
+        studentApplication: studentApplication || null,
+        record: record || null,
+      },
+    });
+  });
+
   router.put(
     '/individual/applications/:id/review-workspace',
     requireAllowedRoles('SCHOOL_OFFICER', 'CITY_OFFICER', 'CITY_MANAGER', 'ADMIN'),
     (req: Request, res: Response): void => {
       const { id } = req.params;
       const {
-        workspaceState,
+        workspaceState: rawWorkspaceState,
+        workspace,
         workflowStatus,
         schoolPreliminaryStatus,
         assignmentStatus,
         latestOperationalNote,
         studentSupplementCreated,
+        studentApplication,
       } = (req.body || {}) as Record<string, any>;
+      const workspaceState = rawWorkspaceState || workspace;
 
       const idx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
       if (idx === -1) {
         res.status(404).json({ success: false, error: `Không tìm thấy hồ sơ ${id}` });
         return;
+      }
+
+      if (studentApplication && typeof studentApplication === 'object') {
+        portalState.studentApplications[id] = {
+          ...(portalState.studentApplications[id] || {}),
+          ...studentApplication,
+          applicationId: id,
+        };
       }
 
       const current = portalState.individualStaffRecords[idx];
@@ -1204,16 +1468,33 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       const waitingSupp = activeSupps[0];
       const completedCount = Object.values(completedMap).filter(Boolean).length;
 
+      const stuAppForCounts = portalState.studentApplications[id];
       const nextCriteriaReview = (
         current.criteriaReview || createDefaultCriteriaReviewList()
       ).map((cr: Record<string, any>) => {
         const cid = cr.criterionId;
+        const matchingCrit = (stuAppForCounts?.criteria || []).find(
+          (c: Record<string, any>) => c.id === cid
+        );
+        const allDecls = matchingCrit ? collectCriterionDeclarations(matchingCrit) : null;
+        const declaredCount =
+          allDecls !== null ? allDecls.length : cr.declaredCount ?? 0;
+        const evidenceCount =
+          allDecls !== null
+            ? allDecls.reduce(
+                (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+                0
+              )
+            : cr.evidenceCount ?? 0;
+
         const hasSupp = activeSupps.some((s: Record<string, any>) => s.criterionId === cid);
         const conc = conclusionsMap[cid];
         const isDone = Boolean(completedMap[cid]) || Boolean(conc);
         if (hasSupp) {
           return {
             ...cr,
+            declaredCount,
+            evidenceCount,
             status: 'needs_supplement',
             noteSummary: waitingSupp?.message || cr.noteSummary,
           };
@@ -1221,6 +1502,8 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         if (isDone) {
           return {
             ...cr,
+            declaredCount,
+            evidenceCount,
             status: 'reviewed',
             noteSummary:
               conc?.conclusion === 'fail'
@@ -1230,6 +1513,8 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         }
         return {
           ...cr,
+          declaredCount,
+          evidenceCount,
           status: 'not_reviewed',
           noteSummary: undefined,
         };
@@ -1328,9 +1613,20 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         }
         stuApp.status = 'supplement_required';
         stuApp.schoolPreliminaryStatus = resolvedSchoolStatus;
-      } else if (portalState.studentApplications[id] && resolvedSchoolStatus) {
-        portalState.studentApplications[id].schoolPreliminaryStatus = resolvedSchoolStatus;
+      } else if (portalState.studentApplications[id]) {
+        if (resolvedSchoolStatus) {
+          portalState.studentApplications[id].schoolPreliminaryStatus = resolvedSchoolStatus;
+        }
+        if (waitingSupp) {
+          portalState.studentApplications[id].status = 'supplement_required';
+        } else if (
+          portalState.studentApplications[id].status === 'supplement_required' ||
+          portalState.studentApplications[id].status === 'supplement_sent'
+        ) {
+          portalState.studentApplications[id].status = 'under_review';
+        }
       }
+      savePortalStateToDisk();
 
       appendPortalAuditLog({
         track: 'INDIVIDUAL',
@@ -1424,6 +1720,21 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       };
       portalState.individualStaffRecords[idx] = updated;
 
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].schoolPreliminaryStatus = nextStatus;
+        portalState.studentApplications[id].schoolRecommendation =
+          nextRec || portalState.studentApplications[id].schoolRecommendation;
+        if (nextRec === 'not_recommended') {
+          portalState.studentApplications[id].status = 'not_recognized';
+          portalState.studentApplications[id].reviewStage = 'COMPLETED';
+          portalState.studentApplications[id].councilFeedback = summaryNote;
+        } else if (nextRec === 'pending' || nextRec === 'recommended') {
+          portalState.studentApplications[id].status = 'under_review';
+          portalState.studentApplications[id].reviewStage = 'SCHOOL';
+        }
+      }
+      savePortalStateToDisk();
+
       appendPortalAuditLog({
         track: 'INDIVIDUAL',
         applicationId: id,
@@ -1491,6 +1802,14 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       };
       portalState.individualStaffRecords[idx] = updated;
 
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].reviewStage = 'CITY';
+        portalState.studentApplications[id].schoolPreliminaryStatus = 'forwarded_to_city';
+        portalState.studentApplications[id].schoolRecommendation = 'recommended';
+        portalState.studentApplications[id].status = 'under_review';
+      }
+      savePortalStateToDisk();
+
       appendPortalAuditLog({
         track: 'INDIVIDUAL',
         applicationId: id,
@@ -1541,6 +1860,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         },
       };
       portalState.individualStaffRecords[idx] = updated;
+      savePortalStateToDisk();
 
       appendPortalAuditLog({
         track: 'INDIVIDUAL',
@@ -1573,17 +1893,26 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
       const actor = resolveSessionActor(req);
       const current = portalState.individualStaffRecords[idx];
+      const resolvedOutcome = outcome || 'recognized';
       const updated = {
         ...current,
         workflowStatus: 'committee_ready',
         finalResultSummary: {
-          outcome: outcome || 'recognized',
+          outcome: resolvedOutcome,
           internalNote: internalNote || '',
           decidedAt: new Date().toISOString(),
           decidedBy: actor.name,
         },
       };
       portalState.individualStaffRecords[idx] = updated;
+
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].status =
+          resolvedOutcome === 'not_recognized' ? 'not_recognized' : 'recognized';
+        portalState.studentApplications[id].reviewStage = 'COMPLETED';
+        portalState.studentApplications[id].councilFeedback = internalNote || '';
+      }
+      savePortalStateToDisk();
 
       appendPortalAuditLog({
         track: 'INDIVIDUAL',
@@ -1610,6 +1939,16 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       portalState.individualStaffRecords = portalState.individualStaffRecords.map((rec) => {
         if (rec.finalResultSummary?.outcome) {
           publishedCount++;
+          const stuApp = portalState.studentApplications[rec.applicationId];
+          if (stuApp) {
+            stuApp.status =
+              rec.finalResultSummary.outcome === 'not_recognized'
+                ? 'not_recognized'
+                : 'recognized';
+            stuApp.reviewStage = 'COMPLETED';
+            stuApp.decisionCode = finalDecisionNo;
+            stuApp.awardedAt = new Date().toLocaleDateString('vi-VN');
+          }
           return {
             ...rec,
             workflowStatus: 'published',
@@ -1622,6 +1961,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         }
         return rec;
       });
+      savePortalStateToDisk();
 
       if (publishedCount === 0) {
         publishedCount = 1;

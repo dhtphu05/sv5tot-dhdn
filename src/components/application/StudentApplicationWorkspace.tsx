@@ -45,6 +45,7 @@ import { useStudentDeclarationAndEvidenceModals } from '../../features/student-a
 import { StudentApplicationTopBanners } from '../../widgets/student-application/StudentApplicationTopBanners';
 import { StudentApplicationBodySection } from '../../widgets/student-application/StudentApplicationBodySection';
 import { StudentApplicationInspectorsAndModals } from '../../widgets/student-application/StudentApplicationInspectorsAndModals';
+import { isBackendMode } from '../../shared/config/executionMode';
 
 export interface StudentApplicationWorkspaceProps {
   hasApplication?: boolean;
@@ -129,7 +130,8 @@ export const StudentApplicationWorkspace: React.FC<
     setSubmissionState(initialSubmissionState);
   }, [initialSubmissionState]);
 
-  const isDemoPersona = initialData?.student?.studentId === '102220123';
+  const isDemoPersona =
+    !isBackendMode() && initialData?.student?.studentId === '102220123';
   const [advisories, setAdvisories] = useState<PreSubmitAdvisoryItem[]>(() =>
     isDemoPersona ? DEFAULT_ADVISORIES : []
   );
@@ -199,25 +201,21 @@ export const StudentApplicationWorkspace: React.FC<
   }, [isDemoPersona, initialSubmissionState]);
 
   useEffect(() => {
+    const countDecls = (appObj: StudentApplicationData) =>
+      (appObj.criteria || []).reduce((sum, c) => {
+        const reqs =
+          Array.isArray(c.groups) && c.groups.length > 0
+            ? c.groups.flatMap((g) => g.requirements || [])
+            : c.requirements || [];
+        return (
+          sum +
+          reqs.reduce((rSum, r) => rSum + (r.declarations?.length || 0), 0)
+        );
+      }, 0);
+
     setApplication((prev) => {
-      const prevDeclCount = (prev.criteria || []).reduce(
-        (sum, c) =>
-          sum +
-          (c.requirements || []).reduce(
-            (rSum, r) => rSum + (r.declarations?.length || 0),
-            0
-          ),
-        0
-      );
-      const nextDeclCount = (initialData.criteria || []).reduce(
-        (sum, c) =>
-          sum +
-          (c.requirements || []).reduce(
-            (rSum, r) => rSum + (r.declarations?.length || 0),
-            0
-          ),
-        0
-      );
+      const prevDeclCount = countDecls(prev);
+      const nextDeclCount = countDecls(initialData);
 
       if (
         prev.applicationId !== initialData.applicationId ||
@@ -232,6 +230,17 @@ export const StudentApplicationWorkspace: React.FC<
       }
       return {
         ...prev,
+        status: initialData.status || prev.status,
+        reviewStage: initialData.reviewStage || prev.reviewStage,
+        schoolPreliminaryStatus:
+          initialData.schoolPreliminaryStatus || prev.schoolPreliminaryStatus,
+        schoolRecommendation:
+          initialData.schoolRecommendation || prev.schoolRecommendation,
+        supplementRequests:
+          initialData.supplementRequests ?? prev.supplementRequests,
+        councilFeedback: initialData.councilFeedback ?? prev.councilFeedback,
+        decisionCode: initialData.decisionCode ?? prev.decisionCode,
+        awardedAt: initialData.awardedAt ?? prev.awardedAt,
         student: initialData.student,
         applicantProfileSnapshot:
           initialData.applicantProfileSnapshot ?? prev.applicantProfileSnapshot,
@@ -306,6 +315,7 @@ export const StudentApplicationWorkspace: React.FC<
     handleConfirmSendSupplement,
     handleViewSupplementRequest,
   } = useStudentSupplementWorkflow({
+    initialData,
     initialSubmissionState,
     submissionState,
     setSubmissionState,
@@ -526,6 +536,9 @@ export const StudentApplicationWorkspace: React.FC<
     const submittedApp: StudentApplicationData = {
       ...application,
       status: 'under_review',
+      reviewStage: 'SCHOOL',
+      schoolPreliminaryStatus: 'pending_intake',
+      submittedAt: application.submittedAt || new Date().toLocaleDateString('vi-VN'),
     };
     setApplication(submittedApp);
     setActivities(HERO_ACTIVITIES);

@@ -373,18 +373,21 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
     staffApplications.find((a) => a.applicationId === selectedStaffAppId) ||
     staffApplications[0] ||
     null;
+  const effectiveStaffAppId =
+    selectedStaffRecord?.applicationId || selectedStaffAppId;
   const activeOfficerStudentApp =
-    officerStudentAppMap[selectedStaffAppId] ||
+    officerStudentAppMap[effectiveStaffAppId] ||
+    (selectedStaffRecord as any)?.studentApplication ||
     (selectedStaffRecord
       ? buildStudentApplicationForCommitteeRecord(selectedStaffRecord)
       : initialHeroOfficerBundle.studentApp);
   const activeOfficerWorkspace =
-    officerWorkspaceMap[selectedStaffAppId] ||
+    officerWorkspaceMap[effectiveStaffAppId] ||
     (selectedStaffRecord
       ? buildFallbackBundleForStaffRecord(selectedStaffRecord).workspaceState
       : initialHeroOfficerBundle.workspaceState);
   const activeCommitteeCase =
-    committeeCasesMap[selectedStaffAppId] ||
+    committeeCasesMap[effectiveStaffAppId] ||
     (selectedStaffRecord
       ? buildDefaultCommitteeCase(selectedStaffRecord)
       : committeeCasesMap[HERO_STAFF_APP_ID]);

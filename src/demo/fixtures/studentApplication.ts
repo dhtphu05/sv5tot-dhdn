@@ -234,6 +234,139 @@ INITIAL_STUDENT_APPLICATION.criteria = buildCriteriaFromDefinitions(
   INITIAL_STUDENT_APPLICATION.criteria
 );
 
+export function resolveInstitutionFromUniversity(
+  university?: string,
+  fallbackInstId?: string
+): { institutionId: string; schoolReviewUnitId: string; schoolReviewUnitName: string } {
+  const norm = (university || '').toLowerCase();
+  if (fallbackInstId) {
+    const map: Record<string, { unitId: string; unitName: string }> = {
+      'inst-dut': { unitId: 'unit-dut', unitName: 'Trường Đại học Bách khoa – ĐHĐN' },
+      'inst-due': { unitId: 'unit-due', unitName: 'Trường Đại học Kinh tế – ĐHĐN' },
+      'inst-ued': { unitId: 'unit-ued', unitName: 'Trường Đại học Sư phạm – ĐHĐN' },
+      'inst-ufl': { unitId: 'unit-ufl', unitName: 'Trường Đại học Ngoại ngữ – ĐHĐN' },
+      'inst-ufls': { unitId: 'unit-ufl', unitName: 'Trường Đại học Ngoại ngữ – ĐHĐN' },
+      'inst-ute': { unitId: 'unit-ute', unitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN' },
+      'inst-vku': {
+        unitId: 'unit-vku',
+        unitName: 'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
+      },
+      'inst-smp': { unitId: 'unit-smp', unitName: 'Trường Y Dược – ĐHĐN' },
+      'inst-vnuk': {
+        unitId: 'unit-vnuk',
+        unitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+      },
+      'inst-kontum': {
+        unitId: 'unit-kontum',
+        unitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+      },
+    };
+    const matched = map[fallbackInstId];
+    if (matched) {
+      return {
+        institutionId: fallbackInstId === 'inst-ufls' ? 'inst-ufl' : fallbackInstId,
+        schoolReviewUnitId: matched.unitId,
+        schoolReviewUnitName: matched.unitName,
+      };
+    }
+  }
+  if (norm.includes('kinh tế')) {
+    return {
+      institutionId: 'inst-due',
+      schoolReviewUnitId: 'unit-due',
+      schoolReviewUnitName: 'Trường Đại học Kinh tế – ĐHĐN',
+    };
+  }
+  if (norm.includes('sư phạm kỹ thuật')) {
+    return {
+      institutionId: 'inst-ute',
+      schoolReviewUnitId: 'unit-ute',
+      schoolReviewUnitName: 'Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
+    };
+  }
+  if (norm.includes('sư phạm')) {
+    return {
+      institutionId: 'inst-ued',
+      schoolReviewUnitId: 'unit-ued',
+      schoolReviewUnitName: 'Trường Đại học Sư phạm – ĐHĐN',
+    };
+  }
+  if (norm.includes('ngoại ngữ')) {
+    return {
+      institutionId: 'inst-ufl',
+      schoolReviewUnitId: 'unit-ufl',
+      schoolReviewUnitName: 'Trường Đại học Ngoại ngữ – ĐHĐN',
+    };
+  }
+  if (norm.includes('việt – hàn') || norm.includes('việt - hàn') || norm.includes('cntt')) {
+    return {
+      institutionId: 'inst-vku',
+      schoolReviewUnitId: 'unit-vku',
+      schoolReviewUnitName:
+        'Trường Đại học Công nghệ Thông tin và Truyền thông Việt – Hàn – ĐHĐN',
+    };
+  }
+  if (norm.includes('y dược')) {
+    return {
+      institutionId: 'inst-smp',
+      schoolReviewUnitId: 'unit-smp',
+      schoolReviewUnitName: 'Trường Y Dược – ĐHĐN',
+    };
+  }
+  if (norm.includes('việt – anh') || norm.includes('việt - anh') || norm.includes('vnuk')) {
+    return {
+      institutionId: 'inst-vnuk',
+      schoolReviewUnitId: 'unit-vnuk',
+      schoolReviewUnitName: 'Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+    };
+  }
+  if (norm.includes('kon tum')) {
+    return {
+      institutionId: 'inst-kontum',
+      schoolReviewUnitId: 'unit-kontum',
+      schoolReviewUnitName: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+    };
+  }
+  return {
+    institutionId: 'inst-dut',
+    schoolReviewUnitId: 'unit-dut',
+    schoolReviewUnitName: university || 'Trường Đại học Bách khoa – ĐHĐN',
+  };
+}
+
+/**
+ * Checks whether an application object is the hardcoded demo fixture (`INITIAL_STUDENT_APPLICATION`)
+ * or belongs to a different student, without wiping out legitimate backend declarations of `minh.nv@dut.udn.vn` (`102220123`).
+ */
+export function isDemoFixtureApplication(
+  app: StudentApplicationData | null | undefined,
+  currentStudentId?: string
+): boolean {
+  if (!app) return false;
+  if (
+    currentStudentId &&
+    app.student?.studentId &&
+    app.student.studentId !== currentStudentId
+  ) {
+    return true;
+  }
+  if (app.student?.email === 'minhanh.nguyen@dut.udn.vn') {
+    return true;
+  }
+  const hasHardcodedDemoDecl = (app.criteria || []).some((c) => {
+    const reqs = [
+      ...(c.requirements || []),
+      ...(c.groups ? c.groups.flatMap((g) => g.requirements || []) : []),
+    ];
+    return reqs.some((r) =>
+      (r.declarations || []).some(
+        (d) => d.id === 'decl-drl' || d.id === 'decl-law' || d.id === 'decl-gpa'
+      )
+    );
+  });
+  return hasHardcodedDemoDecl;
+}
+
 export function buildCleanStudentApplication(params: {
   fullName: string;
   studentId: string;
@@ -248,10 +381,11 @@ export function buildCleanStudentApplication(params: {
     statusLabel: 'Chưa kê khai',
   }));
 
-  const resolvedInstId =
-    params.institutionId ||
-    params.existingProfileSnapshot?.institutionId ||
-    'inst-dut';
+  const resolvedInst = resolveInstitutionFromUniversity(
+    params.university,
+    params.institutionId || params.existingProfileSnapshot?.institutionId
+  );
+  const resolvedInstId = resolvedInst.institutionId;
   const profileSnapshot: import('../../entities/application/studentApplicationTypes').StudentProfileDto =
     params.existingProfileSnapshot &&
     params.existingProfileSnapshot.fullName === params.fullName
@@ -260,7 +394,7 @@ export function buildCleanStudentApplication(params: {
           fullName: params.fullName,
           email: params.email || params.existingProfileSnapshot.email,
           institutionId: resolvedInstId,
-          institutionName: params.university,
+          institutionName: params.university || resolvedInst.schoolReviewUnitName,
         }
       : {
           fullName: params.fullName,
@@ -271,7 +405,7 @@ export function buildCleanStudentApplication(params: {
           phoneNumber: '',
           homeProvince: '',
           institutionId: resolvedInstId,
-          institutionName: params.university,
+          institutionName: params.university || resolvedInst.schoolReviewUnitName,
           academicYearNumber: 0,
           educationLevel: 'Đại học',
           className: '',
@@ -295,7 +429,9 @@ export function buildCleanStudentApplication(params: {
       academicYear: INITIAL_STUDENT_APPLICATION.student.academicYear,
     },
     trainingInstitutionName: params.university,
-    schoolReviewUnitName: params.university || 'Trường Đại học Bách khoa – ĐHĐN',
+    schoolReviewUnitId: resolvedInst.schoolReviewUnitId,
+    schoolReviewUnitName: params.university || resolvedInst.schoolReviewUnitName,
+    supplementRequests: [],
     criteria: emptyCriteria,
   };
 }

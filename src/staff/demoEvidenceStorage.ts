@@ -12,6 +12,7 @@
  */
 
 import { isBackendMode } from '../shared/config/executionMode';
+import { apiRequest } from '../shared/api/httpClient';
 import {
   MAX_EVIDENCE_SIZE_BYTES,
   resolveCanonicalMimeType,
@@ -72,6 +73,31 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
+function uint8ToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const sub = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...sub);
+  }
+  return typeof btoa === 'function'
+    ? btoa(binary)
+    : Buffer.from(bytes).toString('base64');
+}
+
+function base64ToUint8(base64: string): Uint8Array {
+  const clean = base64.replace(/^data:[^;]+;base64,/, '');
+  if (typeof atob === 'function') {
+    const bin = atob(clean);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      out[i] = bin.charCodeAt(i);
+    }
+    return out;
+  }
+  return new Uint8Array(Buffer.from(clean, 'base64'));
+}
+
 /**
  * Stores a binary evidence file persistently (up to 100MB).
  * When running in BACKEND mode, also executes the 3-step Cloudflare R2 Presigned URL upload pipeline.
@@ -122,6 +148,31 @@ export async function saveEvidenceFile(
     });
     remoteEvidenceId = r2Result.id;
     remoteEvidenceIdMap.set(id, remoteEvidenceId);
+
+    // Also index in portalState.evidenceIndex by client evidence ID so officers on any browser can preview
+    if (sizeBytes <= 15 * 1024 * 1024) {
+      fileOrBlob
+        .arrayBuffer()
+        .then((ab) => {
+          const base64Content = uint8ToBase64(new Uint8Array(ab));
+          return apiRequest('/api/v2/portal/evidence/upload', {
+            method: 'POST',
+            body: {
+              id,
+              ownerTrack,
+              applicationId: meta?.applicationId || 'APP-2026-DN-00142',
+              requirementOrCriterionId: meta?.reqId || 'general',
+              fileName,
+              fileType,
+              fileSizeBytes: sizeBytes,
+              base64Content,
+            },
+          });
+        })
+        .catch(() => {
+          // Non-fatal: R2 upload already succeeded
+        });
+    }
   }
 
   const record: StoredEvidenceRecord = {
@@ -262,7 +313,36 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
         return viewRes.viewUrl;
       }
     } catch {
-      // Fall through to null if remote object does not exist
+      // Fall through to portal evidence index lookup
+    }
+
+    try {
+      const portalRes = await apiRequest<{
+        success: boolean;
+        data?: {
+          id: string;
+          name: string;
+          fileType: string;
+          url?: string;
+          base64Content?: string;
+        };
+      }>(`/api/v2/portal/evidence/${encodeURIComponent(id)}`, { method: 'GET' });
+      const evData = portalRes?.data;
+      if (evData?.base64Content) {
+        const mime = resolveCanonicalMimeType(evData.name || 'file.pdf', evData.fileType);
+        const bytes = base64ToUint8(evData.base64Content);
+        const blob = new Blob([bytes as unknown as BlobPart], { type: mime });
+        if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+          const url = URL.createObjectURL(blob);
+          activeBlobUrls.set(id, url);
+          return url;
+        }
+      }
+      if (evData?.url && !evData.url.startsWith('/api/v2/portal/evidence/')) {
+        return evData.url;
+      }
+    } catch {
+      // Fall through to null
     }
   }
 

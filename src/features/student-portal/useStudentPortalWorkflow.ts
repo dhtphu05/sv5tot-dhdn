@@ -30,6 +30,7 @@ import {
   getPrototypeScenarioByHomeId,
   savePersistedDemoSession,
   savePersistedOfficerStudentApps,
+  savePersistedOfficerWorkspaces,
   savePersistedStaffApplications,
 } from '../../demo/prototypeDemoMode';
 import {
@@ -38,6 +39,9 @@ import {
 } from '../../staff/types';
 import { resolveSchoolReviewUnit } from '../../staff/schoolReviewTypes';
 import { ApplicationReviewWorkspaceState } from '../../staff/reviewTypes';
+import { isBackendMode } from '../../shared/config/executionMode';
+import { apiRequest } from '../../shared/api/httpClient';
+import { resolveInstitutionFromUniversity } from '../../demo/fixtures/studentApplication';
 
 const HERO_STAFF_APP_ID = 'APP-2026-DN-102220123';
 
@@ -274,8 +278,33 @@ export function useStudentPortalWorkflow({
     (nextApp: StudentApplicationData) => {
       setSharedApplication(nextApp);
       savePersistedDemoSession({ mutatedApplication: nextApp });
+      const targetAppId = nextApp.applicationId;
+      if (targetAppId) {
+        setOfficerStudentAppMap((prev) => {
+          if (!prev[targetAppId] && nextApp.status === 'draft') {
+            return prev;
+          }
+          const nextMap = { ...prev, [targetAppId]: nextApp };
+          savePersistedOfficerStudentApps(nextMap);
+          return nextMap;
+        });
+      }
+      if (
+        isBackendMode() &&
+        targetAppId &&
+        nextApp.student?.studentId &&
+        prototypeScenarioId !== 'new_student'
+      ) {
+        apiRequest(
+          `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/student-view`,
+          {
+            method: 'PUT',
+            body: { application: nextApp },
+          }
+        ).catch(() => {});
+      }
     },
-    [setSharedApplication]
+    [setSharedApplication, setOfficerStudentAppMap, prototypeScenarioId]
   );
 
   const handleApplicationSubmitted = useCallback(
@@ -286,30 +315,17 @@ export function useStudentPortalWorkflow({
       setHomeScenario('state_g_under_review');
       setAppSubmissionState('under_review');
 
-      setStaffApplications((prev) => {
-        const exists = prev.some(
-          (app) =>
-            app.applicationId === targetAppId ||
-            (targetAppId === HERO_STAFF_APP_ID &&
-              app.applicationId === HERO_STAFF_APP_ID)
-        );
-        if (exists) {
-          const updatedList = prev.map((app) =>
-            app.applicationId === targetAppId
-              ? {
-                  ...app,
-                  workflowStatus: 'assigned_not_started' as const,
-                  submittedAt: 'Vừa xong · Hôm nay',
-                  updatedAt: 'Vừa xong',
-                  latestOperationalNote:
-                    'Sinh viên đã hoàn tất gửi hồ sơ xét chọn',
-                }
-              : app
-          );
-          savePersistedStaffApplications(updatedList);
-          return updatedList;
-        }
+      if (isBackendMode()) {
+        apiRequest(
+          `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/submit`,
+          {
+            method: 'POST',
+            body: { application: submittedApp },
+          }
+        ).catch(() => {});
+      }
 
+      setStaffApplications((prev) => {
         const criteriaReview = submittedApp.criteria.map((crit) => {
           const allReqs = crit.groups
             ? crit.groups.flatMap((g) => g.requirements)
@@ -342,9 +358,68 @@ export function useStudentPortalWorkflow({
           0
         );
 
-        const instId =
-          submittedApp.applicantProfileSnapshot?.institutionId || 'inst-dut';
+        const resolvedInst = resolveInstitutionFromUniversity(
+          submittedApp.student.university,
+          submittedApp.applicantProfileSnapshot?.institutionId
+        );
+        const instId = resolvedInst.institutionId;
         const resolvedSchoolUnit = resolveSchoolReviewUnit(instId);
+        const unitId =
+          submittedApp.schoolReviewUnitId ||
+          resolvedSchoolUnit.unit?.id ||
+          resolvedInst.schoolReviewUnitId;
+        const unitName =
+          submittedApp.schoolReviewUnitName ||
+          resolvedSchoolUnit.unit?.officialName ||
+          resolvedInst.schoolReviewUnitName;
+
+        const exists = prev.some(
+          (app) =>
+            app.applicationId === targetAppId ||
+            (targetAppId === HERO_STAFF_APP_ID &&
+              app.applicationId === HERO_STAFF_APP_ID)
+        );
+        if (exists) {
+          const updatedList = prev.map((app) =>
+            app.applicationId === targetAppId
+              ? {
+                  ...app,
+                  student: {
+                    fullName: submittedApp.student.fullName,
+                    studentCode: submittedApp.student.studentId,
+                    email:
+                      submittedApp.applicantProfileSnapshot?.email ||
+                      submittedApp.student.email ||
+                      app.student.email,
+                  },
+                  applicantProfileSnapshot:
+                    submittedApp.applicantProfileSnapshot ||
+                    app.applicantProfileSnapshot,
+                  institution: {
+                    id: instId,
+                    officialName:
+                      submittedApp.student.university ||
+                      resolvedInst.institutionName,
+                  },
+                  schoolReviewUnitId: unitId,
+                  schoolReviewUnitName: unitName,
+                  currentReviewStage: 'SCHOOL' as const,
+                  schoolPreliminaryStatus: 'pending_intake' as const,
+                  workflowStatus: 'assigned_not_started' as const,
+                  criteriaReview,
+                  totalDeclarations,
+                  totalEvidence,
+                  submittedAt: 'Vừa xong · Hôm nay',
+                  updatedAt: 'Vừa xong',
+                  updatedSortKey: Date.now(),
+                  latestOperationalNote:
+                    'Sinh viên đã hoàn tất gửi hồ sơ xét chọn',
+                }
+              : app
+          );
+          savePersistedStaffApplications(updatedList);
+          return updatedList;
+        }
 
         const newStaffRecord: StaffApplicationRecord = {
           applicationId: targetAppId,
@@ -360,7 +435,8 @@ export function useStudentPortalWorkflow({
             submittedApp.applicantProfileSnapshot || null,
           institution: {
             id: instId,
-            officialName: submittedApp.student.university,
+            officialName:
+              submittedApp.student.university || resolvedInst.institutionName,
           },
           schoolYear: submittedApp.season || 'Năm học 2025–2026',
           levelLabel: 'Cấp Đại học Đà Nẵng',
@@ -368,7 +444,7 @@ export function useStudentPortalWorkflow({
           submittedDateSortKey: new Date().toISOString(),
           updatedAt: 'Vừa xong',
           updatedSortKey: Date.now(),
-          internalDeadline: '18/10/2026',
+          internalDeadline: '10/11/2026',
           eligibilityStatus: 'verified',
           eligibilityLabel: 'Đủ điều kiện nộp hồ sơ',
           workflowStatus: 'assigned_not_started',
@@ -393,9 +469,8 @@ export function useStudentPortalWorkflow({
           finalResultSummary: null,
           latestOperationalNote: 'Sinh viên đã hoàn tất gửi hồ sơ xét chọn',
           currentReviewStage: 'SCHOOL',
-          schoolReviewUnitId: resolvedSchoolUnit.unit?.id || 'unit-dut',
-          schoolReviewUnitName:
-            resolvedSchoolUnit.unit?.officialName || 'Trường Đại học Bách khoa – ĐHĐN',
+          schoolReviewUnitId: unitId,
+          schoolReviewUnitName: unitName,
           schoolPreliminaryStatus: 'pending_intake',
           schoolRecommendation: 'pending',
         };
@@ -467,38 +542,58 @@ export function useStudentPortalWorkflow({
     setHomeScenario('state_i_supplement_sent');
     setAppSubmissionState('supplement_sent');
 
-    setStaffApplications((prev) =>
-      prev.map((app) =>
+    if (isBackendMode()) {
+      apiRequest(
+        `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/supplement`,
+        {
+          method: 'POST',
+          body: {
+            explanation: 'Sinh viên đã bổ sung minh chứng hoàn tất.',
+            updatedApplication: activeStoreState.application,
+          },
+        }
+      ).catch(() => {});
+    }
+
+    setStaffApplications((prev) => {
+      const nextList = prev.map((app) =>
         app.applicationId === targetAppId
           ? {
               ...app,
-              workflowStatus: 'supplement_returned',
-              supplementStatus: 'returned',
+              workflowStatus: 'supplement_returned' as const,
+              schoolPreliminaryStatus:
+                app.currentReviewStage === 'SCHOOL'
+                  ? ('supplement_returned' as const)
+                  : app.schoolPreliminaryStatus,
+              supplementStatus: 'returned' as const,
               updatedAt: 'Vừa xong',
+              updatedSortKey: Date.now(),
               latestOperationalNote: 'Sinh viên đã bổ sung minh chứng hoàn tất',
               supplementSummary: {
                 requestCount: app.supplementSummary?.requestCount || 1,
-                activeStatus: 'student_returned',
+                activeStatus: 'student_returned' as const,
                 latestRequest: app.supplementSummary?.latestRequest
                   ? {
                       ...app.supplementSummary.latestRequest,
-                      staffStatus: 'student_returned',
+                      staffStatus: 'student_returned' as const,
                       returnedAt: 'Vừa xong · Hôm nay',
                     }
                   : undefined,
               },
             }
           : app
-      )
-    );
+      );
+      savePersistedStaffApplications(nextList);
+      return nextList;
+    });
     setOfficerWorkspaceMap((prev) => {
       const current = prev[targetAppId];
       if (!current) return prev;
-      return {
+      const nextMap = {
         ...prev,
         [targetAppId]: {
           ...current,
-          workflowStatus: 'supplement_returned',
+          workflowStatus: 'supplement_returned' as const,
           supplementRequests: current.supplementRequests.map((r) => ({
             ...r,
             staffStatus: 'student_returned' as const,
@@ -506,7 +601,19 @@ export function useStudentPortalWorkflow({
           })),
         },
       };
+      savePersistedOfficerWorkspaces(nextMap);
+      return nextMap;
     });
+    if (activeStoreState.application) {
+      setOfficerStudentAppMap((prev) => {
+        const nextMap = {
+          ...prev,
+          [targetAppId]: activeStoreState.application,
+        };
+        savePersistedOfficerStudentApps(nextMap);
+        return nextMap;
+      });
+    }
     setStaffNotifications((prev) => [
       {
         id: `notif-staff-supp-ret-${Date.now()}`,
@@ -542,13 +649,14 @@ export function useStudentPortalWorkflow({
       return nextNotifs;
     });
   }, [
-    activeStoreState.application?.applicationId,
+    activeStoreState.application,
     studentIdentity.fullName,
     setPrototypeScenarioId,
     setHomeScenario,
     setAppSubmissionState,
     setStaffApplications,
     setOfficerWorkspaceMap,
+    setOfficerStudentAppMap,
     setStaffNotifications,
     setNotifications,
   ]);
@@ -618,7 +726,30 @@ export function useStudentPortalWorkflow({
       submissionStateOverride: 'draft',
       focusCriterionId: 'ethics',
     });
-  }, [applyPrototypeScenario, setPendingDeepLink]);
+    if (isBackendMode() && studentIdentity.studentId) {
+      const resolvedInst = resolveInstitutionFromUniversity(
+        studentIdentity.university,
+        activeStoreState.application?.applicantProfileSnapshot?.institutionId
+      );
+      apiRequest('/api/v2/portal/individual/applications', {
+        method: 'POST',
+        body: {
+          studentFullName: studentIdentity.fullName,
+          studentCode: studentIdentity.studentId,
+          institutionId: resolvedInst.institutionId,
+          institutionName:
+            studentIdentity.university || resolvedInst.institutionName,
+          applicantProfileSnapshot:
+            activeStoreState.application?.applicantProfileSnapshot,
+        },
+      }).catch(() => {});
+    }
+  }, [
+    applyPrototypeScenario,
+    setPendingDeepLink,
+    studentIdentity,
+    activeStoreState.application?.applicantProfileSnapshot,
+  ]);
 
   const handleOpenApplicationFromHome = useCallback(
     (options?: { criterionId?: string; openPreSubmitReview?: boolean }) => {

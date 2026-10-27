@@ -1,5 +1,10 @@
-import { StudentApplicationData } from '../../../demo/fixtures/studentApplication';
+import {
+  StudentApplicationData,
+  buildCleanStudentApplication,
+  buildCriteriaFromDefinitions,
+} from '../../../demo/fixtures/studentApplication';
 import { HERO_SUPPLEMENT_REQUEST } from '../../../demo/fixtures/supplementScenarios';
+import { isBackendMode } from '../../../shared/config/executionMode';
 import {
   ApplicationReviewWorkspaceState,
   OfficerDemoScenarioId,
@@ -912,36 +917,66 @@ export function buildFallbackBundleForStaffRecord(
   }
 
   const bundle = buildOfficerScenarioBundle(mappedScenario);
-  bundle.studentApp.applicationId = record.applicationId;
-  bundle.studentApp.trainingInstitutionName = record.institution.officialName;
-  bundle.studentApp.student = {
-    fullName: record.student.fullName,
-    studentId: record.student.studentCode,
-    university: record.institution.officialName,
-    faculty:
-      record.student.studentCode === '193230153'
-        ? 'Khoa Công nghệ Thông tin'
-        : 'Đơn vị đào tạo trực thuộc',
-    email: record.student.email,
-    academicYear: record.schoolYear,
-  };
-  bundle.studentApp.applicantProfileSnapshot = record.applicantProfileSnapshot || {
-    fullName: record.student.fullName,
-    gender: 'Nam',
-    dateOfBirth: '15/08/2004',
-    ethnicity: 'Kinh',
-    academicYearNumber: 3,
-    educationLevel: 'Đại học',
-    className:
-      record.student.studentCode === '193230153' ? '23T_DT2' : 'K2023-CLC',
-    homeProvince: 'Thành phố Đà Nẵng',
-    institutionId: record.institution.id,
-    institutionName: record.institution.officialName,
-    unionPosition: 'Đoàn viên tích cực',
-    politicalStatus: 'Đoàn viên',
-    phoneNumber: '0905123456',
-    email: record.student.email,
-  };
+  const embeddedStudentApp = (record as any).studentApplication as
+    | StudentApplicationData
+    | undefined;
+  if (embeddedStudentApp && Array.isArray(embeddedStudentApp.criteria)) {
+    const clonedApp = structuredClone(embeddedStudentApp);
+    clonedApp.criteria = buildCriteriaFromDefinitions(clonedApp.criteria);
+    bundle.studentApp = clonedApp;
+  } else if (isBackendMode()) {
+    bundle.studentApp = buildCleanStudentApplication({
+      fullName: record.student.fullName,
+      studentId: record.student.studentCode,
+      university: record.institution.officialName,
+      faculty:
+        record.applicantProfileSnapshot?.className ||
+        'Đơn vị đào tạo trực thuộc',
+      email: record.student.email,
+      academicYear: record.schoolYear,
+      institutionId: record.institution.id,
+      institutionName: record.institution.officialName,
+    });
+    bundle.studentApp.applicationId = record.applicationId;
+    bundle.studentApp.status = 'submitted';
+    bundle.studentApp.submittedAt = record.submittedAt;
+    if (record.applicantProfileSnapshot) {
+      bundle.studentApp.applicantProfileSnapshot =
+        record.applicantProfileSnapshot;
+    }
+  } else {
+    bundle.studentApp.applicationId = record.applicationId;
+    bundle.studentApp.trainingInstitutionName = record.institution.officialName;
+    bundle.studentApp.student = {
+      fullName: record.student.fullName,
+      studentId: record.student.studentCode,
+      university: record.institution.officialName,
+      faculty:
+        record.student.studentCode === '193230153'
+          ? 'Khoa Công nghệ Thông tin'
+          : 'Đơn vị đào tạo trực thuộc',
+      email: record.student.email,
+      academicYear: record.schoolYear,
+    };
+    bundle.studentApp.applicantProfileSnapshot =
+      record.applicantProfileSnapshot || {
+        fullName: record.student.fullName,
+        gender: 'Nam',
+        dateOfBirth: '15/08/2004',
+        ethnicity: 'Kinh',
+        academicYearNumber: 3,
+        educationLevel: 'Đại học',
+        className:
+          record.student.studentCode === '193230153' ? '23T_DT2' : 'K2023-CLC',
+        homeProvince: 'Thành phố Đà Nẵng',
+        institutionId: record.institution.id,
+        institutionName: record.institution.officialName,
+        unionPosition: 'Đoàn viên tích cực',
+        politicalStatus: 'Đoàn viên',
+        phoneNumber: '0905123456',
+        email: record.student.email,
+      };
+  }
 
   if ((record as any).workspaceState) {
     const clonedWs = structuredClone(
@@ -972,7 +1007,7 @@ export function buildFallbackBundleForStaffRecord(
     };
   }
 
-  if (record.applicationId !== 'APP-2026-DN-102220123') {
+  if (record.applicationId !== 'APP-2026-DN-102220123' || isBackendMode()) {
     const isSchoolStage =
       record.currentReviewStage !== 'CITY' &&
       record.currentReviewStage !== 'COMPLETED';

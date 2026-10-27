@@ -582,4 +582,340 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       }
     );
   });
+
+  it('7. End-to-End Student Dossier Data Preservation Across Student -> School Officer -> Supplement -> City Officer -> Committee', async () => {
+    setExecutionMode('BACKEND');
+    const services = resolveDomainServices('BACKEND');
+    const { apiRequest } = await import('../shared/api/httpClient');
+    const { getDeclarationsForRequirement } = await import('../staff/reviewSelectors');
+    const { buildCleanStudentApplication } = await import('../demo/fixtures/studentApplication');
+
+    // 1. Student logs in & creates clean application for Trường Đại học Kinh tế - ĐHĐN (inst-due -> unit-due)
+    const studentApp = buildCleanStudentApplication({
+      fullName: 'Lê Thị Thu Hà',
+      studentId: '201122334',
+      university: 'Trường Đại học Kinh tế - Đại học Đà Nẵng',
+      faculty: 'Khoa Quản trị Kinh doanh',
+      email: 'thuha.le@due.udn.vn',
+      academicYear: '2025–2026',
+    });
+    assert.equal(studentApp.applicationId, 'APP-2026-DN-201122334');
+    assert.equal(studentApp.schoolReviewUnitId, 'unit-due');
+    assert.equal(studentApp.applicantProfileSnapshot?.institutionId, 'inst-due');
+
+    await services.individual.createStudentApplication({
+      studentFullName: studentApp.student.fullName,
+      studentCode: studentApp.student.studentId,
+      email: studentApp.student.email,
+      institutionId: 'inst-due',
+      institutionName: 'Trường Đại học Kinh tế - Đại học Đà Nẵng',
+      faculty: studentApp.student.faculty,
+      className: '48K01.1',
+    });
+
+    // 2. Upload evidence with explicit client id so officers can preview across browsers
+    const clientEvId = 'ev-client-due-2026-001';
+    const uploadedEvRes = await apiRequest<{
+      success: boolean;
+      data: { id: string; name: string; base64Content?: string };
+    }>('/api/v2/portal/evidence/upload', {
+      method: 'POST',
+      body: {
+        id: clientEvId,
+        ownerTrack: 'INDIVIDUAL',
+        applicationId: studentApp.applicationId,
+        requirementOrCriterionId: 'academic-thesis',
+        fileName: 'khoa-luan-tot-nghiep-9.2.pdf',
+        fileType: 'pdf',
+        fileSizeBytes: 2048,
+        base64Content: Buffer.from('%PDF-1.4 Khoa luan tot nghiep 9.2').toString('base64'),
+      },
+    });
+    assert.equal(uploadedEvRes.data.id, clientEvId);
+
+    // 3. Populate declarations in separated QĐ 12 requirement IDs (inside crit.groups) + metadata + evidence
+    const addDeclToGroupReq = (
+      criterionId: 'ethics' | 'academic' | 'physical' | 'volunteer' | 'integration',
+      requirementId: string,
+      decl: any
+    ) => {
+      const crit = studentApp.criteria.find((c) => c.id === criterionId)!;
+      for (const g of crit.groups || []) {
+        const r = g.requirements.find((req) => req.id === requirementId);
+        if (r) {
+          r.declarations = [decl];
+        }
+      }
+    };
+
+    addDeclToGroupReq('ethics', 'ethics-score', {
+      id: 'decl-due-drl',
+      requirementId: 'ethics-score',
+      title: 'Điểm rèn luyện năm học 2025–2026: 91/100',
+      description: 'Xếp loại Xuất sắc',
+      metadata: { scoreSem1: '90', scoreSem2: '92', scoreYear: '91' },
+      evidence: [],
+    });
+    addDeclToGroupReq('ethics', 'ethics-law', {
+      id: 'decl-due-law',
+      requirementId: 'ethics-law',
+      title: 'Cam kết chấp hành pháp luật, nội quy nhà trường',
+      description: 'Không vi phạm pháp luật và quy chế năm học 2025–2026',
+      metadata: { committed: 'true' },
+      evidence: [],
+    });
+    addDeclToGroupReq('academic', 'academic-gpa', {
+      id: 'decl-due-gpa',
+      requirementId: 'academic-gpa',
+      title: 'Điểm trung bình học tập cả năm: 3.68/4.0',
+      description: 'Xếp loại Xuất sắc',
+      metadata: { gpaSem1: '3.65', gpaSem2: '3.71', gpaYear: '3.68' },
+      evidence: [],
+    });
+    addDeclToGroupReq('academic', 'academic-thesis', {
+      id: 'decl-due-thesis',
+      requirementId: 'academic-thesis',
+      title: 'Khóa luận tốt nghiệp đạt 9.2/10 điểm',
+      description: 'Bảo vệ xuất sắc trước Hội đồng Khoa QTKD',
+      metadata: { thesisScore: '9.2' },
+      evidence: [
+        {
+          id: clientEvId,
+          fileName: 'khoa-luan-tot-nghiep-9.2.pdf',
+          fileType: 'pdf',
+          fileSize: '2 KB',
+          uploadedAt: '27/10/2026',
+          status: 'ready',
+        },
+      ],
+    });
+    addDeclToGroupReq('physical', 'physical-club', {
+      id: 'decl-due-club',
+      requirementId: 'physical-club',
+      title: 'Thành viên tích cực CLB Cầu lông ĐH Kinh tế',
+      description: 'Sinh hoạt định kỳ hàng tuần năm học 2025–2026',
+      evidence: [],
+    });
+    addDeclToGroupReq('volunteer', 'volunteer-campaign', {
+      id: 'decl-due-vol',
+      requirementId: 'volunteer-campaign',
+      title: 'Chiến dịch Mùa hè xanh 2026 (05 ngày tình nguyện)',
+      description: 'Tham gia đội hình tình nguyện tại huyện Hòa Vang',
+      metadata: { volunteerDays: '5' },
+      evidence: [],
+    });
+    addDeclToGroupReq('integration', 'integration-skills', {
+      id: 'decl-due-skills',
+      requirementId: 'integration-skills',
+      title: 'Hoàn thành khóa Kỹ năng thực hành xã hội cấp Trường',
+      description: 'Chứng nhận Hội Sinh viên ĐH Kinh tế',
+      evidence: [],
+    });
+    addDeclToGroupReq('integration', 'integration-activity', {
+      id: 'decl-due-act',
+      requirementId: 'integration-activity',
+      title: 'Tham gia Ngày hội Giao lưu Văn hóa Quốc tế ĐHĐN 2026',
+      description: 'Tham gia tích cực',
+      evidence: [],
+    });
+    addDeclToGroupReq('integration', 'integration-lang', {
+      id: 'decl-due-lang',
+      requirementId: 'integration-lang',
+      title: 'Chứng chỉ IELTS Academic 7.0',
+      description: 'Đạt chuẩn ngoại ngữ B1 trở lên',
+      metadata: { certType: 'IELTS', score: '7.0' },
+      evidence: [],
+    });
+
+    // Save full student view to backend
+    await apiRequest(`/api/v2/portal/individual/applications/${studentApp.applicationId}/student-view`, {
+      method: 'PUT',
+      body: { application: studentApp },
+    });
+
+    // 4. Submit application to School Review
+    const submitRes = await apiRequest<{ success: boolean; status: string }>(
+      `/api/v2/portal/individual/applications/${studentApp.applicationId}/submit`,
+      {
+        method: 'POST',
+        body: {
+          application: studentApp,
+          actor: { id: '201122334', name: 'Lê Thị Thu Hà', role: 'STUDENT' },
+        },
+      }
+    );
+    assert.equal(submitRes.success, true);
+
+    // 5. School Officer logs in and fetches review-workspace -> verify 100% of declarations, metadata, and evidence are preserved
+    const schoolAuth = await services.auth.loginWithCredentials({
+      email: 'an.nv@udn.vn',
+      preferredTrack: 'STAFF',
+    });
+    const schoolActor = {
+      id: schoolAuth.user.id,
+      name: schoolAuth.user.fullName,
+      role: 'SCHOOL_OFFICER',
+      unitId: 'unit-due',
+    };
+
+    const schoolWsRes = await apiRequest<{
+      success: boolean;
+      data: {
+        studentApplication: typeof studentApp;
+        workspace: any;
+      };
+    }>(`/api/v2/portal/individual/applications/${studentApp.applicationId}/review-workspace`);
+    const schoolWsBundle = schoolWsRes.data;
+
+    assert.ok(schoolWsBundle.studentApplication);
+    const thesisDecls = getDeclarationsForRequirement(
+      schoolWsBundle.studentApplication,
+      'academic',
+      'academic-thesis'
+    );
+    assert.equal(thesisDecls.length, 1);
+    assert.equal(thesisDecls[0].title, 'Khóa luận tốt nghiệp đạt 9.2/10 điểm');
+    assert.equal(thesisDecls[0].metadata?.thesisScore, '9.2');
+    assert.equal(thesisDecls[0].evidence.length, 1);
+    assert.equal(thesisDecls[0].evidence[0].id, clientEvId);
+
+    const langDecls = getDeclarationsForRequirement(
+      schoolWsBundle.studentApplication,
+      'integration',
+      'integration-lang'
+    );
+    assert.equal(langDecls.length, 1);
+    assert.equal(langDecls[0].metadata?.score, '7.0');
+
+    // Officer can also fetch the uploaded evidence binary by clientEvId
+    const officerFetchedEv = await services.evidenceStorage.getEvidenceById(clientEvId);
+    assert.ok(officerFetchedEv?.base64Content);
+
+    // 6. School Officer requests supplement -> Student responds with updated declaration -> School Officer sees supplement_returned
+    const supReq = {
+      id: 'sup-due-001',
+      criterionId: 'volunteer',
+      criterionName: 'Tình nguyện tốt',
+      criterionNumber: 4,
+      requirementId: 'volunteer-campaign',
+      requirementTitle: 'Tham gia chiến dịch Mùa hè xanh / Tiếp sức mùa thi',
+      declarationId: 'decl-due-vol',
+      declarationTitle: 'Chiến dịch Mùa hè xanh 2026 (05 ngày tình nguyện)',
+      scopeLevel: 'declaration',
+      message: 'Vui lòng bổ sung số quyết định công nhận chiến sĩ Mùa hè xanh.',
+      requestedAt: '27/10/2026 · 15:00',
+      deadline: '10/11/2026',
+      allowedActions: ['editText', 'addEvidence'],
+      status: 'active',
+      staffStatus: 'waiting_student',
+    };
+
+    await apiRequest(`/api/v2/portal/individual/applications/${studentApp.applicationId}/review-workspace`, {
+      method: 'PUT',
+      body: {
+        workspaceState: {
+          ...(schoolWsBundle.workspace || {
+            applicationId: studentApp.applicationId,
+            reviewStage: 'SCHOOL',
+            reviewUnitId: 'unit-due',
+            hasStartedReview: true,
+            isCitySupplementWindowClosed: false,
+            scopeRecords: {},
+            evidenceRecords: {},
+            criterionCompletedMap: {},
+            criterionConclusions: {},
+            historyEvents: [],
+          }),
+          supplementRequests: [supReq],
+          scopeRecords: {
+            'decl:decl-due-vol': {
+              scopeKey: 'decl:decl-due-vol',
+              applicationId: studentApp.applicationId,
+              criterionId: 'volunteer',
+              requirementId: 'volunteer-campaign',
+              declarationId: 'decl-due-vol',
+              reviewerId: 'staff-school-due',
+              reviewerName: 'Cán bộ Trường ĐH Kinh tế',
+              status: 'needs_supplement',
+              internalNote: supReq.message,
+            },
+          },
+        },
+        studentApplication: {
+          ...schoolWsBundle.studentApplication,
+          status: 'supplement_required',
+          supplementRequests: [supReq],
+        },
+      },
+    });
+
+    // Student reloads -> sees supplement_required & supplementRequests
+    const reloadedStudentApp = await services.individual.getStudentApplication(studentApp.applicationId);
+    assert.equal(reloadedStudentApp?.status, 'supplement_required');
+    assert.equal(reloadedStudentApp?.supplementRequests?.length, 1);
+    assert.equal(reloadedStudentApp?.supplementRequests?.[0].id, 'sup-due-001');
+
+    // Student submits supplement response
+    addDeclToGroupReq('volunteer', 'volunteer-campaign', {
+      id: 'decl-due-vol',
+      requirementId: 'volunteer-campaign',
+      title: 'Chiến dịch Mùa hè xanh 2026 (05 ngày tình nguyện - QĐ số 45/QĐ-HSV)',
+      description: 'Đã bổ sung số QĐ công nhận chiến sĩ Mùa hè xanh 2026',
+      metadata: { volunteerDays: '5', decisionNo: '45/QĐ-HSV' },
+      evidence: [],
+    });
+    studentApp.status = 'supplement_sent';
+    studentApp.supplementRequests = [
+      { ...supReq, status: 'completed', staffStatus: 'student_returned', studentNote: 'Em đã bổ sung số QĐ ạ.' } as any,
+    ];
+
+    await apiRequest(`/api/v2/portal/individual/applications/${studentApp.applicationId}/supplement`, {
+      method: 'POST',
+      body: {
+        updatedApplication: studentApp,
+        explanation: 'Em đã bổ sung số QĐ ạ.',
+        actor: { id: '201122334', name: 'Lê Thị Thu Hà', role: 'STUDENT' },
+      },
+    });
+
+    // 7. School Officer completes preliminary review & forwards to City
+    await services.schoolReview.completeSchoolPreliminaryReview({
+      applicationId: studentApp.applicationId,
+      recommendation: 'recommended',
+      summaryNote: 'Hồ sơ đầy đủ minh chứng hợp lệ theo QĐ 12/ĐHĐN-HSV.',
+      actor: schoolActor,
+    });
+
+    const forwarded = await services.schoolReview.forwardSchoolApplicationToCity({
+      applicationId: studentApp.applicationId,
+      actor: schoolActor,
+    });
+    assert.equal(forwarded.record.currentReviewStage, 'CITY');
+    assert.equal(forwarded.record.schoolPreliminaryStatus, 'forwarded_to_city');
+
+    // 8. City Officer lists applications & opens workspace -> 100% of declarations, supplement updates, and metadata preserved!
+    const cityApps = await services.individual.listApplications();
+    const cityRecord = cityApps.find((r) => r.applicationId === studentApp.applicationId);
+    assert.ok(cityRecord);
+    assert.equal(cityRecord.currentReviewStage, 'CITY');
+    assert.equal(cityRecord.institution.id, 'inst-due');
+    assert.ok((cityRecord as any).studentApplication);
+
+    const cityVolDecls = getDeclarationsForRequirement(
+      (cityRecord as any).studentApplication,
+      'volunteer',
+      'volunteer-campaign'
+    );
+    assert.equal(cityVolDecls.length, 1);
+    assert.ok(cityVolDecls[0].title.includes('QĐ số 45/QĐ-HSV'));
+    assert.equal(cityVolDecls[0].metadata?.decisionNo, '45/QĐ-HSV');
+
+    const cityThesisDecls = getDeclarationsForRequirement(
+      (cityRecord as any).studentApplication,
+      'academic',
+      'academic-thesis'
+    );
+    assert.equal(cityThesisDecls.length, 1);
+    assert.equal(cityThesisDecls[0].evidence[0].id, clientEvId);
+  });
 });

@@ -209,14 +209,34 @@ export function getDeclarationsForRequirement(
 ): ApplicationDeclaration[] {
   const crit = studentApp.criteria.find((c) => c.id === criterionId);
   if (!crit) return [];
-  let req = crit.requirements?.find((r) => r.id === requirementId);
-  if (!req && crit.groups) {
+  const reqFromList = crit.requirements?.find((r) => r.id === requirementId);
+  let reqFromGroup: { declarations?: ApplicationDeclaration[] } | undefined;
+  if (crit.groups) {
     for (const g of crit.groups) {
-      req = g.requirements?.find((r) => r.id === requirementId);
-      if (req) break;
+      const found = g.requirements?.find((r) => r.id === requirementId);
+      if (found) {
+        reqFromGroup = found;
+        break;
+      }
     }
   }
-  return req?.declarations || [];
+  const listDecls = reqFromList?.declarations || [];
+  const groupDecls = reqFromGroup?.declarations || [];
+  if (groupDecls.length > 0 && listDecls.length === 0) {
+    return groupDecls;
+  }
+  if (listDecls.length > 0 && groupDecls.length === 0) {
+    return listDecls;
+  }
+  if (groupDecls.length > 0 && listDecls.length > 0) {
+    // Prefer groupDecls since StudentApplicationWorkspace mutates crit.groups directly,
+    // while merging any declarations that exist only in listDecls.
+    const byId = new Map<string, ApplicationDeclaration>();
+    for (const d of listDecls) byId.set(d.id, d);
+    for (const d of groupDecls) byId.set(d.id, d);
+    return Array.from(byId.values());
+  }
+  return [];
 }
 
 /**

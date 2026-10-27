@@ -139,7 +139,7 @@ function sanitizeBackendWorkspace(
   ws: ApplicationReviewWorkspaceState,
   currentReviewStage?: string
 ): ApplicationReviewWorkspaceState {
-  if (!ws || appId === HERO_STAFF_APP_ID) return ws;
+  if (!ws || (!isBackendMode() && appId === HERO_STAFF_APP_ID)) return ws;
 
   const isNowCityStage =
     currentReviewStage === 'CITY' || currentReviewStage === 'COMPLETED';
@@ -383,6 +383,7 @@ export function useStaffWorkflowCoordination({
 
         const backendWorkspaces: Record<string, ApplicationReviewWorkspaceState> =
           {};
+        const inlineStudentApps: Record<string, StudentApplicationData> = {};
         records.forEach((rec) => {
           const remoteWs = (rec as any).workspaceState as
             | ApplicationReviewWorkspaceState
@@ -394,7 +395,25 @@ export function useStaffWorkflowCoordination({
               rec.currentReviewStage
             );
           }
+          const inlineStuApp = (rec as any).studentApplication as
+            | StudentApplicationData
+            | undefined;
+          if (inlineStuApp && inlineStuApp.applicationId) {
+            inlineStudentApps[rec.applicationId] = {
+              ...inlineStuApp,
+              criteria: buildCriteriaFromDefinitions(
+                inlineStuApp.criteria as any
+              ),
+            };
+          }
         });
+        if (Object.keys(inlineStudentApps).length > 0) {
+          setOfficerStudentAppMap((prev) => {
+            const next = { ...prev, ...inlineStudentApps };
+            savePersistedOfficerStudentApps(next);
+            return next;
+          });
+        }
         setOfficerWorkspaceMap((prev) => {
           if (records.length === 0) {
             savePersistedOfficerWorkspaces({});
@@ -434,9 +453,12 @@ export function useStaffWorkflowCoordination({
           savePersistedOfficerStudentApps({});
         }
 
-        const fetchedStudentMap: Record<string, StudentApplicationData> = {};
+        const fetchedStudentMap: Record<string, StudentApplicationData> = {
+          ...inlineStudentApps,
+        };
         await Promise.all(
           records.map(async (rec) => {
+            if (fetchedStudentMap[rec.applicationId]) return;
             try {
               const studentApp = await services.individual.getStudentApplication(
                 rec.applicationId
@@ -780,10 +802,10 @@ export function useStaffWorkflowCoordination({
     React.ComponentProps<typeof OfficerReviewWorkspace>['onMutateWorkspaceState']
   >(
     (updater) => {
-      const appId = selectedStaffAppId;
-      const targetRecord = staffApplications.find(
-        (a) => a.applicationId === appId
-      );
+      const targetRecord =
+        staffApplications.find((a) => a.applicationId === selectedStaffAppId) ||
+        staffApplications[0];
+      const appId = targetRecord?.applicationId || selectedStaffAppId;
       const fallbackBundle = targetRecord
         ? buildFallbackBundleForStaffRecord(targetRecord)
         : initialHeroOfficerBundle;
@@ -945,27 +967,26 @@ export function useStaffWorkflowCoordination({
               assignmentStatus: result.nextAssignmentStatus,
               latestOperationalNote: result.nextOperationalNote,
               studentSupplementCreated: result.studentSupplementCreated,
+              studentApplication: result.nextStudentApp,
             },
           }
         ).catch(() => {});
       }
 
-      if (appId === HERO_STAFF_APP_ID) {
-        const hasWaitingSupp = result.nextWorkspace.supplementRequests.some(
-          (r) => r.staffStatus === 'waiting_student'
-        );
-        if (
-          result.nextStaffStatus === 'supplement_requested' ||
-          hasWaitingSupp
-        ) {
-          setPrototypeScenarioId('supplement_required');
-          setHomeScenario('state_h_supplement_active');
-          setAppSubmissionState('supplement_required');
-        } else if (result.nextStaffStatus === 'review_completed') {
-          setPrototypeScenarioId('waiting_final');
-          setHomeScenario('state_j_waiting_final');
-          setAppSubmissionState('all_reviewed');
-        }
+      const hasWaitingSupp = result.nextWorkspace.supplementRequests.some(
+        (r) => r.staffStatus === 'waiting_student'
+      );
+      if (
+        result.nextStaffStatus === 'supplement_requested' ||
+        hasWaitingSupp
+      ) {
+        setPrototypeScenarioId('supplement_required');
+        setHomeScenario('state_h_supplement_active');
+        setAppSubmissionState('supplement_required');
+      } else if (result.nextStaffStatus === 'review_completed') {
+        setPrototypeScenarioId('waiting_final');
+        setHomeScenario('state_j_waiting_final');
+        setAppSubmissionState('all_reviewed');
       }
     },
     [

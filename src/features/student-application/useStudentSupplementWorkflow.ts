@@ -4,7 +4,7 @@
  * supplement demo scenario switching, and student supplement submission.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   StudentApplicationData,
   ApplicationEvidence,
@@ -25,8 +25,10 @@ import {
   ApplicationSubmissionState,
   TrackingActivity,
 } from '../../components/submission/submissionTypes';
+import { isBackendMode } from '../../shared/config/executionMode';
 
 interface UseStudentSupplementWorkflowParams {
+  initialData?: StudentApplicationData;
   initialSubmissionState: ApplicationSubmissionState;
   submissionState: ApplicationSubmissionState;
   setSubmissionState: React.Dispatch<React.SetStateAction<ApplicationSubmissionState>>;
@@ -40,6 +42,7 @@ interface UseStudentSupplementWorkflowParams {
 }
 
 export function useStudentSupplementWorkflow({
+  initialData,
   initialSubmissionState,
   submissionState,
   setSubmissionState,
@@ -52,27 +55,49 @@ export function useStudentSupplementWorkflow({
   onSupplementBusinessResolved,
 }: UseStudentSupplementWorkflowParams) {
   const heroSuppScenario = SUPPLEMENT_DEMO_SCENARIOS.hero_evidence_only;
+  const incomingRequests =
+    Array.isArray(initialData?.supplementRequests) &&
+    initialData.supplementRequests.length > 0
+      ? initialData.supplementRequests
+      : !isBackendMode() && initialSubmissionState === 'supplement_required'
+      ? heroSuppScenario.requests
+      : [];
 
   const [supplementScenarioId, setSupplementScenarioId] =
     useState<SupplementDemoStateId>('hero_evidence_only');
   const [supplementRequests, setSupplementRequests] = useState<SupplementRequest[]>(
-    initialSubmissionState === 'supplement_required' ? heroSuppScenario.requests : []
+    incomingRequests
   );
   const [activeSupplementRequestId, setActiveSupplementRequestId] = useState<string | null>(
-    initialSubmissionState === 'supplement_required'
-      ? heroSuppScenario.requests[0]?.id || null
-      : null
+    incomingRequests[0]?.id || null
   );
   const [supplementChangesMap, setSupplementChangesMap] = useState<
     Record<string, SupplementChangeRecord>
   >(
-    initialSubmissionState === 'supplement_required'
+    !isBackendMode() &&
+      (!initialData?.supplementRequests ||
+        initialData.supplementRequests.length === 0) &&
+      initialSubmissionState === 'supplement_required'
       ? heroSuppScenario.initialChanges || {}
       : {}
   );
   const [isSupplementWindowClosed, setIsSupplementWindowClosed] = useState(false);
   const [isSupplementConfirmOpen, setIsSupplementConfirmOpen] = useState(false);
   const [isSupplementSubmitting, setIsSupplementSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (
+      Array.isArray(initialData?.supplementRequests) &&
+      initialData.supplementRequests.length > 0
+    ) {
+      setSupplementRequests(initialData.supplementRequests);
+      setActiveSupplementRequestId((prev) =>
+        prev && initialData.supplementRequests!.some((r) => r.id === prev)
+          ? prev
+          : initialData.supplementRequests![0]?.id || null
+      );
+    }
+  }, [initialData?.supplementRequests]);
 
   const activeSupplementRequest = useMemo(() => {
     if (!supplementRequests.length) return null;
@@ -252,15 +277,18 @@ export function useStudentSupplementWorkflow({
             const updatedDecls = r.declarations.map((d) => {
               if (targetReq.declarationId && d.id !== targetReq.declarationId) return d;
               const existingFiles = d.evidenceFiles || [];
-              const newFiles = (changeRec?.addedEvidenceFiles || []).map((f) => ({
-                id: f.id,
-                name: f.name,
-                size: f.size,
-                fileType: f.fileType,
-                uploadedAt: f.uploadedAt,
-                status: 'declared' as const,
-                isNewlyAddedSupplement: true,
-              }));
+              const existingIds = new Set(existingFiles.map((ef) => ef.id || ef.name));
+              const newFiles = (changeRec?.addedEvidenceFiles || [])
+                .filter((f) => !existingIds.has(f.id || f.name))
+                .map((f) => ({
+                  id: f.id,
+                  name: f.name,
+                  size: f.size,
+                  fileType: f.fileType,
+                  uploadedAt: f.uploadedAt,
+                  status: 'declared' as const,
+                  isNewlyAddedSupplement: true,
+                }));
               return {
                 ...d,
                 value: changeRec?.isDeclarationEdited && changeRec.editedDeclarationTitle
@@ -287,6 +315,8 @@ export function useStudentSupplementWorkflow({
 
       return {
         ...prevApp,
+        status: allCompleted ? 'supplement_sent' : prevApp.status,
+        supplementRequests: updatedRequests,
         criteria: nextCriteria,
       };
     });

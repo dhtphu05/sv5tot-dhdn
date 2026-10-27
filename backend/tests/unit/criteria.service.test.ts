@@ -49,9 +49,9 @@ describe('Backend V2: Individual Criteria Domain Service Unit Tests', () => {
       // 4. VOLUNTEER: TC4.1 (Activities >= 5 days)
       { criterionCode: 'VOLUNTEER', requirementCode: 'TC4.1', value: '5 ngày tình nguyện', evidenceCount: 2 },
 
-      // 5. INTEGRATION: TC5.1 (Group A - Soft Skills) + TC5.3 (Group B - IELTS 6.5)
+      // 5. INTEGRATION: TC5.1 (Group A - Soft Skills) + TC5.4 (Group B - IELTS 6.5)
       { criterionCode: 'INTEGRATION', requirementCode: 'TC5.1', value: 'Kỹ năng làm việc nhóm', evidenceCount: 1 },
-      { criterionCode: 'INTEGRATION', requirementCode: 'TC5.3', value: 'IELTS 6.5', evidenceCount: 1 },
+      { criterionCode: 'INTEGRATION', requirementCode: 'TC5.4', value: 'IELTS 6.5', evidenceCount: 1 },
     ];
 
     const evaluation = service.evaluateIndividualAdvisory(fullyQualifiedDeclarations);
@@ -132,7 +132,7 @@ describe('Backend V2: Individual Criteria Domain Service Unit Tests', () => {
     // Both Group A and Group B declared
     const bothGroups: DeclarationItemInput[] = [
       { criterionCode: 'INTEGRATION', requirementCode: 'TC5.1', value: 'Khóa kỹ năng', evidenceCount: 1 },
-      { criterionCode: 'INTEGRATION', requirementCode: 'TC5.3', value: 'TOEIC 550', evidenceCount: 1 },
+      { criterionCode: 'INTEGRATION', requirementCode: 'TC5.4', value: 'TOEIC 550', evidenceCount: 1 },
     ];
 
     const evalBoth = service.evaluateIndividualAdvisory(bothGroups);

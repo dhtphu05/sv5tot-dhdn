@@ -249,7 +249,11 @@ export function resolveScenarioFromUrlParam(
 }
 
 import { StaffUser } from '../staff/types';
-import { buildCleanStudentApplication } from './fixtures/studentApplication';
+import {
+  buildCleanStudentApplication,
+  buildCriteriaFromDefinitions,
+  isDemoFixtureApplication,
+} from './fixtures/studentApplication';
 import { isBackendMode } from '../shared/config/executionMode';
 
 /**
@@ -391,12 +395,10 @@ export function loadPersistedDemoSession(): PersistedDemoSession {
         crit.requirements?.forEach(cleanReq);
         crit.groups?.forEach((g: any) => g.requirements?.forEach(cleanReq));
       }
+      parsedApp.criteria = buildCriteriaFromDefinitions(parsedApp.criteria);
     }
     const mutatedApplication =
-      isBackendMode() &&
-      parsedApp &&
-      (parsedApp.applicationId === 'APP-2026-DN-102220123' ||
-        parsedApp.applicantProfileSnapshot?.fullName === 'Nguyễn Minh Anh')
+      isBackendMode() && parsedApp && isDemoFixtureApplication(parsedApp)
         ? null
         : parsedApp;
 
@@ -564,7 +566,16 @@ export function loadPersistedOfficerStudentApps<T>(): T | null {
     const raw =
       window.sessionStorage.getItem(STORAGE_KEYS.OFFICER_STUDENT_APPS) ||
       window.localStorage.getItem(STORAGE_KEYS.OFFICER_STUDENT_APPS);
-    return raw ? (JSON.parse(raw) as T) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, StudentApplicationData>;
+    if (parsed && typeof parsed === 'object') {
+      for (const app of Object.values(parsed)) {
+        if (app && Array.isArray(app.criteria)) {
+          app.criteria = buildCriteriaFromDefinitions(app.criteria);
+        }
+      }
+    }
+    return parsed as unknown as T;
   } catch {
     return null;
   }

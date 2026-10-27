@@ -600,6 +600,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
   // =========================================================================
   router.post('/evidence/upload', (req: Request, res: Response): void => {
     const {
+      id: clientEvidenceId,
       ownerTrack,
       applicationId,
       requirementOrCriterionId,
@@ -609,6 +610,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       base64Content,
       fileUrl,
     } = (req.body || {}) as {
+      id?: string;
       ownerTrack?: 'INDIVIDUAL' | 'COLLECTIVE';
       applicationId?: string;
       requirementOrCriterionId?: string;
@@ -654,7 +656,10 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
 
     const sizeKb = Math.max(1, Math.round(numericSize / 1024));
     const sizeLabel = sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`;
-    const evidenceId = `ev-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const evidenceId =
+      clientEvidenceId && typeof clientEvidenceId === 'string' && clientEvidenceId.trim()
+        ? clientEvidenceId.trim()
+        : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
     const publicTestPath = path.resolve(process.cwd(), 'public/minhchung_test', path.basename(fileName));
     const resolvedViewUrl =
@@ -708,17 +713,27 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       actorRole: actor.role,
       details: `Tải lên minh chứng "${stored.name}" (${stored.size}) cho ${requirementOrCriterionId}`,
     });
+    savePortalStateToDisk();
 
     res.status(201).json({ success: true, data: stored });
   });
 
   router.get('/evidence/:id', (req: Request, res: Response): void => {
-    const record = portalState.evidenceIndex.get(req.params.id);
+    const targetId = req.params.id;
+    let record = portalState.evidenceIndex.get(targetId);
+    if (!record) {
+      for (const item of portalState.evidenceIndex.values()) {
+        if (item.name === targetId) {
+          record = item;
+          break;
+        }
+      }
+    }
     if (!record) {
       res.status(404).json({
         success: false,
         errorCode: 'EVIDENCE_NOT_FOUND',
-        error: `Không tìm thấy tệp minh chứng ${req.params.id}`,
+        error: `Không tìm thấy tệp minh chứng ${targetId}`,
       });
       return;
     }
@@ -730,6 +745,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     const ownerTrack = (req.query.ownerTrack as string) || 'COLLECTIVE';
     const applicationId = req.query.applicationId as string | undefined;
     portalState.evidenceIndex.delete(id);
+    savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({

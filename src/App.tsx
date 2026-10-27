@@ -24,6 +24,8 @@ import {
 import {
   StudentApplicationData,
   buildCleanStudentApplication,
+  buildCriteriaFromDefinitions,
+  isDemoFixtureApplication,
 } from './demo/fixtures/studentApplication';
 import { ResultDemoScenarioId } from './components/results/resultTypes';
 import { ApplicationSubmissionState } from './components/submission/submissionTypes';
@@ -65,6 +67,7 @@ import { PublicEntryPortalPage } from './pages/public-portal/PublicEntryPortalPa
 import { resolveDomainServices } from './entities/services';
 import {
   AUTH_SESSION_EXPIRED_EVENT,
+  apiRequest,
   hasActiveAuthSession,
   setApiActorContext,
 } from './shared/api/httpClient';
@@ -153,6 +156,15 @@ export default function App() {
             updated.institutionName || prev.trainingInstitutionName,
         };
         savePersistedDemoSession({ mutatedApplication: nextApp });
+        if (isBackendMode() && nextApp.student.studentId && nextApp.applicationId) {
+          apiRequest(
+            `/api/v2/portal/individual/applications/${encodeURIComponent(nextApp.applicationId)}/student-view`,
+            {
+              method: 'PUT',
+              body: { application: nextApp },
+            }
+          ).catch(() => {});
+        }
         return nextApp;
       });
     },
@@ -235,9 +247,10 @@ export default function App() {
 
       if (isNonDemoStudent) {
         setSharedApplication((prev) => {
-          const isPrevPollutedByDemo =
-            prev.applicationId === 'APP-2026-DN-102220123' ||
-            prev.applicantProfileSnapshot?.fullName === 'Nguyễn Minh Anh';
+          const isPrevPollutedByDemo = isDemoFixtureApplication(
+            prev,
+            studentIdentity.studentId
+          );
           const nextApp =
             prev.student.studentId === studentIdentity.studentId &&
             !isPrevPollutedByDemo
@@ -392,9 +405,10 @@ export default function App() {
       isBackendMode() ||
       (Boolean(studentIdentity.studentId) &&
         studentIdentity.studentId !== '102220123');
-    const isPollutedByDemo =
-      sharedApplication.applicationId === 'APP-2026-DN-102220123' ||
-      sharedApplication.applicantProfileSnapshot?.fullName === 'Nguyễn Minh Anh';
+    const isPollutedByDemo = isDemoFixtureApplication(
+      sharedApplication,
+      studentIdentity.studentId
+    );
 
     if (isNonDemo && isPollutedByDemo) {
       const cleaned = buildCleanStudentApplication({
@@ -424,10 +438,80 @@ export default function App() {
     studentIdentity.fullName,
     studentIdentity.studentId,
     studentIdentity.university,
-    sharedApplication.applicationId,
-    sharedApplication.applicantProfileSnapshot?.fullName,
+    sharedApplication,
     notifications,
   ]);
+
+  // Hydrate student application from backend on reload in student_app mode
+  useEffect(() => {
+    if (!isBackendMode() || viewMode !== 'student_app' || !studentIdentity.studentId) {
+      return;
+    }
+    let cancelled = false;
+    const targetAppId = `APP-2026-DN-${studentIdentity.studentId}`;
+    resolveDomainServices()
+      .individual.getStudentApplication(targetAppId)
+      .then((remoteApp) => {
+        if (cancelled || !remoteApp || !remoteApp.applicationId) return;
+        const hydratedApp: StudentApplicationData = {
+          ...remoteApp,
+          criteria: buildCriteriaFromDefinitions(remoteApp.criteria),
+        };
+        setSharedApplication(hydratedApp);
+        const st = hydratedApp.status;
+        const resolvedScenarioId: PrototypeScenarioId =
+          st === 'supplement_required'
+            ? 'supplement_required'
+            : st === 'supplement_sent'
+            ? 'supplement_submitted'
+            : st === 'recognized'
+            ? 'final_recognized'
+            : st === 'not_recognized'
+            ? 'final_not_recognized'
+            : st === 'all_reviewed'
+            ? 'waiting_final'
+            : st && st !== 'draft'
+            ? 'under_review'
+            : 'draft';
+        const resolvedHomeScenario: HomeDevScenarioId =
+          st === 'supplement_required'
+            ? 'state_h_supplement_active'
+            : st === 'supplement_sent'
+            ? 'state_i_supplement_sent'
+            : st === 'recognized'
+            ? 'state_k_recognized'
+            : st === 'not_recognized'
+            ? 'state_l_not_recognized'
+            : st === 'all_reviewed'
+            ? 'state_j_waiting_final'
+            : st && st !== 'draft'
+            ? 'state_g_under_review'
+            : 'state_b_draft_clean';
+        const resolvedSubState: ApplicationSubmissionState =
+          st === 'supplement_required'
+            ? 'supplement_required'
+            : st === 'supplement_sent'
+            ? 'supplement_sent'
+            : st === 'recognized' || st === 'not_recognized'
+            ? 'result_published'
+            : st === 'all_reviewed'
+            ? 'all_reviewed'
+            : st && st !== 'draft'
+            ? 'under_review'
+            : 'draft';
+        setPrototypeScenarioId(resolvedScenarioId);
+        setHomeScenario(resolvedHomeScenario);
+        setAppSubmissionState(resolvedSubState);
+        savePersistedDemoSession({
+          scenarioId: resolvedScenarioId,
+          mutatedApplication: hydratedApp,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [viewMode, studentIdentity.studentId]);
 
   const activeStoreState: CoherentStudentStoreState = useMemo(() => {
     const base = HOME_COHERENT_SCENARIOS[homeScenario];
@@ -448,9 +532,10 @@ export default function App() {
       isBackendMode() ||
       (Boolean(studentIdentity.studentId) &&
         studentIdentity.studentId !== '102220123');
-    const isPollutedByDemo =
-      sharedApplication.applicationId === 'APP-2026-DN-102220123' ||
-      sharedApplication.applicantProfileSnapshot?.fullName === 'Nguyễn Minh Anh';
+    const isPollutedByDemo = isDemoFixtureApplication(
+      sharedApplication,
+      studentIdentity.studentId
+    );
 
     const effectiveSharedApp =
       isNonDemo && isPollutedByDemo
