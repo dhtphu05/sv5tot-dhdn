@@ -45,6 +45,25 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     res.status(200).json({ success: true, data: app });
   });
 
+  router.put('/collective/applications/:id', (req: Request, res: Response): void => {
+    const { id } = req.params;
+    const incoming = (req.body?.application || req.body || {}) as Record<string, any>;
+    const idx = portalState.collectiveApplications.findIndex((c) => c.id === id);
+    const merged: Record<string, any> = {
+      ...(idx >= 0 ? portalState.collectiveApplications[idx] : {}),
+      ...incoming,
+      id,
+      updatedAt: incoming.updatedAt || new Date().toISOString(),
+    };
+    if (idx >= 0) {
+      portalState.collectiveApplications[idx] = merged;
+    } else {
+      portalState.collectiveApplications.unshift(merged);
+    }
+    savePortalStateToDisk();
+    res.status(200).json({ success: true, data: merged });
+  });
+
   router.post('/collective/applications', (req: Request, res: Response): void => {
     const {
       collectiveName,

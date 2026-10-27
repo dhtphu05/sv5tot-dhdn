@@ -255,7 +255,14 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
     },
   });
   if (!user) {
-    const defaultHash = await defaultPasswordHasher.hash('MatKhau@2026');
+    const regStudent =
+      portalState.registeredStudents.get(email.toLowerCase()) ||
+      Array.from(portalState.registeredStudents.values()).find(
+        (st) =>
+          st.email.toLowerCase() === email.toLowerCase() ||
+          st.studentCode.toUpperCase() === studentCode.toUpperCase()
+      );
+    const defaultHash = await defaultPasswordHasher.hash(regStudent?.password || 'MatKhau@2026');
     user = await prisma.user.create({
       data: {
         email,
@@ -267,6 +274,15 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
         profile: app.applicantProfileSnapshot || null,
       },
     });
+    await prisma.userRoleAssignment
+      .create({
+        data: {
+          userId: user.id,
+          roleCode: 'STUDENT',
+          isActive: true,
+        },
+      })
+      .catch(() => {});
   } else if (app.applicantProfileSnapshot || fullName !== user.fullName) {
     user = await prisma.user
       .update({
@@ -606,9 +622,86 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
       const prisma = (await dbManager.getClient()) as any;
       await ensurePortalDbSchema(prisma);
 
-      // 1. Registered Students & Student Profiles
+      // 1. Active Sessions, Registered Students & Student Profiles
+      for (const [tokenKey, sessVal] of Array.from(portalState.sessions.entries()).slice(-200)) {
+        await upsertPersistentRecord(prisma, 'portal_session', tokenKey, sessVal);
+      }
       for (const [email, student] of portalState.registeredStudents.entries()) {
-        await upsertPersistentRecord(prisma, 'registered_student', email, student);
+        const regChanged = await upsertPersistentRecord(
+          prisma,
+          'registered_student',
+          email,
+          student
+        );
+        const userSyncKey = `rel_user_sync:${email}`;
+        const userSnapshot = JSON.stringify(student);
+        if (regChanged || lastSyncedPayloadHash.get(userSyncKey) !== userSnapshot) {
+          const normEmail = (student.email || email).trim().toLowerCase();
+          const normCode = (student.studentCode || '').trim().toUpperCase();
+          const validInstId = SCHOOL_UNIT_MAP[student.institutionId]
+            ? student.institutionId
+            : 'inst-dut';
+          let dbUser = await prisma.user
+            .findFirst({
+              where: {
+                OR: [
+                  { email: normEmail },
+                  ...(normCode ? [{ studentCode: normCode }] : []),
+                ],
+              },
+            })
+            .catch(() => null);
+          if (!dbUser) {
+            const passwordHash = await defaultPasswordHasher.hash(
+              student.password || 'MatKhau@2026'
+            );
+            dbUser = await prisma.user
+              .create({
+                data: {
+                  email: normEmail,
+                  passwordHash,
+                  fullName: student.fullName || 'Sinh viên ĐHĐN',
+                  studentCode: normCode || null,
+                  status: 'ACTIVE',
+                  institutionId: validInstId,
+                  profile: student.profile || null,
+                },
+              })
+              .catch(() => null);
+          } else if (student.password) {
+            const matches = await defaultPasswordHasher
+              .verify(dbUser.passwordHash, student.password)
+              .catch(() => false);
+            if (!matches) {
+              const nextHash = await defaultPasswordHasher.hash(student.password);
+              await prisma.user
+                .update({
+                  where: { id: dbUser.id },
+                  data: { passwordHash: nextHash },
+                })
+                .catch(() => {});
+            }
+          }
+          if (dbUser) {
+            const existingRole = await prisma.userRoleAssignment
+              .findFirst({
+                where: { userId: dbUser.id, roleCode: 'STUDENT', isActive: true },
+              })
+              .catch(() => null);
+            if (!existingRole) {
+              await prisma.userRoleAssignment
+                .create({
+                  data: {
+                    userId: dbUser.id,
+                    roleCode: 'STUDENT',
+                    isActive: true,
+                  },
+                })
+                .catch(() => {});
+            }
+          }
+          lastSyncedPayloadHash.set(userSyncKey, userSnapshot);
+        }
       }
       for (const [profileKey, profileVal] of portalState.studentProfiles.entries()) {
         await upsertPersistentRecord(prisma, 'student_profile', profileKey, profileVal);
@@ -743,6 +836,10 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           );
 
           switch (row.collection) {
+            case 'portal_session':
+              portalState.sessions.set(row.record_key, data);
+              loadedCount++;
+              break;
             case 'registered_student':
               portalState.registeredStudents.set(
                 row.record_key,
@@ -885,7 +982,47 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           loadedCount++;
         }
 
-        // Push any existing local state (e.g., from .data/portal-state.json) into Neon PostgreSQL
+        // Also hydrate student users from relational User table in PostgreSQL
+        const relationalUsers = await prisma.user
+          .findMany({
+            where: { studentCode: { not: null } },
+          })
+          .catch(() => []);
+
+        for (const relUser of relationalUsers || []) {
+          const emailKey = String(relUser.email || '').trim().toLowerCase();
+          const codeKey = String(relUser.studentCode || '').trim();
+          if (!emailKey || !codeKey) continue;
+          const instId = relUser.institutionId || 'inst-dut';
+          const mappedInst =
+            SCHOOL_UNIT_MAP[instId] || SCHOOL_UNIT_MAP['inst-dut'];
+          const existingReg = portalState.registeredStudents.get(emailKey);
+          const profileObj =
+            relUser.profile && typeof relUser.profile === 'object'
+              ? (relUser.profile as Record<string, any>)
+              : existingReg?.profile;
+          portalState.registeredStudents.set(emailKey, {
+            id: relUser.id,
+            fullName: existingReg?.fullName || relUser.fullName,
+            email: emailKey,
+            studentCode: existingReg?.studentCode || codeKey,
+            institutionId: existingReg?.institutionId || instId,
+            institutionName:
+              existingReg?.institutionName ||
+              profileObj?.institutionName ||
+              mappedInst.instName,
+            password: existingReg?.password,
+            profile: profileObj,
+          });
+          if (profileObj) {
+            portalState.studentProfiles.set(`id:${relUser.id}`, profileObj);
+            portalState.studentProfiles.set(`email:${emailKey}`, profileObj);
+            portalState.studentProfiles.set(`code:${codeKey.toUpperCase()}`, profileObj);
+          }
+          loadedCount++;
+        }
+
+        // Push any existing local state into Neon PostgreSQL
         if (
           Object.keys(portalState.studentApplications).length > 0 ||
           portalState.individualStaffRecords.length > 0 ||

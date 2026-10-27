@@ -37,23 +37,23 @@ export function createAuthMiddleware(
       throw ApiError.unauthorized('Mã truy cập Bearer Token không được để trống.', 'EMPTY_BEARER_TOKEN');
     }
 
-    if (token.startsWith('v2-portal-token-')) {
-      const { portalState } = await import('../../modules/domainPortal/domainPortal.state');
-      const portalSession = portalState.sessions.get(token);
-      if (portalSession?.user) {
-        req.actor = {
-          userId: portalSession.user.id,
-          email: portalSession.user.email,
-          fullName: portalSession.user.fullName,
-          roles: [portalSession.user.role as any],
-          activeRole: portalSession.user.role as any,
-          institutionId: portalSession.user.institutionId || null,
-          schoolReviewUnitId: portalSession.user.unitId || null,
-          sessionId: token,
-        };
-        next();
-        return;
-      }
+    const { portalState } = await import('../../modules/domainPortal/domainPortal.state');
+    const { ensurePortalStateHydratedFromNeonDb } = await import('../../modules/domainPortal/domainPortal.dbSync');
+    await ensurePortalStateHydratedFromNeonDb().catch(() => {});
+    const portalSession = portalState.sessions.get(token);
+    if (portalSession?.user) {
+      req.actor = {
+        userId: portalSession.user.id,
+        email: portalSession.user.email,
+        fullName: portalSession.user.fullName,
+        roles: [portalSession.user.role as any],
+        activeRole: portalSession.user.role as any,
+        institutionId: portalSession.user.institutionId || null,
+        schoolReviewUnitId: portalSession.user.unitId || null,
+        sessionId: token,
+      };
+      next();
+      return;
     }
 
     const payload = sessionService.verifyAccessToken(token);

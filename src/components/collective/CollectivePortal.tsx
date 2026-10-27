@@ -33,7 +33,10 @@ import {
   getAllCollectiveApplications,
   createCollectiveApplication,
   subscribeToCollectiveStore,
+  hydrateCollectiveStore,
 } from '../../staff/collectiveStore';
+import { isBackendMode } from '../../shared/config/executionMode';
+import { resolveDomainServices } from '../../entities/services/modeResolver';
 import {
   AUTHORIZED_COLLECTIVE_REGISTRY,
   CollectiveApplication,
@@ -121,6 +124,22 @@ export const CollectivePortal: React.FC<CollectivePortalProps> = ({
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!isBackendMode()) return;
+    let cancelled = false;
+    resolveDomainServices()
+      .collective.listApplications()
+      .then((colApps) => {
+        if (!cancelled && Array.isArray(colApps) && colApps.length > 0) {
+          hydrateCollectiveStore(colApps);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [currentEmail]);
 
   useEffect(() => {
     if (initialAppId) return;

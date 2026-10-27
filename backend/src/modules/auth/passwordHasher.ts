@@ -22,6 +22,10 @@ export class Argon2PasswordHasher implements IPasswordHasher {
 
   public async verify(hash: string, plainText: string): Promise<boolean> {
     try {
+      if (!hash || !plainText) return false;
+      if (!hash.startsWith('$argon2') && plainText.startsWith('$argon2')) {
+        return await argon2.verify(plainText, hash);
+      }
       return await argon2.verify(hash, plainText);
     } catch {
       return false;

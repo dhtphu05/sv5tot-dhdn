@@ -73,6 +73,7 @@ import { resolveDomainServices } from './entities/services';
 import {
   AUTH_SESSION_EXPIRED_EVENT,
   apiRequest,
+  getApiActorContext,
   hasActiveAuthSession,
   setApiActorContext,
 } from './shared/api/httpClient';
@@ -117,17 +118,23 @@ export default function App() {
     fullName: string;
     studentId: string;
     university: string;
-  }>(() => ({
-    fullName:
-      initialSession.store.application.student.fullName ||
-      (allowMockStudentFallback ? MOCK_STUDENT.fullName : ''),
-    studentId:
-      initialSession.store.application.student.studentId ||
-      (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
-    university:
-      initialSession.store.application.student.university ||
-      (allowMockStudentFallback ? MOCK_STUDENT.university : ''),
-  }));
+  }>(() => {
+    const actorCtx = getApiActorContext();
+    return {
+      fullName:
+        initialSession.store.application.student.fullName ||
+        (actorCtx?.role === 'STUDENT' ? actorCtx.userName || '' : '') ||
+        (allowMockStudentFallback ? MOCK_STUDENT.fullName : ''),
+      studentId:
+        initialSession.store.application.student.studentId ||
+        (actorCtx?.role === 'STUDENT' ? actorCtx.studentCode || '' : '') ||
+        (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
+      university:
+        initialSession.store.application.student.university ||
+        (actorCtx?.role === 'STUDENT' ? actorCtx.institutionName || '' : '') ||
+        (allowMockStudentFallback ? MOCK_STUDENT.university : ''),
+    };
+  });
 
   const [activeNavId, setActiveNavId] = useState<string>(initialSession.navId);
 
@@ -457,11 +464,10 @@ export default function App() {
 
   // Hydrate student application and profile from backend on reload in student_app mode
   useEffect(() => {
-    if (!isBackendMode() || viewMode !== 'student_app' || !studentIdentity.studentId) {
+    if (!isBackendMode() || viewMode !== 'student_app') {
       return;
     }
     let cancelled = false;
-    const targetAppId = `APP-2026-DN-${studentIdentity.studentId}`;
     const countAppDeclarations = (appObj?: StudentApplicationData | null) =>
       (appObj?.criteria || []).reduce((sum, c) => {
         const reqs =
@@ -481,9 +487,20 @@ export default function App() {
       .getProfile()
       .then((res) => {
         if (cancelled || !res?.profile) return;
+        const resolvedCode =
+          (res.profile as { studentCode?: string }).studentCode ||
+          getApiActorContext()?.studentCode ||
+          studentIdentity.studentId;
+        if (resolvedCode && !studentIdentity.studentId) {
+          setStudentIdentity((prev) => ({
+            fullName: res.profile.fullName || prev.fullName,
+            studentId: resolvedCode,
+            university: res.profile.institutionName || prev.university,
+          }));
+        }
         setSharedApplication((prev) => {
           const cached = loadPersistedStudentProfile({
-            studentId: studentIdentity.studentId,
+            studentId: resolvedCode,
             email: prev.student?.email || res.profile.email,
           });
           const mergedSnapshot = mergeStudentProfileSnapshots(
@@ -491,7 +508,7 @@ export default function App() {
             res.profile
           );
           savePersistedStudentProfile(mergedSnapshot, {
-            studentId: studentIdentity.studentId,
+            studentId: resolvedCode,
             email: mergedSnapshot.email,
           });
           const nextApp: StudentApplicationData = {
@@ -499,6 +516,7 @@ export default function App() {
             applicantProfileSnapshot: mergedSnapshot,
             student: {
               ...prev.student,
+              studentId: resolvedCode || prev.student.studentId,
               fullName: mergedSnapshot.fullName || prev.student.fullName,
               university: mergedSnapshot.institutionName || prev.student.university,
               class: mergedSnapshot.className || prev.student.class,
@@ -512,6 +530,14 @@ export default function App() {
         });
       })
       .catch(() => {});
+
+    if (!studentIdentity.studentId) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const targetAppId = `APP-2026-DN-${studentIdentity.studentId}`;
 
     // 2. Hydrate student application from /api/v2/portal/individual/applications/:id/student-view
     services.individual

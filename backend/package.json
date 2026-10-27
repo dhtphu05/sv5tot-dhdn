@@ -4,7 +4,7 @@
   "description": "5TOT Đà Nẵng — Authoritative Production Backend V2 (Express, TypeScript, PostgreSQL, Prisma)",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/app/server.ts",
+    "dev": "tsx watch --ignore '**/.data/**' --ignore '**/dist/**' src/app/server.ts",
     "build": "tsc",
     "start": "tsx src/app/server.ts",
     "test": "tsx --test tests/unit/*.test.ts tests/http/*.test.ts tests/integration/*.test.ts",

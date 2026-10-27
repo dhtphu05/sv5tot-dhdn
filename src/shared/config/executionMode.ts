@@ -47,23 +47,29 @@ export function getExecutionMode(): ExecutionMode {
         memoryModeOverride = fromUrl;
         return fromUrl;
       }
-
-      const fromSession = normalizeMode(window.sessionStorage.getItem(MODE_STORAGE_KEY));
-      if (fromSession) {
-        return fromSession;
-      }
     } catch {
       // Ignore storage access errors in restricted environments
     }
   }
 
   if (typeof import.meta !== 'undefined' && import.meta.env) {
+    if (import.meta.env.VITE_DEMO_MODE === 'false') {
+      return 'BACKEND';
+    }
     const envMode = normalizeMode(
       import.meta.env.VITE_EXECUTION_MODE || import.meta.env.VITE_5TOT_EXECUTION_MODE
     );
     if (envMode) return envMode;
-    if (import.meta.env.VITE_DEMO_MODE === 'false') {
-      return 'BACKEND';
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const fromSession = normalizeMode(window.sessionStorage.getItem(MODE_STORAGE_KEY));
+      if (fromSession) {
+        return fromSession;
+      }
+    } catch {
+      // Ignore storage access errors in restricted environments
     }
   }
 

@@ -369,7 +369,9 @@ export function loadPersistedDemoSession(): PersistedDemoSession {
     const isToolbarHidden =
       window.sessionStorage.getItem(STORAGE_KEYS.TOOLBAR_HIDDEN) === '1';
 
-    const rawApp = window.sessionStorage.getItem(STORAGE_KEYS.MUTATED_APP);
+    const rawApp =
+      window.sessionStorage.getItem(STORAGE_KEYS.MUTATED_APP) ||
+      window.localStorage.getItem(STORAGE_KEYS.MUTATED_APP);
     const parsedApp = rawApp
       ? (JSON.parse(rawApp) as StudentApplicationData)
       : null;
@@ -496,11 +498,19 @@ export function savePersistedDemoSession(
     if (partial.mutatedApplication !== undefined) {
       if (partial.mutatedApplication === null) {
         window.sessionStorage.removeItem(STORAGE_KEYS.MUTATED_APP);
+        try {
+          window.localStorage.removeItem(STORAGE_KEYS.MUTATED_APP);
+        } catch {
+          // Ignore localStorage errors
+        }
       } else {
-        window.sessionStorage.setItem(
-          STORAGE_KEYS.MUTATED_APP,
-          JSON.stringify(partial.mutatedApplication)
-        );
+        const serializedApp = JSON.stringify(partial.mutatedApplication);
+        window.sessionStorage.setItem(STORAGE_KEYS.MUTATED_APP, serializedApp);
+        try {
+          window.localStorage.setItem(STORAGE_KEYS.MUTATED_APP, serializedApp);
+        } catch {
+          // Ignore localStorage quota errors
+        }
       }
     }
     if (partial.mutatedNotifications !== undefined) {

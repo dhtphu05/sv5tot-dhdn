@@ -54,13 +54,26 @@ export class PrismaIdentityRepository implements IIdentityRepository {
   public async createStudent(dto: CreateStudentUserDto): Promise<UserEntity> {
     const prisma = await this.getPrisma();
     return prisma.$transaction(async (tx: PrismaTransactionScope) => {
+      let resolvedInstitutionId: string | null = dto.institutionId || null;
+      if (resolvedInstitutionId) {
+        const inst = await tx.institution
+          .findUnique({ where: { id: resolvedInstitutionId } })
+          .catch(() => null);
+        if (!inst) {
+          const fallbackInst = await tx.institution
+            .findUnique({ where: { id: 'inst-dut' } })
+            .catch(() => null);
+          resolvedInstitutionId = fallbackInst ? 'inst-dut' : null;
+        }
+      }
+
       const user = await tx.user.create({
         data: {
           email: dto.email.toLowerCase().trim(),
           passwordHash: dto.passwordHash,
           fullName: dto.fullName.trim(),
           studentCode: dto.studentCode.trim().toUpperCase(),
-          institutionId: dto.institutionId,
+          institutionId: resolvedInstitutionId,
           phone: dto.phone?.trim() || null,
           facultyDepartmentId: dto.facultyDepartmentId || null,
           academicClassId: dto.academicClassId || null,

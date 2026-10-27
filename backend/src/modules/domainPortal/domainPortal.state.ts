@@ -5,7 +5,9 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
@@ -625,7 +627,7 @@ export interface PortalState {
   auditLogs: PortalAuditLogRecord[];
 }
 
-const PORTAL_STATE_FILE_PATH = path.resolve(process.cwd(), '.data', 'portal-state.json');
+const PORTAL_STATE_FILE_PATH = path.resolve(os.tmpdir(), '5tot-dhdn-portal-state.json');
 
 export const portalState: PortalState = {
   sessions: new Map(),
@@ -818,6 +820,8 @@ export function syncStudentProfileInPortalState(
   return merged;
 }
 
+let lastSavedPortalStateDiskJson = '';
+
 export function savePortalStateToDisk(): void {
   if (process.env.NODE_ENV === 'test') return;
   try {
@@ -826,6 +830,7 @@ export function savePortalStateToDisk(): void {
       fs.mkdirSync(dir, { recursive: true });
     }
     const payload = {
+      sessions: Array.from(portalState.sessions.entries()).slice(-200),
       registeredStudents: Array.from(portalState.registeredStudents.entries()),
       studentProfiles: Array.from(portalState.studentProfiles.entries()),
       individualStaffRecords: portalState.individualStaffRecords,
@@ -834,7 +839,11 @@ export function savePortalStateToDisk(): void {
       evidenceIndex: Array.from(portalState.evidenceIndex.entries()),
       auditLogs: portalState.auditLogs.slice(0, 500),
     };
-    fs.writeFileSync(PORTAL_STATE_FILE_PATH, JSON.stringify(payload, null, 2), 'utf8');
+    const serialized = JSON.stringify(payload, null, 2);
+    if (serialized !== lastSavedPortalStateDiskJson) {
+      lastSavedPortalStateDiskJson = serialized;
+      fs.writeFileSync(PORTAL_STATE_FILE_PATH, serialized, 'utf8');
+    }
   } catch {
     // Ignore disk write errors in read-only environments
   }
@@ -846,7 +855,9 @@ export function loadPortalStateFromDisk(): boolean {
   try {
     if (!fs.existsSync(PORTAL_STATE_FILE_PATH)) return false;
     const raw = fs.readFileSync(PORTAL_STATE_FILE_PATH, 'utf8');
+    lastSavedPortalStateDiskJson = raw;
     const parsed = JSON.parse(raw) as {
+      sessions?: Array<[string, PortalAuthSessionPayload]>;
       registeredStudents?: Array<[string, PortalRegisteredStudent]>;
       studentProfiles?: Array<[string, Record<string, any>]>;
       individualStaffRecords?: Array<Record<string, any>>;
@@ -855,6 +866,9 @@ export function loadPortalStateFromDisk(): boolean {
       evidenceIndex?: Array<[string, StoredEvidenceRecord]>;
       auditLogs?: PortalAuditLogRecord[];
     };
+    if (Array.isArray(parsed.sessions)) {
+      portalState.sessions = new Map(parsed.sessions);
+    }
     if (Array.isArray(parsed.registeredStudents)) {
       portalState.registeredStudents = new Map(parsed.registeredStudents);
     }
@@ -1000,6 +1014,40 @@ export function resolveSessionActor(req: Request): {
         authenticated: true,
       };
     }
+
+    try {
+      const decoded = jwt.decode(token) as Record<string, any> | null;
+      if (decoded && typeof decoded.sub === 'string' && typeof decoded.activeRole === 'string') {
+        const email = typeof decoded.email === 'string' ? decoded.email.trim().toLowerCase() : '';
+        const reg = email ? portalState.registeredStudents.get(email) : undefined;
+        const staff = email
+          ? STAFF_SEED_ACCOUNTS.find((s) => s.email.toLowerCase() === email)
+          : undefined;
+        const instId =
+          reg?.institutionId ||
+          (typeof decoded.institutionId === 'string' ? decoded.institutionId : undefined);
+        const unitId =
+          (typeof decoded.schoolReviewUnitId === 'string' ? decoded.schoolReviewUnitId : undefined) ||
+          staff?.unitId ||
+          (instId ? SCHOOL_UNIT_MAP[instId]?.unitId : undefined);
+        const fullName =
+          reg?.fullName ||
+          (typeof decoded.fullName === 'string' ? decoded.fullName : '') ||
+          staff?.fullName ||
+          email ||
+          'Người dùng đã xác thực';
+        return {
+          id: decoded.sub,
+          name: fullName,
+          email,
+          role: decoded.activeRole,
+          unitId,
+          authenticated: true,
+        };
+      }
+    } catch {
+      // Ignore invalid JWT format
+    }
   }
   return {
     id: 'actor-system',
@@ -1064,6 +1112,25 @@ export async function issueZeroTrustJwtToken(
           schoolReviewUnitId: params.unitId,
           grantedByUserId: 'system-portal',
         });
+      }
+    } else {
+      if (params.password) {
+        const matchesExisting = existing.passwordHash
+          ? await defaultPasswordHasher
+              .verify(existing.passwordHash, params.password)
+              .catch(() => false)
+          : false;
+        if (!matchesExisting) {
+          const nextHash = await defaultPasswordHasher.hash(params.password);
+          await deps.identityRepo.updatePasswordHash(existing.id, nextHash).catch(() => {});
+          existing = { ...existing, passwordHash: nextHash };
+        }
+      }
+      const roles = await deps.identityRepo.getUserRoles(existing.id).catch(() => []);
+      if (!roles.some((r) => r.isActive && r.roleCode === params.role)) {
+        await deps.identityRepo
+          .addRoleAssignment(existing.id, params.role, params.unitId || null, 'system-portal')
+          .catch(() => {});
       }
     }
     if (existing && params.fullName && existing.fullName !== params.fullName) {

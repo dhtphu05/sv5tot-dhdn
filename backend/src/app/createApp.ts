@@ -160,7 +160,8 @@ export function createApp(dependencies: AppDependencies = {}): Express {
   app.use(corsMiddleware);
   app.use(rateLimiterMiddleware);
 
-  // 3. Body Parsing with Bounded Limits
+  // 3. Body Parsing with Bounded Limits (35MB for Portal evidence/application sync, env limit for core V2)
+  app.use('/api/v2/portal', express.json({ limit: '35mb' }));
   app.use(express.json({ limit: env.MAX_BODY_SIZE_BYTES }));
   app.use(express.urlencoded({ extended: true, limit: env.MAX_BODY_SIZE_BYTES }));
 

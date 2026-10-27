@@ -12,6 +12,8 @@ export interface ApiActorContext {
   userEmail?: string;
   role?: string;
   unitId?: string;
+  studentCode?: string;
+  institutionName?: string;
   token?: string;
 }
 

@@ -71,6 +71,8 @@ export const backendServicesAdapter: DomainServicesBundle = {
           userEmail: res.data.user.email,
           role: res.data.user.role,
           unitId: res.data.user.unitId,
+          studentCode: res.data.user.studentCode,
+          institutionName: res.data.user.institutionName,
           token: res.data.token,
         });
       }
@@ -92,6 +94,8 @@ export const backendServicesAdapter: DomainServicesBundle = {
           userEmail: res.data.user.email,
           role: res.data.user.role,
           unitId: res.data.user.unitId,
+          studentCode: res.data.user.studentCode || studentCode,
+          institutionName: res.data.user.institutionName || institutionName,
           token: res.data.token,
         });
       }

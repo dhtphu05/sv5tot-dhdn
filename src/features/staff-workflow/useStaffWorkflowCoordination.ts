@@ -265,8 +265,17 @@ export function useStaffWorkflowCoordination({
     useState<SchoolDemoScenarioId>(
       initialSchoolScenarioId || 'B_school_under_review'
     );
-  const [selectedStaffAppId, setSelectedStaffAppId] =
-    useState<string>(HERO_STAFF_APP_ID);
+  const [selectedStaffAppId, setSelectedStaffAppId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const m = window.location.pathname.match(
+        /\/staff\/(?:school\/)?applications\/([^/?#]+)/
+      );
+      if (m && m[1]) {
+        return decodeURIComponent(m[1]);
+      }
+    }
+    return HERO_STAFF_APP_ID;
+  });
 
   const initialHeroOfficerBundle = useMemo(
     () => buildOfficerScenarioBundle(initialOfficerScenarioId),
