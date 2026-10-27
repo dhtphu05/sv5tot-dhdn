@@ -282,6 +282,7 @@ export const CommitteeCriterionContentSection: React.FC<
               <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] border-t border-[#DCE7EE]">
                 <div className="h-[460px] bg-[#EEF3F7]">
                   <DocumentViewer
+                    fileId={activeEvItem.evidence.id}
                     fileName={activeEvItem.evidence.name}
                     fileType={activeEvItem.evidence.fileType}
                     fileUrl={activeEvItem.evidence.url}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ZoomIn,
   ZoomOut,
@@ -6,9 +6,15 @@ import {
   ExternalLink,
   FileQuestion,
   RotateCcw,
+  UploadCloud,
 } from 'lucide-react';
+import {
+  getEvidenceBlobUrlByIdOrName,
+  saveEvidenceFile,
+} from '../../../staff/demoEvidenceStorage';
 
 export interface DocumentViewerProps {
+  fileId?: string;
   fileName: string;
   fileType?: string;
   fileUrl?: string;
@@ -81,12 +87,34 @@ function hashStringIndex(input: string, modulo: number): number {
   return hash % modulo;
 }
 
-function resolvePreviewUrl(fileName: string, fileType: string, explicitUrl?: string): string {
+function isUserUploadedEvidenceId(fileId?: string, explicitUrl?: string): boolean {
+  if (explicitUrl && (explicitUrl.startsWith('blob:') || explicitUrl.startsWith('data:'))) {
+    return true;
+  }
+  if (!fileId) return false;
+  return (
+    fileId.startsWith('ev-new-') ||
+    fileId.startsWith('ev-uploaded-') ||
+    fileId.startsWith('upl-') ||
+    /^ev-\d{10,}/.test(fileId)
+  );
+}
+
+function resolvePreviewUrl(
+  fileName: string,
+  fileType: string,
+  explicitUrl?: string,
+  fileId?: string
+): string {
   const normalizedName = fileName.normalize('NFC');
   const isPdf = normalizedName.toLowerCase().endsWith('.pdf') || fileType === 'pdf';
 
   if (explicitUrl) {
-    if (explicitUrl.startsWith('blob:') || explicitUrl.startsWith('data:') || explicitUrl.startsWith('http')) {
+    if (
+      explicitUrl.startsWith('blob:') ||
+      explicitUrl.startsWith('data:') ||
+      explicitUrl.startsWith('http')
+    ) {
       return explicitUrl;
     }
     if (isPdf) {
@@ -96,6 +124,11 @@ function resolvePreviewUrl(fileName: string, fileType: string, explicitUrl?: str
       return explicitUrl.replace(/\.heic$/i, '.jpg');
     }
     return explicitUrl;
+  }
+
+  // Never fall back to unrelated demo files (Đoàn Hoàng Thiên Phú) for user-uploaded evidence
+  if (isUserUploadedEvidenceId(fileId, explicitUrl)) {
+    return '';
   }
 
   // Match known files by name
@@ -109,7 +142,7 @@ function resolvePreviewUrl(fileName: string, fileType: string, explicitUrl?: str
     return `/minhchung_test/${encodeURIComponent(jpgTarget)}`;
   }
 
-  // Fallback to real PDF or real photo in /minhchung_test so every preview opens a real file
+  // Fallback to real PDF or real photo in /minhchung_test only for demo fixture items
   if (isPdf) {
     return REAL_ASCII_PDFS[hashStringIndex(normalizedName, REAL_ASCII_PDFS.length)];
   }
@@ -122,6 +155,7 @@ function resolvePreviewUrl(fileName: string, fileType: string, explicitUrl?: str
  * and high-clarity zoomable canvas for images (.jpg, .png, .webp, .heic).
  */
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
+  fileId,
   fileName,
   fileType = 'pdf',
   fileUrl,
@@ -130,18 +164,57 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   onRetryPreview,
 }) => {
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [resolvedBlobUrl, setResolvedBlobUrl] = useState<string | null>(null);
+  const [blobLoadFailed, setBlobLoadFailed] = useState(false);
+  const relinkInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setBlobLoadFailed(false);
+    setResolvedBlobUrl(null);
+
+    getEvidenceBlobUrlByIdOrName(fileId, fileName)
+      .then((storedUrl) => {
+        if (!cancelled && storedUrl) {
+          setResolvedBlobUrl(storedUrl);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fileId, fileName, fileUrl]);
+
+  const handleRelinkLocalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() || fileType || 'pdf';
+    const targetId = fileId || `ev-new-${Date.now()}`;
+    await saveEvidenceFile(targetId, file, fileName || file.name, ext).catch(() => {});
+    const freshUrl = await getEvidenceBlobUrlByIdOrName(targetId, fileName || file.name);
+    if (freshUrl) {
+      setResolvedBlobUrl(freshUrl);
+      setBlobLoadFailed(false);
+    } else if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+      setResolvedBlobUrl(URL.createObjectURL(file));
+      setBlobLoadFailed(false);
+    }
+  };
 
   const handleZoomIn = () => setZoomLevel((z) => Math.min(160, z + 15));
   const handleZoomOut = () => setZoomLevel((z) => Math.max(65, z - 15));
   const handleResetZoom = () => setZoomLevel(100);
 
   const isPdf = fileName.toLowerCase().endsWith('.pdf') || fileType === 'pdf';
-  const effectiveUrl = resolvePreviewUrl(fileName, fileType, fileUrl);
+  const candidateUrl = resolvedBlobUrl || (!blobLoadFailed ? fileUrl : undefined);
+  const effectiveUrl = resolvePreviewUrl(fileName, fileType, candidateUrl, fileId);
+  const isMissingLocalBinary = !effectiveUrl && !isLoading && !isFailed;
 
   return (
     <div className="relative flex-1 h-full bg-[#EEF3F7] overflow-auto flex flex-col min-w-0 select-none">
-      {/* Floating Viewer Toolbar for Image files (PDFs use the browser's built-in native PDF toolbar) */}
-      {!isPdf && !isLoading && !isFailed && (
+      {/* Floating Viewer Toolbar for Image files (PDFs use the browser'in built-in native PDF toolbar) */}
+      {!isPdf && !isLoading && !isFailed && !isMissingLocalBinary && (
         <div className="sticky top-4 z-20 mx-auto pointer-events-none mt-3">
           <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-full shadow-[0_4px_20px_rgba(23,42,58,0.12)] border border-[#DCE7EE] text-[12px] text-[#172A3A]">
             <button
@@ -215,6 +288,40 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         </div>
       )}
 
+      {/* Missing Local Binary State (for files attached before IndexedDB binary persistence) */}
+      {isMissingLocalBinary && (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="p-8 bg-white rounded-[12px] border border-[#DCE7EE] shadow-sm max-w-md flex flex-col items-center">
+            <div className="w-12 h-12 rounded-full bg-[#EAF6FC] text-[#126A9C] flex items-center justify-center mb-3">
+              <UploadCloud size={24} />
+            </div>
+            <h4 className="text-[15px] font-bold text-[#172A3A]">
+              Chưa có dữ liệu nhị phân cục bộ cho tệp này
+            </h4>
+            <p className="text-[12.5px] text-[#607483] mt-1.5 leading-relaxed break-words">
+              Tệp <strong className="text-[#172A3A]">{fileName}</strong> được đính kèm từ phiên trước khi lưu tệp nhị phân cục bộ. Bạn có thể chọn lại tệp gốc từ máy tính để hiển thị bản xem trước chính xác ngay lập tức.
+            </p>
+            <input
+              ref={relinkInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic"
+              className="hidden"
+              onChange={handleRelinkLocalFile}
+            />
+            <div className="flex items-center gap-2 mt-5">
+              <button
+                type="button"
+                onClick={() => relinkInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-[12.5px] font-semibold text-white bg-[#126A9C] hover:bg-[#0D78AE] rounded-[7px] transition-colors cursor-pointer shadow-2xs"
+              >
+                <UploadCloud size={14} />
+                <span>Chọn tệp gốc để hiển thị ngay</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Preview Failure Fallback */}
       {!isLoading && isFailed && (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -240,21 +347,23 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                   <span>Thử tải lại</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => window.open(effectiveUrl, '_blank')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[#126A9C] hover:bg-[#0D78AE] rounded-[6px] transition-colors cursor-pointer"
-              >
-                <ExternalLink size={13} />
-                <span>Mở tài liệu gốc</span>
-              </button>
+              {effectiveUrl && (
+                <button
+                  type="button"
+                  onClick={() => window.open(effectiveUrl, '_blank')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[#126A9C] hover:bg-[#0D78AE] rounded-[6px] transition-colors cursor-pointer"
+                >
+                  <ExternalLink size={13} />
+                  <span>Mở tài liệu gốc</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Render Document: Full-bleed Native Browser PDF Viewer for PDFs, Zoomable Card for Images */}
-      {!isLoading && !isFailed && (
+      {!isLoading && !isFailed && !isMissingLocalBinary && (
         isPdf ? (
           <div className="flex-1 w-full h-full min-h-[680px] flex flex-col bg-[#525659]">
             <iframe
@@ -274,11 +383,16 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 <img
                   src={effectiveUrl}
                   alt={fileName}
+                  onError={() => {
+                    if (effectiveUrl.startsWith('blob:')) {
+                      setBlobLoadFailed(true);
+                    }
+                  }}
                   className="w-full max-h-[720px] object-contain bg-[#F8FBFD]"
                 />
-                <div className="px-4 py-2.5 bg-white border-t border-[#E6EFF5] flex items-center justify-between text-[12px] text-[#607483]">
+                <div className="px-4 py-2.5 bg-white border-t border-[#E6EFF5] flex items-center justify-between gap-3 text-[12px] text-[#607483]">
                   <span className="truncate font-medium text-[#172A3A]">{fileName}</span>
-                  <span className="uppercase font-semibold text-[#0D78AE]">{fileType}</span>
+                  <span className="uppercase font-semibold text-[#0D78AE] shrink-0">{fileType}</span>
                 </div>
               </div>
             </div>

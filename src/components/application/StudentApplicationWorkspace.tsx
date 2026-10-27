@@ -37,6 +37,7 @@ import {
   findEvidenceContextInApplication,
   calculateStudentApplicationSummaryStats,
   computeCriteriaAdvisoryStatuses,
+  computeDynamicPreSubmitAdvisories,
 } from '../../entities/application/studentApplicationMutators';
 import { useStudentWorkspaceDeepLink } from '../../features/student-application/useStudentWorkspaceDeepLink';
 import { useStudentSupplementWorkflow } from '../../features/student-application/useStudentSupplementWorkflow';
@@ -538,9 +539,14 @@ export const StudentApplicationWorkspace: React.FC<
     submissionState === 'supplement_required' ||
     submissionState === 'supplement_sent';
 
-  const criteriaStatuses = useMemo(
-    () => computeCriteriaAdvisoryStatuses(application.criteria, advisories),
+  const effectiveAdvisories = useMemo(
+    () => computeDynamicPreSubmitAdvisories(application.criteria, advisories),
     [application.criteria, advisories]
+  );
+
+  const criteriaStatuses = useMemo(
+    () => computeCriteriaAdvisoryStatuses(application.criteria, effectiveAdvisories),
+    [application.criteria, effectiveAdvisories]
   );
 
   return (
@@ -572,7 +578,6 @@ export const StudentApplicationWorkspace: React.FC<
           }
           onConfirmEvidence={handleConfirmEvidence}
           onOpenRegulation={(critId, reqId) => {
-            setEvidenceDetailState((prev) => ({ ...prev, isOpen: false }));
             handleOpenRegulation(critId, reqId);
           }}
           onSwitchEvidence={(nextFile) =>
@@ -670,7 +675,8 @@ export const StudentApplicationWorkspace: React.FC<
               totalDeclarations={totalDeclarations}
               totalEvidence={totalEvidence}
               totalRecommendations={totalRecommendations}
-              advisoriesCount={advisories.length}
+              advisoriesCount={effectiveAdvisories.length}
+              advisories={effectiveAdvisories}
               isScrolledCompact={isScrolledCompact}
               expandedCriteria={expandedCriteria}
               expandedRowId={expandedRowId}
@@ -768,7 +774,7 @@ export const StudentApplicationWorkspace: React.FC<
         totalDeclarations={totalDeclarations}
         totalEvidence={totalEvidence}
         criteriaStatuses={criteriaStatuses}
-        advisories={advisories}
+        advisories={effectiveAdvisories}
         eligibilityState={eligibilityState}
         deadlineState={deadlineState}
         onSelectCriterionFromReview={handleSelectCriterionFromReview}

@@ -28,6 +28,7 @@ import { FindDeclarationSearchBar } from '../../components/application/FindDecla
 import {
   ApplicationSubmissionState,
   TrackingActivity,
+  PreSubmitAdvisoryItem,
 } from '../../components/submission/submissionTypes';
 import { TableRowSkeleton } from '../../components/feedback/Skeleton';
 import { EmptyState } from '../../components/feedback/EmptyState';
@@ -45,6 +46,7 @@ export interface StudentApplicationBodySectionProps {
   totalEvidence: number;
   totalRecommendations: number;
   advisoriesCount: number;
+  advisories?: PreSubmitAdvisoryItem[];
   isScrolledCompact: boolean;
   expandedCriteria: Record<string, boolean>;
   expandedRowId: string | null;
@@ -108,6 +110,7 @@ export const StudentApplicationBodySection: React.FC<
   totalEvidence,
   totalRecommendations,
   advisoriesCount,
+  advisories = [],
   isScrolledCompact,
   expandedCriteria,
   expandedRowId,
@@ -281,6 +284,7 @@ export const StudentApplicationBodySection: React.FC<
       {submissionState === 'draft' && (
         <ApplicationPreSubmitSummary
           recommendationsCount={advisoriesCount}
+          advisories={advisories}
           onCheckFurtherClick={onOpenPreSubmitReview}
           onSubmitClick={onOpenPreSubmitReview}
         />

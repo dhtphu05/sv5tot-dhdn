@@ -406,7 +406,7 @@ export const RegulationInspectorContent: React.FC<RegulationInspectorContentProp
       {/* SIMULATED SOURCE DOCUMENT MODAL (Xem văn bản gốc)                 */}
       {/* ----------------------------------------------------------------- */}
       {isDocumentViewerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 backdrop-blur-[1px]">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/35 backdrop-blur-[1px]">
           <div className="bg-white rounded-[14px] shadow-2xl border border-[#DCE7EE] max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="p-4 border-b border-[#DCE7EE] bg-[#F8FBFD] flex items-center justify-between shrink-0">
@@ -430,7 +430,7 @@ export const RegulationInspectorContent: React.FC<RegulationInspectorContentProp
             <div className="p-6 overflow-y-auto font-mono text-[12px] text-[#172A3A] bg-[#FAFCFE] whitespace-pre-line leading-relaxed space-y-4">
               <div className="p-3 bg-white rounded border border-[#DCE7EE] text-center font-sans">
                 <span className="font-bold text-[13px] text-[#126A9C] block">
-                  HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+                  HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
                 </span>
                 <span className="text-[11px] text-[#607483]">
                   Hệ thống quản lý và xét chọn danh hiệu Sinh viên 5 tốt

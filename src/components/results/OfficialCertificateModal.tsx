@@ -133,7 +133,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                     HỘI SINH VIÊN VIỆT NAM
                   </p>
                   <p className="text-[13px] font-extrabold tracking-wide text-[#126A9C] uppercase">
-                    BAN CHẤP HÀNH HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+                    BAN CHẤP HÀNH HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
                   </p>
                   <div className="flex justify-center pt-3 pb-1">
                     <HsvLogo size={46} />
@@ -143,7 +143,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                 {/* Certificate Main Title */}
                 <div className="text-center mt-4 mb-6">
                   <p className="text-[12px] font-bold tracking-[0.2em] text-[#9A7420] uppercase">
-                    BAN THƯ KÝ HỘI SINH VIÊN VIỆT NAM TP. ĐÀ NẴNG
+                    BAN THƯ KÝ HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
                   </p>
                   <h3 className="text-[28px] sm:text-[32px] font-extrabold tracking-tight text-[#126A9C] uppercase mt-1">
                     GIẤY CHỨNG NHẬN
@@ -223,7 +223,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                       {resultData.publishedAt?.split('/')[2] || '2026'}
                     </p>
                     <p className="font-bold text-[#172A3A] uppercase mt-1">
-                      TM. BAN THƯ KÝ HỘI SINH VIÊN TP. ĐÀ NẴNG
+                      TM. BAN THƯ KÝ HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG
                     </p>
                     <div className="my-3 inline-flex items-center justify-center px-3 py-1.5 rounded border border-dashed border-[#0D78AE]/40 bg-[#F0F9FF] text-[#0D78AE] text-[11.5px] font-bold">
                       Chữ ký số & Dấu xác nhận Hội Sinh viên Đại học Đà Nẵng
@@ -244,7 +244,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                     HỘI SINH VIÊN VIỆT NAM
                   </p>
                   <p className="text-[12.5px] font-bold uppercase text-[#172A3A]">
-                    BCH HỘI SINH VIÊN TP. ĐÀ NẴNG
+                    BCH HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG
                   </p>
                   <p className="text-[12px] text-[#466474] pt-1">
                     Số: {resultData.decisionNumber || '142/QĐ-HSV'}
@@ -276,7 +276,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
               {/* Excerpt Body */}
               <div className="space-y-3 text-[13.5px] text-[#334E68] leading-relaxed">
                 <p className="font-bold text-center text-[#172A3A] uppercase">
-                  BAN THƯ KÝ HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+                  BAN THƯ KÝ HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
                 </p>
                 <p>
                   - Căn cứ Quy chế xét chọn danh hiệu “Sinh viên 5 tốt” cấp Đại học Đà Nẵng năm học{' '}

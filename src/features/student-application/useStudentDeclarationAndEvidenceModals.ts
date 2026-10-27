@@ -24,6 +24,7 @@ import {
   applyAppendEvidenceFilesMutation,
   findCriterionAndRequirementById,
 } from '../../entities/application/studentApplicationMutators';
+import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
 
 interface UseStudentDeclarationAndEvidenceModalsParams {
   initialData: StudentApplicationData;
@@ -259,15 +260,33 @@ export function useStudentDeclarationAndEvidenceModals({
     files: FileList | File[]
   ) => {
     const isSupplementActive = submissionState === 'supplement_required';
-    const newFiles: ApplicationEvidence[] = Array.from(files).map((f, i) => ({
-      id: `ev-uploaded-${Date.now()}-${i}`,
-      name: f.name,
-      fileType: f.name.endsWith('.pdf') ? 'pdf' : 'jpg',
-      size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-      uploadedAt: new Date().toLocaleDateString('vi-VN'),
-      status: 'ready',
-      isNewlyAddedSupplement: isSupplementActive,
-    }));
+    const newFiles: ApplicationEvidence[] = Array.from(files).map((f, i) => {
+      const ext = f.name.split('.').pop()?.toLowerCase() || 'pdf';
+      const sizeStr =
+        f.size > 1024 * 1024
+          ? `${(f.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${Math.max(1, Math.round(f.size / 1024))} KB`;
+      const evId = `ev-uploaded-${Date.now()}-${i}`;
+      const objectUrl =
+        typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
+          ? URL.createObjectURL(f)
+          : undefined;
+      saveEvidenceFile(evId, f, f.name, ext, {
+        size: sizeStr,
+        reqId,
+      }).catch(() => {});
+
+      return {
+        id: evId,
+        name: f.name,
+        fileType: ext,
+        size: sizeStr,
+        uploadedAt: new Date().toLocaleDateString('vi-VN'),
+        status: 'ready',
+        isNewlyAddedSupplement: isSupplementActive,
+        url: objectUrl,
+      };
+    });
 
     setApplication((prev) =>
       applyAppendEvidenceFilesMutation(prev, reqId, declId, newFiles)

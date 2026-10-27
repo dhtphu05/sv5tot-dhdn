@@ -20,6 +20,7 @@ import {
 import { Button } from '../buttons/Button';
 import { DropZone } from '../forms/DropZone';
 import { RightInspector } from './RightInspector';
+import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
 
 export interface AddEvidenceInspectorProps {
   isOpen: boolean;
@@ -75,16 +76,24 @@ export const AddEvidenceInspector: React.FC<AddEvidenceInspectorProps> = ({
       setTimeout(() => {
         // Create new ApplicationEvidence items
         const newEvs: ApplicationEvidence[] = pendingUploadFiles.map((file, i) => {
-          const isPdf = file.name.toLowerCase().endsWith('.pdf');
+          const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+          const sizeStr =
+            file.size > 1024 * 1024
+              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+              : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+          const evId = `ev-uploaded-${Date.now()}-${i}`;
           const objectUrl =
             typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
               ? URL.createObjectURL(file)
               : undefined;
+          saveEvidenceFile(evId, file, file.name, ext, {
+            size: sizeStr,
+          }).catch(() => {});
           return {
-            id: `ev-uploaded-${Date.now()}-${i}`,
+            id: evId,
             name: file.name,
-            fileType: isPdf ? 'pdf' : 'jpg',
-            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            fileType: ext,
+            size: sizeStr,
             uploadedAt: new Date().toLocaleDateString('vi-VN'),
             status: 'reading_document',
             url: objectUrl,

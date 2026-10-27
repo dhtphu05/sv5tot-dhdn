@@ -10,6 +10,7 @@ export interface RightInspectorProps {
   footer?: React.ReactNode;
   width?: number;
   triggerElement?: HTMLElement | null;
+  zIndexClassName?: string;
 }
 
 export const RightInspector: React.FC<RightInspectorProps> = ({
@@ -21,11 +22,13 @@ export const RightInspector: React.FC<RightInspectorProps> = ({
   footer,
   width = 400,
   triggerElement = null,
+  zIndexClassName = 'z-40',
 }) => {
   // Close on Escape key and restore focus
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
+        e.stopPropagation();
         onClose();
         if (triggerElement) {
           triggerElement.focus();
@@ -39,7 +42,7 @@ export const RightInspector: React.FC<RightInspectorProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end">
+    <div className={`fixed inset-0 ${zIndexClassName} flex justify-end`}>
       {/* Soft subtle translucent backdrop that leaves application workspace visible for direct comparison */}
       <div
         className="fixed inset-0 bg-black/10 backdrop-blur-[0.5px] transition-opacity duration-200"

@@ -100,7 +100,38 @@ export const StudentHomeCriteriaStrip: React.FC<StudentHomeCriteriaStripProps> =
       };
     }
 
-    const hasAttentionReq = criterion.requirements.some(
+    const allReqs = criterion.requirements || [];
+    const declaredCount = allReqs.reduce(
+      (sum, r) => sum + (r.declarations?.length || 0),
+      0
+    );
+    const evidenceCount = allReqs.reduce(
+      (sum, r) =>
+        sum +
+        (r.declarations || []).reduce(
+          (dSum, d) => dSum + (d.evidenceFiles?.length || 0),
+          0
+        ),
+      0
+    );
+
+    if (submissionState === 'draft' && declaredCount === 0) {
+      return {
+        badgeLabel: 'Chưa kê khai',
+        badgeTone: 'neutral' as const,
+        summaryText: 'Chưa có thông tin kê khai và minh chứng trong tiêu chí này',
+      };
+    }
+
+    if (submissionState === 'draft' && declaredCount > 0 && evidenceCount === 0) {
+      return {
+        badgeLabel: 'Thiếu minh chứng',
+        badgeTone: 'warning' as const,
+        summaryText: `Đã kê khai ${declaredCount} mục nhưng chưa đính kèm tệp minh chứng`,
+      };
+    }
+
+    const hasAttentionReq = allReqs.some(
       (r) =>
         r.status === 'needs_verification' ||
         r.status === 'can_supplement' ||
@@ -128,7 +159,7 @@ export const StudentHomeCriteriaStrip: React.FC<StudentHomeCriteriaStripProps> =
       badgeLabel: 'Đã kê khai đầy đủ',
       badgeTone: 'success' as const,
       summaryText:
-        criterion.shortSummary || 'Đã điền thông tin và đính kèm minh chứng',
+        criterion.shortSummary || `Đã kê khai ${declaredCount} mục và đính kèm ${evidenceCount} minh chứng`,
     };
   };
 

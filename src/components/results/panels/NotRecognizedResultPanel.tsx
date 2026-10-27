@@ -25,7 +25,7 @@ export const NotRecognizedResultPanel: React.FC<NotRecognizedResultPanelProps> =
           <HsvLogo size={30} />
           <div>
             <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#334E68]">
-              HỘI SINH VIÊN VIỆT NAM THÀNH PHỐ ĐÀ NẴNG
+              HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
             </p>
             <p className="text-[12px] text-[#607483] font-medium">
               Thông báo kết quả xét chọn · Năm học {activeResult.schoolYear}

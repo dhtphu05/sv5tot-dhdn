@@ -137,6 +137,15 @@ export async function saveEvidenceFile(
     applicationId: meta?.applicationId,
   };
 
+  if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+    try {
+      const immediateUrl = URL.createObjectURL(fileOrBlob);
+      activeBlobUrls.set(id, immediateUrl);
+    } catch {
+      // ignore
+    }
+  }
+
   if (!isIndexedDBAvailable()) {
     memoryFallbackStore.set(id, record);
     return;
@@ -185,6 +194,49 @@ export async function getEvidenceFile(id: string): Promise<StoredEvidenceRecord 
 }
 
 /**
+ * Retrieves the most recently stored binary evidence record matching a filename.
+ */
+export async function getEvidenceFileByName(fileName: string): Promise<StoredEvidenceRecord | null> {
+  const normalizedTarget = fileName.trim().toLowerCase();
+  if (!normalizedTarget) return null;
+
+  for (const rec of memoryFallbackStore.values()) {
+    if (rec.name.trim().toLowerCase() === normalizedTarget) {
+      return rec;
+    }
+  }
+
+  if (!isIndexedDBAvailable()) return null;
+
+  try {
+    const db = await openDatabase();
+    return await new Promise<StoredEvidenceRecord | null>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const all = (req.result as StoredEvidenceRecord[]) || [];
+        const matches = all.filter(
+          (r) => r?.name?.trim().toLowerCase() === normalizedTarget && r.blob
+        );
+        if (matches.length === 0) {
+          resolve(null);
+          return;
+        }
+        matches.sort((a, b) =>
+          String(b.uploadedAt || '').localeCompare(String(a.uploadedAt || ''))
+        );
+        resolve(matches[0]);
+      };
+      req.onerror = () => reject(req.error);
+      tx.oncomplete = () => db.close();
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Returns a live browser Blob URL or Cloudflare R2 Presigned View URL for an evidence file.
  * Returns null if the file has not been stored or IndexedDB is empty.
  */
@@ -214,6 +266,33 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
     }
   }
 
+  return null;
+}
+
+/**
+ * Resolves a live browser Blob URL by evidence ID first, falling back to filename lookup in IndexedDB.
+ */
+export async function getEvidenceBlobUrlByIdOrName(
+  fileId?: string,
+  fileName?: string
+): Promise<string | null> {
+  if (fileId) {
+    const byId = await getEvidenceBlobUrl(fileId);
+    if (byId) return byId;
+  }
+  if (fileName) {
+    const byName = await getEvidenceFileByName(fileName);
+    if (byName && byName.blob) {
+      if (activeBlobUrls.has(byName.id)) {
+        return activeBlobUrls.get(byName.id)!;
+      }
+      if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+        const url = URL.createObjectURL(byName.blob);
+        activeBlobUrls.set(byName.id, url);
+        return url;
+      }
+    }
+  }
   return null;
 }
 

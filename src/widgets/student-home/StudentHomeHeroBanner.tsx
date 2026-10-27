@@ -503,6 +503,12 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
 
   // 8. STATE B & C: Draft Application in Progress
   if (submissionState === 'draft') {
+    const criteriaList = application?.criteria || [];
+    const declaredCriteriaCount = criteriaList.filter((c) =>
+      (c.requirements || []).some((r) => (r.declarations?.length || 0) > 0)
+    ).length;
+    const isPartiallyDeclared = declaredCriteriaCount < 5;
+
     return (
       <section
         aria-label="Hồ sơ đang hoàn thiện"
@@ -511,7 +517,7 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
         <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-[12px] font-bold bg-[#E5F5FC] text-[#0D78AE] border border-[#BAE6FD]">
-              <span>Đang hoàn thiện hồ sơ</span>
+              <span>Đang hoàn thiện hồ sơ · {declaredCriteriaCount}/5 tiêu chí</span>
             </span>
             {advisoryCount > 0 && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[6px] text-[12px] font-bold bg-[#FEF6EB] text-[#B75B00] border border-[#FADDB6]">
@@ -527,11 +533,15 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
           <h2 className="text-[20px] font-extrabold text-[#172A3A]">
             {advisoryCount > 0
               ? `Có ${advisoryCount} nội dung bạn có thể kiểm tra thêm`
+              : isPartiallyDeclared
+              ? `Hồ sơ đang được kê khai (${declaredCriteriaCount}/5 tiêu chí)`
               : 'Hồ sơ của bạn đang được chuẩn bị'}
           </h2>
           <p className="text-[13.5px] text-[#466474] leading-relaxed">
             {advisoryCount > 0
               ? 'Các tiêu chí chính đã được kê khai. Bạn có thể xem lại một số gợi ý rà soát minh chứng để hồ sơ rõ ràng nhất trước khi gửi.'
+              : isPartiallyDeclared
+              ? `Bạn đã kê khai ${declaredCriteriaCount}/5 tiêu chí. Hãy tiếp tục điền thông tin và đính kèm minh chứng cho các tiêu chí còn lại trước khi kiểm tra và gửi hồ sơ.`
               : 'Tất cả mục kê khai hiện tại đã hợp lệ và đầy đủ minh chứng. Bạn có thể tiếp tục cập nhật hoặc tiến hành kiểm tra để gửi hồ sơ.'}
           </p>
         </div>

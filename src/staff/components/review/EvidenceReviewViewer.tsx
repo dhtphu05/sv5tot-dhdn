@@ -727,6 +727,7 @@ export const EvidenceReviewViewer: React.FC<EvidenceReviewViewerProps> = ({
 
             <div className="flex-1 min-h-0 overflow-hidden">
               <DocumentViewer
+                fileId={evidence.id}
                 fileName={evidence.name}
                 fileType={evidence.fileType}
                 fileUrl={evidence.url}

@@ -25,7 +25,9 @@ export interface PreSubmitReviewContentProps {
     name: string;
     number: number;
     statusLabel: string;
+    statusTone?: 'undeclared' | 'advisory' | 'ready';
     hasAdvisory: boolean;
+    declaredCount?: number;
   }[];
   advisories: PreSubmitAdvisoryItem[];
   eligibilityState: EligibilityState;
@@ -169,7 +171,12 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {crit.hasAdvisory ? (
+                  {crit.statusTone === 'undeclared' || crit.statusLabel === 'Chưa kê khai' ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#607483] bg-[#F1F5F9] border border-[#CBD5E1] px-2 py-0.5 rounded-[5px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#94A3B8]" />
+                      <span>{crit.statusLabel}</span>
+                    </span>
+                  ) : crit.hasAdvisory ? (
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#B75B00] bg-[#FEF6EB] border border-[#FADDB6] px-2 py-0.5 rounded-[5px]">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#E99A18]" />
                       <span>{crit.statusLabel}</span>
@@ -259,7 +266,7 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
                     iconTrailing={<ArrowRight size={12} />}
                     className="text-[#126A9C] hover:text-[#0D78AE] hover:bg-[#EAF6FC] text-[12px] font-semibold shrink-0 h-7 px-2.5"
                   >
-                    Kiểm tra
+                    {item.actionLabel || 'Kiểm tra'}
                   </Button>
                 </div>
               );
@@ -360,7 +367,7 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
               <Clock size={13} className="text-[#607483]" />
               <span className="font-medium">Hạn gửi:</span>
               <span className="font-bold text-[#172A3A]">
-                {submissionDeadlineText || '20:00 · 15/10/2026'}
+                {submissionDeadlineText || '10/11/2026 · 20:00'}
               </span>
             </div>
           </div>
@@ -376,7 +383,7 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-[#64748B] pl-5">
               <span>Mở nhận hồ sơ:</span>
-              <span className="font-bold text-[#1E293B]">08:00 · 01/10/2026</span>
+              <span className="font-bold text-[#1E293B]">08:00 · 01/10/2025</span>
             </div>
           </div>
         )}
@@ -390,7 +397,7 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
               </span>
             </div>
             <span className="text-[#7F1D1D] pl-5">
-              Hạn gửi đã qua: {submissionDeadlineText || '20:00 · 15/10/2026'}.
+              Hạn gửi đã qua: {submissionDeadlineText || '10/11/2026 · 20:00'}.
             </span>
           </div>
         )}
@@ -402,11 +409,11 @@ export const PreSubmitReviewContent: React.FC<PreSubmitReviewContentProps> = ({
                 Hạn gửi dành riêng cho hồ sơ của bạn
               </span>
               <span className="font-bold text-[#15803D] bg-[#DCFCE7] px-2 py-0.5 rounded-[4px]">
-                20:00 · 20/10/2026
+                20:00 · 15/11/2026
               </span>
             </div>
             <span className="text-[11.5px] text-[#466474]">
-              Hạn chung toàn Đại học Đà Nẵng: {submissionDeadlineText || '20:00 · 15/10/2026'}.
+              Hạn chung toàn Đại học Đà Nẵng: {submissionDeadlineText || '10/11/2026 · 20:00'}.
             </span>
           </div>
         )}

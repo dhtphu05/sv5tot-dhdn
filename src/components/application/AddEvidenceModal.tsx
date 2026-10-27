@@ -24,6 +24,7 @@ import {
 } from '../../demo/fixtures/studentApplication';
 import { FileTypeIcon } from '../evidence/FileTypeIcon';
 import { Button } from '../buttons/Button';
+import { saveEvidenceFile } from '../../staff/demoEvidenceStorage';
 
 export interface AddEvidenceModalProps {
   isOpen: boolean;
@@ -212,8 +213,14 @@ export const AddEvidenceModal: React.FC<AddEvidenceModalProps> = ({
 
     if (activeTab === 'upload') {
       uploadedFiles.forEach((f) => {
+        const evId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+        if (f.rawFile) {
+          saveEvidenceFile(evId, f.rawFile, f.name, f.fileType, {
+            size: f.size,
+          }).catch(() => {});
+        }
         finalFiles.push({
-          id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          id: evId,
           name: f.name,
           fileType: f.fileType,
           size: f.size,

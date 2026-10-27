@@ -11,8 +11,10 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { ApplicationEvidence } from '../../../demo/fixtures/studentApplication';
-import { RequirementStatus } from '../../../tokens';
+import { CRITERIA, CriterionDefinition, RequirementStatus } from '../../../tokens';
 import { FileTypeIcon } from '../FileTypeIcon';
+import { RightInspector } from '../../inspector/RightInspector';
+import { RegulationInspectorContent } from '../../inspector/RegulationInspectorContent';
 import { DocumentViewer } from './DocumentViewer';
 import { InformationPanel } from './InformationPanel';
 import { RecognizedFieldItem } from './RecognizedField';
@@ -321,6 +323,13 @@ export const EvidenceDetailWorkspace: React.FC<EvidenceDetailWorkspaceProps> = (
   const [highlightRegion, setHighlightRegion] = useState<string | null>(
     initialAttentionField?.highlightRegionId || null
   );
+  const [isRegulationOpen, setIsRegulationOpen] = useState(false);
+  const [activeRegCriterion, setActiveRegCriterion] = useState<CriterionDefinition>(
+    () => CRITERIA[criterionId as keyof typeof CRITERIA] || CRITERIA.ethics
+  );
+  const [activeRegSectionId, setActiveRegSectionId] = useState<string | null>(
+    requirementId || null
+  );
 
   // Sync state if selected evidence prop changes
   useEffect(() => {
@@ -349,12 +358,16 @@ export const EvidenceDetailWorkspace: React.FC<EvidenceDetailWorkspaceProps> = (
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (isRegulationOpen) {
+          setIsRegulationOpen(false);
+          return;
+        }
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isRegulationOpen]);
 
   // Attachment switcher logic (Section 47 & 48)
   const fileIndex = allEvidenceList.findIndex((f) => f.id === currentFile.id);
@@ -386,6 +399,16 @@ export const EvidenceDetailWorkspace: React.FC<EvidenceDetailWorkspaceProps> = (
     if (onUpdateField) {
       onUpdateField(currentFile.id, fieldId, newValue);
     }
+  };
+
+  const handleOpenInlineRegulation = (critId: string, reqId?: string) => {
+    const critDef =
+      CRITERIA[critId as keyof typeof CRITERIA] ||
+      CRITERIA[criterionId as keyof typeof CRITERIA] ||
+      CRITERIA.ethics;
+    setActiveRegCriterion(critDef);
+    setActiveRegSectionId(reqId || requirementId || null);
+    setIsRegulationOpen(true);
   };
 
   const usageContextTitle = declarationTitle
@@ -507,6 +530,7 @@ export const EvidenceDetailWorkspace: React.FC<EvidenceDetailWorkspaceProps> = (
         {/* LEFT: Document Viewer (58–62% width) */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           <DocumentViewer
+            fileId={currentFile.id}
             fileName={currentFile.name}
             fileType={currentFile.fileType}
             fileUrl={currentFile.url}
@@ -539,12 +563,35 @@ export const EvidenceDetailWorkspace: React.FC<EvidenceDetailWorkspaceProps> = (
             focusedFieldId={focusedFieldId}
             onUpdateField={handleUpdateFieldValue}
             onConfirmEvidence={() => onConfirmEvidence(currentFile.id)}
-            onOpenRegulation={onOpenRegulation}
+            onOpenRegulation={handleOpenInlineRegulation}
             onFocusField={handleFocusField}
             readOnly={readOnly}
           />
         </div>
       </div>
+
+      {/* Inline Regulation Slide-Over Drawer (stays inside EvidenceDetailWorkspace without exiting) */}
+      <RightInspector
+        isOpen={isRegulationOpen}
+        onClose={() => setIsRegulationOpen(false)}
+        title="Quy định áp dụng"
+        subtitle={`${activeRegCriterion.name} · Năm học 2025–2026`}
+        width={420}
+        zIndexClassName="z-[60]"
+      >
+        <RegulationInspectorContent
+          criterion={activeRegCriterion}
+          season="Năm học 2025–2026"
+          focusedSectionId={activeRegSectionId}
+          onSelectCriterion={(critId) => {
+            const critDef = CRITERIA[critId as keyof typeof CRITERIA];
+            if (critDef) {
+              setActiveRegCriterion(critDef);
+              setActiveRegSectionId(null);
+            }
+          }}
+        />
+      </RightInspector>
     </div>
   );
 };

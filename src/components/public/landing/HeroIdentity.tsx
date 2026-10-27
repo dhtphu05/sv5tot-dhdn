@@ -36,7 +36,7 @@ export const HeroIdentity: React.FC = () => {
           HỆ THỐNG XÉT DUYỆT{' '}
           <span className="text-[#0D6EB0]">SINH VIÊN 5 TỐT</span>
         </span>
-        <span className="block mt-1">CẤP THÀNH PHỐ ĐÀ NẴNG</span>
+        <span className="block mt-1">CẤP ĐẠI HỌC ĐÀ NẴNG</span>
       </h1>
 
       {/* 3. Supporting Copy (Section 11) */}

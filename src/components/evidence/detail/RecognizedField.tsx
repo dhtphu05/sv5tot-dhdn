@@ -75,7 +75,7 @@ export const RecognizedField: React.FC<RecognizedFieldProps> = ({
   return (
     <div
       onClick={() => onFieldFocus && onFieldFocus(field.id)}
-      className={`group/field py-3 px-3.5 rounded-[10px] transition-all duration-150 cursor-pointer ${
+      className={`group/field py-2.5 px-3.5 first:rounded-t-[10px] last:rounded-b-[10px] transition-all duration-150 cursor-pointer ${
         isAttention
           ? 'bg-[#FEF9EE] border border-[#FADDB6]'
           : isFocused
@@ -84,8 +84,8 @@ export const RecognizedField: React.FC<RecognizedFieldProps> = ({
       }`}
     >
       {/* Field Label + Status Badges */}
-      <div className="flex items-center justify-between gap-2 min-w-0 mb-1">
-        <span className="text-[12.5px] font-medium text-[#607483] truncate">
+      <div className="flex items-center justify-between gap-2 min-w-0 mb-0.5">
+        <span className="text-[12px] font-medium text-[#607483] truncate">
           {field.label}
         </span>
 
@@ -163,7 +163,7 @@ export const RecognizedField: React.FC<RecognizedFieldProps> = ({
         /* Read/Review Value Display (Section 22 & 26) */
         <div className="flex flex-col min-w-0">
           <div
-            className={`text-[15.5px] font-semibold leading-snug break-words ${
+            className={`text-[14.5px] font-semibold leading-snug break-words ${
               isAttention ? 'text-[#874200]' : 'text-[#172A3A]'
             }`}
           >

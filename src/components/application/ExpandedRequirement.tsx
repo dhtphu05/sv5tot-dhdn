@@ -384,10 +384,11 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
                         <button
                           type="button"
                           onClick={() => onDeleteDeclaration(requirement.id, decl.id)}
-                          title="Xóa nội dung này"
-                          className="p-1 text-[#728391] hover:text-[#DC2626] rounded-[6px] hover:bg-[#FEE2E2]/60 transition-all cursor-pointer"
+                          title="Xóa kê khai này"
+                          className="px-2.5 py-1 text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#FEF2F2] bg-white border border-[#FECACA] rounded-[6px] transition-all cursor-pointer flex items-center gap-1 text-[11px] font-semibold shadow-2xs"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={11.5} />
+                          <span>Xóa kê khai</span>
                         </button>
                       )}
 
@@ -514,22 +515,35 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
           </div>
         </div>
 
-        {/* Column 2: Khai báo chi tiết + value + detail + Chỉnh sửa */}
+        {/* Column 2: Khai báo chi tiết + value + Chỉnh sửa / Xóa kê khai */}
         <div className="grid-col-2 px-6 border-l border-[#E3EBF1] min-w-0 flex flex-col gap-2.5">
-          <div className="flex items-center justify-between pb-1.5 border-b border-[#E3EBF1] min-h-[26px]">
+          <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-[#E3EBF1] min-h-[26px] flex-wrap">
             <span className="text-[12.5px] font-semibold text-[#172A3A]">
               Khai báo chi tiết
             </span>
-            {canEditSingleDecl && primaryDecl && onOpenEditDeclaration && (
-              <button
-                type="button"
-                onClick={() => onOpenEditDeclaration(requirement.id, primaryDecl)}
-                className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#126A9C] hover:text-[#0D78AE] hover:underline transition-colors cursor-pointer shrink-0"
-              >
-                <Edit3 size={12} />
-                <span>Chỉnh sửa</span>
-              </button>
-            )}
+            <div className="flex items-center gap-3 shrink-0">
+              {canEditSingleDecl && primaryDecl && onOpenEditDeclaration && (
+                <button
+                  type="button"
+                  onClick={() => onOpenEditDeclaration(requirement.id, primaryDecl)}
+                  className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#126A9C] hover:text-[#0D78AE] hover:underline transition-colors cursor-pointer shrink-0"
+                >
+                  <Edit3 size={12} />
+                  <span>Chỉnh sửa</span>
+                </button>
+              )}
+              {!isSupplementMode && !readOnly && primaryDecl && onDeleteDeclaration && (
+                <button
+                  type="button"
+                  onClick={() => onDeleteDeclaration(requirement.id, primaryDecl.id)}
+                  title="Xóa kê khai này"
+                  className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#DC2626] hover:text-[#B91C1C] hover:underline transition-colors cursor-pointer shrink-0"
+                >
+                  <Trash2 size={12} />
+                  <span>Xóa kê khai</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col gap-2.5 min-w-0">
@@ -559,17 +573,6 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
                 {primaryDecl.detail && (
                   <div className="text-[12px] text-[#607483] leading-relaxed line-clamp-2">
                     {primaryDecl.detail}
-                  </div>
-                )}
-                {primaryDecl.date && (
-                  <div className="text-[11px] text-[#728391] pt-0.5 truncate flex items-center gap-1 tabular-nums">
-                    <Calendar size={11.5} className="text-[#94A3B8]" />
-                    <span>
-                      Ngày ghi nhận:{' '}
-                      <strong className="text-[#172A3A] font-semibold">
-                        {primaryDecl.date}
-                      </strong>
-                    </span>
                   </div>
                 )}
               </div>

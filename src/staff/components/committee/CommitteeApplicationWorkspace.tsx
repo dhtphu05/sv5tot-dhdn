@@ -406,6 +406,7 @@ export const CommitteeApplicationWorkspace: React.FC<
                 const item = allEvidenceItems.find((i) => i.evidence.id === selectedEvidenceId);
                 return item ? (
                   <DocumentViewer
+                    fileId={item.evidence.id}
                     fileName={item.evidence.name}
                     fileType={item.evidence.fileType || 'pdf'}
                     fileUrl={item.evidence.url}

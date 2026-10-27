@@ -375,22 +375,109 @@ export function calculateStudentApplicationSummaryStats(
   };
 }
 
+export function computeDynamicPreSubmitAdvisories(
+  criteria: ApplicationCriterion[],
+  manualAdvisories: PreSubmitAdvisoryItem[] = []
+): PreSubmitAdvisoryItem[] {
+  const result: PreSubmitAdvisoryItem[] = [];
+
+  for (const c of criteria) {
+    const allReqs = c.requirements || [];
+    const declaredCount = allReqs.reduce(
+      (sum, r) => sum + (r.declarations?.length || 0),
+      0
+    );
+
+    if (declaredCount === 0) {
+      result.push({
+        id: `adv-undeclared-${c.id}`,
+        criterionId: c.id,
+        criterionName: c.name,
+        criterionNumber: c.number,
+        requirementId: allReqs[0]?.id || '',
+        message: `Tiêu chí ${c.name} hiện chưa có nội dung kê khai nào.`,
+        actionLabel: 'Kê khai',
+        targetType: 'row',
+      });
+      continue;
+    }
+
+    for (const r of allReqs) {
+      const hasDeclWithoutEvidence = (r.declarations || []).some(
+        (d) => !d.evidenceFiles || d.evidenceFiles.length === 0
+      );
+      if (hasDeclWithoutEvidence) {
+        result.push({
+          id: `adv-no-ev-${c.id}-${r.id}`,
+          criterionId: c.id,
+          criterionName: c.name,
+          criterionNumber: c.number,
+          requirementId: r.id,
+          message: `Mục "${r.title}" đã kê khai nhưng chưa đính kèm tệp minh chứng.`,
+          actionLabel: 'Bổ sung',
+          targetType: 'row',
+        });
+      }
+    }
+
+    for (const adv of manualAdvisories || []) {
+      if (adv.criterionId === c.id) {
+        result.push(adv);
+      }
+    }
+  }
+
+  return result;
+}
+
 export function computeCriteriaAdvisoryStatuses(
   criteria: ApplicationCriterion[],
   advisories: PreSubmitAdvisoryItem[]
 ) {
   return criteria.map((c) => {
-    const hasAdvisory = (advisories || []).some((a) => a.criterionId === c.id);
+    const allReqs = c.requirements || [];
+    const declaredCount = allReqs.reduce(
+      (sum, r) => sum + (r.declarations?.length || 0),
+      0
+    );
+    const missingEvidenceCount = allReqs.reduce(
+      (sum, r) =>
+        sum +
+        (r.declarations || []).filter(
+          (d) => !d.evidenceFiles || d.evidenceFiles.length === 0
+        ).length,
+      0
+    );
+    const hasManualAdvisory = (advisories || []).some(
+      (a) => a.criterionId === c.id && !a.id.startsWith('adv-undeclared-')
+    );
+
     let statusLabel = 'Đã có thông tin';
-    if (hasAdvisory) {
+    let statusTone: 'undeclared' | 'advisory' | 'ready' = 'ready';
+    let hasAdvisory = false;
+
+    if (declaredCount === 0) {
+      statusLabel = 'Chưa kê khai';
+      statusTone = 'undeclared';
+      hasAdvisory = false;
+    } else if (missingEvidenceCount > 0) {
+      statusLabel = 'Thiếu minh chứng';
+      statusTone = 'advisory';
+      hasAdvisory = true;
+    } else if (hasManualAdvisory) {
       statusLabel = c.id === 'physical' ? 'Có thể bổ sung' : 'Cần kiểm tra';
+      statusTone = 'advisory';
+      hasAdvisory = true;
     }
+
     return {
       id: c.id,
       name: c.name,
       number: c.number,
       statusLabel,
+      statusTone,
       hasAdvisory,
+      declaredCount,
     };
   });
 }
