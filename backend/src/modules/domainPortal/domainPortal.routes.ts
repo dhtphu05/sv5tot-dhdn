@@ -1530,11 +1530,44 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         status: 'under_review',
         reviewStage: 'SCHOOL',
         criteria: createDefaultCriteriaList(),
+        otherAchievements: [],
         supplementRequests: [],
       };
+    const preservedOtherAchievements =
+      Array.isArray(incomingApp?.otherAchievements) && incomingApp.otherAchievements.length > 0
+        ? incomingApp.otherAchievements
+        : Array.isArray(baseApp.otherAchievements)
+        ? baseApp.otherAchievements
+        : [];
+    const baseTotalCritDecls = Array.isArray(baseApp.criteria)
+      ? baseApp.criteria.reduce(
+          (sum: number, c: Record<string, any>) => sum + collectCriterionDeclarations(c).length,
+          0
+        )
+      : 0;
+    const incomingTotalCritDecls = Array.isArray(incomingApp?.criteria)
+      ? incomingApp.criteria.reduce(
+          (sum: number, c: Record<string, any>) => sum + collectCriterionDeclarations(c).length,
+          0
+        )
+      : 0;
+    const preservedCriteria =
+      incomingTotalCritDecls === 0 && baseTotalCritDecls > 0
+        ? baseApp.criteria
+        : incomingApp?.criteria || baseApp.criteria;
     const app: Record<string, any> = incomingApp
-      ? { ...baseApp, ...incomingApp, applicationId: id }
-      : { ...baseApp, applicationId: id };
+      ? {
+          ...baseApp,
+          ...incomingApp,
+          criteria: preservedCriteria,
+          otherAchievements: preservedOtherAchievements,
+          applicationId: id,
+        }
+      : {
+          ...baseApp,
+          otherAchievements: preservedOtherAchievements,
+          applicationId: id,
+        };
 
     const actor = resolveSessionActor(req);
     const studentCode = String(
@@ -1637,9 +1670,17 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
     if (updatedApplication && typeof updatedApplication === 'object') {
       const existingStuApp = portalState.studentApplications[id] || {};
+      const nextOtherAchievements =
+        Array.isArray(updatedApplication.otherAchievements) &&
+        updatedApplication.otherAchievements.length > 0
+          ? updatedApplication.otherAchievements
+          : Array.isArray(existingStuApp.otherAchievements)
+          ? existingStuApp.otherAchievements
+          : [];
       portalState.studentApplications[id] = {
         ...existingStuApp,
         ...updatedApplication,
+        otherAchievements: nextOtherAchievements,
         applicationId: id,
         status: 'supplement_sent',
       };
@@ -1716,6 +1757,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         activeStatus: 'student_returned',
         returnedDaysAgo: 0,
       },
+      studentApplication: portalState.studentApplications[id] || current.studentApplication,
     };
     portalState.individualStaffRecords[idx] = updated;
     savePortalStateToDisk();
@@ -1837,9 +1879,35 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       }
 
       if (studentApplication && typeof studentApplication === 'object') {
+        const existingStuApp = portalState.studentApplications[id] || {};
+        const preservedOtherAchievements =
+          Array.isArray(studentApplication.otherAchievements) &&
+          studentApplication.otherAchievements.length > 0
+            ? studentApplication.otherAchievements
+            : Array.isArray(existingStuApp.otherAchievements)
+            ? existingStuApp.otherAchievements
+            : [];
+        const existingCritDeclsCount = Array.isArray(existingStuApp.criteria)
+          ? existingStuApp.criteria.reduce(
+              (sum: number, c: Record<string, any>) => sum + collectCriterionDeclarations(c).length,
+              0
+            )
+          : 0;
+        const incomingCritDeclsCount = Array.isArray(studentApplication.criteria)
+          ? studentApplication.criteria.reduce(
+              (sum: number, c: Record<string, any>) => sum + collectCriterionDeclarations(c).length,
+              0
+            )
+          : 0;
+        const preservedCriteria =
+          incomingCritDeclsCount === 0 && existingCritDeclsCount > 0
+            ? existingStuApp.criteria
+            : studentApplication.criteria || existingStuApp.criteria;
         portalState.studentApplications[id] = {
-          ...(portalState.studentApplications[id] || {}),
+          ...existingStuApp,
           ...studentApplication,
+          criteria: preservedCriteria,
+          otherAchievements: preservedOtherAchievements,
           applicationId: id,
         };
       }
@@ -1928,6 +1996,20 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         actor.role === 'SCHOOL_OFFICER' &&
         resolvedSchoolStatus === 'under_review';
 
+      const otherAchievementsList = Array.isArray(stuAppForCounts?.otherAchievements)
+        ? stuAppForCounts.otherAchievements
+        : [];
+      const otherAchievementsEvidenceCount = otherAchievementsList.reduce(
+        (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+        0
+      );
+      const recalculatedTotalDeclarations =
+        nextCriteriaReview.reduce((sum: number, cr: Record<string, any>) => sum + (cr.declaredCount || 0), 0) +
+        otherAchievementsList.length;
+      const recalculatedTotalEvidence =
+        nextCriteriaReview.reduce((sum: number, cr: Record<string, any>) => sum + (cr.evidenceCount || 0), 0) +
+        otherAchievementsEvidenceCount;
+
       const updated = {
         ...current,
         workspaceState: workspaceState || current.workspaceState,
@@ -1945,6 +2027,8 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         latestOperationalNote: latestOperationalNote || current.latestOperationalNote,
         reviewedCriteriaCount: completedCount,
         criteriaReview: nextCriteriaReview,
+        totalDeclarations: recalculatedTotalDeclarations || current.totalDeclarations,
+        totalEvidence: recalculatedTotalEvidence || current.totalEvidence,
         schoolReviewSummary:
           actor.role === 'SCHOOL_OFFICER' || current.schoolReviewSummary
             ? {
@@ -1978,6 +2062,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
             },
         updatedAt: 'Vừa cập nhật',
         updatedSortKey: Date.now(),
+        studentApplication: portalState.studentApplications[id] || current.studentApplication,
       };
 
       portalState.individualStaffRecords[idx] = updated;
@@ -2066,6 +2151,20 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           ? 'not_recommended'
           : 'preliminary_completed';
 
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].schoolPreliminaryStatus = nextStatus;
+        portalState.studentApplications[id].schoolRecommendation =
+          nextRec || portalState.studentApplications[id].schoolRecommendation;
+        if (nextRec === 'not_recommended') {
+          portalState.studentApplications[id].status = 'not_recognized';
+          portalState.studentApplications[id].reviewStage = 'COMPLETED';
+          portalState.studentApplications[id].councilFeedback = summaryNote;
+        } else if (nextRec === 'pending' || nextRec === 'recommended') {
+          portalState.studentApplications[id].status = 'under_review';
+          portalState.studentApplications[id].reviewStage = 'SCHOOL';
+        }
+      }
+
       const updated = {
         ...current,
         schoolPreliminaryStatus: nextStatus,
@@ -2107,22 +2206,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
               ? undefined
               : current.schoolReviewSummary?.notRecommendedReason,
         },
+        studentApplication: portalState.studentApplications[id] || current.studentApplication,
       };
       portalState.individualStaffRecords[idx] = updated;
-
-      if (portalState.studentApplications[id]) {
-        portalState.studentApplications[id].schoolPreliminaryStatus = nextStatus;
-        portalState.studentApplications[id].schoolRecommendation =
-          nextRec || portalState.studentApplications[id].schoolRecommendation;
-        if (nextRec === 'not_recommended') {
-          portalState.studentApplications[id].status = 'not_recognized';
-          portalState.studentApplications[id].reviewStage = 'COMPLETED';
-          portalState.studentApplications[id].councilFeedback = summaryNote;
-        } else if (nextRec === 'pending' || nextRec === 'recommended') {
-          portalState.studentApplications[id].status = 'under_review';
-          portalState.studentApplications[id].reviewStage = 'SCHOOL';
-        }
-      }
       savePortalStateToDisk();
 
       appendPortalAuditLog({
@@ -2153,6 +2239,14 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       const actor = resolveSessionActor(req);
       const current = portalState.individualStaffRecords[idx];
       const now = new Date().toISOString();
+
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].reviewStage = 'CITY';
+        portalState.studentApplications[id].schoolPreliminaryStatus = 'forwarded_to_city';
+        portalState.studentApplications[id].schoolRecommendation = 'recommended';
+        portalState.studentApplications[id].status = 'under_review';
+      }
+
       const nextWorkspaceState = current.workspaceState
         ? {
             ...current.workspaceState,
@@ -2189,15 +2283,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           recommendation: 'recommended',
         },
         latestOperationalNote: `Đã chuyển từ ${current.schoolReviewUnitName || 'Đơn vị xét sơ tuyển'} lên Hội Sinh viên Đại học Đà Nẵng (${now}).`,
+        studentApplication: portalState.studentApplications[id] || current.studentApplication,
       };
       portalState.individualStaffRecords[idx] = updated;
-
-      if (portalState.studentApplications[id]) {
-        portalState.studentApplications[id].reviewStage = 'CITY';
-        portalState.studentApplications[id].schoolPreliminaryStatus = 'forwarded_to_city';
-        portalState.studentApplications[id].schoolRecommendation = 'recommended';
-        portalState.studentApplications[id].status = 'under_review';
-      }
       savePortalStateToDisk();
 
       appendPortalAuditLog({
@@ -2248,6 +2336,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           assignedBy: actor.name,
           reason,
         },
+        studentApplication: portalState.studentApplications[id] || current.studentApplication,
       };
       portalState.individualStaffRecords[idx] = updated;
       savePortalStateToDisk();
@@ -2284,6 +2373,14 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       const actor = resolveSessionActor(req);
       const current = portalState.individualStaffRecords[idx];
       const resolvedOutcome = outcome || 'recognized';
+
+      if (portalState.studentApplications[id]) {
+        portalState.studentApplications[id].status =
+          resolvedOutcome === 'not_recognized' ? 'not_recognized' : 'recognized';
+        portalState.studentApplications[id].reviewStage = 'COMPLETED';
+        portalState.studentApplications[id].councilFeedback = internalNote || '';
+      }
+
       const updated = {
         ...current,
         workflowStatus: 'committee_ready',
@@ -2293,15 +2390,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           decidedAt: new Date().toISOString(),
           decidedBy: actor.name,
         },
+        studentApplication: portalState.studentApplications[id] || current.studentApplication,
       };
       portalState.individualStaffRecords[idx] = updated;
-
-      if (portalState.studentApplications[id]) {
-        portalState.studentApplications[id].status =
-          resolvedOutcome === 'not_recognized' ? 'not_recognized' : 'recognized';
-        portalState.studentApplications[id].reviewStage = 'COMPLETED';
-        portalState.studentApplications[id].councilFeedback = internalNote || '';
-      }
       savePortalStateToDisk();
 
       appendPortalAuditLog({

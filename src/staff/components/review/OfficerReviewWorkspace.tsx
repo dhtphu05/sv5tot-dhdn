@@ -135,12 +135,27 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
 
   const effectiveStudentApp = useMemo(() => {
     if (!studentApp) return studentApp;
-    if (studentApp.applicantProfileSnapshot) return studentApp;
-    const snap = (applicationRecord as any)?.applicantProfileSnapshot;
-    if (snap) {
+    const snap =
+      studentApp.applicantProfileSnapshot ||
+      (applicationRecord as any)?.applicantProfileSnapshot;
+    const recordOtherAchievements = (applicationRecord as any)
+      ?.studentApplication?.otherAchievements;
+    const resolvedOtherAchievements =
+      Array.isArray(studentApp.otherAchievements) &&
+      studentApp.otherAchievements.length > 0
+        ? studentApp.otherAchievements
+        : Array.isArray(recordOtherAchievements) &&
+          recordOtherAchievements.length > 0
+        ? recordOtherAchievements
+        : studentApp.otherAchievements;
+    if (
+      snap !== studentApp.applicantProfileSnapshot ||
+      resolvedOtherAchievements !== studentApp.otherAchievements
+    ) {
       return {
         ...studentApp,
-        applicantProfileSnapshot: snap,
+        applicantProfileSnapshot: snap || studentApp.applicantProfileSnapshot,
+        otherAchievements: resolvedOtherAchievements,
       };
     }
     return studentApp;

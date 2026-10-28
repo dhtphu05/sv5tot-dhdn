@@ -15,7 +15,10 @@
  */
 
 import { StaffApplicationRecord } from '../types';
-import { StudentApplicationData } from '../../demo/fixtures/studentApplication';
+import {
+  StudentApplicationData,
+  buildCriteriaFromDefinitions,
+} from '../../demo/fixtures/studentApplication';
 import { buildHeroStudentApplicationForOfficer } from './officerReviewFixtures';
 import {
   CommitteeCaseDetail,
@@ -122,14 +125,43 @@ export const CANONICAL_COMMITTEE_APPLICATION_IDS: string[] = [
 export function buildStudentApplicationForCommitteeRecord(
   app: StaffApplicationRecord
 ): StudentApplicationData {
+  const embedded = (app as any)?.studentApplication as
+    | StudentApplicationData
+    | undefined;
+  if (embedded && Array.isArray(embedded.criteria) && embedded.criteria.length > 0) {
+    const clonedEmbedded: StudentApplicationData = JSON.parse(
+      JSON.stringify(embedded)
+    );
+    clonedEmbedded.criteria = buildCriteriaFromDefinitions(
+      clonedEmbedded.criteria as any
+    );
+    if (Array.isArray(embedded.otherAchievements)) {
+      clonedEmbedded.otherAchievements = JSON.parse(
+        JSON.stringify(embedded.otherAchievements)
+      );
+    }
+    return clonedEmbedded;
+  }
+
   const base = buildHeroStudentApplicationForOfficer(true);
   if (app.applicationId === 'APP-2026-DN-102220123') {
+    if (Array.isArray(embedded?.otherAchievements) && embedded.otherAchievements.length > 0) {
+      return {
+        ...base,
+        otherAchievements: JSON.parse(JSON.stringify(embedded.otherAchievements)),
+      };
+    }
     return base;
   }
 
   // Clone and adapt student identity for other Committee records while preserving rich 5-criteria structure
   const cloned: StudentApplicationData = JSON.parse(JSON.stringify(base));
   cloned.applicationId = app.applicationId;
+  if (Array.isArray(embedded?.otherAchievements) && embedded.otherAchievements.length > 0) {
+    cloned.otherAchievements = JSON.parse(
+      JSON.stringify(embedded.otherAchievements)
+    );
+  }
   cloned.student = {
     ...cloned.student,
     fullName: app.student.fullName,

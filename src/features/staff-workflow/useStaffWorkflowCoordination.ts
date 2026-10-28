@@ -748,10 +748,27 @@ export function useStaffWorkflowCoordination({
             fallback.workspaceState.reviewUnitId =
               staffUser.schoolReviewUnitId || 'unit-dut';
           }
-          setOfficerStudentAppMap((prev) => ({
-            ...prev,
-            [applicationId]: prev[applicationId] || fallback.studentApp,
-          }));
+          setOfficerStudentAppMap((prev) => {
+            const existing = prev[applicationId];
+            const baseApp = existing || fallback.studentApp;
+            const resolvedOtherAchievements =
+              Array.isArray(baseApp?.otherAchievements) &&
+              baseApp.otherAchievements.length > 0
+                ? baseApp.otherAchievements
+                : Array.isArray(fallback.studentApp?.otherAchievements) &&
+                  fallback.studentApp.otherAchievements.length > 0
+                ? fallback.studentApp.otherAchievements
+                : Array.isArray((record as any)?.studentApplication?.otherAchievements)
+                ? (record as any).studentApplication.otherAchievements
+                : [];
+            return {
+              ...prev,
+              [applicationId]: {
+                ...baseApp,
+                otherAchievements: resolvedOtherAchievements,
+              },
+            };
+          });
           setOfficerWorkspaceMap((prev) => ({
             ...prev,
             [applicationId]: fallback.workspaceState,
@@ -782,6 +799,18 @@ export function useStaffWorkflowCoordination({
           .then((studentApp) => {
             if (studentApp && studentApp.applicationId) {
               setOfficerStudentAppMap((prev) => {
+                const prevOther = prev[applicationId]?.otherAchievements;
+                const recOther = (record as any)?.studentApplication
+                  ?.otherAchievements;
+                const resolvedOther =
+                  Array.isArray(studentApp.otherAchievements) &&
+                  studentApp.otherAchievements.length > 0
+                    ? studentApp.otherAchievements
+                    : Array.isArray(prevOther) && prevOther.length > 0
+                    ? prevOther
+                    : Array.isArray(recOther)
+                    ? recOther
+                    : [];
                 const next = {
                   ...prev,
                   [applicationId]: {
@@ -789,6 +818,7 @@ export function useStaffWorkflowCoordination({
                     criteria: buildCriteriaFromDefinitions(
                       studentApp.criteria as any
                     ),
+                    otherAchievements: resolvedOther,
                   },
                 };
                 savePersistedOfficerStudentApps(next);
@@ -820,10 +850,34 @@ export function useStaffWorkflowCoordination({
         : initialHeroOfficerBundle;
       const currentWorkspace =
         officerWorkspaceMap[appId] || fallbackBundle.workspaceState;
-      const currentStudentApp =
+      const rawCurrentStudentApp =
         officerStudentAppMap[appId] || fallbackBundle.studentApp;
+      const fallbackOtherAchievements =
+        (targetRecord as any)?.studentApplication?.otherAchievements ||
+        fallbackBundle.studentApp?.otherAchievements;
+      const currentStudentApp =
+        rawCurrentStudentApp &&
+        (!Array.isArray(rawCurrentStudentApp.otherAchievements) ||
+          rawCurrentStudentApp.otherAchievements.length === 0) &&
+        Array.isArray(fallbackOtherAchievements) &&
+        fallbackOtherAchievements.length > 0
+          ? {
+              ...rawCurrentStudentApp,
+              otherAchievements: fallbackOtherAchievements,
+            }
+          : rawCurrentStudentApp;
 
       const result = updater(currentWorkspace, currentStudentApp);
+      const effectiveNextStudentApp = result.nextStudentApp
+        ? {
+            ...result.nextStudentApp,
+            otherAchievements:
+              Array.isArray(result.nextStudentApp.otherAchievements) &&
+              result.nextStudentApp.otherAchievements.length > 0
+                ? result.nextStudentApp.otherAchievements
+                : currentStudentApp?.otherAchievements || [],
+          }
+        : undefined;
 
       setOfficerWorkspaceMap((prev) => {
         const next = {
@@ -834,11 +888,11 @@ export function useStaffWorkflowCoordination({
         return next;
       });
 
-      if (result.nextStudentApp) {
+      if (effectiveNextStudentApp) {
         setOfficerStudentAppMap((prev) => {
           const next = {
             ...prev,
-            [appId]: result.nextStudentApp!,
+            [appId]: effectiveNextStudentApp,
           };
           savePersistedOfficerStudentApps(next);
           return next;
@@ -956,7 +1010,11 @@ export function useStaffWorkflowCoordination({
                   },
                 }
               : app.supplementSummary,
-          };
+            studentApplication:
+              effectiveNextStudentApp ||
+              (app as any).studentApplication ||
+              currentStudentApp,
+          } as StaffApplicationRecord;
         });
         savePersistedStaffApplications(nextApps);
         return nextApps;
@@ -976,7 +1034,7 @@ export function useStaffWorkflowCoordination({
               assignmentStatus: result.nextAssignmentStatus,
               latestOperationalNote: result.nextOperationalNote,
               studentSupplementCreated: result.studentSupplementCreated,
-              studentApplication: result.nextStudentApp,
+              studentApplication: effectiveNextStudentApp,
             },
           }
         ).catch(() => {});

@@ -727,11 +727,57 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       evidence: [],
     });
 
+    // Populate multiple declarations in "Thành tích khác" (otherAchievements) outside the 5 criteria
+    studentApp.otherAchievements = [
+      {
+        id: 'decl-due-other-1',
+        value: 'Bằng khen Sinh viên tiêu biểu xuất sắc cấp Thành phố Đà Nẵng 2026',
+        detail: 'QĐ số 88/QĐ-UBND · Cấp Thành phố · Đạt giải Xuất sắc',
+        date: '15/09/2026',
+        status: 'declared',
+        evidenceFiles: [
+          {
+            id: clientEvId,
+            name: 'khoa-luan-tot-nghiep-9.2.pdf',
+            fileType: 'pdf',
+            size: '2 KB',
+            uploadedAt: '27/10/2026',
+            status: 'ready',
+          },
+        ],
+      },
+    ];
+
     // Save full student view to backend
     await apiRequest(`/api/v2/portal/individual/applications/${studentApp.applicationId}/student-view`, {
       method: 'PUT',
       body: { application: studentApp },
     });
+
+    // Also add a 2nd "Thành tích khác" declaration via incremental PUT /declarations endpoint
+    const secondOtherDecl = {
+      id: 'decl-due-other-2',
+      value: 'Giải Nhất Cuộc thi Khởi nghiệp Đổi mới Sáng tạo ĐHĐN 2026',
+      detail: 'Đạt Giải Nhất toàn đoàn · Cấp Đại học Đà Nẵng',
+      date: '02/10/2026',
+      status: 'declared' as const,
+      evidenceFiles: [],
+    };
+    await apiRequest(
+      `/api/v2/portal/individual/applications/${studentApp.applicationId}/declarations`,
+      {
+        method: 'PUT',
+        body: {
+          criterionId: 'other_achievements',
+          requirementId: 'other-achievements-general',
+          declaration: secondOtherDecl,
+        },
+      }
+    );
+    studentApp.otherAchievements = [
+      ...(studentApp.otherAchievements || []),
+      secondOtherDecl as any,
+    ];
 
     // 4. Submit application to School Review
     const submitRes = await apiRequest<{ success: boolean; status: string }>(
@@ -746,7 +792,7 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
     );
     assert.equal(submitRes.success, true);
 
-    // 5. School Officer logs in and fetches review-workspace -> verify 100% of declarations, metadata, and evidence are preserved
+    // 5. School Officer logs in and fetches review-workspace -> verify 100% of declarations, otherAchievements, metadata, and evidence are preserved
     const schoolAuth = await services.auth.loginWithCredentials({
       email: 'an.nv@udn.vn',
       preferredTrack: 'STAFF',
@@ -768,6 +814,19 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
     const schoolWsBundle = schoolWsRes.data;
 
     assert.ok(schoolWsBundle.studentApplication);
+    assert.equal(schoolWsBundle.studentApplication.otherAchievements?.length, 2);
+    assert.equal(
+      schoolWsBundle.studentApplication.otherAchievements?.[0].value,
+      'Bằng khen Sinh viên tiêu biểu xuất sắc cấp Thành phố Đà Nẵng 2026'
+    );
+    assert.equal(
+      schoolWsBundle.studentApplication.otherAchievements?.[1].value,
+      'Giải Nhất Cuộc thi Khởi nghiệp Đổi mới Sáng tạo ĐHĐN 2026'
+    );
+    assert.equal(
+      schoolWsBundle.studentApplication.otherAchievements?.[0].evidenceFiles?.[0]?.id,
+      clientEvId
+    );
     const thesisDecls = getDeclarationsForRequirement(
       schoolWsBundle.studentApplication,
       'academic',
@@ -853,11 +912,12 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
       },
     });
 
-    // Student reloads -> sees supplement_required & supplementRequests
+    // Student reloads -> sees supplement_required & supplementRequests & preserved otherAchievements
     const reloadedStudentApp = await services.individual.getStudentApplication(studentApp.applicationId);
     assert.equal(reloadedStudentApp?.status, 'supplement_required');
     assert.equal(reloadedStudentApp?.supplementRequests?.length, 1);
     assert.equal(reloadedStudentApp?.supplementRequests?.[0].id, 'sup-due-001');
+    assert.equal(reloadedStudentApp?.otherAchievements?.length, 2);
 
     // Student submits supplement response
     addDeclToGroupReq('volunteer', 'volunteer-campaign', {
@@ -896,14 +956,26 @@ describe('5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Suite', () =
     });
     assert.equal(forwarded.record.currentReviewStage, 'CITY');
     assert.equal(forwarded.record.schoolPreliminaryStatus, 'forwarded_to_city');
+    assert.equal((forwarded.record as any).studentApplication?.otherAchievements?.length, 2);
 
-    // 8. City Officer lists applications & opens workspace -> 100% of declarations, supplement updates, and metadata preserved!
+    // 8. City Officer lists applications & opens workspace -> 100% of declarations, otherAchievements, supplement updates, and metadata preserved!
     const cityApps = await services.individual.listApplications();
     const cityRecord = cityApps.find((r) => r.applicationId === studentApp.applicationId);
     assert.ok(cityRecord);
     assert.equal(cityRecord.currentReviewStage, 'CITY');
     assert.equal(cityRecord.institution.id, 'inst-due');
     assert.ok((cityRecord as any).studentApplication);
+    assert.equal((cityRecord as any).studentApplication.otherAchievements?.length, 2);
+
+    const { buildStudentApplicationForCommitteeRecord } = await import(
+      '../staff/fixtures/committeeFixtures'
+    );
+    const committeeStudentApp = buildStudentApplicationForCommitteeRecord(cityRecord);
+    assert.equal(committeeStudentApp.otherAchievements?.length, 2);
+    assert.equal(
+      committeeStudentApp.otherAchievements?.[0].value,
+      'Bằng khen Sinh viên tiêu biểu xuất sắc cấp Thành phố Đà Nẵng 2026'
+    );
 
     const cityVolDecls = getDeclarationsForRequirement(
       (cityRecord as any).studentApplication,

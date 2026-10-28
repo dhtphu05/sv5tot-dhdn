@@ -624,25 +624,41 @@ export const demoServicesAdapter: DomainServicesBundle = {
     async saveDeclaration({ applicationId, criterionId, requirementId, declaration, actor }) {
       const app =
         demoStudentApps.get(applicationId) || structuredClone(STUDENT_APPLICATION_FIXTURE);
-      const nextCriteria = app.criteria.map((c: any) => {
-        if (c.id !== criterionId) return c;
-        const updateReqs = (reqs: any[]) =>
-          reqs.map((r: any) => {
-            if (r.id !== requirementId) return r;
-            const existingIdx = r.declarations.findIndex((d: any) => d.id === declaration.id);
-            const nextDecls =
-              existingIdx >= 0
-                ? r.declarations.map((d: any, idx: number) => (idx === existingIdx ? declaration : d))
-                : [...r.declarations, declaration];
-            return { ...r, declarations: nextDecls };
-          });
-        return {
-          ...c,
-          requirements: updateReqs(c.requirements),
-          groups: c.groups.map((g: any) => ({ ...g, requirements: updateReqs(g.requirements) })),
-        };
-      });
-      const updated: StudentApplicationData = { ...app, criteria: nextCriteria };
+      let updated: StudentApplicationData;
+      if (
+        (criterionId as string) === 'other_achievements' ||
+        requirementId === 'other-achievements-general'
+      ) {
+        const currentOthers = Array.isArray(app.otherAchievements)
+          ? [...app.otherAchievements]
+          : [];
+        const existingIdx = currentOthers.findIndex((d: any) => d.id === declaration.id);
+        const nextOthers =
+          existingIdx >= 0
+            ? currentOthers.map((d: any, idx: number) => (idx === existingIdx ? declaration : d))
+            : [...currentOthers, declaration];
+        updated = { ...app, otherAchievements: nextOthers };
+      } else {
+        const nextCriteria = app.criteria.map((c: any) => {
+          if (c.id !== criterionId) return c;
+          const updateReqs = (reqs: any[]) =>
+            reqs.map((r: any) => {
+              if (r.id !== requirementId) return r;
+              const existingIdx = r.declarations.findIndex((d: any) => d.id === declaration.id);
+              const nextDecls =
+                existingIdx >= 0
+                  ? r.declarations.map((d: any, idx: number) => (idx === existingIdx ? declaration : d))
+                  : [...r.declarations, declaration];
+              return { ...r, declarations: nextDecls };
+            });
+          return {
+            ...c,
+            requirements: updateReqs(c.requirements),
+            groups: c.groups.map((g: any) => ({ ...g, requirements: updateReqs(g.requirements) })),
+          };
+        });
+        updated = { ...app, criteria: nextCriteria };
+      }
       demoStudentApps.set(applicationId, updated);
       recordDemoAudit({
         track: 'INDIVIDUAL',
@@ -659,6 +675,9 @@ export const demoServicesAdapter: DomainServicesBundle = {
     async deleteDeclaration({ applicationId, requirementId, declarationId, actor }) {
       const app =
         demoStudentApps.get(applicationId) || structuredClone(STUDENT_APPLICATION_FIXTURE);
+      const nextOthers = Array.isArray(app.otherAchievements)
+        ? app.otherAchievements.filter((d: any) => d.id !== declarationId)
+        : app.otherAchievements;
       const nextCriteria = app.criteria.map((c: any) => {
         const updateReqs = (reqs: any[]) =>
           reqs.map((r: any) => {
@@ -679,7 +698,11 @@ export const demoServicesAdapter: DomainServicesBundle = {
             : c.groups,
         };
       });
-      const updated: StudentApplicationData = { ...app, criteria: nextCriteria };
+      const updated: StudentApplicationData = {
+        ...app,
+        criteria: nextCriteria,
+        otherAchievements: nextOthers,
+      };
       demoStudentApps.set(applicationId, updated);
       recordDemoAudit({
         track: 'INDIVIDUAL',
@@ -711,7 +734,8 @@ export const demoServicesAdapter: DomainServicesBundle = {
           ...demoIndividualRecords[recIdx],
           applicantProfileSnapshot: snapshot,
           workflowStatus: 'under_review',
-        };
+          studentApplication: updated,
+        } as any;
       }
       recordDemoAudit({
         track: 'INDIVIDUAL',

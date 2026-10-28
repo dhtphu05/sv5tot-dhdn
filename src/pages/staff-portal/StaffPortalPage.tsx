@@ -375,12 +375,25 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
     null;
   const effectiveStaffAppId =
     selectedStaffRecord?.applicationId || selectedStaffAppId;
-  const activeOfficerStudentApp =
+  const rawOfficerStudentApp =
     officerStudentAppMap[effectiveStaffAppId] ||
     (selectedStaffRecord as any)?.studentApplication ||
     (selectedStaffRecord
       ? buildStudentApplicationForCommitteeRecord(selectedStaffRecord)
       : initialHeroOfficerBundle.studentApp);
+  const embeddedOtherAchievements = (selectedStaffRecord as any)
+    ?.studentApplication?.otherAchievements;
+  const activeOfficerStudentApp =
+    rawOfficerStudentApp &&
+    (!Array.isArray(rawOfficerStudentApp.otherAchievements) ||
+      rawOfficerStudentApp.otherAchievements.length === 0) &&
+    Array.isArray(embeddedOtherAchievements) &&
+    embeddedOtherAchievements.length > 0
+      ? {
+          ...rawOfficerStudentApp,
+          otherAchievements: embeddedOtherAchievements,
+        }
+      : rawOfficerStudentApp;
   const activeOfficerWorkspace =
     officerWorkspaceMap[effectiveStaffAppId] ||
     (selectedStaffRecord

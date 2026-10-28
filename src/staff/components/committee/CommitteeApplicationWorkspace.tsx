@@ -104,12 +104,27 @@ export const CommitteeApplicationWorkspace: React.FC<
 
   const effectiveStudentApplication = useMemo(() => {
     if (!studentApplication) return studentApplication;
-    if (studentApplication.applicantProfileSnapshot) return studentApplication;
-    const snap = (application as any)?.applicantProfileSnapshot;
-    if (snap) {
+    const snap =
+      studentApplication.applicantProfileSnapshot ||
+      (application as any)?.applicantProfileSnapshot;
+    const appOtherAchievements = (application as any)?.studentApplication
+      ?.otherAchievements;
+    const resolvedOtherAchievements =
+      Array.isArray(studentApplication.otherAchievements) &&
+      studentApplication.otherAchievements.length > 0
+        ? studentApplication.otherAchievements
+        : Array.isArray(appOtherAchievements) && appOtherAchievements.length > 0
+        ? appOtherAchievements
+        : studentApplication.otherAchievements;
+    if (
+      snap !== studentApplication.applicantProfileSnapshot ||
+      resolvedOtherAchievements !== studentApplication.otherAchievements
+    ) {
       return {
         ...studentApplication,
-        applicantProfileSnapshot: snap,
+        applicantProfileSnapshot:
+          snap || studentApplication.applicantProfileSnapshot,
+        otherAchievements: resolvedOtherAchievements,
       };
     }
     return studentApplication;
@@ -126,7 +141,7 @@ export const CommitteeApplicationWorkspace: React.FC<
       declarationTitle: string;
     }[] = [];
 
-    for (const crit of studentApplication.criteria) {
+    for (const crit of effectiveStudentApplication.criteria) {
       for (const req of crit.requirements) {
         for (const decl of req.declarations) {
           const evs = decl.evidence || decl.evidenceFiles || [];
@@ -144,7 +159,7 @@ export const CommitteeApplicationWorkspace: React.FC<
         }
       }
     }
-    for (const decl of studentApplication.otherAchievements || []) {
+    for (const decl of effectiveStudentApplication.otherAchievements || []) {
       const evs = decl.evidence || decl.evidenceFiles || [];
       for (const ev of evs) {
         items.push({
@@ -159,7 +174,7 @@ export const CommitteeApplicationWorkspace: React.FC<
       }
     }
     return items;
-  }, [studentApplication]);
+  }, [effectiveStudentApplication]);
 
   const activeCriterionDef = useMemo(
     () =>

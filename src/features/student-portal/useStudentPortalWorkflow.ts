@@ -364,14 +364,21 @@ export function useStudentPortalWorkflow({
             evidenceCount: evCount,
           };
         });
-        const totalDeclarations = criteriaReview.reduce(
-          (s, c) => s + c.declaredCount,
+        const otherAchievementsDecls = Array.isArray(
+          submittedApp.otherAchievements
+        )
+          ? submittedApp.otherAchievements
+          : [];
+        const otherAchievementsEvCount = otherAchievementsDecls.reduce(
+          (sum, d) => sum + (d.evidenceFiles?.length || 0),
           0
         );
-        const totalEvidence = criteriaReview.reduce(
-          (s, c) => s + c.evidenceCount,
-          0
-        );
+        const totalDeclarations =
+          criteriaReview.reduce((s, c) => s + c.declaredCount, 0) +
+          otherAchievementsDecls.length;
+        const totalEvidence =
+          criteriaReview.reduce((s, c) => s + c.evidenceCount, 0) +
+          otherAchievementsEvCount;
 
         const resolvedInst = resolveInstitutionFromUniversity(
           submittedApp.student.university,
@@ -396,7 +403,7 @@ export function useStudentPortalWorkflow({
         if (exists) {
           const updatedList = prev.map((app) =>
             app.applicationId === targetAppId
-              ? {
+              ? ({
                   ...app,
                   student: {
                     fullName: submittedApp.student.fullName,
@@ -428,7 +435,8 @@ export function useStudentPortalWorkflow({
                   updatedSortKey: Date.now(),
                   latestOperationalNote:
                     'Sinh viên đã hoàn tất gửi hồ sơ xét chọn',
-                }
+                  studentApplication: submittedApp,
+                } as StaffApplicationRecord)
               : app
           );
           savePersistedStaffApplications(updatedList);
@@ -487,7 +495,8 @@ export function useStudentPortalWorkflow({
           schoolReviewUnitName: unitName,
           schoolPreliminaryStatus: 'pending_intake',
           schoolRecommendation: 'pending',
-        };
+          studentApplication: submittedApp,
+        } as StaffApplicationRecord;
 
         const nextList = [newStaffRecord, ...prev];
         savePersistedStaffApplications(nextList);

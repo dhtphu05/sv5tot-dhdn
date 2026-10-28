@@ -378,6 +378,39 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
     };
   });
 
+  const otherAchievementsList = Array.isArray(app.otherAchievements)
+    ? app.otherAchievements
+    : [];
+  if (otherAchievementsList.length > 0) {
+    const seenOtherIds = new Set<string>();
+    const otherDeclItems: Array<{
+      reqId: string;
+      decl: Record<string, any>;
+    }> = [];
+    for (const d of otherAchievementsList) {
+      if (!d) continue;
+      const dId = String(d.id || `decl-other-${otherDeclItems.length}`);
+      if (seenOtherIds.has(dId)) continue;
+      seenOtherIds.add(dId);
+      otherDeclItems.push({
+        reqId: 'other-achievements-general',
+        decl: { ...d, id: dId },
+      });
+    }
+    const otherEvCount = otherDeclItems.reduce(
+      (sum, item) =>
+        sum + (Array.isArray(item.decl.evidenceFiles) ? item.decl.evidenceFiles.length : 0),
+      0
+    );
+    totalEvidenceCount += otherEvCount;
+    criterionExtracted.push({
+      critId: 'other_achievements',
+      criterionCode: 'OTHER_ACHIEVEMENTS',
+      declItems: otherDeclItems,
+      evCount: otherEvCount,
+    });
+  }
+
   const staffRec = portalState.individualStaffRecords.find(
     (r) => r.applicationId === appId
   );
@@ -970,7 +1003,31 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           if (portalState.studentApplications[code]) continue;
 
           const defaultCrit = createDefaultCriteriaList();
+          const hydratedOtherAchievements: Record<string, any>[] = [];
           for (const dItem of relApp.declarations || []) {
+            const attrs = (dItem.structuredAttributes || {}) as Record<string, any>;
+            if (
+              dItem.criterionCode === 'OTHER_ACHIEVEMENTS' ||
+              dItem.requirementCode === 'other-achievements-general'
+            ) {
+              hydratedOtherAchievements.push({
+                id: attrs.originalDeclarationId || dItem.id,
+                value: attrs.value || dItem.title,
+                title: dItem.title,
+                detail: attrs.detail || dItem.applicantNote || '',
+                date: attrs.date || dItem.activityDateOrPeriod || '10/10/2026',
+                status: 'completed',
+                evidenceFiles: Array.isArray(attrs.evidenceFiles)
+                  ? attrs.evidenceFiles
+                  : [],
+                metadata: attrs.metadata || {
+                  criterionId: 'other_achievements',
+                  requirementId: 'other-achievements-general',
+                },
+                reviewState: attrs.reviewState || undefined,
+              });
+              continue;
+            }
             const cId = CRITERION_CODE_TO_ID[dItem.criterionCode] || 'ethics';
             const critObj = defaultCrit.find((c) => c.id === cId);
             if (!critObj) continue;
@@ -987,7 +1044,6 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               };
               (critObj.requirements as Record<string, any>[]).push(reqObj);
             }
-            const attrs = (dItem.structuredAttributes || {}) as Record<string, any>;
             reqObj.declarations.push({
               id: attrs.originalDeclarationId || dItem.id,
               value: attrs.value || dItem.title,
@@ -1034,6 +1090,7 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               academicYear: 'Năm học 2025–2026',
             },
             criteria: defaultCrit,
+            otherAchievements: hydratedOtherAchievements,
             supplementRequests: [],
           };
           loadedCount++;
