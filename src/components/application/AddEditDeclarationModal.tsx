@@ -464,9 +464,14 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
           <div className="flex items-center gap-3 min-w-0">
             <div
               className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[13px] font-bold text-white shrink-0 shadow-2xs"
-              style={{ backgroundColor: criterionToken?.accentColor || '#18A6E0' }}
+              style={{
+                backgroundColor:
+                  (criterion?.id as string) === 'other_achievements'
+                    ? '#4F46E5'
+                    : criterionToken?.accentColor || '#18A6E0',
+              }}
             >
-              {criterion.number}
+              {(criterion?.id as string) === 'other_achievements' ? '+' : criterion.number}
             </div>
             <div className="flex flex-col min-w-0">
               <h3
@@ -476,7 +481,12 @@ export const AddEditDeclarationModal: React.FC<AddEditDeclarationModalProps> = (
                 {isEditMode ? 'Chỉnh sửa kê khai' : 'Thêm kê khai'}
               </h3>
               <p className="text-[11.5px] text-[#607483]">
-                {criterion.name}{requirement.code ? ` · Mã tiêu chuẩn ${requirement.code}` : ''}
+                {criterion.name}
+                {(criterion?.id as string) === 'other_achievements'
+                  ? ' · Ngoài 5 tiêu chí bắt buộc'
+                  : requirement.code
+                  ? ` · Mã tiêu chuẩn ${requirement.code}`
+                  : ''}
               </p>
             </div>
           </div>

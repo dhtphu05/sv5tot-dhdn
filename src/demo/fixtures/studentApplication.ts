@@ -459,6 +459,92 @@ export function buildCleanStudentApplication(params: {
     schoolReviewUnitName: params.university || resolvedInst.schoolReviewUnitName,
     supplementRequests: [],
     criteria: emptyCriteria,
+    otherAchievements: [],
+  };
+}
+
+export const OTHER_ACHIEVEMENTS_CRITERION_ID = 'other_achievements';
+export const OTHER_ACHIEVEMENTS_REQ_ID = 'other-achievements-general';
+
+export function buildOtherAchievementsCriterion(
+  declarations: ApplicationDeclaration[] = []
+): ApplicationCriterion {
+  const safeDecls: ApplicationDeclaration[] = (
+    Array.isArray(declarations) ? declarations : []
+  ).map((d) => {
+    const rawDecl = d as unknown as Record<string, any>;
+    const rawEvList = Array.isArray(d.evidenceFiles)
+      ? d.evidenceFiles
+      : Array.isArray(d.evidence)
+      ? d.evidence
+      : [];
+    const normalizedEvidence: ApplicationEvidence[] = rawEvList.map((ev) => {
+      const rawEv = ev as unknown as Record<string, any>;
+      return {
+        ...ev,
+        id: ev.id || `ev-${Date.now()}`,
+        name: ev.name || rawEv.fileName || rawEv.title || 'Minh_chung.pdf',
+        fileType: ev.fileType || 'pdf',
+        size: ev.size || rawEv.fileSize || '240 KB',
+        uploadedAt: ev.uploadedAt || '10/10/2026',
+        status:
+          ev.status && (ev.status as string) !== 'completed'
+            ? ev.status
+            : 'ready',
+        url: ev.url || rawEv.previewUrl,
+      };
+    });
+    return {
+      ...d,
+      value:
+        d.value ||
+        rawDecl.title ||
+        rawDecl.description ||
+        'Thành tích bổ sung',
+      detail: d.detail || rawDecl.description || rawDecl.authority || '',
+      date: d.date || rawDecl.date || '10/10/2026',
+      status:
+        d.status && (d.status as string) !== 'completed' ? d.status : 'ready',
+      evidenceFiles: normalizedEvidence,
+    };
+  });
+
+  const totalEv = safeDecls.reduce(
+    (sum, d) => sum + (d.evidenceFiles?.length || 0),
+    0
+  );
+
+  const req: ApplicationRequirement = {
+    id: OTHER_ACHIEVEMENTS_REQ_ID,
+    code: 'TTK',
+    criterionId: OTHER_ACHIEVEMENTS_CRITERION_ID as any,
+    title:
+      'Các giải thưởng, bằng khen, giấy khen, sáng kiến hoặc thành tích tiêu biểu khác',
+    ruleBadge: 'Kê khai bổ sung · Cho phép nhiều kê khai',
+    ruleHelper:
+      'Mục này nằm ngoài 5 tiêu chí bắt buộc. Sinh viên có thể kê khai không giới hạn số lượng thành tích, giải thưởng, chứng nhận hoạt động xã hội, văn hóa, nghệ thuật, khởi nghiệp... kèm minh chứng.',
+    declarationMultiplicity: 'MULTIPLE',
+    declarationLabel: 'Tên thành tích / giải thưởng / bằng khen',
+    addActionLabel: '+ Thêm thành tích khác',
+    allowMultipleEvidence: true,
+    declarationMode: 'repeatable',
+    allowMultipleDeclarations: true,
+    status: safeDecls.length > 0 ? 'declared' : 'undeclared',
+    declarations: safeDecls,
+    isOptionalEmpty: safeDecls.length === 0,
+  };
+
+  return {
+    id: OTHER_ACHIEVEMENTS_CRITERION_ID as any,
+    number: 5,
+    name: 'Thành tích khác',
+    shortSummary:
+      safeDecls.length > 0
+        ? `${safeDecls.length} thành tích bổ sung đã kê khai · ${totalEv} minh chứng`
+        : 'Chưa có thành tích bổ sung (không bắt buộc · ngoài 5 tiêu chí)',
+    statusLabel: safeDecls.length > 0 ? 'Đã kê khai' : 'Chưa kê khai',
+    groups: [],
+    requirements: [req],
   };
 }
 

@@ -478,7 +478,7 @@ export default function App() {
           sum +
           reqs.reduce((rSum, r) => rSum + (r.declarations?.length || 0), 0)
         );
-      }, 0);
+      }, 0) + (appObj?.otherAchievements?.length || 0);
 
     const services = resolveDomainServices();
 
@@ -639,6 +639,10 @@ export default function App() {
               remoteDecls === 0 && localDecls > 0
                 ? prev.criteria
                 : hydratedApp.criteria,
+            otherAchievements:
+              remoteDecls === 0 && localDecls > 0
+                ? prev.otherAchievements
+                : hydratedApp.otherAchievements ?? prev.otherAchievements,
             applicantProfileSnapshot: mergedSnapshot,
             student: {
               ...hydratedApp.student,

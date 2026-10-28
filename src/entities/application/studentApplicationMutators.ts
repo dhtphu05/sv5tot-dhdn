@@ -9,6 +9,8 @@ import {
   ApplicationEvidence,
   ApplicationRequirement,
   StudentApplicationData,
+  OTHER_ACHIEVEMENTS_REQ_ID,
+  buildOtherAchievementsCriterion,
 } from '../../demo/fixtures/studentApplication';
 import { resolveMultiplicity } from '../../demo/fixtures/criteriaDefinitions';
 import { PreSubmitAdvisoryItem } from '../../components/submission/submissionTypes';
@@ -120,9 +122,17 @@ export function applyConfirmEvidenceToApplication(
     }),
   }));
 
+  const newOtherAchievements = (prev.otherAchievements || []).map((decl) => ({
+    ...decl,
+    evidenceFiles: (decl.evidenceFiles || []).map((f) =>
+      f.id === fileId ? { ...f, status: 'ready' as RequirementStatus } : f
+    ),
+  }));
+
   return {
     ...prev,
     criteria: newCriteria,
+    otherAchievements: newOtherAchievements,
   };
 }
 
@@ -139,6 +149,44 @@ export function applySaveDeclarationMutation(
   existingDeclId: string | undefined,
   isSupplementActive: boolean
 ): StudentApplicationData {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    const existingList = prev.otherAchievements || [];
+    if (existingDeclId) {
+      return {
+        ...prev,
+        otherAchievements: existingList.map((d) =>
+          d.id === existingDeclId
+            ? {
+                ...d,
+                value: declData.value,
+                detail: declData.detail,
+                date: declData.date || d.date,
+                metadata: declData.metadata,
+                evidenceFiles,
+              }
+            : d
+        ),
+      };
+    }
+    const newOtherDecl: ApplicationDeclaration = {
+      id: `decl-other-${Date.now()}`,
+      value: declData.value,
+      detail: declData.detail,
+      date: declData.date || new Date().toLocaleDateString('vi-VN'),
+      metadata: declData.metadata,
+      evidenceFiles: evidenceFiles.map((f) => ({
+        ...f,
+        isNewlyAddedSupplement: isSupplementActive
+          ? true
+          : f.isNewlyAddedSupplement,
+      })),
+    };
+    return {
+      ...prev,
+      otherAchievements: [...existingList, newOtherDecl],
+    };
+  }
+
   if (existingDeclId) {
     return {
       ...prev,
@@ -201,6 +249,20 @@ export function applyUpdateDeclarationInlineMutation(
   declarationId: string,
   updated: { value: string; detail?: string }
 ): StudentApplicationData {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    return {
+      ...prev,
+      otherAchievements: (prev.otherAchievements || []).map((d) =>
+        d.id === declarationId
+          ? {
+              ...d,
+              value: updated.value,
+              detail: updated.detail,
+            }
+          : d
+      ),
+    };
+  }
   return {
     ...prev,
     criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({
@@ -224,6 +286,12 @@ export function applyAddDeclarationInlineMutation(
   reqId: string,
   newDecl: ApplicationDeclaration
 ): StudentApplicationData {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    return {
+      ...prev,
+      otherAchievements: [...(prev.otherAchievements || []), newDecl],
+    };
+  }
   return {
     ...prev,
     criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => {
@@ -247,6 +315,14 @@ export function applyDeleteDeclarationMutation(
   reqId: string,
   declId: string
 ): StudentApplicationData {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    return {
+      ...prev,
+      otherAchievements: (prev.otherAchievements || []).filter(
+        (d) => d.id !== declId
+      ),
+    };
+  }
   return {
     ...prev,
     criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => {
@@ -268,6 +344,19 @@ export function applyAppendEvidenceFilesMutation(
   newFiles: ApplicationEvidence[],
   updateStatusTo?: RequirementStatus
 ): StudentApplicationData {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    return {
+      ...prev,
+      otherAchievements: (prev.otherAchievements || []).map((d) =>
+        d.id === declId
+          ? {
+              ...d,
+              evidenceFiles: [...(d.evidenceFiles || []), ...newFiles],
+            }
+          : d
+      ),
+    };
+  }
   return {
     ...prev,
     criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({
@@ -316,6 +405,23 @@ export function findEvidenceContextInApplication(
     }
   }
 
+  for (const decl of application.otherAchievements || []) {
+    if (
+      (decl.evidenceFiles || []).some(
+        (ef) => ef.id === file.id || ef.name === file.name
+      )
+    ) {
+      foundCritName = 'Thành tích khác';
+      foundCritId = 'other_achievements';
+      foundReqTitle =
+        'Các giải thưởng, bằng khen, giấy khen, sáng kiến hoặc thành tích tiêu biểu khác';
+      foundReqId = OTHER_ACHIEVEMENTS_REQ_ID;
+      foundDeclTitle = decl.value;
+      siblingFiles = decl.evidenceFiles || [file];
+      break;
+    }
+  }
+
   return {
     criterionId: foundCritId,
     criterionName: foundCritName,
@@ -333,6 +439,15 @@ export function findCriterionAndRequirementById(
   criterion: ApplicationCriterion | null;
   requirement: ApplicationRequirement | null;
 } {
+  if (reqId === OTHER_ACHIEVEMENTS_REQ_ID) {
+    const otherCrit = buildOtherAchievementsCriterion(
+      application.otherAchievements
+    );
+    return {
+      criterion: otherCrit,
+      requirement: otherCrit.requirements[0] || null,
+    };
+  }
   for (const c of application.criteria) {
     const r = c.requirements.find((req) => req.id === reqId);
     if (r) {
@@ -354,22 +469,33 @@ export function calculateStudentApplicationSummaryStats(
   application: StudentApplicationData
 ) {
   const totalCriteria = application.criteria.length;
-  const totalDeclarations = application.criteria.reduce(
-    (sum, c) =>
-      sum + c.requirements.reduce((rSum, r) => rSum + r.declarations.length, 0),
+  const otherDecls = application.otherAchievements || [];
+  const otherEvCount = otherDecls.reduce(
+    (sum, d) => sum + (d.evidenceFiles?.length || 0),
     0
   );
-  const totalEvidence = application.criteria.reduce(
-    (sum, c) =>
-      sum +
-      c.requirements.reduce(
-        (rSum, r) =>
-          rSum +
-          r.declarations.reduce((dSum, d) => dSum + d.evidenceFiles.length, 0),
-        0
-      ),
-    0
-  );
+  const totalDeclarations =
+    application.criteria.reduce(
+      (sum, c) =>
+        sum +
+        c.requirements.reduce((rSum, r) => rSum + r.declarations.length, 0),
+      0
+    ) + otherDecls.length;
+  const totalEvidence =
+    application.criteria.reduce(
+      (sum, c) =>
+        sum +
+        c.requirements.reduce(
+          (rSum, r) =>
+            rSum +
+            r.declarations.reduce(
+              (dSum, d) => dSum + d.evidenceFiles.length,
+              0
+            ),
+          0
+        ),
+      0
+    ) + otherEvCount;
   const totalRecommendations = application.criteria.reduce(
     (sum, c) => sum + c.requirements.filter((r) => !!r.recommendation).length,
     0

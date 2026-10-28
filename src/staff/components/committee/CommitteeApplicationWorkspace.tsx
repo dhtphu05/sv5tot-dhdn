@@ -144,6 +144,20 @@ export const CommitteeApplicationWorkspace: React.FC<
         }
       }
     }
+    for (const decl of studentApplication.otherAchievements || []) {
+      const evs = decl.evidence || decl.evidenceFiles || [];
+      for (const ev of evs) {
+        items.push({
+          evidence: ev,
+          criterionId: 'integration' as CriterionKey,
+          criterionName: 'Thành tích khác',
+          requirementId: 'other-achievements-general',
+          requirementTitle: 'Thành tích, giải thưởng, chứng nhận hoặc hoạt động tiêu biểu khác',
+          declarationId: decl.id,
+          declarationTitle: decl.value,
+        });
+      }
+    }
     return items;
   }, [studentApplication]);
 

@@ -100,7 +100,9 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
     }
   } else if (declarationCount > 1) {
     const unitLabel =
-      requirement.id === 'physical-sport'
+      requirement.id === 'other-achievements-general'
+        ? 'thành tích bổ sung'
+        : requirement.id === 'physical-sport'
         ? 'thành tích thể thao'
         : requirement.criterionId === 'volunteer'
         ? 'hoạt động tình nguyện'

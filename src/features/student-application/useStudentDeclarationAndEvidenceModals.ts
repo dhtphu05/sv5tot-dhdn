@@ -357,6 +357,28 @@ export function useStudentDeclarationAndEvidenceModals({
   ) => {
     let removedFileName = '';
     setApplication((prev) => {
+      if (reqId === 'other-achievements-general') {
+        const nextApp = {
+          ...prev,
+          otherAchievements: (prev.otherAchievements || []).map((d) => {
+            if (d.id !== declId) return d;
+            const targetFile = (d.evidenceFiles || []).find(
+              (f) => f.id === fileId
+            );
+            if (targetFile) {
+              removedFileName = targetFile.name;
+            }
+            return {
+              ...d,
+              evidenceFiles: (d.evidenceFiles || []).filter(
+                (f) => f.id !== fileId
+              ),
+            };
+          }),
+        };
+        syncSingleDeclarationToBackend(nextApp, reqId, declId);
+        return nextApp;
+      }
       const nextApp = {
         ...prev,
         criteria: syncCriteriaWithUpdate(prev.criteria, reqId, (req) => ({

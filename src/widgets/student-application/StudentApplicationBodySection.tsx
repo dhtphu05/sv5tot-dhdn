@@ -9,6 +9,8 @@ import {
   StudentApplicationData,
   ApplicationDeclaration,
   ApplicationEvidence,
+  buildOtherAchievementsCriterion,
+  OTHER_ACHIEVEMENTS_CRITERION_ID,
 } from '../../demo/fixtures/studentApplication';
 import {
   SupplementDemoStateId,
@@ -268,6 +270,34 @@ export const StudentApplicationBodySection: React.FC<
                 onSendSupplement={onSendSupplementRequestConfirm}
               />
             ))}
+
+            {/* Mục Thành tích khác (Nằm ngoài 5 tiêu chí bắt buộc, cho phép nhiều kê khai) */}
+            <CriterionSection
+              key={OTHER_ACHIEVEMENTS_CRITERION_ID}
+              criterion={buildOtherAchievementsCriterion(application.otherAchievements)}
+              isExpanded={expandedCriteria[OTHER_ACHIEVEMENTS_CRITERION_ID] !== false}
+              onToggleExpand={() => onToggleCriterion(OTHER_ACHIEVEMENTS_CRITERION_ID)}
+              expandedRowId={expandedRowId}
+              highlightedRequirementId={highlightedRequirementId}
+              onToggleRowExpand={onToggleRowExpand}
+              onUpdateDeclaration={onUpdateDeclaration}
+              onAddDeclaration={onAddDeclaration}
+              onDeleteDeclaration={onDeleteDeclaration}
+              onOpenRegulation={onOpenRegulation}
+              onInspectEvidence={onInspectEvidence}
+              onAddEvidence={onAddEvidence}
+              onDeleteEvidence={onDeleteEvidence}
+              onOpenAddDeclaration={onOpenAddDeclaration}
+              onOpenEditDeclaration={onOpenEditDeclaration}
+              onOpenAddEvidenceModal={onOpenAddEvidenceModal}
+              readOnly={isReadOnly}
+              isSupplementMode={isSupplementMode}
+              supplementRequests={supplementRequests}
+              supplementChangesMap={supplementChangesMap}
+              isSupplementWindowClosed={isSupplementWindowClosed}
+              isSupplementSubmitting={isSupplementSubmitting}
+              onSendSupplement={onSendSupplementRequestConfirm}
+            />
           </div>
         </div>
       </div>

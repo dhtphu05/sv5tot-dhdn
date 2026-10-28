@@ -85,7 +85,20 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
   renderDeclarationReviewerSlot,
   renderCriterionConclusionSlot,
 }) => {
-  const token = CRITERIA[criterion.id];
+  const isOtherAchievements = (criterion.id as string) === 'other_achievements';
+  const token =
+    CRITERIA[criterion.id] ||
+    (isOtherAchievements
+      ? ({
+          id: 'integration',
+          number: 6,
+          name: 'Thành tích khác',
+          shortName: 'Thành tích khác',
+          accentColor: '#4F46E5',
+          accentSoft: 'rgba(79, 70, 229, 0.12)',
+          bgTint: '#F8FAFF',
+        } as any)
+      : undefined);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   const toggleGroupCollapse = (groupId: string) => {
@@ -131,6 +144,16 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 
   // Section 3 & 5: Factual secondary progress line without redundant evidence counts in Column 1
   const getCriterionProgressSummary = () => {
+    if (isOtherAchievements) {
+      const allDecls = criterion.requirements.flatMap((r) => r.declarations || []);
+      const totalEv = allDecls.reduce(
+        (sum, d) => sum + (d.evidenceFiles?.length || 0),
+        0
+      );
+      return allDecls.length > 0
+        ? `${allDecls.length} thành tích bổ sung đã kê khai · ${totalEv} minh chứng`
+        : 'Chưa có thành tích bổ sung (không bắt buộc · ngoài 5 tiêu chí)';
+    }
     if (criterion.id === 'volunteer') {
       const allDecls = criterion.requirements.flatMap((r) => r.declarations || []);
       const totalActivities = allDecls.length;
@@ -219,14 +242,21 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
               color: token?.accentColor || '#172A3A',
             }}
           >
-            {criterion.number}
+            {isOtherAchievements ? '+' : criterion.number}
           </div>
 
           <div className="flex flex-col min-w-0">
             {/* Primary line: Canonical criterion title never truncated */}
-            <span className="text-[16px] xl:text-[17px] font-bold text-[#172A3A] tracking-tight whitespace-normal break-words">
-              {criterion.name}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[16px] xl:text-[17px] font-bold text-[#172A3A] tracking-tight whitespace-normal break-words">
+                {criterion.name}
+              </span>
+              {isOtherAchievements && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-[5px] text-[10.5px] font-bold bg-[#EEF2FF] text-[#4338CA] border border-[#C7D2FE]">
+                  Ngoài 5 tiêu chí · Cho phép nhiều kê khai
+                </span>
+              )}
+            </div>
             {/* Secondary line: Factual declaration count with evidence summary */}
             <span className="text-[11.5px] text-[#607483] font-medium whitespace-normal break-words mt-0.5 tabular-nums">
               {hasDeclaredItems &&
@@ -241,7 +271,9 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
         {/* Column 2: Requirement groups structure hint (Clean & quiet) */}
         <div className="grid-col-2 px-6 border-l border-[#E3EBF1] min-w-0 text-[12.5px] text-[#607483] font-medium flex items-center h-full">
           <span className="whitespace-normal break-words">
-            {totalGroups > 1
+            {isOtherAchievements
+              ? 'Kê khai bổ sung (nhiều mục)'
+              : totalGroups > 1
               ? `${totalGroups} nhóm tiêu chuẩn`
               : 'Yêu cầu quy định'}
           </span>
@@ -252,14 +284,20 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
           className="grid-col-3 px-6 border-l border-[#E3EBF1] flex items-center h-full min-w-0"
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            type="button"
-            onClick={() => onOpenRegulation(criterion.id)}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#466474] hover:text-[#126A9C] hover:underline transition-colors shrink-0 cursor-pointer"
-          >
-            <BookOpen size={13} />
-            <span>Xem quy định</span>
-          </button>
+          {isOtherAchievements ? (
+            <span className="text-[12px] font-medium text-[#607483]">
+              Không bắt buộc
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenRegulation(criterion.id)}
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#466474] hover:text-[#126A9C] hover:underline transition-colors shrink-0 cursor-pointer"
+            >
+              <BookOpen size={13} />
+              <span>Xem quy định</span>
+            </button>
+          )}
         </div>
 
         {/* Column 4: Status Label (Prompt 10 Section 11 & 49: Avoid repeating Cần bổ sung at every nested level when expanded) */}

@@ -221,7 +221,7 @@ export const StudentApplicationWorkspace: React.FC<
           sum +
           reqs.reduce((rSum, r) => rSum + (r.declarations?.length || 0), 0)
         );
-      }, 0);
+      }, 0) + (appObj.otherAchievements?.length || 0);
 
     setApplication((prev) => {
       const prevDeclCount = countDecls(prev);
@@ -271,6 +271,10 @@ export const StudentApplicationWorkspace: React.FC<
           initialData.schoolRecommendation || prev.schoolRecommendation,
         supplementRequests:
           initialData.supplementRequests ?? prev.supplementRequests,
+        otherAchievements:
+          Array.isArray(prev.otherAchievements) && prev.otherAchievements.length > 0
+            ? prev.otherAchievements
+            : initialData.otherAchievements ?? prev.otherAchievements,
         councilFeedback: initialData.councilFeedback ?? prev.councilFeedback,
         decisionCode: initialData.decisionCode ?? prev.decisionCode,
         awardedAt: initialData.awardedAt ?? prev.awardedAt,
@@ -309,6 +313,7 @@ export const StudentApplicationWorkspace: React.FC<
       ? initialFocusCriterionId === 'volunteer'
       : initialSubmissionState === 'supplement_required',
     integration: initialFocusCriterionId === 'integration',
+    other_achievements: true,
   });
 
   const [expandedRowId, setExpandedRowId] = useState<string | null>(
@@ -758,6 +763,7 @@ export const StudentApplicationWorkspace: React.FC<
                   physical: true,
                   volunteer: true,
                   integration: true,
+                  other_achievements: true,
                 })
               }
               onCollapseAll={() => {
@@ -767,6 +773,7 @@ export const StudentApplicationWorkspace: React.FC<
                   physical: false,
                   volunteer: false,
                   integration: false,
+                  other_achievements: false,
                 });
                 setExpandedRowId(null);
               }}

@@ -816,6 +816,13 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       };
     });
 
+    if (Array.isArray(app.otherAchievements)) {
+      totalDecl += app.otherAchievements.length;
+      for (const d of app.otherAchievements) {
+        totalEv += Array.isArray(d?.evidenceFiles) ? d.evidenceFiles.length : 0;
+      }
+    }
+
     const resolvedSnapshot = app.applicantProfileSnapshot || existing?.applicantProfileSnapshot || {
       fullName: studentFullName,
       gender: 'Nam',
@@ -998,7 +1005,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       return;
     }
 
-    const countCriteriaDecls = (criteriaList?: Record<string, any>[]) =>
+    const countCriteriaDecls = (criteriaList?: Record<string, any>[], otherList?: Record<string, any>[]) =>
       (Array.isArray(criteriaList) ? criteriaList : []).reduce((sum, c) => {
         const reqs =
           Array.isArray(c.groups) && c.groups.length > 0
@@ -1014,11 +1021,11 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
             0
           )
         );
-      }, 0);
+      }, 0) + (Array.isArray(otherList) ? otherList.length : 0);
 
     const existing = portalState.studentApplications[id] || {};
-    const existingDecls = countCriteriaDecls(existing.criteria);
-    const incomingDecls = countCriteriaDecls(incoming.criteria);
+    const existingDecls = countCriteriaDecls(existing.criteria, existing.otherAchievements);
+    const incomingDecls = countCriteriaDecls(incoming.criteria, incoming.otherAchievements);
 
     const shouldPreserveExistingCriteria =
       !isUserMutation && existingDecls > 0 && incomingDecls === 0;
@@ -1094,6 +1101,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       criteria: shouldPreserveExistingCriteria
         ? existing.criteria
         : incoming.criteria ?? existing.criteria,
+      otherAchievements: shouldPreserveExistingCriteria
+        ? existing.otherAchievements
+        : incoming.otherAchievements ?? existing.otherAchievements ?? [],
       status: resolvedStatus,
       reviewStage: shouldPreserveSubmittedStatus
         ? existing.reviewStage
@@ -1239,6 +1249,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         Array.isArray(existingApp?.criteria) && existingApp.criteria.length > 0
           ? existingApp.criteria
           : createDefaultCriteriaList(),
+      otherAchievements: Array.isArray(existingApp?.otherAchievements)
+        ? existingApp.otherAchievements
+        : [],
       supplementRequests: existingApp?.supplementRequests || [],
     };
 
@@ -1307,6 +1320,7 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           academicYear: 'Năm học 2025–2026',
         },
         criteria: createDefaultCriteriaList(),
+        otherAchievements: [],
         supplementRequests: [],
       };
     app.applicationId = id;
@@ -1314,86 +1328,101 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       app.criteria = createDefaultCriteriaList();
     }
 
-    const crit = app.criteria.find((c: Record<string, any>) => c.id === criterionId);
-    if (crit) {
-      if (!Array.isArray(crit.requirements)) {
-        crit.requirements = [];
+    const rawEvFiles = Array.isArray(declaration.evidenceFiles)
+      ? declaration.evidenceFiles
+      : [];
+    const normalizedEvFiles = rawEvFiles.map((ev: Record<string, any>) => ({
+      ...ev,
+      id: ev.id || `ev-${requirementId}-${Date.now()}`,
+      name: ev.name || ev.fileName || 'Minh_chung.pdf',
+      fileName: ev.fileName || ev.name || 'Minh_chung.pdf',
+      fileType: ev.fileType || 'pdf',
+      size: ev.size || ev.fileSize || '240 KB',
+      fileSize: ev.fileSize || ev.size || '240 KB',
+      uploadedAt: ev.uploadedAt || '10/10/2026',
+      status: ev.status || 'completed',
+    }));
+    const normalizedDecl = {
+      ...declaration,
+      id: declaration.id || `decl-${requirementId}-${Date.now()}`,
+      title: declaration.title || declaration.value || 'Nội dung kê khai',
+      value: declaration.value || declaration.title || 'Nội dung kê khai',
+      description: declaration.description || declaration.detail || '',
+      detail: declaration.detail || declaration.description || '',
+      date: declaration.date || '10/10/2026',
+      authority: declaration.authority || '',
+      status: 'completed',
+      evidenceFiles: normalizedEvFiles,
+      metadata: declaration.metadata ? { ...declaration.metadata } : undefined,
+    };
+
+    if (criterionId === 'other_achievements' || requirementId === 'other-achievements-general') {
+      if (!Array.isArray(app.otherAchievements)) {
+        app.otherAchievements = [];
       }
-      const rawEvFiles = Array.isArray(declaration.evidenceFiles)
-        ? declaration.evidenceFiles
-        : [];
-      const normalizedEvFiles = rawEvFiles.map((ev: Record<string, any>) => ({
-        ...ev,
-        id: ev.id || `ev-${requirementId}-${Date.now()}`,
-        name: ev.name || ev.fileName || 'Minh_chung.pdf',
-        fileName: ev.fileName || ev.name || 'Minh_chung.pdf',
-        fileType: ev.fileType || 'pdf',
-        size: ev.size || ev.fileSize || '240 KB',
-        fileSize: ev.fileSize || ev.size || '240 KB',
-        uploadedAt: ev.uploadedAt || '10/10/2026',
-        status: ev.status || 'completed',
-      }));
-      const normalizedDecl = {
-        ...declaration,
-        id: declaration.id || `decl-${requirementId}-${Date.now()}`,
-        title: declaration.title || declaration.value || 'Nội dung kê khai',
-        value: declaration.value || declaration.title || 'Nội dung kê khai',
-        description: declaration.description || declaration.detail || '',
-        detail: declaration.detail || declaration.description || '',
-        date: declaration.date || '10/10/2026',
-        authority: declaration.authority || '',
-        status: 'completed',
-        evidenceFiles: normalizedEvFiles,
-        metadata: declaration.metadata ? { ...declaration.metadata } : undefined,
-      };
-
-      const upsertIntoReqList = (reqList: Record<string, any>[], addIfMissing: boolean) => {
-        let reqObj = reqList.find((r: Record<string, any>) => r.id === requirementId);
-        if (!reqObj && addIfMissing) {
-          reqObj = {
-            id: requirementId,
-            criterionId,
-            status: 'completed',
-            declarations: [],
-          };
-          reqList.push(reqObj);
-        }
-        if (reqObj) {
-          if (!Array.isArray(reqObj.declarations)) {
-            reqObj.declarations = [];
-          }
-          const existingDeclIdx = reqObj.declarations.findIndex(
-            (d: Record<string, any>) => d.id === normalizedDecl.id
-          );
-          if (existingDeclIdx >= 0) {
-            reqObj.declarations[existingDeclIdx] = normalizedDecl;
-          } else {
-            reqObj.declarations.push(normalizedDecl);
-          }
-          reqObj.status = 'completed';
-          reqObj.isOptionalEmpty = false;
-        }
-      };
-
-      upsertIntoReqList(crit.requirements, true);
-      if (Array.isArray(crit.groups)) {
-        for (const group of crit.groups) {
-          if (Array.isArray(group?.requirements)) {
-            upsertIntoReqList(group.requirements, false);
-          }
-        }
-      }
-
-      const allDecls = collectCriterionDeclarations(crit);
-      const totalCritEvidence = allDecls.reduce(
-        (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
-        0
+      const existingOtherIdx = app.otherAchievements.findIndex(
+        (d: Record<string, any>) => d.id === normalizedDecl.id
       );
-      crit.statusLabel = 'Đã kê khai';
-      crit.shortSummary =
-        criterionId === 'physical'
-          ? `${allDecls.length}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
-          : `${allDecls.length} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
+      if (existingOtherIdx >= 0) {
+        app.otherAchievements[existingOtherIdx] = normalizedDecl;
+      } else {
+        app.otherAchievements.push(normalizedDecl);
+      }
+    } else {
+      const crit = app.criteria.find((c: Record<string, any>) => c.id === criterionId);
+      if (crit) {
+        if (!Array.isArray(crit.requirements)) {
+          crit.requirements = [];
+        }
+
+        const upsertIntoReqList = (reqList: Record<string, any>[], addIfMissing: boolean) => {
+          let reqObj = reqList.find((r: Record<string, any>) => r.id === requirementId);
+          if (!reqObj && addIfMissing) {
+            reqObj = {
+              id: requirementId,
+              criterionId,
+              status: 'completed',
+              declarations: [],
+            };
+            reqList.push(reqObj);
+          }
+          if (reqObj) {
+            if (!Array.isArray(reqObj.declarations)) {
+              reqObj.declarations = [];
+            }
+            const existingDeclIdx = reqObj.declarations.findIndex(
+              (d: Record<string, any>) => d.id === normalizedDecl.id
+            );
+            if (existingDeclIdx >= 0) {
+              reqObj.declarations[existingDeclIdx] = normalizedDecl;
+            } else {
+              reqObj.declarations.push(normalizedDecl);
+            }
+            reqObj.status = 'completed';
+            reqObj.isOptionalEmpty = false;
+          }
+        };
+
+        upsertIntoReqList(crit.requirements, true);
+        if (Array.isArray(crit.groups)) {
+          for (const group of crit.groups) {
+            if (Array.isArray(group?.requirements)) {
+              upsertIntoReqList(group.requirements, false);
+            }
+          }
+        }
+
+        const allDecls = collectCriterionDeclarations(crit);
+        const totalCritEvidence = allDecls.reduce(
+          (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+          0
+        );
+        crit.statusLabel = 'Đã kê khai';
+        crit.shortSummary =
+          criterionId === 'physical'
+            ? `${allDecls.length}/2 hình thức đã kê khai · ${totalCritEvidence} minh chứng`
+            : `${allDecls.length} nội dung đã kê khai · ${totalCritEvidence} minh chứng`;
+      }
     }
 
     portalState.studentApplications[id] = app;
@@ -1425,6 +1454,12 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         error: `Không tìm thấy hồ sơ ${id}`,
       });
       return;
+    }
+
+    if (Array.isArray(app.otherAchievements)) {
+      app.otherAchievements = app.otherAchievements.filter(
+        (d: Record<string, any>) => d.id !== declarationId
+      );
     }
 
     const removeFromReqList = (reqList: Record<string, any>[]) => {

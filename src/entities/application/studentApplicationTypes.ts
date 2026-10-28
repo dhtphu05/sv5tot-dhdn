@@ -166,6 +166,7 @@ export interface StudentApplicationData {
   };
   applicantProfileSnapshot?: StudentProfileDto | null;
   criteria: ApplicationCriterion[];
+  otherAchievements?: ApplicationDeclaration[];
   supplementRequests?: any[];
   councilFeedback?: string;
   decisionCode?: string;

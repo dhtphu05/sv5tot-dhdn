@@ -19,6 +19,9 @@ import {
   ApplicationRequirement,
   ApplicationDeclaration,
   ApplicationEvidence,
+  buildOtherAchievementsCriterion,
+  OTHER_ACHIEVEMENTS_CRITERION_ID,
+  OTHER_ACHIEVEMENTS_REQ_ID,
 } from '../../demo/fixtures/studentApplication';
 import {
   SupplementRequest,
@@ -147,9 +150,11 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
     presentationMode === 'city_review' ||
     presentationMode === 'committee_review';
 
-  // Internal state for expanded criteria accordion — all 5 criteria are open by default across review & preview
+  // Internal state for expanded criteria accordion — all 5 criteria + Thành tích khác are open by default across review & preview
   const [expandedCriteria, setExpandedCriteria] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
+    const initial: Record<string, boolean> = {
+      [OTHER_ACHIEVEMENTS_CRITERION_ID]: true,
+    };
     for (const crit of application.criteria || []) {
       initial[crit.id] = true;
     }
@@ -175,6 +180,9 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
           initial[req.id] = true;
         }
       }
+    }
+    if ((application.otherAchievements || []).length > 1) {
+      initial[OTHER_ACHIEVEMENTS_REQ_ID] = true;
     }
     return initial;
   });
@@ -206,7 +214,7 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
         const next = { ...prev, [critId]: !prev[critId] };
         return next;
       });
-      if (onSelectCriterion) {
+      if (onSelectCriterion && critId !== OTHER_ACHIEVEMENTS_CRITERION_ID) {
         onSelectCriterion(critId);
       }
     },
@@ -214,8 +222,12 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
   );
 
   const handleExpandAll = useCallback(() => {
-    const allCriteriaExpanded: Record<string, boolean> = {};
-    const allRowsExpanded: Record<string, boolean> = {};
+    const allCriteriaExpanded: Record<string, boolean> = {
+      [OTHER_ACHIEVEMENTS_CRITERION_ID]: true,
+    };
+    const allRowsExpanded: Record<string, boolean> = {
+      [OTHER_ACHIEVEMENTS_REQ_ID]: true,
+    };
     for (const c of application.criteria || []) {
       allCriteriaExpanded[c.id] = true;
       for (const r of c.requirements || []) {
@@ -227,7 +239,9 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
   }, [application.criteria]);
 
   const handleCollapseAll = useCallback(() => {
-    const allCriteriaCollapsed: Record<string, boolean> = {};
+    const allCriteriaCollapsed: Record<string, boolean> = {
+      [OTHER_ACHIEVEMENTS_CRITERION_ID]: false,
+    };
     for (const c of application.criteria || []) {
       allCriteriaCollapsed[c.id] = false;
     }
@@ -265,8 +279,13 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
         }
       }
     }
+    const otherDecls = application.otherAchievements || [];
+    declCount += otherDecls.length;
+    for (const d of otherDecls) {
+      evCount += (d.evidenceFiles || []).length;
+    }
     return { declCount, evCount };
-  }, [application.criteria]);
+  }, [application.criteria, application.otherAchievements]);
 
   return (
     <div className={`space-y-4 w-full min-w-0 ${className}`}>
@@ -371,6 +390,40 @@ export const SharedStudentDossier: React.FC<SharedStudentDossierProps> = ({
               />
             );
           })}
+
+          {/* Mục Thành tích khác (Nằm ngoài 5 tiêu chí bắt buộc, đồng bộ qua các cấp xét duyệt) */}
+          {(() => {
+            const otherCriterion = buildOtherAchievementsCriterion(application.otherAchievements);
+            return (
+              <CriterionSection
+                key={OTHER_ACHIEVEMENTS_CRITERION_ID}
+                criterion={otherCriterion}
+                isExpanded={expandedCriteria[OTHER_ACHIEVEMENTS_CRITERION_ID] !== false}
+                onToggleExpand={() => handleToggleCriterion(OTHER_ACHIEVEMENTS_CRITERION_ID)}
+                expandedRowId={propExpandedRowId}
+                expandedRowMap={effectiveExpandedRowMap}
+                highlightedRequirementId={highlightedRequirementId}
+                onToggleRowExpand={handleToggleRow}
+                onUpdateDeclaration={onUpdateDeclaration}
+                onAddDeclaration={onAddDeclaration}
+                onDeleteDeclaration={onDeleteDeclaration}
+                onOpenRegulation={onOpenRegulation}
+                onInspectEvidence={(file) => onInspectEvidence(file, otherCriterion.requirements[0])}
+                onAddEvidence={onAddEvidence}
+                onDeleteEvidence={onDeleteEvidence}
+                onOpenAddDeclaration={onOpenAddDeclaration}
+                onOpenEditDeclaration={onOpenEditDeclaration}
+                onOpenAddEvidenceModal={onOpenAddEvidenceModal}
+                readOnly={isReadOnly}
+                isSupplementMode={isSupplementMode}
+                supplementRequests={supplementRequests}
+                supplementChangesMap={supplementChangesMap}
+                isSupplementWindowClosed={isSupplementWindowClosed}
+                isSupplementSubmitting={isSupplementSubmitting}
+                onSendSupplement={onSendSupplement}
+              />
+            );
+          })()}
         </div>
         </div>
       </div>
