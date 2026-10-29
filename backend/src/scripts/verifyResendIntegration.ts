@@ -1,5 +1,15 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
-dotenv.config({ path: 'backend/.env' });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env reliably
+dotenv.config({ path: path.resolve(__dirname, '../../../backend/.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
+
 import { getEmailService } from '../shared/email/index';
 
 async function main() {
