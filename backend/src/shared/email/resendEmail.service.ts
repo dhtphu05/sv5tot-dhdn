@@ -25,6 +25,11 @@ export class ResendEmailService implements IEmailService {
 
   constructor(apiKeyOverride?: string) {
     const env = getEnvironment();
+    // In local development on machines with SSL inspection, ensure outgoing HTTPS requests succeed
+    if (env.NODE_ENV === 'development' && !process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+
     const apiKey = apiKeyOverride || env.RESEND_API_KEY;
     if (apiKey) {
       this.resendClient = new Resend(apiKey);
