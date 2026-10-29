@@ -7,8 +7,10 @@
  * - MOCK mode: Logs email without network call (offline/dev/unit-test).
  * - SAFE mode: Reroutes all emails to RESEND_SAFE_OVERRIDE_EMAIL with clear audit banners.
  * - LIVE mode: Direct dispatch to genuine user email addresses.
+ * - Idempotency: Protects against double-send on retries using SHA-256 token digests.
  */
 
+import crypto from 'node:crypto';
 import { Resend } from 'resend';
 import { getEnvironment } from '../../config/environment';
 import { logger } from '../logging/logger';
@@ -90,14 +92,20 @@ export class ResendEmailService implements IEmailService {
         `[EmailService] Dispatching email via Resend to ${effectiveRecipient} (Original: ${originalRecipient}, Mode: ${env.RESEND_MODE})`
       );
 
-      const response = await this.resendClient.emails.send({
+      const emailPayload = {
         from: env.RESEND_FROM_EMAIL,
         to: [effectiveRecipient],
         subject: effectiveSubject,
         html: effectiveHtml,
         text: options.text,
         replyTo: options.replyTo,
-      });
+      };
+
+      const sendOptions = options.idempotencyKey
+        ? { idempotencyKey: options.idempotencyKey }
+        : undefined;
+
+      const response = await this.resendClient.emails.send(emailPayload, sendOptions);
 
       if (response.error) {
         logger.error(
@@ -162,11 +170,17 @@ export class ResendEmailService implements IEmailService {
       expiresInMinutes: 15,
     });
 
+    const tokenDigest = crypto
+      .createHash('sha256')
+      .update(data.resetToken)
+      .digest('hex');
+
     return this.send({
       to: data.to,
       subject: '[5TOT ĐHĐN] Yêu cầu đặt lại mật khẩu tài khoản',
       html,
       text: `Xin chào ${data.userName},\n\nBạn vừa yêu cầu đặt lại mật khẩu cho tài khoản 5TOT ĐHĐN. Vui lòng truy cập liên kết sau trong vòng 15 phút để đổi mật khẩu:\n\n${resetUrl}\n\nTrân trọng,\nHội Sinh viên Việt Nam Đại học Đà Nẵng`,
+      idempotencyKey: `password-reset/${tokenDigest}`,
     });
   }
 }

@@ -1,5 +1,5 @@
 /**
- * 5TOT ÄHÄN â€” Password Reset Domain Service (Backend V2)
+ * 5TOT ĐHĐN — Password Reset Domain Service (Backend V2)
  * Handles single-use cryptographically secure reset tokens, expiry validation, and session revocation.
  */
 
@@ -7,11 +7,12 @@ import crypto from 'node:crypto';
 import type { IPasswordResetRepository } from './passwordReset.repository';
 import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
-import type { IPasswordHasher} from '../auth/passwordHasher';
+import type { IPasswordHasher } from '../auth/passwordHasher';
 import { defaultPasswordHasher } from '../auth/passwordHasher';
 import type { IEmailService } from '../../shared/email/email.types';
 import { ApiError } from '../../shared/errors/apiError';
 import { getEnvironment } from '../../config/environment';
+import { logger } from '../../shared/logging/logger';
 
 export class PasswordResetService {
   constructor(
@@ -35,7 +36,7 @@ export class PasswordResetService {
     // Generic response regardless of whether email exists to prevent enumeration
     const genericResponse = {
       success: true,
-      message: 'Náº¿u Ä‘á»‹a chá»‰ email tá»“n táº¡i trÃªn há»‡ thá»‘ng, liÃªn káº¿t Ä‘áº·t láº¡i máº­t kháº©u sáº½ Ä‘Æ°á»£c gá»­i Ä‘áº¿n há»™p thÆ° cá»§a báº¡n.',
+      message: 'Nếu địa chỉ email tồn tại trên hệ thống, liên kết đặt lại mật khẩu sẽ được gửi đến hộp thư của bạn.',
     };
 
     if (!user) {
@@ -54,11 +55,26 @@ export class PasswordResetService {
 
     // Dispatch password reset email via EmailService
     if (this.emailService) {
-      await this.emailService.sendPasswordResetEmail({
-        to: user.email,
-        userName: user.fullName || user.email,
-        resetToken: rawToken,
-      });
+      try {
+        const sendResult = await this.emailService.sendPasswordResetEmail({
+          to: user.email,
+          userName: user.fullName || user.email,
+          resetToken: rawToken,
+        });
+
+        if (!sendResult.success) {
+          // If delivery fails, invalidate token so an undelivered token does not linger
+          await this.resetRepo.invalidateUserTokens(user.id).catch(() => undefined);
+          logger.error('Password reset email delivery failed', {
+            error: sendResult.error,
+          });
+        }
+      } catch (err: unknown) {
+        await this.resetRepo.invalidateUserTokens(user.id).catch(() => undefined);
+        logger.error('Password reset email dispatch exception', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
 
     const env = getEnvironment();
@@ -73,11 +89,11 @@ export class PasswordResetService {
     newPasswordPlain: string
   ): Promise<void> {
     if (!rawToken || rawToken.trim().length === 0) {
-      throw ApiError.badRequest('MÃ£ khÃ´i phá»¥c máº­t kháº©u khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.');
+      throw ApiError.badRequest('Mã khôi phục mật khẩu không được để trống.');
     }
 
     if (newPasswordPlain.length < 8) {
-      throw ApiError.badRequest('Máº­t kháº©u má»›i pháº£i cÃ³ tá»‘i thiá»ƒu 8 kÃ½ tá»±.');
+      throw ApiError.badRequest('Mật khẩu mới phải có tối thiểu 8 ký tự.');
     }
 
     const tokenHash = this.hashToken(rawToken.trim());
@@ -85,21 +101,21 @@ export class PasswordResetService {
 
     if (!tokenRecord || tokenRecord.usedAt !== null) {
       throw ApiError.badRequest(
-        'MÃ£ khÃ´i phá»¥c máº­t kháº©u khÃ´ng há»£p lá»‡ hoáº·c Ä‘Ã£ qua sá»­ dá»¥ng.',
+        'Mã khôi phục mật khẩu không hợp lệ hoặc đã qua sử dụng.',
         'INVALID_RESET_TOKEN'
       );
     }
 
     if (new Date() > tokenRecord.expiresAt) {
       throw ApiError.badRequest(
-        'MÃ£ khÃ´i phá»¥c máº­t kháº©u Ä‘Ã£ háº¿t háº¡n. Vui lÃ²ng gá»­i yÃªu cáº§u Ä‘áº·t láº¡i máº­t kháº©u má»›i.',
+        'Mã khôi phục mật khẩu đã hết hạn. Vui lòng gửi yêu cầu đặt lại mật khẩu mới.',
         'EXPIRED_RESET_TOKEN'
       );
     }
 
     const user = await this.identityRepo.findById(tokenRecord.userId);
     if (!user) {
-      throw ApiError.notFound('NgÆ°á»i dÃ¹ng');
+      throw ApiError.notFound('Người dùng');
     }
 
     // 1. Hash new password with Argon2id

@@ -96,6 +96,42 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     });
   });
 
+  it('invalidates reset token and returns generic response if email delivery fails', async () => {
+    const failingEmailService = {
+      send: async () => ({
+        success: false,
+        error: 'Network timeout',
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendPasswordResetEmail: async () => ({
+        success: false,
+        error: 'Provider rejection',
+        originalRecipient: testUser.email,
+        effectiveRecipient: testUser.email,
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+    };
+
+    const resetServiceWithFailingEmail = new PasswordResetService(
+      fakeResetRepo,
+      fakeIdentityRepo,
+      sessionService,
+      defaultPasswordHasher,
+      failingEmailService
+    );
+
+    const result = await resetServiceWithFailingEmail.requestPasswordReset(testUser.email);
+    assert.equal(result.success, true);
+    // Token was generated but immediately invalidated so it cannot be used
+    const tokens = Array.from(fakeResetRepo.tokens.values());
+    assert.equal(tokens.length, 1);
+    assert.ok(tokens[0].usedAt instanceof Date);
+  });
+
   it('returns generic message for non-existent email to prevent enumeration', async () => {
     const result = await resetService.requestPasswordReset('nonexistent@dut.udn.vn');
     assert.equal(result.success, true);

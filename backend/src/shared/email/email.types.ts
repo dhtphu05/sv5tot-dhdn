@@ -10,6 +10,7 @@ export interface SendEmailOptions {
   html: string;
   text?: string;
   replyTo?: string;
+  idempotencyKey?: string;
   metadata?: Record<string, string>;
 }
 
