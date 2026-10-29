@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-29T06:19:06.687Z",
+  "createdAt": "2026-10-29T10:29:34.926Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 56627,
-      "sha256": "6338b9c5a71da34e88380f57f32e906f97224175f3955efb8a1116aef5358d9c"
+      "sizeBytes": 56667,
+      "sha256": "830903f22bbd046e9639029ec6eb84ae56590daf7ee21aebb1164aeea744bb6c"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -511,8 +511,8 @@
     },
     {
       "path": "src/components/application/StudentApplicationWorkspace.tsx",
-      "sizeBytes": 38182,
-      "sha256": "f9545952699751e4ef619508686975e7acb049dd3cc3abb7ffb610b87bc468c0"
+      "sizeBytes": 38640,
+      "sha256": "1737c3190b5b2ef6a51f2cb3156b98765a29c42c0af48d4de4ccbb9748e5a494"
     },
     {
       "path": "src/components/application/modal/InlineEvidenceSection.tsx",
@@ -1216,8 +1216,8 @@
     },
     {
       "path": "src/demo/prototypeDemoMode.ts",
-      "sizeBytes": 20299,
-      "sha256": "dd9bf73837f1e326cc9be54656b268f306b45ad98d30ab88e064917c8c989fa2"
+      "sizeBytes": 21794,
+      "sha256": "5e1003e7234b26968d2fa6b2cc1d0c662f448a89e725a0dc1b68340101929008"
     },
     {
       "path": "src/demo/studentSelectors.ts",
@@ -1506,8 +1506,8 @@
     },
     {
       "path": "src/features/staff-workflow/useStaffWorkflowCoordination.ts",
-      "sizeBytes": 49738,
-      "sha256": "a0bc6d339753c37800f0100acc2a0bbbc2b8ad19e859bb2dee606517ae903a0c"
+      "sizeBytes": 50507,
+      "sha256": "93eed63833b130209f643b46e8f8e9de9218e65e4cab28e6a9e12e757542792c"
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
@@ -1526,8 +1526,8 @@
     },
     {
       "path": "src/features/student-portal/useStudentPortalWorkflow.ts",
-      "sizeBytes": 30742,
-      "sha256": "429c6b1febfcce56591974dff0afc8de66b41820e68d36c075fd0db36d23a3dc"
+      "sizeBytes": 31994,
+      "sha256": "9496ea61d28e613ed0c90a48ce8b65a5b35af60898b693d6c68ab9d237f9cf30"
     },
     {
       "path": "src/features/supplement-request/SupplementComposers.tsx",
@@ -1626,8 +1626,8 @@
     },
     {
       "path": "src/shared/api/httpClient.ts",
-      "sizeBytes": 6200,
-      "sha256": "0953fc1ad41bf41214d7eaa187f60f34548529db0893bb48d3d8e7633ba6132b"
+      "sizeBytes": 7147,
+      "sha256": "d4aaba6914fb755c2a810173abee103c301f255196e02aa9132b671f5d816d62"
     },
     {
       "path": "src/shared/api/r2EvidenceClient.ts",
@@ -1731,8 +1731,8 @@
     },
     {
       "path": "src/staff/collective/collectiveStoreCore.ts",
-      "sizeBytes": 6514,
-      "sha256": "ef7a0a5d128c4c3a506b13a640ad70cbaee404491e6cdd1f3dd831f9b1add725"
+      "sizeBytes": 6937,
+      "sha256": "7577dc420dcd03cf8cb1082f9e2ca8fc0082ab0872605d92c3ccf9b99cc65211"
     },
     {
       "path": "src/staff/collectiveStore.ts",

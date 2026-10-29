@@ -4,7 +4,7 @@
  * and home/results deep-linking handlers.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   StudentNotificationItem,
   NotificationDemoScenarioId,
@@ -274,6 +274,17 @@ export function useStudentPortalWorkflow({
     });
   }, [setNotifications]);
 
+  const putStudentViewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPutStudentViewSignatureRef = useRef<string>('');
+
+  useEffect(() => {
+    return () => {
+      if (putStudentViewTimerRef.current) {
+        clearTimeout(putStudentViewTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleApplicationChange = useCallback(
     (nextApp: StudentApplicationData) => {
       setSharedApplication(nextApp);
@@ -304,13 +315,29 @@ export function useStudentPortalWorkflow({
         });
       }
       if (isBackendMode() && targetAppId && nextApp.student?.studentId) {
-        apiRequest(
-          `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/student-view`,
-          {
-            method: 'PUT',
-            body: { application: nextApp, isUserMutation: true },
-          }
-        ).catch(() => {});
+        const signature = JSON.stringify({
+          applicationId: targetAppId,
+          status: nextApp.status,
+          criteria: nextApp.criteria,
+          otherAchievements: nextApp.otherAchievements,
+          student: nextApp.student,
+        });
+        if (signature === lastPutStudentViewSignatureRef.current) {
+          return;
+        }
+        if (putStudentViewTimerRef.current) {
+          clearTimeout(putStudentViewTimerRef.current);
+        }
+        putStudentViewTimerRef.current = setTimeout(() => {
+          lastPutStudentViewSignatureRef.current = signature;
+          apiRequest(
+            `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/student-view`,
+            {
+              method: 'PUT',
+              body: { application: nextApp, isUserMutation: true },
+            }
+          ).catch(() => {});
+        }, 300);
       }
     },
     [
@@ -324,8 +351,15 @@ export function useStudentPortalWorkflow({
 
   const handleApplicationSubmitted = useCallback(
     (submittedApp: StudentApplicationData) => {
-      const targetAppId = submittedApp.applicationId || HERO_STAFF_APP_ID;
-      setSharedApplication(submittedApp);
+      const cleanStudentId = String(submittedApp.student?.studentId || '').trim();
+      const targetAppId =
+        submittedApp.applicationId ||
+        (cleanStudentId ? `APP-2026-DN-${cleanStudentId}` : HERO_STAFF_APP_ID);
+      const normalizedSubmittedApp: StudentApplicationData = {
+        ...submittedApp,
+        applicationId: targetAppId,
+      };
+      setSharedApplication(normalizedSubmittedApp);
       setPrototypeScenarioId('under_review');
       setHomeScenario('state_g_under_review');
       setAppSubmissionState('under_review');
@@ -335,7 +369,7 @@ export function useStudentPortalWorkflow({
           `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/submit`,
           {
             method: 'POST',
-            body: { application: submittedApp },
+            body: { application: normalizedSubmittedApp },
           }
         ).catch(() => {});
       }

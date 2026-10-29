@@ -105,14 +105,44 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>;
 }
 
+const inFlightGetRequests = new Map<string, Promise<unknown>>();
+
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${baseUrl}${normalizedPath}`;
+  const method = options.method || 'GET';
 
   const currentActor = getApiActorContext();
   const actor = options.actor || currentActor;
   const effectiveToken = options.actor?.token || currentActor?.token;
+
+  if (method === 'GET' && options.body === undefined) {
+    const dedupeKey = `${effectiveToken || actor?.userId || 'anon'}:${url}`;
+    const existingPromise = inFlightGetRequests.get(dedupeKey);
+    if (existingPromise) {
+      return existingPromise as Promise<T>;
+    }
+    const requestPromise = executeApiRequest<T>(url, normalizedPath, method, options, actor, effectiveToken).finally(
+      () => {
+        inFlightGetRequests.delete(dedupeKey);
+      }
+    );
+    inFlightGetRequests.set(dedupeKey, requestPromise);
+    return requestPromise;
+  }
+
+  return executeApiRequest<T>(url, normalizedPath, method, options, actor, effectiveToken);
+}
+
+async function executeApiRequest<T>(
+  url: string,
+  normalizedPath: string,
+  method: string,
+  options: ApiRequestOptions,
+  actor: ApiActorContext | null,
+  effectiveToken: string | undefined
+): Promise<T> {
   const isV2Endpoint = normalizedPath.startsWith('/api/v2/') || normalizedPath === '/api/v2';
 
   const headers: Record<string, string> = {
@@ -150,7 +180,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   let response: Response;
   try {
     response = await fetch(url, {
-      method: options.method || 'GET',
+      method,
       headers,
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     });

@@ -14,7 +14,12 @@ import type {
 import { dbManager } from '../../shared/database/prismaClient';
 import { getEnvironment } from '../../config/environment';
 import { ApiError } from '../../shared/errors/apiError';
-import { portalState, savePortalStateToDisk } from '../domainPortal/domainPortal.state';
+import {
+  portalState,
+  savePortalStateToDisk,
+  isTestRuntime,
+  isLegacyMockOrTestAppId,
+} from '../domainPortal/domainPortal.state';
 
 export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingBatchRepository {
   private async getClient() {
@@ -252,26 +257,57 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
     });
 
     // 4. Synchronize portalState in-memory records if present
-    const selectedSet = new Set(resultDto.selectedApplicationIds || []);
-    if (selectedSet.size > 0 && Array.isArray(portalState?.individualStaffRecords)) {
+    const selectedSet = new Set<string>(resultDto.selectedApplicationIds || []);
+    if (selectedSet.size > 0) {
       const nowIso = now.toISOString();
-      portalState.individualStaffRecords = portalState.individualStaffRecords.map((rec: any) => {
-        if (!selectedSet.has(rec.applicationId)) return rec;
-        return {
-          ...rec,
-          currentReviewStage: 'CITY',
-          schoolPreliminaryStatus: 'forwarded_to_city',
-          workflowStatus: 'unassigned',
-          schoolReviewSummary: {
-            ...(rec.schoolReviewSummary || {}),
-            isForwardedToCity: true,
-            recommendation: 'recommended',
-            forwardedAt: nowIso,
-            forwardedBy: userId,
-          },
-          updatedAt: nowIso,
-        };
-      });
+      if (Array.isArray(portalState?.individualStaffRecords)) {
+        portalState.individualStaffRecords = portalState.individualStaffRecords.map((rec: any) => {
+          if (!selectedSet.has(rec.applicationId)) return rec;
+          const nextWorkspaceState = rec.workspaceState
+            ? {
+                ...rec.workspaceState,
+                currentReviewStage: 'CITY',
+                schoolPreliminaryStatus: 'forwarded_to_city',
+                schoolRecommendation: 'recommended',
+                workflowStatus: 'unassigned',
+                assignedOfficer: null,
+                isReviewCompleted: false,
+                overallReadinessStatus: 'pending_review',
+              }
+            : rec.workspaceState;
+          return {
+            ...rec,
+            currentReviewStage: 'CITY',
+            schoolPreliminaryStatus: 'forwarded_to_city',
+            schoolRecommendation: 'recommended',
+            workflowStatus: 'unassigned',
+            assignment: null,
+            reviewedCriteriaCount: 0,
+            workspaceState: nextWorkspaceState,
+            schoolReviewSummary: {
+              ...(rec.schoolReviewSummary || {}),
+              isForwardedToCity: true,
+              recommendation: 'recommended',
+              forwardedAt: nowIso,
+              forwardedBy: userId,
+            },
+            latestOperationalNote: `Đơn vị xét sơ tuyển đã chính thức chuyển hồ sơ lên cấp Đại học Đà Nẵng (${resultDto.dispatchNumber || 'Đợt chính thức'})`,
+            updatedAt: nowIso,
+            updatedSortKey: Date.now(),
+          };
+        });
+      }
+      if (portalState?.studentApplications && typeof portalState.studentApplications === 'object') {
+        for (const appId of selectedSet) {
+          const stuApp = portalState.studentApplications[appId];
+          if (stuApp) {
+            stuApp.reviewStage = 'CITY';
+            stuApp.schoolPreliminaryStatus = 'forwarded_to_city';
+            stuApp.schoolRecommendation = 'recommended';
+            stuApp.status = 'under_review';
+          }
+        }
+      }
       savePortalStateToDisk();
     }
 
@@ -399,7 +435,7 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       include: { institution: true },
     });
 
-    const dbApplications = await (prisma as any).individualApplication.findMany({
+    const rawDbApplications = await (prisma as any).individualApplication.findMany({
       where: {
         schoolReviewUnitId: unitId,
         seasonId: effectiveSeasonId,
@@ -408,18 +444,31 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
         institution: true,
       },
     });
+    const dbApplications = rawDbApplications.filter(
+      (a: any) =>
+        isTestRuntime() ||
+        (!isLegacyMockOrTestAppId(a.id) && !isLegacyMockOrTestAppId(a.applicationCode))
+    );
 
-    const dbAppIds = new Set(dbApplications.map((a: any) => a.id));
+    const dbAppIds = new Set<string>();
+    for (const a of dbApplications) {
+      if (a.id) dbAppIds.add(String(a.id));
+      if (a.applicationCode) dbAppIds.add(String(a.applicationCode));
+    }
     const portalUnitRecords = (portalState?.individualStaffRecords || []).filter(
-      (r: any) => r.schoolReviewUnitId === unitId && !dbAppIds.has(r.applicationId)
+      (r: any) =>
+        r.schoolReviewUnitId === unitId &&
+        !dbAppIds.has(r.applicationId) &&
+        (isTestRuntime() || !isLegacyMockOrTestAppId(r.applicationId))
     );
     const mergedPortalApps = portalUnitRecords.map((r: any) => ({
       id: r.applicationId,
-      institutionId: r.institutionId || unitId,
-      institution: { officialName: r.university || r.schoolReviewUnitName || unitId },
+      applicationCode: r.applicationId,
+      institutionId: r.institution?.id || r.institutionId || unitId,
+      institution: { officialName: r.institution?.officialName || r.university || r.schoolReviewUnitName || unitId },
       openSupplementCount: r.supplementSummary?.activeStatus === 'pending_student' ? 1 : 0,
       schoolPreliminaryStatus:
-        r.schoolPreliminaryStatus === 'forwarded_to_city'
+        r.schoolPreliminaryStatus === 'forwarded_to_city' || r.currentReviewStage === 'CITY'
           ? 'FORWARDED_TO_CITY'
           : r.schoolPreliminaryStatus === 'recommended_forwarding'
             ? 'ELIGIBLE_FOR_CITY'
@@ -465,15 +514,29 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
         withOpenSupplements++;
       }
 
+      const portalRec = (portalState?.individualStaffRecords || []).find(
+        (r: any) => r.applicationId === app.id || r.applicationId === app.applicationCode
+      );
+      const effectivePrelim =
+        portalRec?.schoolPreliminaryStatus === 'forwarded_to_city' ||
+        portalRec?.currentReviewStage === 'CITY'
+          ? 'FORWARDED_TO_CITY'
+          : portalRec?.schoolPreliminaryStatus === 'recommended_forwarding'
+            ? 'ELIGIBLE_FOR_CITY'
+            : portalRec?.schoolPreliminaryStatus === 'not_recommended'
+              ? 'NOT_ELIGIBLE_AT_SCHOOL'
+              : app.schoolPreliminaryStatus;
+
       if (
-        app.schoolPreliminaryStatus === 'FORWARDED_TO_CITY' ||
-        app.schoolPreliminaryStatus === 'ELIGIBLE_FOR_CITY' ||
-        draftSelectedSet.has(app.id)
+        effectivePrelim === 'FORWARDED_TO_CITY' ||
+        effectivePrelim === 'ELIGIBLE_FOR_CITY' ||
+        draftSelectedSet.has(app.id) ||
+        (app.applicationCode && draftSelectedSet.has(app.applicationCode))
       ) {
         reviewed++;
         selected++;
         item.selected++;
-      } else if (app.schoolPreliminaryStatus === 'NOT_ELIGIBLE_AT_SCHOOL') {
+      } else if (effectivePrelim === 'NOT_ELIGIBLE_AT_SCHOOL') {
         reviewed++;
         notSelected++;
       } else {

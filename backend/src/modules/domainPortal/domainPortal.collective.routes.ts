@@ -19,6 +19,7 @@ import {
   requireAllowedRoles,
   type StoredEvidenceRecord,
 } from './domainPortal.state';
+import { hydrateEvidenceRecordFromNeonDb } from './domainPortal.dbSync';
 
 export function registerCollectiveAndEvidencePortalRoutes(router: Router): void {
   // =========================================================================
@@ -737,7 +738,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     res.status(201).json({ success: true, data: stored });
   });
 
-  router.get('/evidence/:id', (req: Request, res: Response): void => {
+  router.get('/evidence/:id', async (req: Request, res: Response): Promise<void> => {
     const targetId = req.params.id;
     let record = portalState.evidenceIndex.get(targetId);
     if (!record) {
@@ -746,6 +747,12 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
           record = item;
           break;
         }
+      }
+    }
+    if (!record || !record.base64Content) {
+      const hydrated = await hydrateEvidenceRecordFromNeonDb(record?.id || targetId);
+      if (hydrated) {
+        record = hydrated;
       }
     }
     if (!record) {

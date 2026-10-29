@@ -528,6 +528,35 @@ export function savePersistedDemoSession(
   }
 }
 
+const LEGACY_MOCK_AND_TEST_APP_IDS = new Set<string>([
+  'APP-2026-DN-102220019',
+  'APP-2026-DN-102220084',
+  'APP-2026-DN-221121004512',
+  'APP-2026-DN-221121008901',
+  'APP-2026-DN-314220118',
+  'APP-2026-DN-411220056',
+  'APP-2026-DN-22115053120109',
+  'APP-2026-DN-22IT094',
+  'APP-2026-DN-22BA031',
+  'APP-2026-DN-22YD042',
+  'APP-2026-DN-22010018',
+  'APP-2026-DN-27211204912',
+  'APP-2026-DN-27212408831',
+  'APP-2026-DN-22DA05112',
+  'APP-2026-DN-22KTR019',
+  'APP-2026-DN-22TDTT088',
+  'APP-2026-DN-22DD0145',
+  'APP-2026-DN-22FPT067',
+  'APP-2026-DN-102220999',
+  'APP-2026-DN-201122334',
+]);
+
+export function isLegacyMockOrTestAppId(id?: string | null): boolean {
+  const clean = String(id || '').trim();
+  if (!clean) return false;
+  return LEGACY_MOCK_AND_TEST_APP_IDS.has(clean);
+}
+
 export function savePersistedOfficerWorkspaces(workspaces: unknown): void {
   if (typeof window === 'undefined') return;
   try {
@@ -549,7 +578,16 @@ export function loadPersistedOfficerWorkspaces<T>(): T | null {
     const raw =
       window.sessionStorage.getItem(STORAGE_KEYS.OFFICER_WORKSPACES) ||
       window.localStorage.getItem(STORAGE_KEYS.OFFICER_WORKSPACES);
-    return raw ? (JSON.parse(raw) as T) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (isBackendMode() && parsed && typeof parsed === 'object') {
+      for (const key of Object.keys(parsed)) {
+        if (isLegacyMockOrTestAppId(key)) {
+          delete parsed[key];
+        }
+      }
+    }
+    return parsed as unknown as T;
   } catch {
     return null;
   }
@@ -579,7 +617,11 @@ export function loadPersistedOfficerStudentApps<T>(): T | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Record<string, StudentApplicationData>;
     if (parsed && typeof parsed === 'object') {
-      for (const app of Object.values(parsed)) {
+      for (const [key, app] of Object.entries(parsed)) {
+        if (isBackendMode() && (isLegacyMockOrTestAppId(key) || isDemoFixtureApplication(app))) {
+          delete parsed[key];
+          continue;
+        }
         if (app && Array.isArray(app.criteria)) {
           app.criteria = buildCriteriaFromDefinitions(app.criteria);
         }
@@ -612,7 +654,14 @@ export function loadPersistedStaffApplications<T>(): T | null {
     const raw =
       window.sessionStorage.getItem(STORAGE_KEYS.STAFF_APPLICATIONS) ||
       window.localStorage.getItem(STORAGE_KEYS.STAFF_APPLICATIONS);
-    return raw ? (JSON.parse(raw) as T) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (isBackendMode() && Array.isArray(parsed)) {
+      return parsed.filter(
+        (item: { applicationId?: string }) => !isLegacyMockOrTestAppId(item?.applicationId)
+      ) as unknown as T;
+    }
+    return parsed as T;
   } catch {
     return null;
   }

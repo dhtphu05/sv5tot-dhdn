@@ -26,14 +26,30 @@ setInterval(() => {
 }, 300000).unref();
 
 export function rateLimiterMiddleware(req: Request, res: Response, next: NextFunction): void {
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   const env = getEnvironment();
-  const clientIp = (req.ip || req.socket.remoteAddress || 'unknown').replace('::ffff:', '');
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const rawIp =
+    (typeof forwardedFor === 'string' ? forwardedFor.split(',')[0]?.trim() : '') ||
+    req.ip ||
+    req.socket.remoteAddress ||
+    'unknown';
+  const clientIp = rawIp.replace('::ffff:', '');
+  const authHeader = req.headers.authorization;
+  const tokenKey =
+    typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(-24)
+      : 'anon';
+  const bucketKey = `${clientIp}:${tokenKey}`;
   const now = Date.now();
 
-  let record = clientHits.get(clientIp);
+  let record = clientHits.get(bucketKey);
   if (!record) {
     record = { timestamps: [] };
-    clientHits.set(clientIp, record);
+    clientHits.set(bucketKey, record);
   }
 
   // Filter out timestamps outside window

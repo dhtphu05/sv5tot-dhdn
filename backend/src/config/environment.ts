@@ -133,7 +133,7 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     DB_CONNECT_TIMEOUT_MS: Number(env.DB_CONNECT_TIMEOUT_MS) || 5000,
     DB_SLOW_QUERY_WARN_MS: Number(env.DB_SLOW_QUERY_WARN_MS) || 200,
     RATE_LIMIT_WINDOW_MS: Number(env.RATE_LIMIT_WINDOW_MS) || 60000,
-    RATE_LIMIT_MAX_REQUESTS: Number(env.RATE_LIMIT_MAX_REQUESTS) || 300,
+    RATE_LIMIT_MAX_REQUESTS: Number(env.RATE_LIMIT_MAX_REQUESTS) || 3000,
     JWT_ACCESS_SECRET: jwtAccessSecret,
     JWT_ACCESS_TTL_SECONDS: Number(env.JWT_ACCESS_TTL_SECONDS) || 900, // 15m
     REFRESH_TOKEN_TTL_SECONDS: Number(env.REFRESH_TOKEN_TTL_SECONDS) || 604800, // 7d

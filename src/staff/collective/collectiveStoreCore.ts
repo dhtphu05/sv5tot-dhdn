@@ -61,6 +61,27 @@ export function subscribeToCollectiveStore(listener: StoreListener): () => void 
   };
 }
 
+const LEGACY_MOCK_COLLECTIVE_IDS = new Set<string>([
+  'COL-2026-DN-MVPM6A7N',
+  'COL-2026-DN-MVPM6BWD',
+  'COL-2026-DN-MVPO9W6K',
+  'COL-2026-DN-MVT5O4PK',
+  'COL-2026-DN-MVPO9ZFC',
+  'COL-2026-DN-MVPO9XW1',
+  'COL-2026-DN-MVPM6DI5',
+  'COL-2026-DN-MVR6LAXP',
+  'col-app-2026-dut-cntt',
+  'col-app-2026-due-qt',
+  'col-app-2026-ued-sp',
+  'col-app-2026-dtu-kt',
+]);
+
+function isLegacyMockCollectiveId(id?: string | null): boolean {
+  const clean = String(id || '').trim();
+  if (!clean) return false;
+  return LEGACY_MOCK_COLLECTIVE_IDS.has(clean);
+}
+
 function loadApplicationsFromStorage(): CollectiveApplication[] {
   const defaultList = [
     INITIAL_DEMO_COLLECTIVE_APPLICATION,
@@ -85,7 +106,7 @@ function loadApplicationsFromStorage(): CollectiveApplication[] {
       return defaultList;
     }
     if (isBackendMode()) {
-      return parsed;
+      return parsed.filter((app: CollectiveApplication) => !isLegacyMockCollectiveId(app?.id));
     }
     // Ensure all 4 canonical demo apps are present in DEMO mode if not found
     const merged = [...parsed];
@@ -118,6 +139,15 @@ export function saveApplicationsToStorage(apps: CollectiveApplication[]): void {
 let cachedApps: CollectiveApplication[] | null = null;
 
 export function hydrateCollectiveStore(apps: CollectiveApplication[]): void {
+  if (isBackendMode()) {
+    const cleanRemote = (apps || []).filter(
+      (remote) => Boolean(remote?.id) && !isLegacyMockCollectiveId(remote.id)
+    );
+    cachedApps = cleanRemote;
+    saveApplicationsToStorage(cachedApps);
+    return;
+  }
+
   const existingLocal = getStoreApps();
   const mergedMap = new Map<string, CollectiveApplication>();
   for (const remote of apps || []) {
@@ -130,24 +160,12 @@ export function hydrateCollectiveStore(apps: CollectiveApplication[]): void {
     const remote = mergedMap.get(local.id);
     if (!remote) {
       mergedMap.set(local.id, local);
-      if (isBackendMode()) {
-        apiRequest(`/api/v2/portal/collective/applications/${encodeURIComponent(local.id)}`, {
-          method: 'PUT',
-          body: { application: local },
-        }).catch(() => {});
-      }
     } else if (
       local.updatedAt &&
       remote.updatedAt &&
       new Date(local.updatedAt).getTime() > new Date(remote.updatedAt).getTime()
     ) {
       mergedMap.set(local.id, local);
-      if (isBackendMode()) {
-        apiRequest(`/api/v2/portal/collective/applications/${encodeURIComponent(local.id)}`, {
-          method: 'PUT',
-          body: { application: local },
-        }).catch(() => {});
-      }
     }
   }
   cachedApps = Array.from(mergedMap.values());

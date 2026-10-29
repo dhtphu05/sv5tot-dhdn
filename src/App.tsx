@@ -376,6 +376,7 @@ export default function App() {
     setPrototypeScenarioId,
     setHomeScenario,
     setAppSubmissionState,
+    isActive: viewMode === 'staff_app',
   });
 
   const {

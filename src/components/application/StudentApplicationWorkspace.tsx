@@ -188,11 +188,13 @@ export const StudentApplicationWorkspace: React.FC<
   const [application, setApplication] =
     useState<StudentApplicationData>(() => initialData);
   const hasLocalMutationRef = useRef(false);
+  const pendingOutboundSyncRef = useRef(false);
 
   const setApplicationWithMutation = useCallback<
     React.Dispatch<React.SetStateAction<StudentApplicationData>>
   >((updater) => {
     hasLocalMutationRef.current = true;
+    pendingOutboundSyncRef.current = true;
     setApplication(updater);
   }, []);
 
@@ -232,6 +234,7 @@ export const StudentApplicationWorkspace: React.FC<
         prev.student.studentId !== initialData.student.studentId
       ) {
         hasLocalMutationRef.current = false;
+        pendingOutboundSyncRef.current = false;
         return initialData;
       }
 
@@ -567,7 +570,8 @@ export const StudentApplicationWorkspace: React.FC<
   };
 
   useEffect(() => {
-    if (!hasLocalMutationRef.current) return;
+    if (!hasLocalMutationRef.current || !pendingOutboundSyncRef.current) return;
+    pendingOutboundSyncRef.current = false;
     onApplicationChange?.(application);
   }, [application, onApplicationChange]);
 
@@ -578,8 +582,13 @@ export const StudentApplicationWorkspace: React.FC<
     setIsReviewPaused(false);
     setSubmissionState('under_review');
 
+    const cleanStudentId = String(application.student?.studentId || '').trim();
+    const resolvedAppId =
+      application.applicationId ||
+      (cleanStudentId ? `APP-2026-DN-${cleanStudentId}` : '');
     const submittedApp: StudentApplicationData = {
       ...application,
+      applicationId: resolvedAppId,
       status: 'under_review',
       reviewStage: 'SCHOOL',
       schoolPreliminaryStatus: 'pending_intake',

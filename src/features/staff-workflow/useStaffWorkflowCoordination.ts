@@ -230,6 +230,7 @@ export interface StaffWorkflowCoordinationOptions {
   setPrototypeScenarioId: (id: PrototypeScenarioId) => void;
   setHomeScenario: (id: HomeDevScenarioId) => void;
   setAppSubmissionState: (state: ApplicationSubmissionState) => void;
+  isActive?: boolean;
 }
 
 export function useStaffWorkflowCoordination({
@@ -247,6 +248,7 @@ export function useStaffWorkflowCoordination({
   setPrototypeScenarioId,
   setHomeScenario,
   setAppSubmissionState,
+  isActive = true,
 }: StaffWorkflowCoordinationOptions) {
   const [staffUser, setStaffUser] = useState<StaffUser>(
     () =>
@@ -375,7 +377,7 @@ export function useStaffWorkflowCoordination({
   });
 
   useEffect(() => {
-    if (!isBackendMode()) return;
+    if (!isBackendMode() || !isActive) return;
     let cancelled = false;
     const services = resolveDomainServices();
 
@@ -416,9 +418,14 @@ export function useStaffWorkflowCoordination({
             };
           }
         });
+        const validAppIds = new Set(records.map((r) => r.applicationId));
         if (Object.keys(inlineStudentApps).length > 0) {
           setOfficerStudentAppMap((prev) => {
-            const next = { ...prev, ...inlineStudentApps };
+            const next: Record<string, StudentApplicationData> = {};
+            for (const [k, v] of Object.entries(prev)) {
+              if (validAppIds.has(k)) next[k] = v;
+            }
+            Object.assign(next, inlineStudentApps);
             savePersistedOfficerStudentApps(next);
             return next;
           });
@@ -428,8 +435,12 @@ export function useStaffWorkflowCoordination({
             savePersistedOfficerWorkspaces({});
             return {};
           }
+          const prunedPrev: Record<string, ApplicationReviewWorkspaceState> = {};
+          for (const [k, v] of Object.entries(prev)) {
+            if (validAppIds.has(k)) prunedPrev[k] = v;
+          }
           const next: Record<string, ApplicationReviewWorkspaceState> = {
-            ...prev,
+            ...prunedPrev,
             ...backendWorkspaces,
           };
           records.forEach((rec) => {
@@ -487,7 +498,11 @@ export function useStaffWorkflowCoordination({
         );
         if (!cancelled && Object.keys(fetchedStudentMap).length > 0) {
           setOfficerStudentAppMap((prev) => {
-            const next = { ...prev, ...fetchedStudentMap };
+            const next: Record<string, StudentApplicationData> = {};
+            for (const [k, v] of Object.entries(prev)) {
+              if (validAppIds.has(k)) next[k] = v;
+            }
+            Object.assign(next, fetchedStudentMap);
             savePersistedOfficerStudentApps(next);
             return next;
           });
@@ -507,7 +522,13 @@ export function useStaffWorkflowCoordination({
     return () => {
       cancelled = true;
     };
-  }, [staffUser.id, staffUser.primaryRole, staffRouteId]);
+  }, [
+    isActive,
+    staffUser.id,
+    staffUser.primaryRole,
+    staffUser.schoolReviewUnitId,
+    staffRouteId,
+  ]);
 
   const handleApplyOfficerScenario = useCallback(
     (

@@ -651,6 +651,83 @@ export const portalState: PortalState = {
   ],
 };
 
+export function isTestRuntime(): boolean {
+  return (
+    process.env.NODE_ENV === 'test' ||
+    process.execArgv.includes('--test') ||
+    process.argv.includes('--test') ||
+    Boolean(
+      process.env.npm_lifecycle_event &&
+        process.env.npm_lifecycle_event.includes('test')
+    )
+  );
+}
+
+export const LEGACY_MOCK_AND_TEST_APP_IDS = new Set([
+  'APP-2026-DN-102220123',
+  'APP-2026-DN-102220999',
+  'APP-2026-DN-201122334',
+  'APP-2026-DN-00142',
+  'APP-2026-DN-102220019',
+  'APP-2026-DN-102220084',
+  'APP-2026-DN-221121004512',
+  'APP-2026-DN-221121008901',
+  'APP-2026-DN-314220118',
+  'APP-2026-DN-411220056',
+  'APP-2026-DN-22115053120109',
+  'APP-2026-DN-22IT094',
+  'APP-2026-DN-22BA031',
+  'APP-2026-DN-22YD042',
+  'APP-2026-DN-22010018',
+  'APP-2026-DN-27211204912',
+  'APP-2026-DN-27212408831',
+  'APP-2026-DN-22DA05112',
+  'APP-2026-DN-22KTR019',
+  'APP-2026-DN-22TDTT088',
+  'APP-2026-DN-22DD0145',
+  'APP-2026-DN-22FPT067',
+  'COL-2026-DN-MVPM6A7N',
+  'COL-2026-DN-MVPM6BWD',
+  'COL-2026-DN-MVPO9W6K',
+  'COL-2026-DN-MVT5O4PK',
+  'COL-2026-DN-MVPO9ZFC',
+  'COL-2026-DN-MVPO9XW1',
+  'COL-2026-DN-MVPM6DI5',
+  'COL-2026-DN-MVR6LAXP',
+  'col-app-2026-dut-01',
+  'col-app-2026-due-01',
+  'col-app-2026-ued-01',
+  'col-app-2026-vku-01',
+]);
+
+export function isLegacyMockOrTestAppId(id?: string | null): boolean {
+  if (!id) return false;
+  return LEGACY_MOCK_AND_TEST_APP_IDS.has(String(id).trim());
+}
+
+export function inferInstitutionIdFromName(rawName?: string | null): string | null {
+  const lower = String(rawName || '').trim().toLowerCase();
+  if (!lower) return null;
+  for (const [instId, info] of Object.entries(SCHOOL_UNIT_MAP)) {
+    if (
+      lower.includes(info.instName.toLowerCase()) ||
+      lower.includes(info.unitName.toLowerCase())
+    ) {
+      return instId === 'inst-ufls' ? 'inst-ufl' : instId;
+    }
+  }
+  if (lower.includes('kinh tế')) return 'inst-due';
+  if (lower.includes('sư phạm kỹ thuật')) return 'inst-ute';
+  if (lower.includes('sư phạm')) return 'inst-ued';
+  if (lower.includes('ngoại ngữ')) return 'inst-ufl';
+  if (lower.includes('việt - hàn') || lower.includes('việt – hàn') || lower.includes('vku')) return 'inst-vku';
+  if (lower.includes('y dược')) return 'inst-smp';
+  if (lower.includes('việt - anh') || lower.includes('việt – anh') || lower.includes('vnuk')) return 'inst-vnuk';
+  if (lower.includes('kon tum')) return 'inst-kontum';
+  if (lower.includes('bách khoa')) return 'inst-dut';
+  return null;
+}
+
 export function mergeStudentProfileObjects(
   base?: Record<string, any> | null,
   override?: Record<string, any> | null
@@ -671,7 +748,17 @@ export function mergeStudentProfileObjects(
     if (!Number.isNaN(bv) && bv > 0) return bv;
     return fallback;
   };
-  const instId = pickStr('institutionId', 'inst-dut');
+  const rawInstName = pickStr('institutionName');
+  const inferredInstId = inferInstitutionIdFromName(rawInstName);
+  const rawOvInstId = typeof o.institutionId === 'string' ? o.institutionId.trim() : '';
+  const rawBvInstId = typeof b.institutionId === 'string' ? b.institutionId.trim() : '';
+  const explicitInstId =
+    rawOvInstId && (rawOvInstId !== 'inst-dut' || !inferredInstId)
+      ? rawOvInstId
+      : rawBvInstId && (rawBvInstId !== 'inst-dut' || !inferredInstId)
+      ? rawBvInstId
+      : inferredInstId || rawOvInstId || rawBvInstId || 'inst-dut';
+  const instId = SCHOOL_UNIT_MAP[explicitInstId] ? explicitInstId : inferredInstId || 'inst-dut';
   return {
     fullName: pickStr('fullName'),
     gender: pickStr('gender'),
@@ -683,7 +770,7 @@ export function mergeStudentProfileObjects(
     homeProvince: pickStr('homeProvince'),
     institutionId: instId,
     institutionName:
-      pickStr('institutionName') || SCHOOL_UNIT_MAP[instId]?.instName || '',
+      rawInstName || SCHOOL_UNIT_MAP[instId]?.instName || '',
     unionPosition: pickStr('unionPosition'),
     politicalStatus: pickStr('politicalStatus'),
     phoneNumber: pickStr('phoneNumber'),
@@ -723,7 +810,8 @@ export function resolveSavedStudentProfileFromPortalState(keys: {
 
 export function syncStudentProfileInPortalState(
   profile: Record<string, any>,
-  keys: { userId?: string; email?: string; studentCode?: string }
+  keys: { userId?: string; email?: string; studentCode?: string },
+  options?: { skipSaveIfUnchanged?: boolean }
 ): Record<string, any> {
   const resolvedEmail = (keys.email || profile.email || '').trim().toLowerCase();
   let resolvedCode = (keys.studentCode || '').trim();
@@ -747,6 +835,8 @@ export function syncStudentProfileInPortalState(
     studentCode: resolvedCode,
   });
   const merged = mergeStudentProfileObjects(existing, profile);
+  const unchanged =
+    Boolean(existing) && JSON.stringify(existing) === JSON.stringify(merged);
 
   if (keys.userId) {
     portalState.studentProfiles.set(`id:${keys.userId}`, merged);
@@ -816,44 +906,87 @@ export function syncStudentProfileInPortalState(
     }
   }
 
-  savePortalStateToDisk();
+  if (!(options?.skipSaveIfUnchanged && unchanged)) {
+    savePortalStateToDisk();
+  }
   return merged;
 }
 
 let lastSavedPortalStateDiskJson = '';
+let diskSaveTimer: NodeJS.Timeout | null = null;
+let diskWriteInFlight = false;
+
+function schedulePortalStateDiskFlush(): void {
+  if (isTestRuntime()) return;
+  if (diskSaveTimer) {
+    clearTimeout(diskSaveTimer);
+  }
+  diskSaveTimer = setTimeout(() => {
+    diskSaveTimer = null;
+    if (diskWriteInFlight) {
+      schedulePortalStateDiskFlush();
+      return;
+    }
+    try {
+      const dir = path.dirname(PORTAL_STATE_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      // Exclude multi-megabyte base64Content from the snapshot file so serialization stays <500KB and non-blocking
+      const lightweightEvidenceEntries: Array<[string, StoredEvidenceRecord]> = [];
+      for (const [evId, ev] of portalState.evidenceIndex.entries()) {
+        if (ev.base64Content && ev.base64Content.length > 4096) {
+          const { base64Content: _omitted, ...metadataOnly } = ev;
+          lightweightEvidenceEntries.push([evId, metadataOnly]);
+        } else {
+          lightweightEvidenceEntries.push([evId, ev]);
+        }
+      }
+      const payload = {
+        sessions: Array.from(portalState.sessions.entries()).slice(-200),
+        registeredStudents: Array.from(portalState.registeredStudents.entries()),
+        studentProfiles: Array.from(portalState.studentProfiles.entries()),
+        individualStaffRecords: portalState.individualStaffRecords,
+        studentApplications: portalState.studentApplications,
+        collectiveApplications: portalState.collectiveApplications,
+        evidenceIndex: lightweightEvidenceEntries,
+        auditLogs: portalState.auditLogs.slice(0, 500),
+      };
+      const serialized = JSON.stringify(payload);
+      if (serialized !== lastSavedPortalStateDiskJson) {
+        lastSavedPortalStateDiskJson = serialized;
+        diskWriteInFlight = true;
+        void fs.promises
+          .writeFile(PORTAL_STATE_FILE_PATH, serialized, 'utf8')
+          .catch(() => {})
+          .finally(() => {
+            diskWriteInFlight = false;
+          });
+      }
+    } catch {
+      diskWriteInFlight = false;
+    }
+  }, 250);
+  if (diskSaveTimer.unref) {
+    diskSaveTimer.unref();
+  }
+}
 
 export function savePortalStateToDisk(): void {
-  if (process.env.NODE_ENV === 'test') return;
-  try {
-    const dir = path.dirname(PORTAL_STATE_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const payload = {
-      sessions: Array.from(portalState.sessions.entries()).slice(-200),
-      registeredStudents: Array.from(portalState.registeredStudents.entries()),
-      studentProfiles: Array.from(portalState.studentProfiles.entries()),
-      individualStaffRecords: portalState.individualStaffRecords,
-      studentApplications: portalState.studentApplications,
-      collectiveApplications: portalState.collectiveApplications,
-      evidenceIndex: Array.from(portalState.evidenceIndex.entries()),
-      auditLogs: portalState.auditLogs.slice(0, 500),
-    };
-    const serialized = JSON.stringify(payload, null, 2);
-    if (serialized !== lastSavedPortalStateDiskJson) {
-      lastSavedPortalStateDiskJson = serialized;
-      fs.writeFileSync(PORTAL_STATE_FILE_PATH, serialized, 'utf8');
-    }
-  } catch {
-    // Ignore disk write errors in read-only environments
-  }
+  if (isTestRuntime()) return;
+  schedulePortalStateDiskFlush();
   schedulePortalStateNeonDbSync();
 }
 
 export function loadPortalStateFromDisk(): boolean {
-  if (process.env.NODE_ENV === 'test') return false;
+  if (isTestRuntime()) return false;
   try {
     if (!fs.existsSync(PORTAL_STATE_FILE_PATH)) return false;
+    const stat = fs.statSync(PORTAL_STATE_FILE_PATH);
+    // Skip synchronous loading if a legacy >15MB bloated cache file is sitting in /tmp (Neon DB hydration will populate cleanly)
+    if (stat.size > 15 * 1024 * 1024) {
+      return false;
+    }
     const raw = fs.readFileSync(PORTAL_STATE_FILE_PATH, 'utf8');
     lastSavedPortalStateDiskJson = raw;
     const parsed = JSON.parse(raw) as {
@@ -876,8 +1009,9 @@ export function loadPortalStateFromDisk(): boolean {
       portalState.studentProfiles = new Map(parsed.studentProfiles);
     }
     if (Array.isArray(parsed.individualStaffRecords)) {
-      portalState.individualStaffRecords = parsed.individualStaffRecords.map(
-        (rec) => {
+      portalState.individualStaffRecords = parsed.individualStaffRecords
+        .filter((rec) => !isLegacyMockOrTestAppId(rec?.applicationId))
+        .map((rec) => {
           if (rec?.assignment?.officerId) {
             return {
               ...rec,
@@ -895,15 +1029,21 @@ export function loadPortalStateFromDisk(): boolean {
             };
           }
           return rec;
-        }
-      );
+        });
     }
     if (parsed.studentApplications && typeof parsed.studentApplications === 'object') {
-      portalState.studentApplications = parsed.studentApplications;
+      const cleanedApps: Record<string, Record<string, any>> = {};
+      for (const [k, v] of Object.entries(parsed.studentApplications)) {
+        if (!isLegacyMockOrTestAppId(k) && !isLegacyMockOrTestAppId(v?.applicationId)) {
+          cleanedApps[k] = v;
+        }
+      }
+      portalState.studentApplications = cleanedApps;
     }
     if (Array.isArray(parsed.collectiveApplications)) {
-      portalState.collectiveApplications = parsed.collectiveApplications.map(
-        (col) => {
+      portalState.collectiveApplications = parsed.collectiveApplications
+        .filter((col) => !isLegacyMockOrTestAppId(col?.id || col?.applicationId))
+        .map((col) => {
           if (col?.assignedOfficerId) {
             return {
               ...col,
@@ -912,14 +1052,15 @@ export function loadPortalStateFromDisk(): boolean {
             };
           }
           return col;
-        }
-      );
+        });
     }
     if (Array.isArray(parsed.evidenceIndex)) {
       portalState.evidenceIndex = new Map(parsed.evidenceIndex);
     }
     if (Array.isArray(parsed.auditLogs)) {
-      portalState.auditLogs = parsed.auditLogs;
+      portalState.auditLogs = parsed.auditLogs.filter(
+        (log) => !isLegacyMockOrTestAppId(log?.applicationId)
+      );
     }
     return true;
   } catch {
@@ -988,6 +1129,9 @@ export function appendPortalAuditLog(
     ...entry,
   };
   portalState.auditLogs.unshift(record);
+  if (portalState.auditLogs.length > 500) {
+    portalState.auditLogs.length = 500;
+  }
   savePortalStateToDisk();
   return record;
 }
@@ -1074,6 +1218,8 @@ export function requireAllowedRoles(...allowedRoles: string[]) {
   };
 }
 
+const verifiedUserRoleAssignmentCache = new Set<string>();
+
 export async function issueZeroTrustJwtToken(
   deps: { sessionService: SessionService; identityRepo: IIdentityRepository },
   params: {
@@ -1085,12 +1231,18 @@ export async function issueZeroTrustJwtToken(
     unitId?: string;
     studentCode?: string;
     password?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    existingUser?: any;
+    passwordAlreadyVerified?: boolean;
   }
 ): Promise<{ userId: string; accessToken: string }> {
   try {
-    let existing = await deps.identityRepo.findByEmail(params.email);
-    if (!existing && params.studentCode) {
-      existing = await deps.identityRepo.findByStudentCode(params.studentCode);
+    let existing = params.existingUser ?? null;
+    if (!existing) {
+      existing = await deps.identityRepo.findByEmail(params.email);
+      if (!existing && params.studentCode) {
+        existing = await deps.identityRepo.findByStudentCode(params.studentCode);
+      }
     }
     if (!existing) {
       const passwordHash = await defaultPasswordHasher.hash(params.password || 'MatKhau@2026');
@@ -1113,8 +1265,11 @@ export async function issueZeroTrustJwtToken(
           grantedByUserId: 'system-portal',
         });
       }
+      if (existing) {
+        verifiedUserRoleAssignmentCache.add(`${existing.id}:${params.role}`);
+      }
     } else {
-      if (params.password) {
+      if (params.password && !params.passwordAlreadyVerified) {
         const matchesExisting = existing.passwordHash
           ? await defaultPasswordHasher
               .verify(existing.passwordHash, params.password)
@@ -1122,15 +1277,19 @@ export async function issueZeroTrustJwtToken(
           : false;
         if (!matchesExisting) {
           const nextHash = await defaultPasswordHasher.hash(params.password);
-          await deps.identityRepo.updatePasswordHash(existing.id, nextHash).catch(() => {});
+          void deps.identityRepo.updatePasswordHash(existing.id, nextHash).catch(() => {});
           existing = { ...existing, passwordHash: nextHash };
         }
       }
-      const roles = await deps.identityRepo.getUserRoles(existing.id).catch(() => []);
-      if (!roles.some((r) => r.isActive && r.roleCode === params.role)) {
-        await deps.identityRepo
-          .addRoleAssignment(existing.id, params.role, params.unitId || null, 'system-portal')
-          .catch(() => {});
+      const roleCacheKey = `${existing.id}:${params.role}`;
+      if (!verifiedUserRoleAssignmentCache.has(roleCacheKey)) {
+        const roles = await deps.identityRepo.getUserRoles(existing.id).catch(() => []);
+        if (!roles.some((r) => r.isActive && r.roleCode === params.role)) {
+          await deps.identityRepo
+            .addRoleAssignment(existing.id, params.role, params.unitId || null, 'system-portal')
+            .catch(() => {});
+        }
+        verifiedUserRoleAssignmentCache.add(roleCacheKey);
       }
     }
     if (existing && params.fullName && existing.fullName !== params.fullName) {

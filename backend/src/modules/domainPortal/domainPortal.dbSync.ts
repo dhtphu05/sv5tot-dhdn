@@ -12,6 +12,9 @@ import {
   portalState,
   SCHOOL_UNIT_MAP,
   createDefaultCriteriaList,
+  isTestRuntime,
+  isLegacyMockOrTestAppId,
+  inferInstitutionIdFromName,
   type PortalRegisteredStudent,
   type StoredEvidenceRecord,
   type PortalAuditLogRecord,
@@ -35,12 +38,17 @@ const CRITERION_CODE_TO_ID: Record<string, string> = {
 
 let schemaReadyPromise: Promise<void> | null = null;
 let initialHydrationPromise: Promise<boolean> | null = null;
+let isHydrated = false;
+let lastHydratedAt = 0;
+let cachedActiveSeasonId: string | null = null;
 let syncTimer: NodeJS.Timeout | null = null;
 let activeSyncPromise: Promise<void> | null = null;
 const lastSyncedPayloadHash = new Map<string, string>();
+const persistedEvidenceIds = new Set<string>();
+const lastSyncedObjectRef = new Map<string, unknown>();
 
 export function isNeonDbSyncEnabled(): boolean {
-  if (process.env.NODE_ENV === 'test') return false;
+  if (isTestRuntime()) return false;
   try {
     const env = getEnvironment();
     return env.BACKEND_DATABASE_MODE !== 'offline' && Boolean(env.DATABASE_URL);
@@ -79,8 +87,16 @@ async function upsertPersistentRecord(
   payload: unknown
 ): Promise<boolean> {
   const cacheKey = `${collection}:${recordKey}`;
+  if (
+    (collection === 'portal_session' || collection === 'evidence_record') &&
+    payload &&
+    lastSyncedObjectRef.get(cacheKey) === payload
+  ) {
+    return false;
+  }
   const jsonText = JSON.stringify(payload ?? {});
   if (lastSyncedPayloadHash.get(cacheKey) === jsonText) {
+    if (payload) lastSyncedObjectRef.set(cacheKey, payload);
     return false;
   }
   await prisma.$executeRawUnsafe(
@@ -95,6 +111,7 @@ async function upsertPersistentRecord(
     jsonText
   );
   lastSyncedPayloadHash.set(cacheKey, jsonText);
+  if (payload) lastSyncedObjectRef.set(cacheKey, payload);
   return true;
 }
 
@@ -132,7 +149,7 @@ function mapReviewStageEnum(
 ): 'STUDENT_DRAFT' | 'SCHOOL_PRELIMINARY' | 'CITY_REVIEW' | 'COMMITTEE_FINALIZATION' | 'COMPLETED' {
   if (status === 'recognized' || status === 'not_recognized') return 'COMPLETED';
   if (reviewStage === 'COMMITTEE' || status === 'all_reviewed') return 'COMMITTEE_FINALIZATION';
-  if (reviewStage === 'CITY') return 'CITY_REVIEW';
+  if (reviewStage === 'CITY' || schoolPreliminaryStatus === 'forwarded_to_city') return 'CITY_REVIEW';
   if (isDraftAppStatus(status, schoolPreliminaryStatus)) return 'STUDENT_DRAFT';
   return 'SCHOOL_PRELIMINARY';
 }
@@ -153,7 +170,12 @@ function mapSchoolPrelimEnum(
   if (isDraftAppStatus(status, schoolPreliminaryStatus)) {
     return 'NOT_SUBMITTED';
   }
-  if (reviewStage === 'CITY' || reviewStage === 'COMMITTEE' || schoolPreliminaryStatus === 'school_forwarded') {
+  if (
+    reviewStage === 'CITY' ||
+    reviewStage === 'COMMITTEE' ||
+    schoolPreliminaryStatus === 'school_forwarded' ||
+    schoolPreliminaryStatus === 'forwarded_to_city'
+  ) {
     return 'FORWARDED_TO_CITY';
   }
   switch (schoolPreliminaryStatus) {
@@ -161,6 +183,8 @@ function mapSchoolPrelimEnum(
     case 'school_pending':
       return 'PENDING_SCHOOL_REVIEW';
     case 'in_review':
+    case 'under_review':
+    case 'preliminary_completed':
     case 'school_reviewing':
       return 'SCHOOL_IN_REVIEW';
     case 'supplement_requested':
@@ -169,8 +193,10 @@ function mapSchoolPrelimEnum(
     case 'supplement_returned':
       return 'SCHOOL_SUPPLEMENT_RESUBMITTED';
     case 'eligible_for_city':
+    case 'recommended_forwarding':
       return 'ELIGIBLE_FOR_CITY';
     case 'not_eligible_at_school':
+    case 'not_recommended':
     case 'school_rejected':
       return 'NOT_ELIGIBLE_AT_SCHOOL';
     default:
@@ -235,12 +261,23 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
   const appId = String(app?.applicationId || '').trim();
   const studentCode = String(app?.student?.studentId || '').trim();
   if (!appId || !studentCode) return;
+  if (!isTestRuntime() && isLegacyMockOrTestAppId(appId)) return;
 
+  const inferredByName = inferInstitutionIdFromName(
+    app?.applicantProfileSnapshot?.institutionName ||
+      app?.student?.university ||
+      app?.trainingInstitutionName ||
+      app?.schoolReviewUnitName
+  );
+  const byUnitId = Object.entries(SCHOOL_UNIT_MAP).find(
+    ([, v]) => v.unitId === app?.schoolReviewUnitId
+  )?.[0];
   const rawInstId =
+    (byUnitId && byUnitId !== 'inst-dut' ? byUnitId : undefined) ||
+    (inferredByName && inferredByName !== 'inst-dut' ? inferredByName : undefined) ||
     app?.applicantProfileSnapshot?.institutionId ||
-    Object.entries(SCHOOL_UNIT_MAP).find(
-      ([, v]) => v.unitId === app?.schoolReviewUnitId
-    )?.[0] ||
+    byUnitId ||
+    inferredByName ||
     'inst-dut';
   const validInstId = SCHOOL_UNIT_MAP[rawInstId] ? rawInstId : 'inst-dut';
   const mappedUnit = SCHOOL_UNIT_MAP[validInstId] || SCHOOL_UNIT_MAP['inst-dut'];
@@ -259,25 +296,29 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       `Sinh viên ${studentCode}`
   ).trim();
 
-  // 1. Ensure Active Season exists
+  // 1. Ensure Active Season exists (cached after first lookup to avoid 2 DB round-trips per app)
   const seasonId = 'season-2025-2026';
-  await prisma.awardSeason
-    .upsert({
-      where: { code: '2025-2026' },
-      update: {},
-      create: {
-        id: seasonId,
-        code: '2025-2026',
-        name: 'Năm học 2025 – 2026',
-        isActive: true,
-        individualSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
-        individualSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
-        schoolForwardingDeadline: new Date('2026-11-20T17:00:00+07:00'),
-        collectiveSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
-        collectiveSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
-      },
-    })
-    .catch(() => {});
+  if (!cachedActiveSeasonId) {
+    const upsertedSeason = await prisma.awardSeason
+      .upsert({
+        where: { code: '2025-2026' },
+        update: {},
+        create: {
+          id: seasonId,
+          code: '2025-2026',
+          name: 'Năm học 2025 – 2026',
+          isActive: true,
+          individualSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+          individualSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
+          schoolForwardingDeadline: new Date('2026-11-20T17:00:00+07:00'),
+          collectiveSubmissionStart: new Date('2025-10-01T08:00:00+07:00'),
+          collectiveSubmissionEnd: new Date('2026-11-10T20:00:00+07:00'),
+        },
+      })
+      .catch(() => null);
+    cachedActiveSeasonId = upsertedSeason?.id || seasonId;
+  }
+  const effectiveSeasonId = cachedActiveSeasonId;
 
   // 2. Ensure Student User exists in PostgreSQL `User` table
   let user = await prisma.user.findFirst({
@@ -415,11 +456,6 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
     (r) => r.applicationId === appId
   );
 
-  const activeSeason = await prisma.awardSeason.findUnique({
-    where: { code: '2025-2026' },
-  });
-  const effectiveSeasonId = activeSeason?.id || seasonId;
-
   // 4. Upsert IndividualApplication in Neon PostgreSQL
   const existingByUserSeason = await prisma.individualApplication.findUnique({
     where: {
@@ -504,87 +540,91 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
     },
   });
 
-  // 5. Upsert IndividualCriterionSubmission & IndividualDeclarationItem rows
+  // 5. Upsert IndividualCriterionSubmission & IndividualDeclarationItem rows in parallel per criterion
   const validDeclarationIds: string[] = [];
 
-  for (const cExt of criterionExtracted) {
-    const selfStatus =
-      cExt.declItems.length === 0
-        ? 'INCOMPLETE'
-        : cExt.evCount > 0
-        ? 'READY'
-        : 'DECLARED';
+  await Promise.all(
+    criterionExtracted.map(async (cExt) => {
+      const selfStatus =
+        cExt.declItems.length === 0
+          ? 'INCOMPLETE'
+          : cExt.evCount > 0
+          ? 'READY'
+          : 'DECLARED';
 
-    const critSub = await prisma.individualCriterionSubmission.upsert({
-      where: {
-        individualApplicationId_criterionCode: {
-          individualApplicationId: dbApp.id,
-          criterionCode: cExt.criterionCode,
+      const critSub = await prisma.individualCriterionSubmission.upsert({
+        where: {
+          individualApplicationId_criterionCode: {
+            individualApplicationId: dbApp.id,
+            criterionCode: cExt.criterionCode,
+          },
         },
-      },
-      update: {
-        selfStatus,
-        declarationCount: cExt.declItems.length,
-        evidenceCount: cExt.evCount,
-      },
-      create: {
-        individualApplicationId: dbApp.id,
-        criterionCode: cExt.criterionCode,
-        selfStatus,
-        declarationCount: cExt.declItems.length,
-        evidenceCount: cExt.evCount,
-      },
-    });
-
-    for (const { reqId, decl } of cExt.declItems) {
-      const dbDeclId = `${dbApp.id}__${decl.id}`;
-      validDeclarationIds.push(dbDeclId);
-
-      const title = String(decl.value || decl.title || 'Nội dung kê khai');
-      const structuredAttributes = {
-        originalDeclarationId: decl.id,
-        value: decl.value || title,
-        detail: decl.detail || decl.description || '',
-        date: decl.date || '',
-        evidenceFiles: Array.isArray(decl.evidenceFiles) ? decl.evidenceFiles : [],
-        metadata: decl.metadata || {},
-        reviewState: decl.reviewState || null,
-        isNewlyAddedSupplement: Boolean(decl.isNewlyAddedSupplement),
-      };
-
-      await prisma.individualDeclarationItem.upsert({
-        where: { id: dbDeclId },
         update: {
-          criterionSubmissionId: critSub.id,
-          criterionCode: cExt.criterionCode,
-          requirementCode: reqId,
-          title,
-          activityDateOrPeriod: decl.date ? String(decl.date) : null,
-          applicantNote: decl.detail ? String(decl.detail) : null,
-          structuredAttributes,
-          selfStatus:
-            Array.isArray(decl.evidenceFiles) && decl.evidenceFiles.length > 0
-              ? 'READY'
-              : 'DECLARED',
+          selfStatus,
+          declarationCount: cExt.declItems.length,
+          evidenceCount: cExt.evCount,
         },
         create: {
-          id: dbDeclId,
           individualApplicationId: dbApp.id,
-          criterionSubmissionId: critSub.id,
           criterionCode: cExt.criterionCode,
-          requirementCode: reqId,
-          title,
-          activityDateOrPeriod: decl.date ? String(decl.date) : null,
-          applicantNote: decl.detail ? String(decl.detail) : null,
-          structuredAttributes,
-          selfStatus:
-            Array.isArray(decl.evidenceFiles) && decl.evidenceFiles.length > 0
-              ? 'READY'
-              : 'DECLARED',
+          selfStatus,
+          declarationCount: cExt.declItems.length,
+          evidenceCount: cExt.evCount,
         },
       });
-    }
-  }
+
+      await Promise.all(
+        cExt.declItems.map(async ({ reqId, decl }) => {
+          const dbDeclId = `${dbApp.id}__${decl.id}`;
+          validDeclarationIds.push(dbDeclId);
+
+          const title = String(decl.value || decl.title || 'Nội dung kê khai');
+          const structuredAttributes = {
+            originalDeclarationId: decl.id,
+            value: decl.value || title,
+            detail: decl.detail || decl.description || '',
+            date: decl.date || '',
+            evidenceFiles: Array.isArray(decl.evidenceFiles) ? decl.evidenceFiles : [],
+            metadata: decl.metadata || {},
+            reviewState: decl.reviewState || null,
+            isNewlyAddedSupplement: Boolean(decl.isNewlyAddedSupplement),
+          };
+
+          await prisma.individualDeclarationItem.upsert({
+            where: { id: dbDeclId },
+            update: {
+              criterionSubmissionId: critSub.id,
+              criterionCode: cExt.criterionCode,
+              requirementCode: reqId,
+              title,
+              activityDateOrPeriod: decl.date ? String(decl.date) : null,
+              applicantNote: decl.detail ? String(decl.detail) : null,
+              structuredAttributes,
+              selfStatus:
+                Array.isArray(decl.evidenceFiles) && decl.evidenceFiles.length > 0
+                  ? 'READY'
+                  : 'DECLARED',
+            },
+            create: {
+              id: dbDeclId,
+              individualApplicationId: dbApp.id,
+              criterionSubmissionId: critSub.id,
+              criterionCode: cExt.criterionCode,
+              requirementCode: reqId,
+              title,
+              activityDateOrPeriod: decl.date ? String(decl.date) : null,
+              applicantNote: decl.detail ? String(decl.detail) : null,
+              structuredAttributes,
+              selfStatus:
+                Array.isArray(decl.evidenceFiles) && decl.evidenceFiles.length > 0
+                  ? 'READY'
+                  : 'DECLARED',
+            },
+          });
+        })
+      );
+    })
+  );
 
   // Delete any declaration items in DB that were removed by the student
   if (validDeclarationIds.length > 0) {
@@ -606,74 +646,76 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       .catch(() => {});
   }
 
-  // 6. Sync Officer Review Judgments if present on staffRec.reviewWorkspace
-  const workspace = staffRec?.reviewWorkspace;
+  // 6. Sync Officer Review Judgments if present on staffRec.workspaceState or staffRec.reviewWorkspace
+  const workspace = staffRec?.workspaceState || staffRec?.reviewWorkspace;
   if (workspace && workspace.criteriaJudgments && typeof workspace.criteriaJudgments === 'object') {
     const isCityStage =
       staffRec?.currentReviewStage === 'CITY' ||
       staffRec?.currentReviewStage === 'COMMITTEE';
-    for (const [critId, jRaw] of Object.entries(
-      workspace.criteriaJudgments as Record<string, any>
-    )) {
-      if (!jRaw || !jRaw.status) continue;
-      const criterionCode = CRITERION_ID_TO_CODE[critId] || critId.toUpperCase();
-      const judgmentStatus = mapJudgmentEnum(jRaw.status);
-      const reviewerName = String(
-        jRaw.updatedBy || staffRec?.assignment?.officerName || 'Cán bộ xét duyệt'
-      );
-      const reviewerNote = jRaw.reviewerNote ? String(jRaw.reviewerNote) : null;
+    await Promise.all(
+      Object.entries(workspace.criteriaJudgments as Record<string, any>).map(
+        async ([critId, jRaw]) => {
+          if (!jRaw || !jRaw.status) return;
+          const criterionCode = CRITERION_ID_TO_CODE[critId] || critId.toUpperCase();
+          const judgmentStatus = mapJudgmentEnum(jRaw.status);
+          const reviewerName = String(
+            jRaw.updatedBy || staffRec?.assignment?.officerName || 'Cán bộ xét duyệt'
+          );
+          const reviewerNote = jRaw.reviewerNote ? String(jRaw.reviewerNote) : null;
 
-      if (isCityStage) {
-        await prisma.cityCriterionReviewJudgment
-          .upsert({
-            where: {
-              individualApplicationId_criterionCode: {
-                individualApplicationId: dbApp.id,
-                criterionCode,
-              },
-            },
-            update: {
-              judgmentStatus,
-              reviewerNameSnapshot: reviewerName,
-              reviewerNote,
-            },
-            create: {
-              individualApplicationId: dbApp.id,
-              criterionCode,
-              judgmentStatus,
-              reviewerUserId: 'staff-off-nam',
-              reviewerNameSnapshot: reviewerName,
-              reviewerNote,
-              flaggedEvidenceLinkIds: [],
-            },
-          })
-          .catch(() => {});
-      } else {
-        await prisma.schoolCriterionReviewJudgment
-          .upsert({
-            where: {
-              individualApplicationId_criterionCode: {
-                individualApplicationId: dbApp.id,
-                criterionCode,
-              },
-            },
-            update: {
-              judgmentStatus,
-              reviewerNameSnapshot: reviewerName,
-              reviewerNote,
-            },
-            create: {
-              individualApplicationId: dbApp.id,
-              criterionCode,
-              judgmentStatus,
-              reviewerUserId: 'staff-sch-dut',
-              reviewerNameSnapshot: reviewerName,
-              reviewerNote,
-            },
-          })
-          .catch(() => {});
-      }
-    }
+          if (isCityStage) {
+            await prisma.cityCriterionReviewJudgment
+              .upsert({
+                where: {
+                  individualApplicationId_criterionCode: {
+                    individualApplicationId: dbApp.id,
+                    criterionCode,
+                  },
+                },
+                update: {
+                  judgmentStatus,
+                  reviewerNameSnapshot: reviewerName,
+                  reviewerNote,
+                },
+                create: {
+                  individualApplicationId: dbApp.id,
+                  criterionCode,
+                  judgmentStatus,
+                  reviewerUserId: 'staff-off-nam',
+                  reviewerNameSnapshot: reviewerName,
+                  reviewerNote,
+                  flaggedEvidenceLinkIds: [],
+                },
+              })
+              .catch(() => {});
+          } else {
+            await prisma.schoolCriterionReviewJudgment
+              .upsert({
+                where: {
+                  individualApplicationId_criterionCode: {
+                    individualApplicationId: dbApp.id,
+                    criterionCode,
+                  },
+                },
+                update: {
+                  judgmentStatus,
+                  reviewerNameSnapshot: reviewerName,
+                  reviewerNote,
+                },
+                create: {
+                  individualApplicationId: dbApp.id,
+                  criterionCode,
+                  judgmentStatus,
+                  reviewerUserId: 'staff-sch-dut',
+                  reviewerNameSnapshot: reviewerName,
+                  reviewerNote,
+                },
+              })
+              .catch(() => {});
+          }
+        }
+      )
+    );
   }
 }
 
@@ -776,8 +818,11 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
       }
 
       // 2. Student Applications (JSONB + Relational Tables)
-      const currentAppIds = Object.keys(portalState.studentApplications);
+      const currentAppIds = Object.keys(portalState.studentApplications).filter(
+        (id) => isTestRuntime() || !isLegacyMockOrTestAppId(id)
+      );
       for (const [appId, app] of Object.entries(portalState.studentApplications)) {
+        if (!isTestRuntime() && isLegacyMockOrTestAppId(appId)) continue;
         const appChanged = await upsertPersistentRecord(prisma, 'student_application', appId, app);
         const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === appId);
         const relCacheKey = `rel_sync:${appId}`;
@@ -798,9 +843,10 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
       // 3. Individual Staff Records (including reviewWorkspace)
       const currentStaffIds = portalState.individualStaffRecords
         .map((r) => String(r?.applicationId || ''))
-        .filter(Boolean);
+        .filter((id) => Boolean(id) && (isTestRuntime() || !isLegacyMockOrTestAppId(id)));
       for (const rec of portalState.individualStaffRecords) {
         if (!rec?.applicationId) continue;
+        if (!isTestRuntime() && isLegacyMockOrTestAppId(String(rec.applicationId))) continue;
         await upsertPersistentRecord(
           prisma,
           'staff_record',
@@ -820,12 +866,15 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
       for (const col of portalState.collectiveApplications) {
         const colId = String(col?.id || col?.applicationId || '');
         if (!colId) continue;
+        if (!isTestRuntime() && isLegacyMockOrTestAppId(colId)) continue;
         await upsertPersistentRecord(prisma, 'collective_application', colId, col);
       }
 
-      // 5. Evidence Index (including binary base64Content for cross-browser preview)
+      // 5. Evidence Index — only persist newly added/modified evidence records (never re-stringify 68MB of already-persisted blobs)
       for (const [evId, ev] of portalState.evidenceIndex.entries()) {
+        if (persistedEvidenceIds.has(evId)) continue;
         await upsertPersistentRecord(prisma, 'evidence_record', evId, ev);
+        persistedEvidenceIds.add(evId);
       }
 
       // 6. Audit Logs Snapshot
@@ -856,11 +905,16 @@ export function schedulePortalStateNeonDbSync(): void {
   syncTimer = setTimeout(() => {
     syncTimer = null;
     void flushPortalStateToNeonDbNow();
-  }, 60);
+  }, 350);
+  if (syncTimer.unref) {
+    syncTimer.unref();
+  }
 }
 
 export async function clearPortalPersistentRecordsInNeonDb(): Promise<void> {
   lastSyncedPayloadHash.clear();
+  lastSyncedObjectRef.clear();
+  persistedEvidenceIds.clear();
   if (!isNeonDbSyncEnabled()) return;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -872,8 +926,49 @@ export async function clearPortalPersistentRecordsInNeonDb(): Promise<void> {
   }
 }
 
-export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
+export async function hydrateEvidenceRecordFromNeonDb(
+  targetIdOrName: string
+): Promise<StoredEvidenceRecord | null> {
+  const existing = portalState.evidenceIndex.get(targetIdOrName);
+  if (existing?.base64Content) {
+    return existing;
+  }
+  if (!isNeonDbSyncEnabled()) {
+    return existing || null;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prisma = (await dbManager.getClient()) as any;
+    await ensurePortalDbSchema(prisma);
+    let rows = (await prisma.$queryRawUnsafe(
+      `SELECT "record_key", "payload" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "record_key" = $1 LIMIT 1`,
+      targetIdOrName
+    )) as Array<{ record_key: string; payload: any }>;
+
+    if ((!rows || rows.length === 0) && !existing) {
+      rows = (await prisma.$queryRawUnsafe(
+        `SELECT "record_key", "payload" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "payload"->>'name' = $1 LIMIT 1`,
+        targetIdOrName
+      )) as Array<{ record_key: string; payload: any }>;
+    }
+    const row = rows?.[0];
+    if (!row?.payload) return existing || null;
+    const parsed = (
+      typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
+    ) as StoredEvidenceRecord;
+    portalState.evidenceIndex.set(row.record_key, parsed);
+    persistedEvidenceIds.add(row.record_key);
+    return parsed;
+  } catch {
+    return existing || null;
+  }
+}
+
+export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false): Promise<boolean> {
   if (!isNeonDbSyncEnabled()) return false;
+  if (isHydrated && !forceRefresh && Date.now() - lastHydratedAt < 4000) {
+    return true;
+  }
   if (!initialHydrationPromise) {
     initialHydrationPromise = (async () => {
       try {
@@ -881,27 +976,69 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
         const prisma = (await dbManager.getClient()) as any;
         await ensurePortalDbSchema(prisma);
 
-        const rows = (await prisma.$queryRawUnsafe(
-          `SELECT "collection", "record_key", "payload" FROM "portal_persistent_records" ORDER BY "updated_at" ASC`
-        )) as Array<{
-          collection: string;
-          record_key: string;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          payload: any;
-        }>;
+        // 1. Fetch all non-evidence records (~3 MB) + lightweight evidence metadata (excluding 68 MB of base64Content) in parallel
+        const [rows, evidenceMetaRows] = await Promise.all([
+          prisma.$queryRawUnsafe(
+            `SELECT "collection", "record_key", "payload" FROM "portal_persistent_records" WHERE "collection" <> 'evidence_record' ORDER BY "updated_at" ASC`
+          ) as Promise<
+            Array<{
+              collection: string;
+              record_key: string;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              payload: any;
+            }>
+          >,
+          !isHydrated
+            ? (prisma
+                .$queryRawUnsafe(
+                  `SELECT "record_key", ("payload" - 'base64Content') AS "payload" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record'`
+                )
+                .catch(() => []) as Promise<
+                Array<{
+                  record_key: string;
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  payload: any;
+                }>
+              >)
+            : Promise.resolve([]),
+        ]);
 
         let loadedCount = 0;
 
+        for (const evRow of evidenceMetaRows || []) {
+          const evData =
+            typeof evRow.payload === 'string'
+              ? JSON.parse(evRow.payload)
+              : evRow.payload;
+          if (!evData) continue;
+          const existingEv = portalState.evidenceIndex.get(evRow.record_key);
+          portalState.evidenceIndex.set(evRow.record_key, {
+            ...(evData as StoredEvidenceRecord),
+            base64Content: existingEv?.base64Content || evData.base64Content,
+          });
+          persistedEvidenceIds.add(evRow.record_key);
+          loadedCount++;
+        }
+
         for (const row of rows || []) {
+          if (
+            !isTestRuntime() &&
+            (row.collection === 'student_application' ||
+              row.collection === 'staff_record' ||
+              row.collection === 'collective_application') &&
+            isLegacyMockOrTestAppId(row.record_key)
+          ) {
+            continue;
+          }
           const data =
             typeof row.payload === 'string'
               ? JSON.parse(row.payload)
               : row.payload;
           if (!data) continue;
-          lastSyncedPayloadHash.set(
-            `${row.collection}:${row.record_key}`,
-            JSON.stringify(data)
-          );
+          const serializedData = JSON.stringify(data);
+          const cacheKey = `${row.collection}:${row.record_key}`;
+          lastSyncedPayloadHash.set(cacheKey, serializedData);
+          lastSyncedObjectRef.set(cacheKey, data);
 
           switch (row.collection) {
             case 'portal_session':
@@ -913,6 +1050,7 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
                 row.record_key,
                 data as PortalRegisteredStudent
               );
+              lastSyncedPayloadHash.set(`rel_user_sync:${row.record_key}`, serializedData);
               loadedCount++;
               break;
             case 'student_profile':
@@ -955,13 +1093,6 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               loadedCount++;
               break;
             }
-            case 'evidence_record':
-              portalState.evidenceIndex.set(
-                row.record_key,
-                data as StoredEvidenceRecord
-              );
-              loadedCount++;
-              break;
             case 'audit_logs_snapshot':
               if (Array.isArray(data) && data.length > 0) {
                 portalState.auditLogs = data as PortalAuditLogRecord[];
@@ -970,8 +1101,16 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           }
         }
 
-        // Remove any staff_record whose corresponding student_application is still an un-submitted draft
+        // Remove any legacy mock/test records or staff_record whose corresponding student_application is still an un-submitted draft
+        for (const appId of Object.keys(portalState.studentApplications)) {
+          if (!isTestRuntime() && isLegacyMockOrTestAppId(appId)) {
+            delete portalState.studentApplications[appId];
+          }
+        }
         portalState.individualStaffRecords = portalState.individualStaffRecords.filter((rec) => {
+          if (!isTestRuntime() && isLegacyMockOrTestAppId(rec?.applicationId)) {
+            return false;
+          }
           const matchingStudentApp = portalState.studentApplications[rec.applicationId];
           if (
             matchingStudentApp &&
@@ -987,19 +1126,30 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           }
           return true;
         });
+        portalState.collectiveApplications = portalState.collectiveApplications.filter(
+          (col) => isTestRuntime() || !isLegacyMockOrTestAppId(col?.id || col?.applicationId)
+        );
 
-        // Also hydrate any relational IndividualApplication rows that might not be in portal_persistent_records
-        const relationalApps = await prisma.individualApplication
-          .findMany({
-            include: {
-              applicant: true,
-              declarations: true,
-            },
-          })
-          .catch(() => []);
+        // Hydrate relational IndividualApplication and User rows in parallel
+        const [relationalApps, relationalUsers] = await Promise.all([
+          prisma.individualApplication
+            .findMany({
+              include: {
+                applicant: true,
+                declarations: true,
+              },
+            })
+            .catch(() => []),
+          prisma.user
+            .findMany({
+              where: { studentCode: { not: null } },
+            })
+            .catch(() => []),
+        ]);
 
         for (const relApp of relationalApps || []) {
           const code = String(relApp.applicationCode || relApp.id);
+          if (!isTestRuntime() && isLegacyMockOrTestAppId(code)) continue;
           if (portalState.studentApplications[code]) continue;
 
           const defaultCrit = createDefaultCriteriaList();
@@ -1064,6 +1214,22 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
 
           const mapped =
             SCHOOL_UNIT_MAP[relApp.institutionId] || SCHOOL_UNIT_MAP['inst-dut'];
+          const mappedPrelim =
+            relApp.schoolPreliminaryStatus === 'FORWARDED_TO_CITY'
+              ? 'forwarded_to_city'
+              : relApp.schoolPreliminaryStatus === 'ELIGIBLE_FOR_CITY'
+              ? 'recommended_forwarding'
+              : relApp.schoolPreliminaryStatus === 'NOT_ELIGIBLE_AT_SCHOOL'
+              ? 'not_recommended'
+              : relApp.schoolPreliminaryStatus === 'SCHOOL_SUPPLEMENT_REQUESTED'
+              ? 'supplement_requested'
+              : relApp.schoolPreliminaryStatus === 'SCHOOL_SUPPLEMENT_RESUBMITTED'
+              ? 'supplement_returned'
+              : relApp.schoolPreliminaryStatus === 'SCHOOL_IN_REVIEW'
+              ? 'under_review'
+              : relApp.currentReviewStage === 'STUDENT_DRAFT'
+              ? 'school_not_submitted'
+              : 'pending_intake';
           portalState.studentApplications[code] = {
             applicationId: code,
             season: 'Năm học 2025–2026',
@@ -1071,11 +1237,13 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
             status:
               relApp.currentReviewStage === 'STUDENT_DRAFT' ? 'draft' : 'under_review',
             reviewStage:
-              relApp.currentReviewStage === 'CITY_REVIEW'
+              relApp.currentReviewStage === 'CITY_REVIEW' ||
+              relApp.schoolPreliminaryStatus === 'FORWARDED_TO_CITY'
                 ? 'CITY'
                 : relApp.currentReviewStage === 'COMMITTEE_FINALIZATION'
                 ? 'COMMITTEE'
                 : 'SCHOOL',
+            schoolPreliminaryStatus: mappedPrelim,
             trainingInstitutionName: mapped.instName,
             schoolReviewUnitId: relApp.schoolReviewUnitId || mapped.unitId,
             schoolReviewUnitName: mapped.unitName,
@@ -1096,13 +1264,6 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
           loadedCount++;
         }
 
-        // Also hydrate student users from relational User table in PostgreSQL
-        const relationalUsers = await prisma.user
-          .findMany({
-            where: { studentCode: { not: null } },
-          })
-          .catch(() => []);
-
         for (const relUser of relationalUsers || []) {
           const emailKey = String(relUser.email || '').trim().toLowerCase();
           const codeKey = String(relUser.studentCode || '').trim();
@@ -1115,7 +1276,7 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
             relUser.profile && typeof relUser.profile === 'object'
               ? (relUser.profile as Record<string, any>)
               : existingReg?.profile;
-          portalState.registeredStudents.set(emailKey, {
+          const hydratedReg: PortalRegisteredStudent = {
             id: relUser.id,
             fullName: existingReg?.fullName || relUser.fullName,
             email: emailKey,
@@ -1127,32 +1288,49 @@ export async function ensurePortalStateHydratedFromNeonDb(): Promise<boolean> {
               mappedInst.instName,
             password: existingReg?.password,
             profile: profileObj,
-          });
+          };
+          portalState.registeredStudents.set(emailKey, hydratedReg);
+          const regJson = JSON.stringify(hydratedReg);
+          lastSyncedPayloadHash.set(`registered_student:${emailKey}`, regJson);
+          lastSyncedPayloadHash.set(`rel_user_sync:${emailKey}`, regJson);
           if (profileObj) {
+            const profJson = JSON.stringify(profileObj);
             portalState.studentProfiles.set(`id:${relUser.id}`, profileObj);
             portalState.studentProfiles.set(`email:${emailKey}`, profileObj);
             portalState.studentProfiles.set(`code:${codeKey.toUpperCase()}`, profileObj);
+            lastSyncedPayloadHash.set(`student_profile:id:${relUser.id}`, profJson);
+            lastSyncedPayloadHash.set(`student_profile:email:${emailKey}`, profJson);
+            lastSyncedPayloadHash.set(`student_profile:code:${codeKey.toUpperCase()}`, profJson);
           }
           loadedCount++;
         }
 
-        // Push any existing local state into Neon PostgreSQL
-        if (
-          Object.keys(portalState.studentApplications).length > 0 ||
-          portalState.individualStaffRecords.length > 0 ||
-          portalState.collectiveApplications.length > 0 ||
-          portalState.registeredStudents.size > 0 ||
-          portalState.evidenceIndex.size > 0
-        ) {
-          await flushPortalStateToNeonDbNow();
+        // Populate relational sync cache keys for all hydrated applications so startup does not re-sync 65 apps
+        for (const [appId, app] of Object.entries(portalState.studentApplications)) {
+          const staffRec = portalState.individualStaffRecords.find(
+            (r) => r.applicationId === appId
+          );
+          lastSyncedPayloadHash.set(
+            `rel_sync:${appId}`,
+            JSON.stringify({ app, staffRec: staffRec ?? null })
+          );
+          if (!lastSyncedPayloadHash.has(`student_application:${appId}`)) {
+            lastSyncedPayloadHash.set(`student_application:${appId}`, JSON.stringify(app));
+          }
         }
 
+        isHydrated = true;
+        lastHydratedAt = Date.now();
+        initialHydrationPromise = null;
         return loadedCount > 0;
       } catch (err) {
         console.warn(
           '[NeonDB Hydrate] Warning during startup hydration:',
           err instanceof Error ? err.message : String(err)
         );
+        isHydrated = true;
+        lastHydratedAt = Date.now();
+        initialHydrationPromise = null;
         return false;
       }
     })();

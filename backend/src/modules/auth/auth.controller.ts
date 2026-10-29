@@ -134,10 +134,14 @@ export class AuthController {
       const mergedProfile = portalSaved
         ? (mergeStudentProfileObjects(portalSaved, result.profile) as typeof result.profile)
         : result.profile;
-      syncStudentProfileInPortalState(mergedProfile, {
-        userId: req.actor.userId,
-        email: req.actor.email,
-      });
+      syncStudentProfileInPortalState(
+        mergedProfile,
+        {
+          userId: req.actor.userId,
+          email: req.actor.email,
+        },
+        { skipSaveIfUnchanged: true }
+      );
       res.status(200).json({
         success: true,
         data: {
