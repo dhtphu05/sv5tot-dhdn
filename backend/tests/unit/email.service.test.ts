@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {
   buildPasswordResetHtmlTemplate,
   buildPasswordResetPlainTextTemplate,
+  buildSupplementRequestHtmlTemplate,
+  buildSupplementRequestPlainTextTemplate,
+  resolveCriterionName,
 } from '../../src/shared/email/emailTemplates';
 import { ResendEmailService } from '../../src/shared/email/resendEmail.service';
 import { resetEnvironmentCache } from '../../src/config/environment';
@@ -238,5 +241,75 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
       }
       resetEnvironmentCache();
     }
+  });
+
+  // Dịch vụ 1: Yêu cầu Bổ sung Minh chứng (Evidence Supplementation Request) Tests
+  it('Dịch vụ 1: builds responsive supplement request HTML with clear details and prominent CTA', () => {
+    const html = buildSupplementRequestHtmlTemplate({
+      to: 'student.test@dut.udn.vn',
+      studentName: 'Nguyễn Văn Sinh Viên',
+      applicationCode: 'HS-2026-DUT-001',
+      institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
+      criterionOrReqCode: 'TC4',
+      requestReason: 'Cần bổ sung minh chứng Giấy chứng nhận hiến máu tình nguyện đợt 2.',
+      requiredAction: 'Tải lên hình ảnh rõ nét của Giấy chứng nhận có mộc đỏ.',
+      deadlineAt: '23:59 ngày 15/11/2026',
+      actionUrl: 'https://sinhvien5tot.udn.vn/?route=application_detail&code=HS-2026-DUT-001',
+    });
+
+    assert.ok(html.includes('HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG'));
+    assert.ok(html.includes('Kính gửi Nguyễn Văn Sinh Viên,'));
+    assert.ok(html.includes('HS-2026-DUT-001'));
+    assert.ok(html.includes('Trường Đại học Bách khoa – ĐHĐN'));
+    assert.ok(html.includes('Tiêu chuẩn 4: Tình nguyện tốt'));
+    assert.ok(html.includes('Cần bổ sung minh chứng Giấy chứng nhận hiến máu tình nguyện đợt 2.'));
+    assert.ok(html.includes('Tải lên hình ảnh rõ nét của Giấy chứng nhận có mộc đỏ.'));
+    assert.ok(html.includes('23:59 ngày 15/11/2026'));
+    assert.ok(html.includes('Xem chi tiết &amp; Bổ sung minh chứng'));
+    assert.ok(html.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=HS-2026-DUT-001'));
+    assert.ok(html.includes('word-break: break-all'));
+    assert.ok(html.includes('hoisinhvien@udn.vn'));
+  });
+
+  it('Dịch vụ 1: dispatches supplement request email with proper subject and payload', async () => {
+    const emailService = new ResendEmailService('mock-api-key');
+
+    let captured: any = null;
+    emailService.send = async (options: any) => {
+      captured = options;
+      return {
+        success: true,
+        id: 'mock-supp-123',
+        originalRecipient: options.to,
+        effectiveRecipient: options.to,
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      };
+    };
+
+    const result = await emailService.sendSupplementRequestEmail({
+      to: 'student.dut@udn.vn',
+      studentName: 'Trần Thị Thu Thảo',
+      applicationCode: 'HS-2026-DUT-002',
+      criterionOrReqCode: 'TC2',
+      requestReason: 'Bảng điểm chưa có xác nhận từ Phòng Đào tạo.',
+    });
+
+    assert.equal(result.success, true);
+    assert.ok(captured);
+    assert.equal(captured.subject, '[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ HS-2026-DUT-002');
+    assert.ok(captured.html.includes('Trần Thị Thu Thảo'));
+    assert.ok(captured.html.includes('Tiêu chuẩn 2: Học tập tốt'));
+    assert.ok(captured.text.includes('Bảng điểm chưa có xác nhận'));
+    assert.ok(captured.idempotencyKey.startsWith('supplement-request/'));
+  });
+
+  it('resolves canonical Vietnamese criterion names accurately', () => {
+    assert.equal(resolveCriterionName('TC1'), 'Tiêu chuẩn 1: Đạo đức tốt');
+    assert.equal(resolveCriterionName('TC2'), 'Tiêu chuẩn 2: Học tập tốt');
+    assert.equal(resolveCriterionName('TC3'), 'Tiêu chuẩn 3: Thể lực tốt');
+    assert.equal(resolveCriterionName('TC4'), 'Tiêu chuẩn 4: Tình nguyện tốt');
+    assert.equal(resolveCriterionName('TC5'), 'Tiêu chuẩn 5: Hội nhập tốt');
+    assert.equal(resolveCriterionName('CUSTOM_REQ'), 'Tiêu chí / Tiêu chuẩn: CUSTOM_REQ');
   });
 });

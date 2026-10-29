@@ -634,6 +634,32 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     });
   }
 
+  public async createNotification(notification: {
+    recipientUserId: string;
+    category: string;
+    channel?: 'IN_APP' | 'EMAIL' | 'IN_APP_AND_EMAIL';
+    title: string;
+    body: string;
+    track?: 'INDIVIDUAL' | 'COLLECTIVE';
+    applicationId?: string;
+    actionUrl?: string;
+  }): Promise<void> {
+    const prisma = await this.getPrisma();
+    await prisma.notification.create({
+      data: {
+        recipientUserId: notification.recipientUserId,
+        category: notification.category,
+        channel: (notification.channel as any) || 'IN_APP_AND_EMAIL',
+        title: notification.title,
+        body: notification.body,
+        track: (notification.track as any) || 'INDIVIDUAL',
+        applicationId: notification.applicationId,
+        actionUrl: notification.actionUrl,
+        status: 'UNREAD',
+      },
+    });
+  }
+
   private buildCriterionSummary(
     criterionCode: IndividualCriterionCode,
     app: Record<string, unknown>

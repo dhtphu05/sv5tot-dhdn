@@ -4,6 +4,8 @@
  * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
+import type { SupplementRequestEmailData } from './email.types';
+
 export interface PasswordResetTemplateParams {
   userName: string;
   resetUrl: string;
@@ -226,6 +228,329 @@ Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua emai
 
 Nếu nút trên không hoạt động, vui lòng sao chép liên kết sau và mở trong trình duyệt:
 ${resetUrl}
+
+---
+Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng
+Email hỗ trợ: hoisinhvien@udn.vn
+Đây là email tự động. Vui lòng không trả lời trực tiếp.`;
+}
+
+export function resolveCriterionName(code: string): string {
+  const normalized = code.trim().toUpperCase();
+  switch (normalized) {
+    case 'TC1':
+    case 'TC01':
+    case 'DAO_DUC_TOT':
+      return 'Tiêu chuẩn 1: Đạo đức tốt';
+    case 'TC2':
+    case 'TC02':
+    case 'HOC_TAP_TOT':
+      return 'Tiêu chuẩn 2: Học tập tốt';
+    case 'TC3':
+    case 'TC03':
+    case 'THE_LUC_TOT':
+      return 'Tiêu chuẩn 3: Thể lực tốt';
+    case 'TC4':
+    case 'TC04':
+    case 'TINH_NGUYEN_TOT':
+      return 'Tiêu chuẩn 4: Tình nguyện tốt';
+    case 'TC5':
+    case 'TC05':
+    case 'HOI_NHAP_TOT':
+      return 'Tiêu chuẩn 5: Hội nhập tốt';
+    default:
+      return `Tiêu chí / Tiêu chuẩn: ${code}`;
+  }
+}
+
+export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailData): string {
+  const criterionDisplayName = data.criterionName || resolveCriterionName(data.criterionOrReqCode);
+  const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
+  const deadlineStr = data.deadlineAt
+    ? data.deadlineAt instanceof Date
+      ? data.deadlineAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+      : String(data.deadlineAt)
+    : 'Trong vòng 72 giờ kể từ khi nhận được thông báo này';
+
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Yêu cầu bổ sung minh chứng – Sinh viên 5 tốt ĐHĐN</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f8fafc;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background-color: #0D78AE;
+      padding: 24px 24px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .org-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin: 0 0 6px 0;
+      color: #ffffff;
+    }
+    .system-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f9ff;
+    }
+    .content {
+      padding: 32px 24px;
+      font-size: 15px;
+      color: #1e293b;
+    }
+    .greeting {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .main-text {
+      margin: 0 0 20px 0;
+      line-height: 1.6;
+    }
+    .detail-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 20px 0;
+    }
+    .detail-row {
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #475569;
+      display: inline-block;
+      min-width: 130px;
+    }
+    .detail-value {
+      color: #0f172a;
+    }
+    .reason-box {
+      background-color: #eff6ff;
+      border-left: 3px solid #0D78AE;
+      padding: 12px 14px;
+      margin-top: 10px;
+      border-radius: 0 6px 6px 0;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .cta-container {
+      text-align: center;
+      margin: 28px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #0D78AE;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 6px;
+      min-height: 44px;
+      box-sizing: border-box;
+      line-height: 20px;
+    }
+    .notice-section {
+      background-color: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 24px 0;
+      font-size: 13.5px;
+      color: #92400e;
+      border-radius: 0 4px 4px 0;
+    }
+    .fallback-section {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .fallback-url-box {
+      font-size: 12px;
+      color: #0D78AE;
+      word-break: break-all;
+      overflow-wrap: break-word;
+      background-color: #f8fafc;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      margin-top: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .fallback-url-box a {
+      color: #0D78AE;
+      text-decoration: underline;
+      word-break: break-all;
+      overflow-wrap: break-word;
+    }
+    .footer {
+      background-color: #f8fafc;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12.5px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .footer a {
+      color: #0D78AE;
+      text-decoration: none;
+    }
+    @media only screen and (max-width: 480px) {
+      .wrapper {
+        padding: 12px 8px;
+      }
+      .content {
+        padding: 24px 16px;
+      }
+      .cta-button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+      }
+      .detail-label {
+        display: block;
+        margin-bottom: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="org-title">HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG</div>
+        <div class="system-title">Hệ thống xét chọn danh hiệu và giải thưởng sinh viên</div>
+      </div>
+
+      <div class="content">
+        <div class="greeting">Kính gửi ${data.studentName},</div>
+        <p class="main-text">Hội đồng thẩm định hồ sơ xét chọn danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng đã gửi yêu cầu bổ sung / giải trình minh chứng đối với hồ sơ của bạn. Chi tiết yêu cầu như sau:</p>
+
+        <div class="detail-card">
+          <div class="detail-row">
+            <span class="detail-label">Mã hồ sơ:</span>
+            <span class="detail-value"><strong>${data.applicationCode}</strong></span>
+          </div>
+          ${data.institutionName ? `
+          <div class="detail-row">
+            <span class="detail-label">Đơn vị / Trường:</span>
+            <span class="detail-value">${data.institutionName}</span>
+          </div>` : ''}
+          <div class="detail-row">
+            <span class="detail-label">Tiêu chuẩn:</span>
+            <span class="detail-value"><strong>${criterionDisplayName}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Thời hạn hoàn thành:</span>
+            <span class="detail-value" style="color: #b91c1c; font-weight: 600;">${deadlineStr}</span>
+          </div>
+          <div class="detail-row" style="margin-top: 12px;">
+            <span class="detail-label" style="display: block; margin-bottom: 4px;">Nội dung yêu cầu từ Cán bộ:</span>
+            <div class="reason-box">
+              ${data.requestReason}
+            </div>
+          </div>
+          ${data.requiredAction ? `
+          <div class="detail-row" style="margin-top: 10px;">
+            <span class="detail-label">Hành động yêu cầu:</span>
+            <span class="detail-value">${data.requiredAction}</span>
+          </div>` : ''}
+        </div>
+
+        <div class="cta-container">
+          <a href="${actionUrl}" target="_blank" rel="noopener noreferrer" class="cta-button">
+            Xem chi tiết &amp; Bổ sung minh chứng
+          </a>
+        </div>
+
+        <div class="notice-section">
+          <strong>Lưu ý quan trọng:</strong> Vui lòng đăng nhập hệ thống và hoàn thành việc gửi minh chứng bổ sung trước thời hạn nêu trên. Sau thời hạn này, hồ sơ sẽ được hội đồng thẩm định dựa trên các minh chứng hiện có.
+        </div>
+
+        <div class="fallback-section">
+          <p style="margin: 0 0 6px 0;">Nếu nút trên không hoạt động, vui lòng sao chép liên kết sau và mở trong trình duyệt:</p>
+          <div class="fallback-url-box">
+            <a href="${actionUrl}" target="_blank" rel="noopener noreferrer">${actionUrl}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p style="margin: 0 0 4px 0; font-weight: 600; color: #334155;">Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng</p>
+        <p style="margin: 0 0 6px 0;">Email hỗ trợ: <a href="mailto:hoisinhvien@udn.vn">hoisinhvien@udn.vn</a></p>
+        <p style="margin: 0; font-size: 11.5px; color: #94a3b8;">Đây là email tự động. Vui lòng không trả lời trực tiếp.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export function buildSupplementRequestPlainTextTemplate(data: SupplementRequestEmailData): string {
+  const criterionDisplayName = data.criterionName || resolveCriterionName(data.criterionOrReqCode);
+  const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
+  const deadlineStr = data.deadlineAt
+    ? data.deadlineAt instanceof Date
+      ? data.deadlineAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+      : String(data.deadlineAt)
+    : 'Trong vòng 72 giờ kể từ khi nhận được thông báo này';
+
+  return `HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
+Hệ thống xét chọn danh hiệu và giải thưởng sinh viên
+
+Kính gửi ${data.studentName},
+
+Hội đồng thẩm định hồ sơ xét chọn danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng đã gửi yêu cầu bổ sung / giải trình minh chứng đối với hồ sơ của bạn.
+
+THÔNG TIN CHI TIẾT YÊU CẦU:
+- Mã hồ sơ: ${data.applicationCode}
+${data.institutionName ? `- Đơn vị / Trường: ${data.institutionName}\n` : ''}- Tiêu chuẩn: ${criterionDisplayName}
+- Thời hạn hoàn thành: ${deadlineStr}
+- Nội dung yêu cầu từ Cán bộ: ${data.requestReason}
+${data.requiredAction ? `- Hành động yêu cầu: ${data.requiredAction}\n` : ''}
+Vui lòng truy cập liên kết bên dưới để bổ sung minh chứng:
+${actionUrl}
+
+LƯU Ý QUAN TRỌNG:
+Vui lòng đăng nhập hệ thống và hoàn thành việc gửi minh chứng bổ sung trước thời hạn nêu trên. Sau thời hạn này, hồ sơ sẽ được hội đồng thẩm định dựa trên các minh chứng hiện có.
 
 ---
 Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng

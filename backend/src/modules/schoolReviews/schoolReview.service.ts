@@ -32,11 +32,15 @@ import type {
 import { SchoolReviewPolicy, INDIVIDUAL_CRITERIA_CODES } from './schoolReview.policy';
 import { ApiError } from '../../shared/errors/apiError';
 import type { PaginatedResult } from '../../shared/query/pagination';
+import type { IEmailService } from '../../shared/email/email.types';
+import { logger } from '../../shared/logging/logger';
+import { resolveCriterionName } from '../../shared/email/emailTemplates';
 
 export class SchoolReviewService {
   constructor(
     private readonly schoolReviewRepo: ISchoolReviewRepository,
-    private readonly applicationRepo?: IIndividualApplicationRepository
+    private readonly applicationRepo?: IIndividualApplicationRepository,
+    private readonly emailService?: IEmailService
   ) {}
 
   public async getQueue(
@@ -174,6 +178,49 @@ export class SchoolReviewService {
         requestReason: data.requestReason,
       },
     });
+
+    // 1. Authoritative In-App Notification (Dịch vụ 1)
+    if (typeof this.schoolReviewRepo.createNotification === 'function') {
+      await this.schoolReviewRepo.createNotification({
+        recipientUserId: detail.applicantUserId,
+        category: 'SUPPLEMENT_REQUESTED',
+        channel: 'IN_APP_AND_EMAIL',
+        title: `[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ ${detail.applicationCode}`,
+        body: `Cán bộ thẩm định yêu cầu bổ sung minh chứng cho ${resolveCriterionName(data.criterionOrReqCode)}. Lý do: ${data.requestReason}`,
+        track: 'INDIVIDUAL',
+        applicationId,
+        actionUrl: `/?route=application_detail&id=${applicationId}`,
+      }).catch((err) => {
+        logger.warn('Failed to persist in-app notification for supplement request', {
+          error: err instanceof Error ? err.message : String(err),
+          applicationId,
+        });
+      });
+    }
+
+    // 2. Authoritative Email Notification via Resend (Dịch vụ 1)
+    if (this.emailService && detail.email) {
+      try {
+        await this.emailService.sendSupplementRequestEmail({
+          to: detail.email,
+          studentName: detail.applicantName || 'Sinh viên',
+          applicationCode: detail.applicationCode,
+          institutionName: detail.institutionName,
+          criterionOrReqCode: data.criterionOrReqCode,
+          criterionName: resolveCriterionName(data.criterionOrReqCode),
+          requestReason: data.requestReason,
+          requiredAction: data.requiredAction,
+          deadlineAt: data.deadlineAt,
+          reviewerNameSnapshot: actor.fullName,
+        });
+      } catch (err: unknown) {
+        logger.error('Failed to dispatch supplement request email via Resend', {
+          error: err instanceof Error ? err.message : String(err),
+          applicationId,
+          studentEmail: detail.email,
+        });
+      }
+    }
 
     return supplement;
   }

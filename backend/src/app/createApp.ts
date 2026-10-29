@@ -241,7 +241,7 @@ export function createApp(dependencies: AppDependencies = {}): Express {
   );
   const applicationController = new IndividualApplicationController(applicationService);
 
-  const schoolReviewService = new SchoolReviewService(schoolReviewRepo, applicationRepo);
+  const schoolReviewService = new SchoolReviewService(schoolReviewRepo, applicationRepo, emailService);
   const schoolReviewController = new SchoolReviewController(schoolReviewService);
 
   const schoolForwardingBatchRepo = dependencies.schoolForwardingBatchRepo || new PrismaSchoolForwardingBatchRepository();
