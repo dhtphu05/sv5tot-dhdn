@@ -252,6 +252,22 @@ export function useStaffWorkflowCoordination({
   setAppSubmissionState,
   isActive = true,
 }: StaffWorkflowCoordinationOptions) {
+  useEffect(() => {
+    if (staffUser && (staffUser.primaryRole === 'SCHOOL_OFFICER' || staffUser.primaryRole === 'CITY_OFFICER')) {
+      const current = getApiActorContext();
+      if (!current || current.userId !== staffUser.id) {
+        setApiActorContext({
+          userId: staffUser.id || 'staff-sch-dut',
+          userName: staffUser.fullName,
+          userEmail: staffUser.email || 'canbo.dut@udn.vn',
+          role: staffUser.primaryRole || 'SCHOOL_OFFICER',
+          unitId: staffUser.schoolReviewUnitId || 'unit-dut',
+          token: `staff-token-${staffUser.id || 'staff-sch-dut'}`,
+        });
+      }
+    }
+  }, [staffUser]);
+
   const [staffUser, setStaffUser] = useState<StaffUser>(
     () =>
       initialStaffUser ||

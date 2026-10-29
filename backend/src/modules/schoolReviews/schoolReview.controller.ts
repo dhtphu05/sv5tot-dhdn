@@ -74,9 +74,16 @@ export class SchoolReviewController {
     if (!req.actor) throw ApiError.unauthorized('Yêu cầu xác thực tài khoản.');
     const { id } = req.params;
     const body = CreateSupplementRequestSchema.parse(req.body);
+    let parsedDeadline: Date | undefined = undefined;
+    if (body.deadlineAt) {
+      const d = new Date(body.deadlineAt);
+      if (!isNaN(d.getTime())) {
+        parsedDeadline = d;
+      }
+    }
     const supplement = await this.service.requestSupplement(req.actor, id, {
       ...body,
-      deadlineAt: body.deadlineAt ? new Date(body.deadlineAt) : undefined,
+      deadlineAt: parsedDeadline,
     });
     res.status(201).json({
       success: true,

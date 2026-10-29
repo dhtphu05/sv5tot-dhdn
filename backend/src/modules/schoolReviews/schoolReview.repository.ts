@@ -14,6 +14,7 @@ import type {
   SupplementScopeType,
   SupplementLifecycleStatus,
   SchoolPreliminaryStatus,
+  SchoolRecommendation,
 } from './schoolReview.types';
 import type {
   IndividualApplicationDto,
@@ -22,9 +23,9 @@ import type {
 import type { PaginatedResult } from '../../shared/query/pagination';
 
 export interface ISchoolReviewRepository {
-  getQueue(filter: SchoolQueueFilter): Promise<PaginatedResult<SchoolApplicationQueueItemDto>>;
+  listSchoolApplications(filter: SchoolQueueFilter): Promise<PaginatedResult<SchoolApplicationQueueItemDto>>;
 
-  getQueueMetrics(schoolReviewUnitId: string, seasonId: string): Promise<SchoolQueueMetricsDto>;
+  getSchoolQueueMetrics(schoolReviewUnitId: string, seasonId?: string): Promise<SchoolQueueMetricsDto>;
 
   getApplicationWithReviewDetails(
     applicationId: string
@@ -66,19 +67,22 @@ export interface ISchoolReviewRepository {
     supplementId: string
   ): Promise<SupplementRequestDto | null>;
 
-  createSupplementResponse(data: {
-    supplementRequestId: string;
-    respondingUserId: string;
-    respondingNameSnapshot: string;
-    explanationNote: string;
-    attachedEvidenceLinkIds?: string[];
-  }): Promise<SupplementResponseDto>;
-
-  updateSupplementRequestStatus(
+  resolveSupplementRequest(
     supplementId: string,
     status: SupplementLifecycleStatus,
+    officerUserId: string,
     note?: string
-  ): Promise<void>;
+  ): Promise<SupplementRequestDto>;
+
+  createSupplementResponse(data: {
+    supplementRequestId: string;
+    responderUserId: string;
+    responderNameSnapshot: string;
+    explanationNote: string;
+    attachedEvidenceIds: string[];
+  }): Promise<SupplementResponseDto>;
+
+  saveSchoolRecommendation(applicationId: string, recommendation: SchoolRecommendation, reviewerUserId: string, note?: string): Promise<void>;
 
   forwardApplicationToCity(
     applicationId: string,

@@ -48,7 +48,7 @@ export const CreateSupplementRequestSchema = z.object({
     .min(5, 'Lý do yêu cầu bổ sung phải có ít nhất 5 ký tự để sinh viên nắm rõ thông tin.')
     .max(2000),
   requiredAction: z.string().max(1000).optional(),
-  deadlineAt: z.string().datetime().optional(),
+  deadlineAt: z.string().optional(),
 });
 
 export const ResolveSupplementRequestSchema = z.object({

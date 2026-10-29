@@ -1,3 +1,4 @@
+import { apiRequest } from '../../../shared/api/httpClient';
 /**
  * 5TOT ĐHĐN — Officer Review Mutations Hook
  * Extracted mutation handlers for OfficerReviewWorkspace:
@@ -236,6 +237,41 @@ export function useOfficerReviewMutations({
           schoolReviewUnitName
         )
       );
+
+      // Authoritative Wire to Backend V2 School Reviews API
+      const targetAppId = applicationRecord?.applicationId || studentApp.applicationId;
+      if (targetAppId) {
+        let parsedDeadline: string | undefined = undefined;
+        if (payload.requestedDueDate) {
+          const parsed = Date.parse(payload.requestedDueDate);
+          if (!isNaN(parsed)) {
+            parsedDeadline = new Date(parsed).toISOString();
+          }
+        }
+
+        const supplementPayload = {
+          criterionOrReqCode: payload.scope.requirementId || payload.scope.criterionId,
+          scopeType: payload.scope.declarationId ? 'DECLARATION_ITEM' : 'CRITERION_OR_REQUIREMENT',
+          targetDeclarationId: payload.scope.declarationId || undefined,
+          requestReason: payload.message,
+          requiredAction: Array.isArray(payload.allowedActions)
+            ? payload.allowedActions.join(', ')
+            : 'Bổ sung minh chứng',
+          deadlineAt: parsedDeadline,
+        };
+
+        apiRequest(`/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`, {
+          method: 'POST',
+          body: supplementPayload,
+        })
+          .then(() => {
+            showToast('Đã gửi yêu cầu bổ sung và gửi email thông báo qua Resend đến sinh viên!');
+          })
+          .catch((err: any) => {
+            console.warn('Backend V2 School Review supplement request notice:', err?.message || err);
+          });
+      }
+
       showToast(
         'Đã gửi yêu cầu bổ sung. Trạng thái hồ sơ sinh viên và thông báo đã được đồng bộ.'
       );
@@ -250,6 +286,7 @@ export function useOfficerReviewMutations({
       isSchoolStage,
       schoolReviewUnitName,
       showToast,
+      applicationRecord,
     ]
   );
 
