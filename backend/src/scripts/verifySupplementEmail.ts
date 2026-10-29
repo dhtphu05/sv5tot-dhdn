@@ -46,6 +46,10 @@ async function main() {
   } else {
     console.error('\n>>> THẤT BẠI: Lỗi khi gửi email:', result.error);
   }
+  process.exit(0);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

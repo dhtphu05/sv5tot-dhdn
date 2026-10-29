@@ -93,8 +93,12 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
   } = storeState;
 
   const activeSupplements: SupplementRequest[] = React.useMemo(() => {
+    const isNonDemo =
+      Boolean(storeState.application?.student?.studentId) &&
+      storeState.application.student.studentId !== '102220123';
     const baseActive = supplementRequests.filter((r) => r.status === 'active');
     if (
+      !isNonDemo &&
       hasMultipleSupplements &&
       submissionState === 'supplement_required' &&
       !baseActive.some((r) => r.id === SECOND_SUPPLEMENT_DEMO_REQUEST.id)
@@ -102,7 +106,7 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
       return [...baseActive, SECOND_SUPPLEMENT_DEMO_REQUEST];
     }
     return baseActive;
-  }, [supplementRequests, hasMultipleSupplements, submissionState]);
+  }, [supplementRequests, hasMultipleSupplements, submissionState, storeState.application?.student?.studentId]);
 
   const primarySupplement = activeSupplements[0] || null;
 

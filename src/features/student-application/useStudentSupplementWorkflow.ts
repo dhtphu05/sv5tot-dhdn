@@ -61,11 +61,16 @@ export function useStudentSupplementWorkflow({
   onSupplementBusinessResolved,
 }: UseStudentSupplementWorkflowParams) {
   const heroSuppScenario = SUPPLEMENT_DEMO_SCENARIOS.hero_evidence_only;
+  const isDemoPersona =
+    !isBackendMode() &&
+    (!initialData?.student?.studentId ||
+      initialData.student.studentId === '102220123');
+
   const incomingRequests =
     Array.isArray(initialData?.supplementRequests) &&
     initialData.supplementRequests.length > 0
       ? initialData.supplementRequests
-      : !isBackendMode() && initialSubmissionState === 'supplement_required'
+      : isDemoPersona && initialSubmissionState === 'supplement_required'
       ? heroSuppScenario.requests
       : [];
 
@@ -80,7 +85,7 @@ export function useStudentSupplementWorkflow({
   const [supplementChangesMap, setSupplementChangesMap] = useState<
     Record<string, SupplementChangeRecord>
   >(
-    !isBackendMode() &&
+    isDemoPersona &&
       (!initialData?.supplementRequests ||
         initialData.supplementRequests.length === 0) &&
       initialSubmissionState === 'supplement_required'

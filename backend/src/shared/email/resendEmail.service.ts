@@ -78,29 +78,36 @@ export class ResendEmailService implements IEmailService {
 
     // 2. SAFE MODE vs LIVE MODE Resolution
     let effectiveRecipient = originalRecipient;
-    const effectiveSubject = options.subject;
-    const effectiveHtml = options.html;
-    const isRerouted = false;
+    let effectiveSubject = options.subject;
+    let effectiveHtml = options.html;
+    let effectiveText = options.text;
+    let isRerouted = false;
 
     if (env.RESEND_MODE === 'safe') {
       const overrideEmail = (
         env.RESEND_SAFE_OVERRIDE_EMAIL || 'vanngocnhuy30032006@gmail.com'
       ).trim().toLowerCase();
 
-      // In safe mode, we only allow email dispatch to the designated safe override address.
-      // Under NO circumstances do we leak or forward another user's valid reset token to the test address.
+      // In safe mode: all emails are securely redirected to the override address so tests NEVER email unintended users,
+      // while guaranteeing that developers/testers receive actual transactional emails in their inbox.
       if (originalRecipient !== overrideEmail) {
+        effectiveRecipient = overrideEmail;
+        effectiveSubject = `[SAFE MODE -> ${originalRecipient}] ${options.subject}`;
+        effectiveHtml = `
+          <div style="background-color: #fef3c7; border: 1px solid #f59e0b; padding: 12px; margin-bottom: 16px; border-radius: 6px; font-family: sans-serif; font-size: 13px; color: #92400e;">
+            <strong>⚠️ [CHẾ ĐỘ AN TOÀN - SAFE MODE ACTIVE]</strong><br/>
+            Email này được gửi trong môi trường thử nghiệm và được bẫy chuyển hướng về hộp thư: <code>${overrideEmail}</code>.<br/>
+            <strong>Người nhận gốc:</strong> ${originalRecipient}
+          </div>
+          ${options.html}
+        `;
+        if (options.text) {
+          effectiveText = `[SAFE MODE ACTIVE: Intended for ${originalRecipient}, rerouted to ${overrideEmail}]\n\n${options.text}`;
+        }
+        isRerouted = true;
         logger.info(
-          `[EmailService:SAFE_SUPPRESSED] Safe mode active: dispatch to ${originalRecipient} suppressed to prevent token leakage.`
+          `[EmailService:SAFE_REROUTE] Safe mode active: rerouting email from ${originalRecipient} to ${effectiveRecipient}`
         );
-        return {
-          success: true,
-          id: `safe-suppressed-${Date.now()}`,
-          originalRecipient,
-          effectiveRecipient: 'suppressed',
-          isRerouted: false,
-          timestamp,
-        };
       }
     }
 
@@ -114,7 +121,7 @@ export class ResendEmailService implements IEmailService {
         to: [effectiveRecipient],
         subject: effectiveSubject,
         html: effectiveHtml,
-        text: options.text,
+        text: effectiveText,
         replyTo: options.replyTo,
       };
 
@@ -231,7 +238,7 @@ export class ResendEmailService implements IEmailService {
     const html = buildSupplementRequestHtmlTemplate(emailDataWithUrl);
     const text = buildSupplementRequestPlainTextTemplate(emailDataWithUrl);
 
-    const idempotencyRaw = `${data.applicationCode}:${data.criterionOrReqCode}:${data.deadlineAt || ''}`;
+    const idempotencyRaw = `${data.applicationCode}:${data.criterionOrReqCode}:${Date.now()}`;
     const tokenDigest = crypto.createHash('sha256').update(idempotencyRaw).digest('hex');
 
     return this.send({

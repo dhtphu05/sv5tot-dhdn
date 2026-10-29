@@ -765,6 +765,17 @@ export default function App() {
           })
         : sharedApplication;
 
+    const effectiveSupplementRequests =
+      Array.isArray(effectiveSharedApp.supplementRequests) &&
+      effectiveSharedApp.supplementRequests.length > 0
+        ? effectiveSharedApp.supplementRequests
+        : Array.isArray(sharedApplication.supplementRequests) &&
+          sharedApplication.supplementRequests.length > 0
+        ? sharedApplication.supplementRequests
+        : isNonDemo
+        ? []
+        : base.supplementRequests;
+
     return {
       ...base,
       advisoryCount: isNonDemo ? 0 : base.advisoryCount,
@@ -774,8 +785,10 @@ export default function App() {
         effectiveSharedApp.schoolReviewUnitName ||
         studentIdentity.university ||
         base.schoolReviewUnitName,
+      supplementRequests: effectiveSupplementRequests,
       application: {
         ...effectiveSharedApp,
+        supplementRequests: effectiveSupplementRequests,
         schoolReviewUnitName:
           effectiveSharedApp.schoolReviewUnitName || studentIdentity.university,
         student: {

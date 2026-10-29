@@ -333,7 +333,7 @@ export const StudentApplicationWorkspace: React.FC<
       : initialSubmissionState === 'supplement_required'
       ? firstSuppReq
         ? firstSuppReq.criterionId === 'volunteer'
-        : true
+        : false
       : false,
     integration: initialFocusCriterionId
       ? initialFocusCriterionId === 'integration'
