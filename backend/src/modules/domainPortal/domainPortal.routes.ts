@@ -1851,18 +1851,21 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
   router.post('/individual/applications/:id/supplement', (req: Request, res: Response): void => {
     const { id } = req.params;
     const {
+      requestId,
       explanation: rawExplanation,
       note,
       updatedApplication: rawUpdatedApp,
       application,
     } = (req.body || {}) as {
+      requestId?: string;
       explanation?: string;
       note?: string;
       updatedApplication?: Record<string, any>;
       application?: Record<string, any>;
     };
-    const explanation = rawExplanation || note;
+    const explanation = (rawExplanation || note || '').trim();
     const updatedApplication = rawUpdatedApp || application;
+    const nowStr = new Date().toLocaleDateString('vi-VN');
 
     if (updatedApplication && typeof updatedApplication === 'object') {
       const existingStuApp = portalState.studentApplications[id] || {};
@@ -1873,31 +1876,60 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           : Array.isArray(existingStuApp.otherAchievements)
           ? existingStuApp.otherAchievements
           : [];
+      const incomingSupps = Array.isArray(updatedApplication.supplementRequests)
+        ? updatedApplication.supplementRequests
+        : Array.isArray(existingStuApp.supplementRequests)
+        ? existingStuApp.supplementRequests
+        : [];
+      const normalizedStuSupps = incomingSupps.map((s: Record<string, any>) =>
+        (requestId ? s.id === requestId : true) &&
+        (s.status === 'active' || s.status === 'open')
+          ? {
+              ...s,
+              status: 'completed',
+              respondedAt: nowStr,
+              studentExplanation: explanation || s.studentExplanation,
+            }
+          : s
+      );
+      const remainingActiveStuSupps = normalizedStuSupps.filter(
+        (s: Record<string, any>) => s.status === 'active'
+      );
       portalState.studentApplications[id] = {
         ...existingStuApp,
         ...updatedApplication,
         otherAchievements: nextOtherAchievements,
+        supplementRequests: normalizedStuSupps,
         applicationId: id,
-        status: 'supplement_sent',
+        status: remainingActiveStuSupps.length > 0 ? 'supplement_required' : 'supplement_sent',
       };
       syncStaffRecordFromStudentApplication(portalState.studentApplications[id], {
         createIfMissing: true,
       });
     } else if (portalState.studentApplications[id]) {
-      portalState.studentApplications[id].status = 'supplement_sent';
       if (Array.isArray(portalState.studentApplications[id].supplementRequests)) {
         portalState.studentApplications[id].supplementRequests =
           portalState.studentApplications[id].supplementRequests.map((s: Record<string, any>) =>
-            s.status === 'active' || s.status === 'open'
+            (requestId ? s.id === requestId : true) &&
+            (s.status === 'active' || s.status === 'open')
               ? {
                   ...s,
-                  status: 'responded',
-                  respondedAt: new Date().toLocaleDateString('vi-VN'),
+                  status: 'completed',
+                  respondedAt: nowStr,
                   studentExplanation: explanation || s.studentExplanation,
                 }
               : s
           );
       }
+      const remainingActiveStuSupps = Array.isArray(
+        portalState.studentApplications[id].supplementRequests
+      )
+        ? portalState.studentApplications[id].supplementRequests.filter(
+            (s: Record<string, any>) => s.status === 'active'
+          )
+        : [];
+      portalState.studentApplications[id].status =
+        remainingActiveStuSupps.length > 0 ? 'supplement_required' : 'supplement_sent';
     }
 
     const idx = portalState.individualStaffRecords.findIndex((r) => r.applicationId === id);
@@ -1911,23 +1943,262 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
     const current = portalState.individualStaffRecords[idx];
     const isSchoolStage = current.currentReviewStage === 'SCHOOL';
-    const nextWorkspaceState = current.workspaceState
-      ? {
-          ...current.workspaceState,
-          supplementRequests: Array.isArray(current.workspaceState.supplementRequests)
-            ? current.workspaceState.supplementRequests.map((sr: Record<string, any>) =>
-                sr.status === 'active' && sr.staffStatus === 'waiting_student'
-                  ? {
-                      ...sr,
-                      staffStatus: 'student_returned',
-                      studentRespondedAt: new Date().toLocaleDateString('vi-VN'),
-                      studentExplanation: explanation || sr.studentExplanation,
-                    }
-                  : sr
-              )
-            : current.workspaceState.supplementRequests,
+    const stuApp = portalState.studentApplications[id];
+
+    // Collect newly added supplement evidence file names and IDs from updated student application
+    const collectAddedEvidenceForScope = (
+      criterionId?: string,
+      requirementId?: string,
+      declarationId?: string
+    ): { names: string[]; ids: string[] } => {
+      if (!stuApp || !Array.isArray(stuApp.criteria)) {
+        return { names: [], ids: [] };
+      }
+      const names: string[] = [];
+      const ids: string[] = [];
+      const inspectReqList = (reqs: unknown) => {
+        if (!Array.isArray(reqs)) return;
+        for (const r of reqs) {
+          if (!r || typeof r !== 'object') continue;
+          if (requirementId && r.id && r.id !== requirementId) continue;
+          for (const d of r.declarations || []) {
+            if (!d || typeof d !== 'object') continue;
+            if (declarationId && d.id && d.id !== declarationId) continue;
+            for (const ef of d.evidenceFiles || []) {
+              if (ef?.isNewlyAddedSupplement) {
+                if (ef.name && !names.includes(ef.name)) {
+                  names.push(ef.name);
+                }
+                if (ef.id && !ids.includes(ef.id)) {
+                  ids.push(ef.id);
+                }
+              }
+            }
+          }
         }
-      : current.workspaceState;
+      };
+      for (const crit of stuApp.criteria) {
+        if (criterionId && crit.id !== criterionId) continue;
+        inspectReqList(crit.requirements);
+        if (Array.isArray(crit.groups)) {
+          for (const g of crit.groups) {
+            inspectReqList(g?.requirements);
+          }
+        }
+      }
+      return { names, ids };
+    };
+
+    const existingWs = current.workspaceState || {
+      applicationId: id,
+      reviewStage: isSchoolStage ? 'SCHOOL' : 'CITY',
+      hasStartedReview: true,
+      scopeRecords: {},
+      evidenceRecords: {},
+      criterionCompletedMap: {},
+      criterionConclusions: {},
+      supplementRequests: [],
+      historyEvents: [],
+    };
+
+    const nextWsSupplementRequests = Array.isArray(existingWs.supplementRequests)
+      ? existingWs.supplementRequests.map((sr: Record<string, any>) =>
+          (requestId ? sr.id === requestId : true) &&
+          (sr.status === 'active' || sr.staffStatus === 'waiting_student')
+            ? {
+                ...sr,
+                staffStatus: 'student_returned',
+                studentReturnedAt: nowStr,
+                studentRespondedAt: nowStr,
+                studentExplanation: explanation || sr.studentExplanation,
+              }
+            : sr
+        )
+      : [];
+
+    const returnedCriterionIds = new Set<string>(
+      nextWsSupplementRequests
+        .filter((sr: Record<string, any>) => sr.staffStatus === 'student_returned')
+        .map((sr: Record<string, any>) => String(sr.criterionId || ''))
+        .filter(Boolean)
+    );
+
+    const nextScopeRecords: Record<string, any> = {
+      ...(existingWs.scopeRecords || {}),
+    };
+    for (const [scopeKey, rec] of Object.entries(nextScopeRecords)) {
+      const matchingReturnedReq = nextWsSupplementRequests.find(
+        (sr: Record<string, any>) =>
+          sr.staffStatus === 'student_returned' &&
+          (sr.declarationId
+            ? sr.declarationId === rec.declarationId
+            : sr.requirementId === rec.requirementId)
+      );
+      if (rec.status === 'needs_supplement' || Boolean(matchingReturnedReq)) {
+        const addedEv = collectAddedEvidenceForScope(
+          rec.criterionId,
+          rec.requirementId,
+          rec.declarationId
+        );
+        const effNote =
+          explanation ||
+          rec.supplementDiff?.explanationNote ||
+          'Sinh viên đã bổ sung minh chứng hoàn tất.';
+        nextScopeRecords[scopeKey] = {
+          ...rec,
+          status: 'supplement_returned',
+          supplementDiff: {
+            requestId:
+              matchingReturnedReq?.id ||
+              requestId ||
+              rec.supplementDiff?.requestId ||
+              'sup-req-1',
+            returnedAt: nowStr,
+            explanationNote: effNote,
+            studentResponseNote: effNote,
+            addedEvidenceNames:
+              addedEv.names.length > 0
+                ? addedEv.names
+                : rec.supplementDiff?.addedEvidenceNames || [],
+            addedEvidenceIds:
+              addedEv.ids.length > 0
+                ? addedEv.ids
+                : rec.supplementDiff?.addedEvidenceIds || [],
+            fieldChanges: rec.supplementDiff?.fieldChanges || [],
+          },
+        };
+        if (rec.criterionId) {
+          returnedCriterionIds.add(String(rec.criterionId));
+        }
+      }
+    }
+
+    // If a returned supplement request had no scopeRecord yet, create one using canonical decl:/req: scopeKey
+    for (const sr of nextWsSupplementRequests) {
+      if (sr.staffStatus !== 'student_returned' || !sr.requirementId) continue;
+      const canonicalKey = sr.declarationId
+        ? `decl:${sr.declarationId}`
+        : `req:${sr.requirementId}`;
+      const hasExistingMatch = Object.values(nextScopeRecords).some(
+        (rec: Record<string, any>) =>
+          sr.declarationId
+            ? rec.declarationId === sr.declarationId
+            : rec.requirementId === sr.requirementId
+      );
+      if (!hasExistingMatch && !nextScopeRecords[canonicalKey]) {
+        const addedEv = collectAddedEvidenceForScope(
+          sr.criterionId,
+          sr.requirementId,
+          sr.declarationId
+        );
+        const effNote =
+          explanation ||
+          sr.studentExplanation ||
+          'Sinh viên đã bổ sung minh chứng hoàn tất.';
+        nextScopeRecords[canonicalKey] = {
+          scopeKey: canonicalKey,
+          applicationId: id,
+          criterionId: sr.criterionId,
+          requirementId: sr.requirementId,
+          declarationId: sr.declarationId,
+          reviewerId: sr.requestingOfficerId || 'staff',
+          reviewerName: sr.requestingOfficerName || 'Cán bộ xét duyệt',
+          status: 'supplement_returned',
+          internalNote: '',
+          reviewedAt: nowStr,
+          supplementDiff: {
+            requestId: sr.id || requestId || 'sup-req-1',
+            returnedAt: nowStr,
+            explanationNote: effNote,
+            studentResponseNote: effNote,
+            addedEvidenceNames: addedEv.names,
+            addedEvidenceIds: addedEv.ids,
+            fieldChanges: [],
+          },
+        };
+      }
+    }
+
+    const nextHistoryEvents = [
+      {
+        id: `hist-supp-return-${Date.now()}`,
+        timestamp: nowStr,
+        actorName: current.fullName || stuApp?.student?.fullName || 'Sinh viên',
+        actorRoleLabel: 'Sinh viên',
+        description: explanation
+          ? `Sinh viên đã gửi bổ sung minh chứng kèm giải trình: "${explanation}".`
+          : 'Sinh viên đã gửi bổ sung minh chứng hoàn tất.',
+        scopeBadge: 'Đã gửi bổ sung',
+        tone: 'brand',
+      },
+      ...(Array.isArray(existingWs.historyEvents) ? existingWs.historyEvents : []),
+    ];
+
+    const nextWorkspaceState = {
+      ...existingWs,
+      scopeRecords: nextScopeRecords,
+      supplementRequests: nextWsSupplementRequests,
+      historyEvents: nextHistoryEvents,
+    };
+
+    const nextCriteriaReview = (
+      current.criteriaReview || createDefaultCriteriaReviewList()
+    ).map((cr: Record<string, any>) => {
+      const cid = cr.criterionId;
+      const matchingCrit = (stuApp?.criteria || []).find(
+        (c: Record<string, any>) => c.id === cid
+      );
+      const allDecls = matchingCrit ? collectCriterionDeclarations(matchingCrit) : null;
+      const declaredCount =
+        allDecls !== null ? allDecls.length : cr.declaredCount ?? 0;
+      const evidenceCount =
+        allDecls !== null
+          ? allDecls.reduce(
+              (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+              0
+            )
+          : cr.evidenceCount ?? 0;
+
+      if (cr.status === 'needs_supplement' || returnedCriterionIds.has(cid)) {
+        return {
+          ...cr,
+          declaredCount,
+          evidenceCount,
+          status: 'supplement_returned',
+          noteSummary: explanation
+            ? `Sinh viên đã bổ sung: ${explanation}`
+            : 'Sinh viên đã gửi bổ sung · Chờ cán bộ xét lại',
+        };
+      }
+      return {
+        ...cr,
+        declaredCount,
+        evidenceCount,
+      };
+    });
+
+    const otherAchievementsList = Array.isArray(stuApp?.otherAchievements)
+      ? stuApp.otherAchievements
+      : [];
+    const otherAchievementsEvidenceCount = otherAchievementsList.reduce(
+      (sum: number, d: Record<string, any>) => sum + (d.evidenceFiles?.length || 0),
+      0
+    );
+    const recalculatedTotalDeclarations =
+      nextCriteriaReview.reduce((sum: number, cr: Record<string, any>) => sum + (cr.declaredCount || 0), 0) +
+      otherAchievementsList.length;
+    const recalculatedTotalEvidence =
+      nextCriteriaReview.reduce((sum: number, cr: Record<string, any>) => sum + (cr.evidenceCount || 0), 0) +
+      otherAchievementsEvidenceCount;
+
+    const latestReturnedReq =
+      nextWsSupplementRequests.find(
+        (sr: Record<string, any>) => sr.staffStatus === 'student_returned'
+      ) || current.supplementSummary?.latestRequest;
+
+    if (stuApp && isSchoolStage) {
+      stuApp.schoolPreliminaryStatus = 'supplement_returned';
+    }
 
     const updated = {
       ...current,
@@ -1943,6 +2214,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
               status: 'supplement_returned',
             }
           : current.schoolReviewSummary,
+      criteriaReview: nextCriteriaReview,
+      totalDeclarations: recalculatedTotalDeclarations || current.totalDeclarations,
+      totalEvidence: recalculatedTotalEvidence || current.totalEvidence,
       updatedAt: new Date().toISOString(),
       updatedSortKey: Date.now(),
       latestOperationalNote: explanation
@@ -1950,10 +2224,22 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         : 'Sinh viên đã gửi bổ sung minh chứng.',
       supplementSummary: {
         ...(current.supplementSummary || {}),
+        requestCount:
+          nextWsSupplementRequests.length ||
+          current.supplementSummary?.requestCount ||
+          1,
         activeStatus: 'student_returned',
         returnedDaysAgo: 0,
+        latestRequest: latestReturnedReq
+          ? {
+              ...latestReturnedReq,
+              staffStatus: 'student_returned',
+              returnedAt: nowStr,
+              studentExplanation: explanation || latestReturnedReq.studentExplanation,
+            }
+          : undefined,
       },
-      studentApplication: portalState.studentApplications[id] || current.studentApplication,
+      studentApplication: stuApp || current.studentApplication,
     };
     portalState.individualStaffRecords[idx] = updated;
     savePortalStateToDisk();
@@ -2122,13 +2408,20 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
 
       const completedMap = workspaceState?.criterionCompletedMap || {};
       const conclusionsMap = workspaceState?.criterionConclusions || {};
-      const activeSupps = Array.isArray(workspaceState?.supplementRequests)
+      const activeWaitingSupps = Array.isArray(workspaceState?.supplementRequests)
         ? workspaceState.supplementRequests.filter(
             (r: Record<string, any>) =>
               r.status === 'active' && r.staffStatus === 'waiting_student'
           )
         : [];
-      const waitingSupp = activeSupps[0];
+      const activeReturnedSupps = Array.isArray(workspaceState?.supplementRequests)
+        ? workspaceState.supplementRequests.filter(
+            (r: Record<string, any>) =>
+              r.status === 'active' && r.staffStatus === 'student_returned'
+          )
+        : [];
+      const waitingSupp = activeWaitingSupps[0];
+      const returnedSupp = activeReturnedSupps[0];
       const completedCount = Object.values(completedMap).filter(Boolean).length;
 
       const stuAppForCounts = portalState.studentApplications[id];
@@ -2150,10 +2443,15 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
               )
             : cr.evidenceCount ?? 0;
 
-        const hasSupp = activeSupps.some((s: Record<string, any>) => s.criterionId === cid);
+        const hasWaitingSupp = activeWaitingSupps.some(
+          (s: Record<string, any>) => s.criterionId === cid
+        );
+        const hasReturnedSupp = activeReturnedSupps.some(
+          (s: Record<string, any>) => s.criterionId === cid
+        );
         const conc = conclusionsMap[cid];
         const isDone = Boolean(completedMap[cid]) || Boolean(conc);
-        if (hasSupp) {
+        if (hasWaitingSupp) {
           return {
             ...cr,
             declaredCount,
@@ -2162,12 +2460,24 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
             noteSummary: waitingSupp?.message || cr.noteSummary,
           };
         }
+        if (hasReturnedSupp) {
+          return {
+            ...cr,
+            declaredCount,
+            evidenceCount,
+            status: 'supplement_returned',
+            noteSummary:
+              returnedSupp?.studentExplanation ||
+              returnedSupp?.message ||
+              cr.noteSummary,
+          };
+        }
         if (isDone) {
           return {
             ...cr,
             declaredCount,
             evidenceCount,
-            status: 'reviewed',
+            status: conc?.conclusion === 'fail' ? 'needs_discussion' : 'reviewed',
             noteSummary:
               conc?.conclusion === 'fail'
                 ? `Không đạt${conc.reason ? `: ${conc.reason}` : ''}`
@@ -2192,7 +2502,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
             ? 'supplement_requested'
             : workflowStatus === 'under_review' &&
               (!current.schoolPreliminaryStatus ||
-                current.schoolPreliminaryStatus === 'pending_intake')
+                current.schoolPreliminaryStatus === 'pending_intake' ||
+                current.schoolPreliminaryStatus === 'supplement_requested' ||
+                current.schoolPreliminaryStatus === 'supplement_returned')
             ? 'under_review'
             : current.schoolPreliminaryStatus
           : current.schoolPreliminaryStatus);
@@ -2287,6 +2599,16 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
                 staffStatus: 'waiting_student',
               },
             }
+          : returnedSupp
+          ? {
+              requestCount: (workspaceState?.supplementRequests || []).length || 1,
+              activeStatus: 'student_returned',
+              returnedDaysAgo: 0,
+              latestRequest: {
+                ...returnedSupp,
+                staffStatus: 'student_returned',
+              },
+            }
           : {
               ...(current.supplementSummary || { requestCount: 0 }),
               activeStatus: null,
@@ -2320,19 +2642,32 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         stuApp.status = 'supplement_required';
         stuApp.schoolPreliminaryStatus = resolvedSchoolStatus;
       } else if (portalState.studentApplications[id]) {
+        const stuApp = portalState.studentApplications[id];
         if (resolvedSchoolStatus) {
-          portalState.studentApplications[id].schoolPreliminaryStatus = resolvedSchoolStatus;
+          stuApp.schoolPreliminaryStatus = resolvedSchoolStatus;
         }
         if (waitingSupp) {
-          portalState.studentApplications[id].status = 'supplement_required';
-        } else if (isCityReviewCompleted) {
-          portalState.studentApplications[id].status = 'all_reviewed';
-          portalState.studentApplications[id].reviewStage = 'COMMITTEE';
-        } else if (
-          portalState.studentApplications[id].status === 'supplement_required' ||
-          portalState.studentApplications[id].status === 'supplement_sent'
-        ) {
-          portalState.studentApplications[id].status = 'under_review';
+          stuApp.status = 'supplement_required';
+        } else if (returnedSupp) {
+          stuApp.status = 'supplement_sent';
+        } else {
+          if (Array.isArray(stuApp.supplementRequests)) {
+            stuApp.supplementRequests = stuApp.supplementRequests.map(
+              (s: Record<string, any>) =>
+                s.status === 'active' || s.status === 'responded'
+                  ? { ...s, status: 'completed' }
+                  : s
+            );
+          }
+          if (isCityReviewCompleted) {
+            stuApp.status = 'all_reviewed';
+            stuApp.reviewStage = 'COMMITTEE';
+          } else if (
+            stuApp.status === 'supplement_required' ||
+            stuApp.status === 'supplement_sent'
+          ) {
+            stuApp.status = 'under_review';
+          }
         }
       }
       savePortalStateToDisk();

@@ -592,86 +592,120 @@ export function useStudentPortalWorkflow({
     ]
   );
 
-  const handleSupplementBusinessResolved = useCallback(() => {
-    const targetAppId =
-      activeStoreState.application?.applicationId || HERO_STAFF_APP_ID;
-    setPrototypeScenarioId('supplement_submitted');
-    setHomeScenario('state_i_supplement_sent');
-    setAppSubmissionState('supplement_sent');
+  const handleSupplementBusinessResolved = useCallback(
+    (
+      updatedApp?: StudentApplicationData,
+      explanationNote?: string,
+      requestId?: string
+    ) => {
+      const effectiveApp = updatedApp || activeStoreState.application;
+      const effectiveExplanation =
+        explanationNote?.trim() || 'Sinh viên đã bổ sung minh chứng hoàn tất.';
+      const targetAppId =
+        effectiveApp?.applicationId || HERO_STAFF_APP_ID;
+      if (effectiveApp) {
+        setSharedApplication(effectiveApp);
+      }
+      setPrototypeScenarioId('supplement_submitted');
+      setHomeScenario('state_i_supplement_sent');
+      setAppSubmissionState('supplement_sent');
 
-    if (isBackendMode()) {
-      apiRequest(
-        `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/supplement`,
-        {
-          method: 'POST',
-          body: {
-            explanation: 'Sinh viên đã bổ sung minh chứng hoàn tất.',
-            updatedApplication: activeStoreState.application,
-          },
-        }
-      ).catch(() => {});
-    }
+      if (isBackendMode()) {
+        apiRequest(
+          `/api/v2/portal/individual/applications/${encodeURIComponent(targetAppId)}/supplement`,
+          {
+            method: 'POST',
+            body: {
+              requestId,
+              explanation: effectiveExplanation,
+              updatedApplication: effectiveApp,
+            },
+          }
+        ).catch(() => {});
+      }
 
-    setStaffApplications((prev) => {
-      const nextList = prev.map((app) =>
-        app.applicationId === targetAppId
-          ? {
-              ...app,
-              workflowStatus: 'supplement_returned' as const,
-              schoolPreliminaryStatus:
-                app.currentReviewStage === 'SCHOOL'
-                  ? ('supplement_returned' as const)
-                  : app.schoolPreliminaryStatus,
-              supplementStatus: 'returned' as const,
-              updatedAt: 'Vừa xong',
-              updatedSortKey: Date.now(),
-              latestOperationalNote: 'Sinh viên đã bổ sung minh chứng hoàn tất',
-              supplementSummary: {
-                requestCount: app.supplementSummary?.requestCount || 1,
-                activeStatus: 'student_returned' as const,
-                latestRequest: app.supplementSummary?.latestRequest
-                  ? {
-                      ...app.supplementSummary.latestRequest,
-                      staffStatus: 'student_returned' as const,
-                      returnedAt: 'Vừa xong · Hôm nay',
-                    }
-                  : undefined,
+      setStaffApplications((prev) => {
+        const nextList = prev.map((app) =>
+          app.applicationId === targetAppId
+            ? {
+                ...app,
+                workflowStatus: 'supplement_returned' as const,
+                schoolPreliminaryStatus:
+                  app.currentReviewStage === 'SCHOOL'
+                    ? ('supplement_returned' as const)
+                    : app.schoolPreliminaryStatus,
+                supplementStatus: 'returned' as const,
+                updatedAt: 'Vừa xong',
+                updatedSortKey: Date.now(),
+                latestOperationalNote: effectiveExplanation,
+                supplementSummary: {
+                  requestCount: app.supplementSummary?.requestCount || 1,
+                  activeStatus: 'student_returned' as const,
+                  latestRequest: app.supplementSummary?.latestRequest
+                    ? {
+                        ...app.supplementSummary.latestRequest,
+                        staffStatus: 'student_returned' as const,
+                        returnedAt: 'Vừa xong · Hôm nay',
+                      }
+                    : undefined,
+                },
+              }
+            : app
+        );
+        savePersistedStaffApplications(nextList);
+        return nextList;
+      });
+      setOfficerWorkspaceMap((prev) => {
+        const current = prev[targetAppId];
+        if (!current) return prev;
+        const nextScopeRecords = { ...(current.scopeRecords || {}) };
+        for (const [k, rec] of Object.entries(nextScopeRecords)) {
+          if (rec.status === 'needs_supplement') {
+            nextScopeRecords[k] = {
+              ...rec,
+              status: 'supplement_returned',
+              supplementDiff: {
+                requestId:
+                  requestId || rec.supplementDiff?.requestId || 'sup-req-1',
+                returnedAt: 'Vừa xong · Hôm nay',
+                explanationNote: effectiveExplanation,
+                studentResponseNote: effectiveExplanation,
+                addedEvidenceIds: rec.supplementDiff?.addedEvidenceIds || [],
+                addedEvidenceNames:
+                  rec.supplementDiff?.addedEvidenceNames || [],
+                fieldChanges: rec.supplementDiff?.fieldChanges || [],
               },
-            }
-          : app
-      );
-      savePersistedStaffApplications(nextList);
-      return nextList;
-    });
-    setOfficerWorkspaceMap((prev) => {
-      const current = prev[targetAppId];
-      if (!current) return prev;
-      const nextMap = {
-        ...prev,
-        [targetAppId]: {
-          ...current,
-          workflowStatus: 'supplement_returned' as const,
-          supplementRequests: current.supplementRequests.map((r) => ({
-            ...r,
-            staffStatus: 'student_returned' as const,
-            studentReturnedAt: 'Vừa xong · Hôm nay',
-          })),
-        },
-      };
-      savePersistedOfficerWorkspaces(nextMap);
-      return nextMap;
-    });
-    if (activeStoreState.application) {
-      setOfficerStudentAppMap((prev) => {
+            };
+          }
+        }
         const nextMap = {
           ...prev,
-          [targetAppId]: activeStoreState.application,
+          [targetAppId]: {
+            ...current,
+            workflowStatus: 'supplement_returned' as const,
+            scopeRecords: nextScopeRecords,
+            supplementRequests: current.supplementRequests.map((r) => ({
+              ...r,
+              staffStatus: 'student_returned' as const,
+              studentReturnedAt: 'Vừa xong · Hôm nay',
+              studentExplanation: effectiveExplanation,
+            })),
+          },
         };
-        savePersistedOfficerStudentApps(nextMap);
+        savePersistedOfficerWorkspaces(nextMap);
         return nextMap;
       });
-    }
-    setStaffNotifications((prev) => [
+      if (effectiveApp) {
+        setOfficerStudentAppMap((prev) => {
+          const nextMap = {
+            ...prev,
+            [targetAppId]: effectiveApp,
+          };
+          savePersistedOfficerStudentApps(nextMap);
+          return nextMap;
+        });
+      }
+      setStaffNotifications((prev) => [
       {
         id: `notif-staff-supp-ret-${Date.now()}`,
         categoryLabel: 'Bổ sung hồ sơ',

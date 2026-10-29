@@ -467,6 +467,17 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
     },
   });
 
+  const activeOpenSuppsCount = Array.isArray(app.supplementRequests)
+    ? app.supplementRequests.filter(
+        (s: Record<string, any>) => s.status === 'active' || s.status === 'open'
+      ).length
+    : Array.isArray(staffRec?.workspaceState?.supplementRequests)
+    ? staffRec.workspaceState.supplementRequests.filter(
+        (s: Record<string, any>) =>
+          s.status === 'active' && s.staffStatus === 'waiting_student'
+      ).length
+    : 0;
+
   const targetDbAppId = existingByUserSeason?.id || appId;
   const dbApp = await prisma.individualApplication.upsert({
     where: { id: targetDbAppId },
@@ -484,6 +495,7 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       applicantProfileSnapshot: app.applicantProfileSnapshot || null,
       declaredCriteriaCount,
       totalEvidenceCount,
+      openSupplementCount: activeOpenSuppsCount,
       currentReviewStage: mapReviewStageEnum(
         app.status,
         app.reviewStage || staffRec?.currentReviewStage,
@@ -520,6 +532,7 @@ async function syncStudentApplicationToRelationalTables(prisma: any, app: Record
       applicantProfileSnapshot: app.applicantProfileSnapshot || null,
       declaredCriteriaCount,
       totalEvidenceCount,
+      openSupplementCount: activeOpenSuppsCount,
       currentReviewStage: mapReviewStageEnum(
         app.status,
         app.reviewStage || staffRec?.currentReviewStage,
@@ -1293,7 +1306,15 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
             season: 'Năm học 2025–2026',
             level: 'Cấp Đại học Đà Nẵng',
             status:
-              relApp.currentReviewStage === 'STUDENT_DRAFT' ? 'draft' : 'under_review',
+              relApp.currentReviewStage === 'STUDENT_DRAFT'
+                ? 'draft'
+                : relApp.schoolPreliminaryStatus === 'SCHOOL_SUPPLEMENT_REQUESTED' ||
+                  relApp.cityWorkflowStatus === 'CITY_SUPPLEMENT_REQUESTED'
+                ? 'supplement_required'
+                : relApp.schoolPreliminaryStatus === 'SCHOOL_SUPPLEMENT_RESUBMITTED' ||
+                  relApp.cityWorkflowStatus === 'CITY_SUPPLEMENT_RESUBMITTED'
+                ? 'supplement_sent'
+                : 'under_review',
             reviewStage:
               relApp.currentReviewStage === 'CITY_REVIEW' ||
               relApp.schoolPreliminaryStatus === 'FORWARDED_TO_CITY'

@@ -403,11 +403,19 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
                     </div>
                   </div>
 
-                  {/* Scoped Review Block when new changes exist for this target declaration (Section 23, 24, 25) */}
-                  {isSupplementActive && supplementRequest && supplementChanges && (
+                  {/* Scoped Review Block for this target declaration (Section 23, 24, 25) */}
+                  {isSupplementActive && supplementRequest && (
                     <SupplementReviewCard
                       request={supplementRequest}
-                      changes={supplementChanges}
+                      changes={
+                        supplementChanges || {
+                          requestId: supplementRequest.id,
+                          criterionId: supplementRequest.criterionId,
+                          requirementId: requirement.id,
+                          declarationId: decl.id,
+                          addedEvidenceFiles: [],
+                        }
+                      }
                       isWindowClosed={isSupplementWindowClosed}
                       isSubmitting={isSupplementSubmitting}
                       onSubmit={(explanation) =>
@@ -420,6 +428,35 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
             })
           )}
         </div>
+
+        {/* If requirement has 0 declarations or request targets requirement without declarationId, show SupplementReviewCard */}
+        {isTargetRequirement &&
+          supplementRequest &&
+          supplementRequest.status === 'active' &&
+          (declarationCount === 0 || !supplementRequest.declarationId) &&
+          !requirement.declarations.some(
+            (d) =>
+              !supplementRequest.declarationId ||
+              supplementRequest.declarationId === d.id
+          ) && (
+            <SupplementReviewCard
+              request={supplementRequest}
+              changes={
+                supplementChanges || {
+                  requestId: supplementRequest.id,
+                  criterionId: supplementRequest.criterionId,
+                  requirementId: requirement.id,
+                  declarationId: supplementRequest.declarationId || '',
+                  addedEvidenceFiles: [],
+                }
+              }
+              isWindowClosed={isSupplementWindowClosed}
+              isSubmitting={isSupplementSubmitting}
+              onSubmit={(explanation) =>
+                onSendSupplement?.(supplementRequest.id, explanation)
+              }
+            />
+          )}
 
         {reviewerActionSlot && (
           <div className="pt-2">
@@ -552,7 +589,11 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
                 <span className="text-[12.5px] text-[#607483]">
                   Chưa có nội dung kê khai cho mục này.
                 </span>
-                {!readOnly && onOpenAddDeclaration && (
+                {(!readOnly ||
+                  canAddDeclaration ||
+                  canEditSingleDecl ||
+                  canManageSingleEvidence) &&
+                  onOpenAddDeclaration && (
                   <div>
                     <button
                       type="button"
@@ -621,12 +662,20 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
         </div>
       </div>
 
-      {/* Scoped Review Block when changes exist for this SINGLE requirement (Section 23, 24, 25) */}
-      {isSingleSupplementActive && supplementRequest && supplementChanges && (
+      {/* Scoped Review Block for this SINGLE requirement (Section 23, 24, 25) */}
+      {isSingleSupplementActive && supplementRequest && (
         <div className="px-6">
           <SupplementReviewCard
             request={supplementRequest}
-            changes={supplementChanges}
+            changes={
+              supplementChanges || {
+                requestId: supplementRequest.id,
+                criterionId: supplementRequest.criterionId,
+                requirementId: requirement.id,
+                declarationId: primaryDecl?.id || '',
+                addedEvidenceFiles: [],
+              }
+            }
             isWindowClosed={isSupplementWindowClosed}
             isSubmitting={isSupplementSubmitting}
             onSubmit={(explanation) =>

@@ -134,7 +134,14 @@ export function buildUpdateScopeStatusMutation(
     const isTarget =
       r.declarationId === scope.declarationId ||
       (!scope.declarationId && r.requirementId === scope.requirementId);
-    if (isTarget && (r.status === 'active' || r.staffStatus === 'waiting_student' || r.staffStatus === 'resumed_review')) {
+    if (
+      isTarget &&
+      (r.status === 'active' ||
+        (r.status as string) === 'responded' ||
+        r.staffStatus === 'waiting_student' ||
+        r.staffStatus === 'student_returned' ||
+        r.staffStatus === 'resumed_review')
+    ) {
       return {
         ...r,
         status: 'completed' as const,
@@ -497,6 +504,8 @@ export function buildSendSupplementMutation(
 
   const nextCritCompleted = { ...prevWs.criterionCompletedMap };
   delete nextCritCompleted[payload.scope.criterionId];
+  const nextCritConclusions = { ...(prevWs.criterionConclusions || {}) };
+  delete nextCritConclusions[payload.scope.criterionId];
 
   return {
     nextWorkspace: {
@@ -504,8 +513,10 @@ export function buildSendSupplementMutation(
       hasStartedReview: true,
       startedAt: prevWs.startedAt || nowStr,
       lastReviewedAt: nowStr,
+      completedAt: undefined,
       scopeRecords: nextScopeRecords,
       criterionCompletedMap: nextCritCompleted,
+      criterionConclusions: nextCritConclusions,
       supplementRequests: [newSupplementRequest, ...prevWs.supplementRequests],
       historyEvents: nextHistory,
     },
@@ -674,7 +685,10 @@ export function buildCompleteApplicationMutation(
   }
 
   const nextSupplementRequests = (prevWs.supplementRequests || []).map((r) =>
-    r.status === 'active' || r.staffStatus === 'waiting_student'
+    r.status === 'active' ||
+    (r.status as string) === 'responded' ||
+    r.staffStatus === 'waiting_student' ||
+    r.staffStatus === 'student_returned'
       ? {
           ...r,
           status: 'completed' as const,
@@ -683,6 +697,21 @@ export function buildCompleteApplicationMutation(
         }
       : r
   );
+
+  const nextScopeRecords = { ...(prevWs.scopeRecords || {}) };
+  for (const [key, rec] of Object.entries(nextScopeRecords)) {
+    if (
+      rec.status === 'needs_supplement' ||
+      rec.status === 'supplement_returned'
+    ) {
+      const critConc = nextConclusions[rec.criterionId];
+      nextScopeRecords[key] = {
+        ...rec,
+        status: critConc?.conclusion === 'fail' ? 'unsuitable' : 'suitable',
+        reviewedAt: nowStr,
+      };
+    }
+  }
 
   const nextHistory: ReviewHistoryEvent[] = [
     {
@@ -706,6 +735,7 @@ export function buildCompleteApplicationMutation(
       startedAt: prevWs.startedAt || nowStr,
       lastReviewedAt: nowStr,
       completedAt: nowStr,
+      scopeRecords: nextScopeRecords,
       criterionCompletedMap: {
         ethics: true,
         academic: true,
@@ -770,7 +800,10 @@ export function buildRecordCriterionConclusionMutation(
 
   const nextSupplementRequests = (prevWs.supplementRequests || []).map((r) =>
     r.criterionId === critId &&
-    (r.status === 'active' || r.staffStatus === 'waiting_student')
+    (r.status === 'active' ||
+      (r.status as string) === 'responded' ||
+      r.staffStatus === 'waiting_student' ||
+      r.staffStatus === 'student_returned')
       ? {
           ...r,
           status: 'completed' as const,
@@ -779,6 +812,20 @@ export function buildRecordCriterionConclusionMutation(
         }
       : r
   );
+
+  const nextScopeRecords = { ...(prevWs.scopeRecords || {}) };
+  for (const [key, rec] of Object.entries(nextScopeRecords)) {
+    if (
+      rec.criterionId === critId &&
+      (rec.status === 'needs_supplement' || rec.status === 'supplement_returned')
+    ) {
+      nextScopeRecords[key] = {
+        ...rec,
+        status: conclusion === 'pass' ? 'suitable' : 'unsuitable',
+        reviewedAt: nowStr,
+      };
+    }
+  }
 
   const stageLabel = stage === 'SCHOOL' ? 'Cấp Trường' : 'Cấp Đại học Đà Nẵng';
   const outcomeLabel = conclusion === 'pass' ? 'Đạt tiêu chí' : 'Không đạt tiêu chí';
@@ -800,6 +847,7 @@ export function buildRecordCriterionConclusionMutation(
       hasStartedReview: true,
       startedAt: prevWs.startedAt || nowStr,
       completedAt: undefined,
+      scopeRecords: nextScopeRecords,
       criterionConclusions: nextConclusions,
       criterionCompletedMap: nextCompletedMap,
       supplementRequests: nextSupplementRequests,

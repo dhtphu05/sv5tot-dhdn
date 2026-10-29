@@ -335,7 +335,7 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
                   {isAlternativeOption && isGroupSatisfied ? 'Phương án khác' : 'Chưa kê khai'}
                 </span>
               </div>
-              {!readOnly && (
+              {(!readOnly || hasActiveSupplementForRow) && (
                 <button
                   type="button"
                   onClick={(e) => {

@@ -957,7 +957,10 @@ export function useStaffWorkflowCoordination({
         result.nextWorkspace.criterionCompletedMap || {}
       ).filter(Boolean).length;
       const waitingSupp = (result.nextWorkspace.supplementRequests || []).find(
-        (r) => r.staffStatus === 'waiting_student'
+        (r) => r.status === 'active' && r.staffStatus === 'waiting_student'
+      );
+      const returnedSupp = (result.nextWorkspace.supplementRequests || []).find(
+        (r) => r.status === 'active' && r.staffStatus === 'student_returned'
       );
 
       const nextSchoolStatus =
@@ -986,13 +989,35 @@ export function useStaffWorkflowCoordination({
             const hasWaiting = (
               result.nextWorkspace.supplementRequests || []
             ).some(
-              (r) => r.criterionId === cid && r.staffStatus === 'waiting_student'
+              (r) =>
+                r.criterionId === cid &&
+                r.status === 'active' &&
+                r.staffStatus === 'waiting_student'
+            );
+            const hasReturned = (
+              result.nextWorkspace.supplementRequests || []
+            ).some(
+              (r) =>
+                r.criterionId === cid &&
+                r.status === 'active' &&
+                r.staffStatus === 'student_returned'
             );
             if (hasWaiting) {
               return {
                 ...cr,
                 status: 'needs_supplement' as const,
                 noteSummary: waitingSupp?.message || cr.noteSummary,
+              };
+            }
+            if (hasReturned) {
+              return {
+                ...cr,
+                status: 'supplement_returned' as const,
+                noteSummary:
+                  (returnedSupp as { studentExplanation?: string } | undefined)
+                    ?.studentExplanation ||
+                  returnedSupp?.message ||
+                  cr.noteSummary,
               };
             }
             if (cConc) {
@@ -1093,7 +1118,22 @@ export function useStaffWorkflowCoordination({
                     staffStatus: 'waiting_student',
                   },
                 }
-              : app.supplementSummary,
+              : returnedSupp
+              ? {
+                  requestCount:
+                    result.nextWorkspace.supplementRequests.length || 1,
+                  activeStatus: 'student_returned',
+                  latestRequest: {
+                    ...returnedSupp,
+                    staffStatus: 'student_returned',
+                  },
+                }
+              : app.supplementSummary
+              ? {
+                  ...app.supplementSummary,
+                  activeStatus: null,
+                }
+              : undefined,
             studentApplication:
               effectiveNextStudentApp ||
               (app as any).studentApplication ||

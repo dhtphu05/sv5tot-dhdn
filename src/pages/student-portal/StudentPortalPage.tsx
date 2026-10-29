@@ -99,7 +99,11 @@ export interface StudentPortalPageProps {
   handleConsumeDeepLink: () => void;
   handleApplicationChange: (nextApp: StudentApplicationData) => void;
   handleApplicationSubmitted: (submittedApp: StudentApplicationData) => void;
-  handleSupplementBusinessResolved: () => void;
+  handleSupplementBusinessResolved: (
+    updatedApp?: StudentApplicationData,
+    explanationNote?: string,
+    requestId?: string
+  ) => void;
   handleEvidenceBusinessResolved: (fileId: string) => void;
   isToolbarHidden: boolean;
   setIsToolbarHidden: React.Dispatch<React.SetStateAction<boolean>>;

@@ -63,7 +63,11 @@ export interface StudentApplicationWorkspaceProps {
   onNavigateToResults?: () => void;
   onApplicationChange?: (nextApp: StudentApplicationData) => void;
   onApplicationSubmitted?: (submittedApp: StudentApplicationData) => void;
-  onSupplementBusinessResolved?: () => void;
+  onSupplementBusinessResolved?: (
+    updatedApp?: StudentApplicationData,
+    explanationNote?: string,
+    requestId?: string
+  ) => void;
   onEvidenceBusinessResolved?: (fileId: string) => void;
   submissionDeadlineText?: string;
   reviewStage?: 'SCHOOL' | 'CITY' | 'COMPLETED';
@@ -302,26 +306,46 @@ export const StudentApplicationWorkspace: React.FC<
     initialData.trainingInstitutionName,
   ]);
 
+  const firstSuppReq = initialData?.supplementRequests?.find(
+    (r) => r.status === 'active'
+  ) || initialData?.supplementRequests?.[0];
+
   const [expandedCriteria, setExpandedCriteria] = useState<
     Record<string, boolean>
   >({
     ethics: initialFocusCriterionId
       ? initialFocusCriterionId === 'ethics'
+      : initialSubmissionState === 'supplement_required' && firstSuppReq
+      ? firstSuppReq.criterionId === 'ethics'
       : initialSubmissionState === 'draft',
     academic: initialFocusCriterionId
       ? initialFocusCriterionId === 'academic'
+      : initialSubmissionState === 'supplement_required' && firstSuppReq
+      ? firstSuppReq.criterionId === 'academic'
       : initialSubmissionState === 'draft',
-    physical: initialFocusCriterionId === 'physical',
+    physical: initialFocusCriterionId
+      ? initialFocusCriterionId === 'physical'
+      : initialSubmissionState === 'supplement_required' && firstSuppReq
+      ? firstSuppReq.criterionId === 'physical'
+      : false,
     volunteer: initialFocusCriterionId
       ? initialFocusCriterionId === 'volunteer'
-      : initialSubmissionState === 'supplement_required',
-    integration: initialFocusCriterionId === 'integration',
+      : initialSubmissionState === 'supplement_required'
+      ? firstSuppReq
+        ? firstSuppReq.criterionId === 'volunteer'
+        : true
+      : false,
+    integration: initialFocusCriterionId
+      ? initialFocusCriterionId === 'integration'
+      : initialSubmissionState === 'supplement_required' && firstSuppReq
+      ? firstSuppReq.criterionId === 'integration'
+      : false,
     other_achievements: true,
   });
 
   const [expandedRowId, setExpandedRowId] = useState<string | null>(
     initialSubmissionState === 'supplement_required'
-      ? 'volunteer-activities'
+      ? firstSuppReq?.requirementId || 'volunteer-activities'
       : null
   );
 
@@ -363,6 +387,7 @@ export const StudentApplicationWorkspace: React.FC<
     handleViewSupplementRequest,
   } = useStudentSupplementWorkflow({
     initialData,
+    application,
     initialSubmissionState,
     submissionState,
     setSubmissionState,

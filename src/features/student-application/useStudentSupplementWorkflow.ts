@@ -29,6 +29,7 @@ import { isBackendMode } from '../../shared/config/executionMode';
 
 interface UseStudentSupplementWorkflowParams {
   initialData?: StudentApplicationData;
+  application?: StudentApplicationData;
   initialSubmissionState: ApplicationSubmissionState;
   submissionState: ApplicationSubmissionState;
   setSubmissionState: React.Dispatch<React.SetStateAction<ApplicationSubmissionState>>;
@@ -38,11 +39,16 @@ interface UseStudentSupplementWorkflowParams {
   setExpandedRowId: React.Dispatch<React.SetStateAction<string | null>>;
   setHighlightedRequirementId: React.Dispatch<React.SetStateAction<string | null>>;
   showToast: (msg: string, durationMs?: number) => void;
-  onSupplementBusinessResolved?: () => void;
+  onSupplementBusinessResolved?: (
+    updatedApp?: StudentApplicationData,
+    explanationNote?: string,
+    requestId?: string
+  ) => void;
 }
 
 export function useStudentSupplementWorkflow({
   initialData,
+  application,
   initialSubmissionState,
   submissionState,
   setSubmissionState,
@@ -267,8 +273,7 @@ export function useStudentSupplementWorkflow({
     const changeRec = supplementChangesMap[targetReq.id];
     const finalExplanation = explanationNote || changeRec?.explanationNote;
 
-    // Attach newly supplemented evidence to application while preserving original files
-    setApplication((prevApp) => {
+    const buildUpdatedApp = (prevApp: StudentApplicationData): StudentApplicationData => {
       const nextCriteria = prevApp.criteria.map((c) => {
         if (c.id !== targetReq.criterionId) return c;
         const updateReqs = (reqs: typeof c.requirements) =>
@@ -319,10 +324,15 @@ export function useStudentSupplementWorkflow({
         supplementRequests: updatedRequests,
         criteria: nextCriteria,
       };
-    });
+    };
+
+    const resolvedNextApp = application ? buildUpdatedApp(application) : undefined;
+
+    // Attach newly supplemented evidence to application while preserving original files
+    setApplication((prevApp) => buildUpdatedApp(prevApp));
 
     setActivities(SUPPLEMENT_SENT_ACTIVITIES);
-    onSupplementBusinessResolved?.();
+    onSupplementBusinessResolved?.(resolvedNextApp, finalExplanation, targetReq.id);
 
     showToast(
       'Đã gửi thông tin bổ sung thành công. Hồ sơ đang chờ cán bộ xét lại.',

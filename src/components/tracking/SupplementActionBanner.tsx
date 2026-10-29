@@ -45,7 +45,8 @@ export const SupplementActionBanner: React.FC<SupplementActionBannerProps> = ({
   const hasPendingChanges = Boolean(
     changes &&
       ((changes.addedEvidenceFiles && changes.addedEvidenceFiles.length > 0) ||
-        changes.isDeclarationEdited)
+        changes.isDeclarationEdited ||
+        (changes.explanationNote && changes.explanationNote.trim().length > 0))
   );
 
   return (
@@ -70,7 +71,8 @@ export const SupplementActionBanner: React.FC<SupplementActionBannerProps> = ({
               const isReadyToSend = Boolean(
                 reqChanges &&
                   ((reqChanges.addedEvidenceFiles && reqChanges.addedEvidenceFiles.length > 0) ||
-                    reqChanges.isDeclarationEdited)
+                    reqChanges.isDeclarationEdited ||
+                    (reqChanges.explanationNote && reqChanges.explanationNote.trim().length > 0))
               );
 
               return (

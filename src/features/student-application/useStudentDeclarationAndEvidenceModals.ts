@@ -256,8 +256,25 @@ export function useStudentDeclarationAndEvidenceModals({
         declData.value,
         declData.detail
       );
+      if (isSupplementActive && evidenceFiles.length > 0) {
+        const newlyAdded = evidenceFiles.filter((f) => f.isNewlyAddedSupplement);
+        if (newlyAdded.length > 0) {
+          recordSupplementEvidenceAdded(reqId, existingDeclId, newlyAdded);
+        }
+      }
       showToast('Đã lưu thay đổi');
     } else {
+      if (isSupplementActive) {
+        recordSupplementDeclarationEdit(
+          reqId,
+          `decl-${Date.now()}`,
+          declData.value,
+          declData.detail
+        );
+        if (evidenceFiles.length > 0) {
+          recordSupplementEvidenceAdded(reqId, `decl-${Date.now()}`, evidenceFiles);
+        }
+      }
       setHighlightedRequirementId(reqId);
       setTimeout(() => setHighlightedRequirementId(null), 2500);
       showToast('Đã thêm kê khai');
@@ -348,6 +365,10 @@ export function useStudentDeclarationAndEvidenceModals({
       syncSingleDeclarationToBackend(nextApp, reqId, declId);
       return nextApp;
     });
+
+    if (isSupplementActive) {
+      recordSupplementEvidenceAdded(reqId, declId, newFiles);
+    }
   };
 
   const handleDeleteEvidence = (
