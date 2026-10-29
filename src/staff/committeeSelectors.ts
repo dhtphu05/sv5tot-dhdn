@@ -150,18 +150,61 @@ export function getCommitteeDecisionOutcomeMeta(
 }
 
 /**
+ * Checks whether an application has been forwarded from a School Review Unit
+ * to the University of Danang (City) review & committee scope.
+ * Unforwarded SCHOOL-stage applications must not appear in City Officer, City Manager, or City Committee queues.
+ */
+export function isApplicationForwardedToCityScope(
+  app: StaffApplicationRecord
+): boolean {
+  if (
+    app.currentReviewStage === 'CITY' ||
+    (app.currentReviewStage as string) === 'COMMITTEE' ||
+    app.currentReviewStage === 'COMPLETED'
+  ) {
+    return true;
+  }
+  if (
+    app.schoolPreliminaryStatus === 'forwarded_to_city' ||
+    app.schoolReviewSummary?.isForwardedToCity === true ||
+    app.schoolReviewSummary?.status === 'forwarded_to_city'
+  ) {
+    return true;
+  }
+  if (
+    app.committeeSummary !== null ||
+    app.workflowStatus === 'needs_committee_review' ||
+    app.workflowStatus === 'waiting_decision' ||
+    app.workflowStatus === 'ready_for_finalization' ||
+    app.workflowStatus === 'finalized_recognized' ||
+    app.workflowStatus === 'finalized_not_recognized'
+  ) {
+    return true;
+  }
+  // Legacy / demo fixture records without explicit school stage metadata
+  if (!app.currentReviewStage && !app.schoolPreliminaryStatus) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Returns all applications that belong in the Committee operational scope (Section 17).
- * Excludes ordinary in-progress or unassigned Officer applications.
+ * Excludes ordinary in-progress or unassigned Officer applications, and excludes unforwarded School-stage records.
  */
 export function getCommitteeQueue(
   applications: StaffApplicationRecord[],
   committeeCases: Record<string, CommitteeCaseDetail>
 ): StaffApplicationRecord[] {
   return applications.filter((app) => {
+    if (!isApplicationForwardedToCityScope(app)) {
+      return false;
+    }
     if (committeeCases[app.applicationId]) {
       return true;
     }
     return (
+      app.workflowStatus === 'review_completed' ||
       app.workflowStatus === 'needs_committee_review' ||
       app.workflowStatus === 'waiting_decision' ||
       app.workflowStatus === 'ready_for_finalization' ||
@@ -182,7 +225,12 @@ export function getCommitteeAttentionApplications(
   const queue = getCommitteeQueue(applications, committeeCases);
   return queue.filter((app) => {
     const c = committeeCases[app.applicationId];
-    if (!c) return app.workflowStatus === 'needs_committee_review';
+    if (!c) {
+      return (
+        app.workflowStatus === 'needs_committee_review' ||
+        app.committeeSummary?.queueCategory === 'needs_committee_review'
+      );
+    }
     const hasPendingFlags =
       c.flaggedItems?.some((item) => item.status === 'pending_consideration') ??
       false;
@@ -207,6 +255,8 @@ export function getApplicationsAwaitingDecision(
     const c = committeeCases[app.applicationId];
     if (!c) {
       return (
+        (app.workflowStatus === 'review_completed' &&
+          app.committeeSummary?.queueCategory !== 'needs_committee_review') ||
         app.workflowStatus === 'waiting_decision' ||
         app.workflowStatus === 'ready_for_finalization'
       );
@@ -383,7 +433,37 @@ export function getCommitteeOperationalSummary(
 
   for (const app of queue) {
     const c = committeeCases[app.applicationId];
-    if (!c) continue;
+    if (!c) {
+      const fallbackPendingFlag =
+        app.workflowStatus === 'needs_committee_review' ||
+        app.committeeSummary?.queueCategory === 'needs_committee_review';
+      if (fallbackPendingFlag) {
+        flaggedApplicationsCount += 1;
+      }
+      if (app.finalResultSummary?.outcome) {
+        decidedCount += 1;
+        if (app.finalResultSummary.outcome === 'recognized') {
+          recognizedCount += 1;
+        } else {
+          notRecognizedCount += 1;
+        }
+      } else if (!fallbackPendingFlag) {
+        waitingDecisionCount += 1;
+      }
+      if (
+        app.workflowStatus === 'ready_for_finalization' ||
+        app.workflowStatus === 'finalized_recognized' ||
+        app.workflowStatus === 'finalized_not_recognized'
+      ) {
+        finalizedCount += 1;
+      }
+      if (app.finalResultSummary?.isPublished) {
+        publishedCount += 1;
+      } else {
+        unpublishedCount += 1;
+      }
+      continue;
+    }
 
     const hasPendingFlag =
       c.flaggedItems?.some((f) => f.status === 'pending_consideration') ??

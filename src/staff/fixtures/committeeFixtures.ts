@@ -696,6 +696,7 @@ export function buildCommitteeScenarioBundle(
   for (const app of updatedApplications) {
     if (!committeeCasesMap[app.applicationId]) {
       const isInCommitteeScope =
+        app.workflowStatus === 'review_completed' ||
         app.workflowStatus === 'needs_committee_review' ||
         app.workflowStatus === 'waiting_decision' ||
         app.workflowStatus === 'ready_for_finalization' ||
@@ -734,8 +735,60 @@ export function buildDefaultCommitteeCase(
     app.workflowStatus === 'finalized_recognized' ||
     app.workflowStatus === 'finalized_not_recognized';
   const isPublished =
+    Boolean(app.finalResultSummary?.isPublished) ||
     app.workflowStatus === 'finalized_recognized' ||
     app.workflowStatus === 'finalized_not_recognized';
+
+  const derivedFlags: CommitteeFlaggedItem[] = (app.criteriaReview || [])
+    .filter(
+      (cr) =>
+        cr.status === 'needs_discussion' ||
+        (typeof cr.noteSummary === 'string' && cr.noteSummary.startsWith('Không đạt'))
+    )
+    .map((cr, idx) => ({
+      id: `flag-${app.applicationId}-${cr.criterionId || idx}`,
+      applicationId: app.applicationId,
+      criterionId: cr.criterionId,
+      criterionNumber: (Math.min(5, Math.max(1, Number(cr.criterionNumber) || idx + 1)) as 1 | 2 | 3 | 4 | 5),
+      criterionName: cr.criterionName,
+      requirementId: `${cr.criterionId}-req`,
+      requirementTitle: cr.criterionName,
+      declarationId: `${cr.criterionId}-decl-1`,
+      declarationTitle: `Nội dung kê khai thuộc tiêu chí ${cr.criterionName}`,
+      officerEscalationReason:
+        cr.noteSummary ||
+        app.committeeSummary?.officerSummaryNote ||
+        'Cán bộ xét duyệt đề nghị Hội đồng xem xét thêm tiêu chí này.',
+      escalatedBy: app.assignment?.officerName || 'Cán bộ xét duyệt',
+      escalatedAt:
+        app.committeeSummary?.submittedToCommitteeAt ||
+        app.updatedAt ||
+        'Hôm nay',
+      status: isFinalized || isPublished ? 'considered' : 'pending_consideration',
+    }));
+
+  const hasPendingFlags = derivedFlags.some(
+    (f) => f.status === 'pending_consideration'
+  );
+
+  const outcome = app.finalResultSummary?.outcome;
+  const decision = outcome
+    ? {
+        outcome,
+        outcomeLabel:
+          outcome === 'recognized'
+            ? ('Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng' as const)
+            : ('Chưa được công nhận trong đợt xét này' as const),
+        recordedBy: (app.finalResultSummary as any)?.decidedBy || 'Hội đồng xét chọn',
+        recordedByRoleLabel: 'Hội đồng xét chọn',
+        recordedAt:
+          (app.finalResultSummary as any)?.decidedAt ||
+          app.finalResultSummary?.publishedAt ||
+          app.updatedAt ||
+          'Hôm nay',
+        internalNote: (app.finalResultSummary as any)?.internalNote || undefined,
+      }
+    : null;
 
   return {
     applicationId: app.applicationId,
@@ -743,18 +796,21 @@ export function buildDefaultCommitteeCase(
       ? 'published'
       : isFinalized
       ? 'ready_for_publication'
-      : app.workflowStatus === 'needs_committee_review'
+      : decision
+      ? 'decision_recorded'
+      : hasPendingFlags || app.workflowStatus === 'needs_committee_review'
       ? 'needs_committee_review'
       : 'waiting_decision',
-    flaggedItems: [],
+    flaggedItems: derivedFlags,
     committeeNotes: [],
-    decision: null,
+    decision,
     isFinalizedForPublication: isFinalized,
     isPublished,
+    publishedAt: app.finalResultSummary?.publishedAt,
     history: [
       {
         id: `hist-${app.applicationId}-init`,
-        timestamp: app.submittedAt || '12/10/2026',
+        timestamp: app.submittedAt || 'Hôm nay',
         actorName: app.student.fullName,
         actorRoleLabel: 'Sinh viên',
         description: 'Hồ sơ đã nộp và hoàn tất phần thẩm định cấp Cán bộ.',

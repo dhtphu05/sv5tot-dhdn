@@ -40,7 +40,9 @@ import {
   COMMITTEE_DEMO_SCENARIO_MAP,
   DEFAULT_COMMITTEE_SCENARIO_ID,
   buildCommitteeScenarioBundle,
+  buildDefaultCommitteeCase,
 } from '../../staff/fixtures/committeeFixtures';
+import { isApplicationForwardedToCityScope } from '../../staff/committeeSelectors';
 import { SchoolForwardingRecommendation } from '../../staff/schoolReviewTypes';
 import {
   getAllCollectiveApplications,
@@ -331,6 +333,37 @@ export function useStaffWorkflowCoordination({
   const [committeeCasesMap, setCommitteeCasesMap] = useState<
     Record<string, CommitteeCaseDetail>
   >(() => (isBackendMode() ? {} : initialCommitteeBundle.committeeCasesMap));
+
+  useEffect(() => {
+    if (!isBackendMode()) return;
+    setCommitteeCasesMap((prev) => {
+      let changed = false;
+      const next: Record<string, CommitteeCaseDetail> = { ...prev };
+      for (const app of staffApplications) {
+        if (!isApplicationForwardedToCityScope(app)) {
+          if (next[app.applicationId]) {
+            delete next[app.applicationId];
+            changed = true;
+          }
+          continue;
+        }
+        const isInCommitteeScope =
+          app.workflowStatus === 'review_completed' ||
+          app.workflowStatus === 'needs_committee_review' ||
+          app.workflowStatus === 'waiting_decision' ||
+          app.workflowStatus === 'ready_for_finalization' ||
+          app.workflowStatus === 'finalized_recognized' ||
+          app.workflowStatus === 'finalized_not_recognized' ||
+          app.committeeSummary !== null ||
+          app.finalResultSummary !== null;
+        if (isInCommitteeScope && !next[app.applicationId]) {
+          next[app.applicationId] = buildDefaultCommitteeCase(app);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [staffApplications]);
 
   const [staffNotifications, setStaffNotifications] = useState<
     StaffNotificationItem[]
@@ -965,7 +998,10 @@ export function useStaffWorkflowCoordination({
             if (cConc) {
               return {
                 ...cr,
-                status: 'reviewed' as const,
+                status:
+                  cConc.conclusion === 'fail'
+                    ? ('needs_discussion' as const)
+                    : ('reviewed' as const),
                 noteSummary:
                   cConc.conclusion === 'fail'
                     ? `Không đạt${cConc.reason ? `: ${cConc.reason}` : ''}`
@@ -989,10 +1025,23 @@ export function useStaffWorkflowCoordination({
           const isReopenedSchoolReview =
             staffUser.primaryRole === 'SCHOOL_OFFICER' &&
             nextSchoolStatus === 'under_review';
+          const isCityReviewCompleted =
+            staffUser.primaryRole !== 'SCHOOL_OFFICER' &&
+            ((result.nextStaffStatus || app.workflowStatus) === 'review_completed' ||
+              completedCount === 5);
+          const flaggedCrit = nextCriteriaReview.find(
+            (cr) =>
+              cr.status === 'needs_discussion' ||
+              (typeof cr.noteSummary === 'string' &&
+                cr.noteSummary.startsWith('Không đạt'))
+          );
 
           return {
             ...app,
-            workflowStatus: result.nextStaffStatus || app.workflowStatus,
+            workflowStatus:
+              isCityReviewCompleted && flaggedCrit
+                ? 'needs_committee_review'
+                : result.nextStaffStatus || app.workflowStatus,
             schoolPreliminaryStatus:
               nextSchoolStatus || app.schoolPreliminaryStatus,
             schoolRecommendation: isReopenedSchoolReview
@@ -1009,6 +1058,20 @@ export function useStaffWorkflowCoordination({
               result.nextOperationalNote || app.latestOperationalNote,
             reviewedCriteriaCount: completedCount,
             criteriaReview: nextCriteriaReview,
+            committeeSummary: isCityReviewCompleted
+              ? {
+                  queueCategory: flaggedCrit
+                    ? 'needs_committee_review'
+                    : 'waiting_decision',
+                  flaggedCriterionName: flaggedCrit?.criterionName,
+                  officerSummaryNote:
+                    result.nextOperationalNote ||
+                    flaggedCrit?.noteSummary ||
+                    'Đã hoàn tất thẩm định 05 tiêu chí · Trình Hội đồng xét chọn.',
+                  submittedToCommitteeAt:
+                    app.committeeSummary?.submittedToCommitteeAt || 'Vừa xong',
+                }
+              : app.committeeSummary,
             schoolReviewSummary:
               staffUser.primaryRole === 'SCHOOL_OFFICER' && app.schoolReviewSummary
                 ? {

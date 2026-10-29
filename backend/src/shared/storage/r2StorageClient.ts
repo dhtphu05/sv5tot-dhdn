@@ -554,7 +554,7 @@ export class CloudflareR2StorageClient implements IObjectStorageClient {
     const response = await cfg.fetchFn!(presigned.uploadUrl, {
       method: 'PUT',
       headers: presigned.headers,
-      body: params.body as unknown as BodyInit,
+      body: new Uint8Array(params.body),
       signal: AbortSignal.timeout(30000),
     });
 

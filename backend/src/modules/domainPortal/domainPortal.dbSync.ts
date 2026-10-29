@@ -745,7 +745,8 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
           student
         );
         const userSyncKey = `rel_user_sync:${email}`;
-        const userSnapshot = JSON.stringify(student);
+        const userSnapshot =
+          lastSyncedPayloadHash.get(`registered_student:${email}`) || JSON.stringify(student);
         if (regChanged || lastSyncedPayloadHash.get(userSyncKey) !== userSnapshot) {
           const normEmail = (student.email || email).trim().toLowerCase();
           const normCode = (student.studentCode || '').trim().toUpperCase();
@@ -818,17 +819,49 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
         await upsertPersistentRecord(prisma, 'student_profile', profileKey, profileVal);
       }
 
-      // 2. Student Applications (JSONB + Relational Tables)
+      // 2. Individual Staff Records (including reviewWorkspace) — synced first so hashes are ready in O(1)
+      const currentStaffIds = portalState.individualStaffRecords
+        .map((r) => String(r?.applicationId || ''))
+        .filter((id) => Boolean(id) && (isTestRuntime() || !isLegacyMockOrTestAppId(id)));
+      const changedStaffAppIds = new Set<string>();
+      for (const rec of portalState.individualStaffRecords) {
+        if (!rec?.applicationId) continue;
+        const staffAppId = String(rec.applicationId);
+        if (!isTestRuntime() && isLegacyMockOrTestAppId(staffAppId)) continue;
+        const staffChanged = await upsertPersistentRecord(
+          prisma,
+          'staff_record',
+          staffAppId,
+          rec
+        );
+        if (staffChanged) {
+          changedStaffAppIds.add(staffAppId);
+        }
+      }
+      if (currentStaffIds.length === 0) {
+        await prisma
+          .$executeRawUnsafe(
+            `DELETE FROM "portal_persistent_records" WHERE "collection" = 'staff_record'`
+          )
+          .catch(() => {});
+      }
+
+      // 3. Student Applications (JSONB + Relational Tables)
       const currentAppIds = Object.keys(portalState.studentApplications).filter(
         (id) => isTestRuntime() || !isLegacyMockOrTestAppId(id)
       );
       for (const [appId, app] of Object.entries(portalState.studentApplications)) {
         if (!isTestRuntime() && isLegacyMockOrTestAppId(appId)) continue;
         const appChanged = await upsertPersistentRecord(prisma, 'student_application', appId, app);
-        const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === appId);
         const relCacheKey = `rel_sync:${appId}`;
-        const relSnapshot = JSON.stringify({ app, staffRec: staffRec ?? null });
-        if (appChanged || lastSyncedPayloadHash.get(relCacheKey) !== relSnapshot) {
+        const appHash = lastSyncedPayloadHash.get(`student_application:${appId}`) || '';
+        const staffHash = lastSyncedPayloadHash.get(`staff_record:${appId}`) || '';
+        const relSnapshot = `${appHash}::${staffHash}`;
+        if (
+          appChanged ||
+          changedStaffAppIds.has(appId) ||
+          lastSyncedPayloadHash.get(relCacheKey) !== relSnapshot
+        ) {
           await syncStudentApplicationToRelationalTables(prisma, app).catch(() => {});
           lastSyncedPayloadHash.set(relCacheKey, relSnapshot);
         }
@@ -837,28 +870,6 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
         await prisma
           .$executeRawUnsafe(
             `DELETE FROM "portal_persistent_records" WHERE "collection" = 'student_application'`
-          )
-          .catch(() => {});
-      }
-
-      // 3. Individual Staff Records (including reviewWorkspace)
-      const currentStaffIds = portalState.individualStaffRecords
-        .map((r) => String(r?.applicationId || ''))
-        .filter((id) => Boolean(id) && (isTestRuntime() || !isLegacyMockOrTestAppId(id)));
-      for (const rec of portalState.individualStaffRecords) {
-        if (!rec?.applicationId) continue;
-        if (!isTestRuntime() && isLegacyMockOrTestAppId(String(rec.applicationId))) continue;
-        await upsertPersistentRecord(
-          prisma,
-          'staff_record',
-          String(rec.applicationId),
-          rec
-        );
-      }
-      if (currentStaffIds.length === 0) {
-        await prisma
-          .$executeRawUnsafe(
-            `DELETE FROM "portal_persistent_records" WHERE "collection" = 'staff_record'`
           )
           .catch(() => {});
       }
@@ -1355,16 +1366,12 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
 
         // Populate relational sync cache keys for all hydrated applications so startup does not re-sync 65 apps
         for (const [appId, app] of Object.entries(portalState.studentApplications)) {
-          const staffRec = portalState.individualStaffRecords.find(
-            (r) => r.applicationId === appId
-          );
-          lastSyncedPayloadHash.set(
-            `rel_sync:${appId}`,
-            JSON.stringify({ app, staffRec: staffRec ?? null })
-          );
           if (!lastSyncedPayloadHash.has(`student_application:${appId}`)) {
             lastSyncedPayloadHash.set(`student_application:${appId}`, JSON.stringify(app));
           }
+          const appHash = lastSyncedPayloadHash.get(`student_application:${appId}`) || '';
+          const staffHash = lastSyncedPayloadHash.get(`staff_record:${appId}`) || '';
+          lastSyncedPayloadHash.set(`rel_sync:${appId}`, `${appHash}::${staffHash}`);
         }
 
         isHydrated = true;
