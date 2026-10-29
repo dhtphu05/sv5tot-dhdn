@@ -53,13 +53,20 @@ export function getExecutionMode(): ExecutionMode {
   }
 
   if (typeof import.meta !== 'undefined' && import.meta.env) {
-    if (import.meta.env.VITE_DEMO_MODE === 'false') {
-      return 'BACKEND';
-    }
     const envMode = normalizeMode(
       import.meta.env.VITE_EXECUTION_MODE || import.meta.env.VITE_5TOT_EXECUTION_MODE
     );
     if (envMode) return envMode;
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      return 'DEMO';
+    }
+    if (
+      import.meta.env.VITE_DEMO_MODE === 'false' ||
+      import.meta.env.PROD === true ||
+      (typeof process === 'undefined' && typeof window !== 'undefined')
+    ) {
+      return 'BACKEND';
+    }
   }
 
   if (typeof window !== 'undefined') {

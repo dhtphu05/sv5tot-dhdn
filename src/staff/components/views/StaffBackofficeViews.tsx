@@ -78,6 +78,7 @@ import {
   StaffDeadlinesRouteView,
   StaffApplicationQueueRouteView,
 } from '../../../widgets/staff-backoffice/StaffQueueAndUtilityViews';
+import { isBackendMode } from '../../../shared/config/executionMode';
 
 export interface StaffBackofficeViewsProps {
   currentUser: StaffUser;
@@ -329,7 +330,7 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
     'COL-2026-DN-22TCLC-KTPM'
   );
   const [collectiveWorkspaceOpen, setCollectiveWorkspaceOpen] =
-    useState<boolean>(true);
+    useState<boolean>(() => !isBackendMode());
   const [applicationTypeFilter, setApplicationTypeFilter] = useState<
     'all' | 'individual' | 'collective'
   >('all');

@@ -31,6 +31,7 @@ import {
 import {
   getApplicationsAwaitingDecision,
   getCommitteeOperationalSummary,
+  isApplicationForwardedToCityScope,
 } from '../../staff/committeeSelectors';
 import { getCurrentSeason } from '../../staff/adminSelectors';
 import {
@@ -369,9 +370,24 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
   handleHotfixOperationalApplication,
   handleDeleteOperationalApplication,
 }) => {
+  const isCityScopedRole =
+    staffUser.primaryRole === 'CITY_OFFICER' ||
+    staffUser.primaryRole === 'CITY_MANAGER' ||
+    staffUser.primaryRole === 'CITY_COMMITTEE';
+  const cityScopedApplications = React.useMemo(
+    () => staffApplications.filter(isApplicationForwardedToCityScope),
+    [staffApplications]
+  );
+  const effectiveStaffApplications = isCityScopedRole
+    ? cityScopedApplications
+    : staffApplications;
+
   const selectedStaffRecord =
+    effectiveStaffApplications.find(
+      (a) => a.applicationId === selectedStaffAppId
+    ) ||
     staffApplications.find((a) => a.applicationId === selectedStaffAppId) ||
-    staffApplications[0] ||
+    effectiveStaffApplications[0] ||
     null;
   const effectiveStaffAppId =
     selectedStaffRecord?.applicationId || selectedStaffAppId;
@@ -406,15 +422,15 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
       : committeeCasesMap[HERO_STAFF_APP_ID]);
 
   // Simplified for SRW-4 Business Correction: City reviewers share the City review queue without requiring individual assignment
-  const assignedCount = staffApplications.length;
-  const attentionCount = staffApplications.filter(
+  const assignedCount = cityScopedApplications.length;
+  const attentionCount = cityScopedApplications.filter(
     (a) =>
       a.workflowStatus === 'supplement_returned' ||
       a.workflowStatus === 'needs_recheck' ||
       a.workflowStatus === 'assigned_not_started' ||
       a.isAging
   ).length;
-  const supplementCount = staffApplications.filter(
+  const supplementCount = cityScopedApplications.filter(
     (a) =>
       a.workflowStatus === 'supplement_requested' ||
       a.workflowStatus === 'supplement_returned'
@@ -422,11 +438,11 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
   const unassignedCount = 0;
 
   const committeeSummary = getCommitteeOperationalSummary(
-    staffApplications,
+    cityScopedApplications,
     committeeCasesMap
   );
   const committeeWaitingList = getApplicationsAwaitingDecision(
-    staffApplications,
+    cityScopedApplications,
     committeeCasesMap
   );
 
@@ -550,7 +566,7 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
           <StaffBackofficeViews
             currentUser={staffUser}
             activeRouteId={staffRouteId}
-            applications={staffApplications}
+            applications={effectiveStaffApplications}
             notifications={staffNotifications}
             committeeCases={committeeCasesMap}
             activeCommitteeScenarioId={activeCommitteeScenarioId}

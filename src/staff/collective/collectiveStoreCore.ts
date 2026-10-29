@@ -62,6 +62,10 @@ export function subscribeToCollectiveStore(listener: StoreListener): () => void 
 }
 
 const LEGACY_MOCK_COLLECTIVE_IDS = new Set<string>([
+  'COL-2026-DN-22TCLC-KTPM',
+  'COL-2026-DN-LCH-CNTT',
+  'COL-2026-DN-CLB-TINHNGUYEN',
+  'COL-2026-DN-21TCLC-DT1',
   'COL-2026-DN-MVPM6A7N',
   'COL-2026-DN-MVPM6BWD',
   'COL-2026-DN-MVPO9W6K',
@@ -74,12 +78,43 @@ const LEGACY_MOCK_COLLECTIVE_IDS = new Set<string>([
   'col-app-2026-due-qt',
   'col-app-2026-ued-sp',
   'col-app-2026-dtu-kt',
+  'col-app-2026-dut-01',
+  'col-app-2026-due-01',
+  'col-app-2026-ued-01',
+  'col-app-2026-vku-01',
 ]);
 
 function isLegacyMockCollectiveId(id?: string | null): boolean {
   const clean = String(id || '').trim();
   if (!clean) return false;
   return LEGACY_MOCK_COLLECTIVE_IDS.has(clean);
+}
+
+function isNonUdnCollectiveApp(app?: CollectiveApplication | null): boolean {
+  if (!app) return false;
+  const instId = String(app.institutionId || '').trim().toLowerCase();
+  if (
+    instId === 'inst-dtu' ||
+    instId === 'inst-donga' ||
+    instId === 'inst-dau' ||
+    instId === 'inst-upes3' ||
+    instId === 'inst-tyd' ||
+    instId === 'inst-fpt'
+  ) {
+    return true;
+  }
+  const instName = String(app.institutionName || '').trim().toLowerCase();
+  if (
+    instName.includes('duy tân') ||
+    instName.includes('đông á') ||
+    instName.includes('kiến trúc') ||
+    instName.includes('thể dục thể thao') ||
+    instName.includes('kỹ thuật y') ||
+    instName.includes('fpt')
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function loadApplicationsFromStorage(): CollectiveApplication[] {
@@ -106,7 +141,10 @@ function loadApplicationsFromStorage(): CollectiveApplication[] {
       return defaultList;
     }
     if (isBackendMode()) {
-      return parsed.filter((app: CollectiveApplication) => !isLegacyMockCollectiveId(app?.id));
+      return parsed.filter(
+        (app: CollectiveApplication) =>
+          !isLegacyMockCollectiveId(app?.id) && !isNonUdnCollectiveApp(app)
+      );
     }
     // Ensure all 4 canonical demo apps are present in DEMO mode if not found
     const merged = [...parsed];
@@ -141,7 +179,10 @@ let cachedApps: CollectiveApplication[] | null = null;
 export function hydrateCollectiveStore(apps: CollectiveApplication[]): void {
   if (isBackendMode()) {
     const cleanRemote = (apps || []).filter(
-      (remote) => Boolean(remote?.id) && !isLegacyMockCollectiveId(remote.id)
+      (remote) =>
+        Boolean(remote?.id) &&
+        !isLegacyMockCollectiveId(remote.id) &&
+        !isNonUdnCollectiveApp(remote)
     );
     cachedApps = cleanRemote;
     saveApplicationsToStorage(cachedApps);

@@ -77,12 +77,6 @@ export const CANONICAL_INSTITUTION_OPTIONS = [
   { id: 'inst-smp', name: 'Trường Y Dược - Đại học Đà Nẵng' },
   { id: 'inst-vnuk', name: 'Viện Nghiên cứu & Đào tạo Việt - Anh - Đại học Đà Nẵng' },
   { id: 'inst-kontum', name: 'Phân hiệu Đại học Đà Nẵng tại Kon Tum' },
-  { id: 'inst-dtu', name: 'Trường Đại học Duy Tân' },
-  { id: 'inst-donga', name: 'Trường Đại học Đông Á' },
-  { id: 'inst-dau', name: 'Trường Đại học Kiến trúc Đà Nẵng' },
-  { id: 'inst-upes3', name: 'Trường Đại học Thể dục Thể thao Đà Nẵng' },
-  { id: 'inst-tyd', name: 'Trường Đại học Kỹ thuật Y - Dược Đà Nẵng' },
-  { id: 'inst-fpt', name: 'Trường Đại học FPT phân hiệu Đà Nẵng' },
 ];
 
 const STUDENT_PROFILE_CACHE_PREFIX = '5tot_dhdn_student_profile_v1_';

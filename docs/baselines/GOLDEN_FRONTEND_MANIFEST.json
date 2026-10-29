@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-29T10:29:34.926Z",
+  "createdAt": "2026-10-29T13:37:09.870Z",
   "totalProtectedFiles": 520,
   "files": [
     {
@@ -851,8 +851,8 @@
     },
     {
       "path": "src/components/profile/StudentProfileView.tsx",
-      "sizeBytes": 40712,
-      "sha256": "6c7d7b25148b0bbe5e8fc4a95d5cbc957423ba7c2e9a0a99b0ace35a3075a709"
+      "sizeBytes": 40239,
+      "sha256": "e28c579defedacfccddb8362eaf613c054e2265f3ff122a0c76ab016fb4a88b9"
     },
     {
       "path": "src/components/public/InstitutionCombobox.tsx",
@@ -1216,8 +1216,8 @@
     },
     {
       "path": "src/demo/prototypeDemoMode.ts",
-      "sizeBytes": 21794,
-      "sha256": "5e1003e7234b26968d2fa6b2cc1d0c662f448a89e725a0dc1b68340101929008"
+      "sizeBytes": 25005,
+      "sha256": "99e469d2737871179c098da6f3e0d37f60769e84be86b14eaf6af91c7dcb303e"
     },
     {
       "path": "src/demo/studentSelectors.ts",
@@ -1261,8 +1261,8 @@
     },
     {
       "path": "src/entities/committee/committeeWorkflowMutators.ts",
-      "sizeBytes": 14828,
-      "sha256": "992e04c62e94007ea4caa04365d7e7a3ab6c776402aacefdfbaa3fb73b8365d2"
+      "sizeBytes": 15214,
+      "sha256": "5b9c34f4775f16917578e939d771338d13ac94d422e1dba95658f533e3cf8b99"
     },
     {
       "path": "src/entities/review/officerReviewMutators.ts",
@@ -1506,8 +1506,8 @@
     },
     {
       "path": "src/features/staff-workflow/useStaffWorkflowCoordination.ts",
-      "sizeBytes": 50507,
-      "sha256": "93eed63833b130209f643b46e8f8e9de9218e65e4cab28e6a9e12e757542792c"
+      "sizeBytes": 53183,
+      "sha256": "a536d63eff909950f4af61551c8564d0dd3f1997e3df526752794c7b3ddaa1bc"
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
@@ -1581,8 +1581,8 @@
     },
     {
       "path": "src/pages/staff-portal/StaffPortalPage.tsx",
-      "sizeBytes": 24935,
-      "sha256": "47b804f896963bfdd6566dfadbce363a9e4277f9a84e6675ede3ceba302c9741"
+      "sizeBytes": 25541,
+      "sha256": "05ea9ed51c419e48f430ca816f9803d24ebb1f8e306b30b4687a79654babad68"
     },
     {
       "path": "src/pages/student-portal/StudentPortalPage.tsx",
@@ -1631,13 +1631,13 @@
     },
     {
       "path": "src/shared/api/r2EvidenceClient.ts",
-      "sizeBytes": 12113,
-      "sha256": "bdd93a0febf10f1e0a4deec21b1ca053eb8fe2d18948222058fe02fd22fc7617"
+      "sizeBytes": 12335,
+      "sha256": "331082eece9dfb41395056e975763a85f8159144c8f70d792d06e90c77fecfb8"
     },
     {
       "path": "src/shared/config/executionMode.ts",
-      "sizeBytes": 3944,
-      "sha256": "a3875ac37153c76318d3b6482068b83767b1430cf1e89f008878b9a839e9a840"
+      "sizeBytes": 4150,
+      "sha256": "74af849e6e83be410248c26682ff0c422ded916211b67f27f069288b151112df"
     },
     {
       "path": "src/shared/index.ts",
@@ -1731,8 +1731,8 @@
     },
     {
       "path": "src/staff/collective/collectiveStoreCore.ts",
-      "sizeBytes": 6937,
-      "sha256": "7577dc420dcd03cf8cb1082f9e2ca8fc0082ab0872605d92c3ccf9b99cc65211"
+      "sizeBytes": 8018,
+      "sha256": "f34dd6dc42f1552231437a2132f0c373e99f8ffd86f3f1e7f6d3bf7afc0fb82d"
     },
     {
       "path": "src/staff/collectiveStore.ts",
@@ -1746,8 +1746,8 @@
     },
     {
       "path": "src/staff/committeeSelectors.ts",
-      "sizeBytes": 19500,
-      "sha256": "ecc41f7f53b4dc9f9b5117e019dbee81018a5bc5209b323a11ea2ef35f1e4096"
+      "sizeBytes": 22116,
+      "sha256": "2092154849c00eae3477ab366129382a75cf25efcc649027c65f496e3f2f386e"
     },
     {
       "path": "src/staff/committeeTypes.ts",
@@ -2141,8 +2141,8 @@
     },
     {
       "path": "src/staff/components/views/StaffBackofficeViews.tsx",
-      "sizeBytes": 22198,
-      "sha256": "d27ffb794d79f45116a0a28a70b96d805a6b0c3719c9a24c85748c9847298024"
+      "sizeBytes": 22286,
+      "sha256": "24eb93c612c665ad27e28b90eb576a10f89a80e5f9487c9fe1ad9913080ea3a6"
     },
     {
       "path": "src/staff/criteriaProgress.ts",
@@ -2151,8 +2151,8 @@
     },
     {
       "path": "src/staff/demoEvidenceStorage.ts",
-      "sizeBytes": 15826,
-      "sha256": "b7d381526ed563a7adde08e3d84893f77ea2a3f43a423dd5b3af60110a49a853"
+      "sizeBytes": 17238,
+      "sha256": "9a84b737438136c2e15813301be975c25fb86663aba67dc6925931187bb956a5"
     },
     {
       "path": "src/staff/export/exportDataTransform.ts",
@@ -2226,8 +2226,8 @@
     },
     {
       "path": "src/staff/fixtures/committeeFixtures.ts",
-      "sizeBytes": 30519,
-      "sha256": "6b3403446ce045b5796d2f82f6d09c3ed42e2841b4703b0223c5aa26a074adcb"
+      "sizeBytes": 32881,
+      "sha256": "3a5768e1b6db2d6f9293f61df0d18ac5363888d3b75a0a58ceac9d309187c07f"
     },
     {
       "path": "src/staff/fixtures/demoScenarios.ts",
@@ -2546,8 +2546,8 @@
     },
     {
       "path": "src/widgets/staff-backoffice/StaffCollectiveReviewRoute.tsx",
-      "sizeBytes": 8310,
-      "sha256": "537f0b62219c89a0d9bb8b29e1874ccbe0acebd1e20596d7a2b172b3c9fabe94"
+      "sizeBytes": 8409,
+      "sha256": "ec8a7c735930fd50a5af70171656db69c7cb6271cc2e34f7ac46e663ef3882fe"
     },
     {
       "path": "src/widgets/staff-backoffice/StaffOverviewAndWorkload.tsx",

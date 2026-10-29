@@ -18,6 +18,7 @@ import {
   SchoolForwardingSnapshot,
   SchoolReviewSummary,
 } from '../../staff/schoolReviewTypes';
+import { buildDefaultCommitteeCase } from '../../staff/fixtures/committeeFixtures';
 
 export function applyResolveCommitteeFlag(
   prevCases: Record<string, CommitteeCaseDetail>,
@@ -31,7 +32,10 @@ export function applyResolveCommitteeFlag(
   nextApps: StaffApplicationRecord[];
 } {
   const nowLabel = 'Vừa xong · 17/10/2026';
-  const current = prevCases[applicationId];
+  const targetApp = prevApps.find((a) => a.applicationId === applicationId);
+  const current =
+    prevCases[applicationId] ||
+    (targetApp ? buildDefaultCommitteeCase(targetApp) : undefined);
   let nextCases = prevCases;
 
   if (current) {
@@ -147,7 +151,10 @@ export function applyRecordCommitteeDecision(
       ? ('Được công nhận Sinh viên 5 tốt cấp Đại học Đà Nẵng' as const)
       : ('Chưa được công nhận trong đợt xét này' as const);
 
-  const current = prevCases[applicationId];
+  const targetApp = prevApps.find((a) => a.applicationId === applicationId);
+  const current =
+    prevCases[applicationId] ||
+    (targetApp ? buildDefaultCommitteeCase(targetApp) : undefined);
   const nextCases = current
     ? {
         ...prevCases,

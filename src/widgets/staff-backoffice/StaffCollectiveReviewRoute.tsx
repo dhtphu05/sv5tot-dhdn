@@ -17,6 +17,7 @@ import {
 } from '../../staff/collectiveStore';
 import { CollectiveApplication } from '../../staff/collectiveTypes';
 import { Button } from '../../components/buttons/Button';
+import { isBackendMode } from '../../shared/config/executionMode';
 
 export interface StaffCollectiveReviewRouteProps {
   currentUser: StaffUser;
@@ -58,7 +59,7 @@ export const StaffCollectiveReviewRoute: React.FC<
     collectiveApps.find((a) => a.id === selectedCollectiveId) ||
     collectiveApps.find((a) => a.assignedOfficerId === currentUser.id) ||
     collectiveApps[0] ||
-    INITIAL_DEMO_COLLECTIVE_APPLICATION;
+    (isBackendMode() ? undefined : INITIAL_DEMO_COLLECTIVE_APPLICATION);
 
   // Simplified for SRW-4 Business Correction: All authorized City reviewers access the shared collective review queue
   const assignedCollectiveApps = collectiveApps;
