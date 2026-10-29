@@ -68,8 +68,8 @@ export const EvidenceSummary: React.FC<EvidenceSummaryProps> = ({
   // -------------------------------------------------------------
   if (count === 0) {
     return (
-      <div className={`flex items-center justify-between gap-2 min-w-0 max-w-full overflow-hidden ${className}`}>
-        <span className="text-[12.5px] text-[#728391] italic truncate shrink-0">
+      <div className={`flex flex-col items-start gap-1 py-0.5 min-w-0 max-w-full ${className}`}>
+        <span className="text-[12px] text-[#728391] italic truncate leading-snug">
           Chưa có minh chứng
         </span>
         {editable && onAdd && (
@@ -79,7 +79,7 @@ export const EvidenceSummary: React.FC<EvidenceSummaryProps> = ({
               e.stopPropagation();
               onAdd();
             }}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#126A9C] hover:text-[#0D78AE] hover:underline bg-[#EAF6FC] px-2 py-0.5 rounded-[5px] border border-[#D0E8F5] transition-colors cursor-pointer shrink-0 select-none"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#126A9C] hover:text-[#0D78AE] hover:underline bg-[#EAF6FC] hover:bg-[#DDF0FA] px-2 py-0.5 rounded-[5px] border border-[#D0E8F5] transition-colors cursor-pointer select-none whitespace-nowrap"
             title="Thêm minh chứng cho kê khai này"
           >
             <Plus size={11} strokeWidth={2.4} />
