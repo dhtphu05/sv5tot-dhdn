@@ -252,6 +252,12 @@ export function useStaffWorkflowCoordination({
   setAppSubmissionState,
   isActive = true,
 }: StaffWorkflowCoordinationOptions) {
+  const [staffUser, setStaffUser] = useState<StaffUser>(
+    () =>
+      initialStaffUser ||
+      STAFF_DEMO_USERS[initialStaffRole || 'CITY_OFFICER']
+  );
+
   useEffect(() => {
     if (staffUser && (staffUser.primaryRole === 'SCHOOL_OFFICER' || staffUser.primaryRole === 'CITY_OFFICER')) {
       const current = getApiActorContext();
@@ -267,12 +273,6 @@ export function useStaffWorkflowCoordination({
       }
     }
   }, [staffUser]);
-
-  const [staffUser, setStaffUser] = useState<StaffUser>(
-    () =>
-      initialStaffUser ||
-      STAFF_DEMO_USERS[initialStaffRole || 'CITY_OFFICER']
-  );
   const [staffRouteId, setStaffRouteId] =
     useState<StaffRouteId>(initialStaffRouteId);
   const [activeOfficerScenarioId, setActiveOfficerScenarioId] =
