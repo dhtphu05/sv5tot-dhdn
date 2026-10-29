@@ -19,6 +19,7 @@ import {
 import {
   SchoolRecommendationQueue,
   getApplicationCriteriaSummary,
+  getApplicationSchoolReviewUnitId,
 } from '../../staff/schoolSelectors';
 import { SchoolBatchHeader } from '../../widgets/school-backoffice/SchoolBatchHeader';
 import { SchoolForwardedSummaryBanner } from '../../widgets/school-backoffice/SchoolForwardedSummaryBanner';
@@ -423,7 +424,7 @@ export const SchoolRecommendationForwardingPage: React.FC<
     // 4. All selected belong to current unit
     const allInScope = selectedAppsList.every((a) => {
       if (!a) return true;
-      const appUnit = a.schoolReviewUnitId || 'unit-dut';
+      const appUnit = getApplicationSchoolReviewUnitId(a);
       return appUnit === userUnitId;
     });
     checks.push({

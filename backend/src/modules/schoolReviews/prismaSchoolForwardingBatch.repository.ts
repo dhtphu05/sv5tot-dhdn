@@ -19,6 +19,7 @@ import {
   savePortalStateToDisk,
   isTestRuntime,
   isLegacyMockOrTestAppId,
+  isNonUdnInstitutionRecord,
 } from '../domainPortal/domainPortal.state';
 
 export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingBatchRepository {
@@ -266,12 +267,18 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
           const nextWorkspaceState = rec.workspaceState
             ? {
                 ...rec.workspaceState,
+                reviewStage: 'CITY',
                 currentReviewStage: 'CITY',
                 schoolPreliminaryStatus: 'forwarded_to_city',
                 schoolRecommendation: 'recommended',
                 workflowStatus: 'unassigned',
                 assignedOfficer: null,
+                hasStartedReview: false,
                 isReviewCompleted: false,
+                completedAt: undefined,
+                criterionCompletedMap: {},
+                criterionConclusions: {},
+                scopeRecords: {},
                 overallReadinessStatus: 'pending_review',
               }
             : rec.workspaceState;
@@ -283,6 +290,13 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
             workflowStatus: 'unassigned',
             assignment: null,
             reviewedCriteriaCount: 0,
+            criteriaReview: Array.isArray(rec.criteriaReview)
+              ? rec.criteriaReview.map((c: any) => ({
+                  ...c,
+                  status: 'not_reviewed',
+                  noteSummary: undefined,
+                }))
+              : rec.criteriaReview,
             workspaceState: nextWorkspaceState,
             schoolReviewSummary: {
               ...(rec.schoolReviewSummary || {}),
@@ -291,7 +305,7 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
               forwardedAt: nowIso,
               forwardedBy: userId,
             },
-            latestOperationalNote: `Đơn vị xét sơ tuyển đã chính thức chuyển hồ sơ lên cấp Đại học Đà Nẵng (${resultDto.dispatchNumber || 'Đợt chính thức'})`,
+            latestOperationalNote: `Đơn vị xét sơ tuyển đã chính thức chuyển hồ sơ lên cấp Đại học Đà Nẵng (${resultDto.decisionNumber || 'Đợt chính thức'})`,
             updatedAt: nowIso,
             updatedSortKey: Date.now(),
           };
@@ -444,11 +458,23 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
         institution: true,
       },
     });
-    const dbApplications = rawDbApplications.filter(
-      (a: any) =>
-        isTestRuntime() ||
-        (!isLegacyMockOrTestAppId(a.id) && !isLegacyMockOrTestAppId(a.applicationCode))
-    );
+    const dbApplications = rawDbApplications.filter((a: any) => {
+      if (isTestRuntime()) return true;
+      if (isLegacyMockOrTestAppId(a.id) || isLegacyMockOrTestAppId(a.applicationCode)) {
+        return false;
+      }
+      if (isNonUdnInstitutionRecord(a)) {
+        return false;
+      }
+      // Exclude unsubmitted student drafts from School Officer review & batch summary
+      if (
+        a.schoolPreliminaryStatus === 'NOT_SUBMITTED' ||
+        a.currentReviewStage === 'STUDENT_DRAFT'
+      ) {
+        return false;
+      }
+      return true;
+    });
 
     const dbAppIds = new Set<string>();
     for (const a of dbApplications) {
@@ -459,14 +485,20 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       (r: any) =>
         r.schoolReviewUnitId === unitId &&
         !dbAppIds.has(r.applicationId) &&
-        (isTestRuntime() || !isLegacyMockOrTestAppId(r.applicationId))
+        r.schoolPreliminaryStatus !== 'school_not_submitted' &&
+        (isTestRuntime() ||
+          (!isLegacyMockOrTestAppId(r.applicationId) && !isNonUdnInstitutionRecord(r)))
     );
     const mergedPortalApps = portalUnitRecords.map((r: any) => ({
       id: r.applicationId,
       applicationCode: r.applicationId,
       institutionId: r.institution?.id || r.institutionId || unitId,
       institution: { officialName: r.institution?.officialName || r.university || r.schoolReviewUnitName || unitId },
-      openSupplementCount: r.supplementSummary?.activeStatus === 'pending_student' ? 1 : 0,
+      openSupplementCount:
+        r.supplementSummary?.activeStatus === 'pending_student' ||
+        r.supplementSummary?.activeStatus === 'waiting_student'
+          ? 1
+          : 0,
       schoolPreliminaryStatus:
         r.schoolPreliminaryStatus === 'forwarded_to_city' || r.currentReviewStage === 'CITY'
           ? 'FORWARDED_TO_CITY'
@@ -487,9 +519,12 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       },
     });
 
-    const draftSelectedIds: string[] = Array.isArray(existingBatch?.selectedApplicationIds)
+    const rawDraftSelectedIds: string[] = Array.isArray(existingBatch?.selectedApplicationIds)
       ? (existingBatch.selectedApplicationIds as string[])
       : [];
+    const draftSelectedIds = isTestRuntime()
+      ? rawDraftSelectedIds
+      : rawDraftSelectedIds.filter((id) => !isLegacyMockOrTestAppId(id));
     const draftSelectedSet = new Set(draftSelectedIds);
 
     const total = Math.max(applications.length, draftSelectedIds.length);
@@ -510,13 +545,22 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       const item = instMap.get(instId)!;
       item.total++;
 
-      if (app.openSupplementCount > 0) {
-        withOpenSupplements++;
-      }
-
       const portalRec = (portalState?.individualStaffRecords || []).find(
         (r: any) => r.applicationId === app.id || r.applicationId === app.applicationCode
       );
+      const hasOpenSupplement = portalRec
+        ? portalRec.supplementSummary?.activeStatus === 'pending_student' ||
+          portalRec.supplementSummary?.activeStatus === 'waiting_student'
+        : app.openSupplementCount > 0;
+      const isSelectedInDraft =
+        draftSelectedSet.size === 0 ||
+        draftSelectedSet.has(app.id) ||
+        Boolean(app.applicationCode && draftSelectedSet.has(app.applicationCode));
+
+      if (hasOpenSupplement && isSelectedInDraft) {
+        withOpenSupplements++;
+      }
+
       const effectivePrelim =
         portalRec?.schoolPreliminaryStatus === 'forwarded_to_city' ||
         portalRec?.currentReviewStage === 'CITY'
