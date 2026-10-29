@@ -43,6 +43,16 @@ export class PasswordResetService {
       return genericResponse;
     }
 
+    // In safe mode: strictly prevent issuing or sending reset tokens for third-party accounts
+    if (this.emailService && typeof this.emailService.canIssuePasswordResetFor === 'function') {
+      if (!this.emailService.canIssuePasswordResetFor(normalizedEmail)) {
+        logger.info(
+          `[PasswordReset:SAFE_MODE] Reset token issuance suppressed for non-whitelisted account in safe mode: ${normalizedEmail}`
+        );
+        return genericResponse;
+      }
+    }
+
     // Invalidate existing active tokens for this user
     await this.resetRepo.invalidateUserTokens(user.id);
 

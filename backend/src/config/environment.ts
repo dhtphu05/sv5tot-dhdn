@@ -33,6 +33,7 @@ export interface BackendEnvironment {
   RESEND_FROM_EMAIL: string;
   RESEND_MODE: 'mock' | 'safe' | 'live';
   RESEND_SAFE_OVERRIDE_EMAIL?: string;
+  APP_PUBLIC_URL: string;
   APP_URL: string;
 }
 
@@ -135,7 +136,34 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     | 'safe'
     | 'live';
   const resendSafeOverride = env.RESEND_SAFE_OVERRIDE_EMAIL?.trim() || 'vanngocnhuy30032006@gmail.com';
-  const appUrl = (env.APP_URL || env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  // Public Frontend URL Configuration (P0 - Production Hardening)
+  const defaultPublicUrl = nodeEnv === 'production' ? 'https://sinhvien5tot.udn.vn' : 'http://localhost:5173';
+  const rawAppPublicUrl = env.APP_PUBLIC_URL?.trim() || env.APP_URL?.trim() || env.FRONTEND_URL?.trim() || defaultPublicUrl;
+  const appPublicUrl = rawAppPublicUrl.replace(/\/+$/, '');
+
+  try {
+    const parsedUrl = new URL(appPublicUrl);
+    if (nodeEnv === 'production') {
+      if (parsedUrl.protocol !== 'https:') {
+        throw new ConfigurationError(
+          `APP_PUBLIC_URL must use HTTPS in production. Received: "${appPublicUrl}".`
+        );
+      }
+      const host = parsedUrl.hostname.toLowerCase();
+      if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local') || host === '0.0.0.0') {
+        throw new ConfigurationError(
+          `APP_PUBLIC_URL cannot use localhost/loopback in production. Received: "${appPublicUrl}".`
+        );
+      }
+    }
+  } catch (err) {
+    if (err instanceof ConfigurationError) {
+      throw err;
+    }
+    throw new ConfigurationError(
+      `Invalid APP_PUBLIC_URL: "${appPublicUrl}". Must be a valid absolute URL.`
+    );
+  }
 
   return {
     NODE_ENV: nodeEnv as BackendEnvironment['NODE_ENV'],
@@ -167,7 +195,8 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     RESEND_FROM_EMAIL: resendFromEmail,
     RESEND_MODE: resendMode,
     RESEND_SAFE_OVERRIDE_EMAIL: resendSafeOverride,
-    APP_URL: appUrl,
+    APP_PUBLIC_URL: appPublicUrl,
+    APP_URL: appPublicUrl,
   };
 }
 

@@ -1,5 +1,5 @@
 /**
- * 5TOT ÄÃ  Náºµng â€” Password Reset Service Unit Tests (BE2-A2)
+ * 5TOT Đà Nẵng — Password Reset Service Unit Tests (BE2-A2)
  */
 
 import { describe, it, beforeEach } from 'node:test';
@@ -37,7 +37,7 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     testUser = await fakeIdentityRepo.createStudent({
       email: 'student.reset@dut.udn.vn',
       passwordHash: initialHash,
-      fullName: 'Sinh ViÃªn Reset',
+      fullName: 'Sinh Viên Reset',
       studentCode: '102220555',
       institutionId: 'inst-dut',
     });
@@ -96,6 +96,47 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     });
   });
 
+  it('Safe mode: suppresses token creation for unauthorized non-test accounts', async () => {
+    const dispatchedEmails: unknown[] = [];
+    const safeModeEmailService = {
+      send: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendPasswordResetEmail: async (data: unknown) => {
+        dispatchedEmails.push(data);
+        return {
+          success: true,
+          originalRecipient: testUser.email,
+          effectiveRecipient: testUser.email,
+          isRerouted: false,
+          timestamp: new Date().toISOString(),
+        };
+      },
+      canIssuePasswordResetFor: (email: string) => {
+        return email === 'authorized-tester@udn.vn';
+      },
+    };
+
+    const resetServiceWithSafeMode = new PasswordResetService(
+      fakeResetRepo,
+      fakeIdentityRepo,
+      sessionService,
+      defaultPasswordHasher,
+      safeModeEmailService
+    );
+
+    // Attempt reset for unauthorized testUser
+    const result = await resetServiceWithSafeMode.requestPasswordReset(testUser.email);
+    assert.equal(result.success, true);
+    assert.equal(result.devResetToken, undefined);
+    assert.equal(dispatchedEmails.length, 0);
+    assert.equal(fakeResetRepo.tokens.size, 0, 'No token should be created for unauthorized account in safe mode');
+  });
+
   it('invalidates reset token and returns generic response if email delivery fails', async () => {
     const failingEmailService = {
       send: async () => ({
@@ -147,6 +188,7 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     // 2. Request reset
     const reqResult = await resetService.requestPasswordReset(testUser.email);
     const rawToken = reqResult.devResetToken!;
+    assert.ok(rawToken);
 
     // 3. Confirm reset
     await resetService.confirmPasswordReset(rawToken, 'NewBrandNewPassword123!');

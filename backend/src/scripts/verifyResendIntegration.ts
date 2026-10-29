@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,12 +15,19 @@ import { getEmailService } from '../shared/email/index';
 
 async function main() {
   const emailService = getEmailService();
+  const targetRecipient = (
+    process.env.RESEND_SAFE_OVERRIDE_EMAIL || 'vanngocnhuy30032006@gmail.com'
+  ).trim();
+
+  const freshToken = crypto.randomBytes(32).toString('hex');
+
   console.log('--- KHỞI ĐỘNG KIỂM TRA GỬI EMAIL QUA RESEND ---');
+  console.log(`Target Recipient: ${targetRecipient}`);
   
   const result = await emailService.sendPasswordResetEmail({
-    to: 'minhanh.sv5t@dut.udn.vn',
+    to: targetRecipient,
     userName: 'Nguyễn Minh Anh',
-    resetToken: 'demo-token-resend-test-2026',
+    resetToken: freshToken,
   });
 
   console.log('KẾT QUẢ GỬI EMAIL:');
@@ -28,7 +36,7 @@ async function main() {
   if (result.success) {
     console.log('\n>>> THÀNH CÔNG: Email đã được phát đi từ Resend!');
     console.log(`>>> Resend Email ID: ${result.id}`);
-    console.log(`>>> Người nhận đích (an toàn): ${result.effectiveRecipient}`);
+    console.log(`>>> Người nhận đích: ${result.effectiveRecipient}`);
   } else {
     console.error('\n>>> THẤT BẠI: Lỗi khi gửi:', result.error);
   }

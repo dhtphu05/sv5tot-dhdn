@@ -34,4 +34,5 @@ export interface PasswordResetEmailData {
 export interface IEmailService {
   send(options: SendEmailOptions): Promise<SendEmailResult>;
   sendPasswordResetEmail(data: PasswordResetEmailData): Promise<SendEmailResult>;
+  canIssuePasswordResetFor?(accountEmail: string): boolean;
 }

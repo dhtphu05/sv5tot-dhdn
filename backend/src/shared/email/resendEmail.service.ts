@@ -5,7 +5,7 @@
  *
  * Implements authoritative email dispatch via Resend SDK with built-in Safety Shield:
  * - MOCK mode: Logs email without network call (offline/dev/unit-test).
- * - SAFE mode: Reroutes all emails to RESEND_SAFE_OVERRIDE_EMAIL with clear audit banners.
+ * - SAFE mode: Only allows dispatch for designated test recipient; suppresses third-party token leakage.
  * - LIVE mode: Direct dispatch to genuine user email addresses.
  * - Idempotency: Protects against double-send on retries using SHA-256 token digests.
  */
@@ -20,7 +20,10 @@ import type {
   SendEmailOptions,
   SendEmailResult,
 } from './email.types';
-import { buildPasswordResetHtmlTemplate } from './emailTemplates';
+import {
+  buildPasswordResetHtmlTemplate,
+  buildPasswordResetPlainTextTemplate,
+} from './emailTemplates';
 
 export class ResendEmailService implements IEmailService {
   private resendClient: Resend | null = null;
@@ -36,6 +39,17 @@ export class ResendEmailService implements IEmailService {
     if (apiKey) {
       this.resendClient = new Resend(apiKey);
     }
+  }
+
+  public canIssuePasswordResetFor(accountEmail: string): boolean {
+    const env = getEnvironment();
+    if (env.RESEND_MODE === 'safe') {
+      const allowedOverride = (
+        env.RESEND_SAFE_OVERRIDE_EMAIL || 'vanngocnhuy30032006@gmail.com'
+      ).trim().toLowerCase();
+      return accountEmail.trim().toLowerCase() === allowedOverride;
+    }
+    return true;
   }
 
   public async send(options: SendEmailOptions): Promise<SendEmailResult> {
@@ -61,35 +75,35 @@ export class ResendEmailService implements IEmailService {
 
     // 2. SAFE MODE vs LIVE MODE Resolution
     let effectiveRecipient = originalRecipient;
-    let effectiveSubject = options.subject;
-    let effectiveHtml = options.html;
-    let isRerouted = false;
+    const effectiveSubject = options.subject;
+    const effectiveHtml = options.html;
+    const isRerouted = false;
 
     if (env.RESEND_MODE === 'safe') {
       const overrideEmail = (
         env.RESEND_SAFE_OVERRIDE_EMAIL || 'vanngocnhuy30032006@gmail.com'
       ).trim().toLowerCase();
 
-      if (overrideEmail && originalRecipient !== overrideEmail) {
-        effectiveRecipient = overrideEmail;
-        effectiveSubject = `[TEST AN TOÀN: Gốc ${originalRecipient}] ${options.subject}`;
-        isRerouted = true;
-
-        const safetyBanner = `
-<div style="background-color: #fef2f2; border: 2px dashed #ef4444; padding: 14px 18px; margin: 16px auto 24px auto; max-width: 600px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #991b1b; text-align: left; line-height: 1.5;">
-  <strong style="font-size: 14px;">🛡️ [CHẾ ĐỘ TEST AN TOÀN — EMAIL ĐÃ ĐƯỢC CHUYỂN HƯỚNG]</strong><br/>
-  • <strong>Địa chỉ gốc trong hệ thống:</strong> <code>${originalRecipient}</code><br/>
-  • <strong>Đã chuyển hướng đến hòm thư test:</strong> <code>${effectiveRecipient}</code><br/>
-  • <em>Hệ thống bảo vệ dữ liệu người dùng thật trong cơ sở dữ liệu.</em>
-</div>`;
-
-        effectiveHtml = safetyBanner + options.html;
+      // In safe mode, we only allow email dispatch to the designated safe override address.
+      // Under NO circumstances do we leak or forward another user's valid reset token to the test address.
+      if (originalRecipient !== overrideEmail) {
+        logger.info(
+          `[EmailService:SAFE_SUPPRESSED] Safe mode active: dispatch to ${originalRecipient} suppressed to prevent token leakage.`
+        );
+        return {
+          success: true,
+          id: `safe-suppressed-${Date.now()}`,
+          originalRecipient,
+          effectiveRecipient: 'suppressed',
+          isRerouted: false,
+          timestamp,
+        };
       }
     }
 
     try {
       logger.info(
-        `[EmailService] Dispatching email via Resend to ${effectiveRecipient} (Original: ${originalRecipient}, Mode: ${env.RESEND_MODE})`
+        `[EmailService] Dispatching email via Resend to ${effectiveRecipient} (Mode: ${env.RESEND_MODE})`
       );
 
       const emailPayload = {
@@ -137,7 +151,6 @@ export class ResendEmailService implements IEmailService {
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       logger.error(`[EmailService:EXCEPTION] Exception during dispatch: ${errorMsg}`, {
-        error: err,
         originalRecipient,
         effectiveRecipient,
       });
@@ -157,14 +170,23 @@ export class ResendEmailService implements IEmailService {
     data: PasswordResetEmailData
   ): Promise<SendEmailResult> {
     const env = getEnvironment();
-    const appUrl = env.APP_URL || 'http://localhost:5173';
-    const resetUrl =
-      data.resetUrl ||
-      `${appUrl}/?route=reset_password&token=${data.resetToken}&email=${encodeURIComponent(
-        data.to
-      )}`;
+
+    let resetUrl = data.resetUrl;
+    if (!resetUrl) {
+      const baseUrl = env.APP_PUBLIC_URL || env.APP_URL;
+      const parsedBaseUrl = new URL(baseUrl);
+      parsedBaseUrl.searchParams.set('route', 'reset_password');
+      parsedBaseUrl.searchParams.set('token', data.resetToken);
+      resetUrl = parsedBaseUrl.toString();
+    }
 
     const html = buildPasswordResetHtmlTemplate({
+      userName: data.userName,
+      resetUrl,
+      expiresInMinutes: 15,
+    });
+
+    const text = buildPasswordResetPlainTextTemplate({
       userName: data.userName,
       resetUrl,
       expiresInMinutes: 15,
@@ -177,9 +199,9 @@ export class ResendEmailService implements IEmailService {
 
     return this.send({
       to: data.to,
-      subject: '[5TOT ĐHĐN] Yêu cầu đặt lại mật khẩu tài khoản',
+      subject: 'Yêu cầu đặt lại mật khẩu – Sinh viên 5 tốt ĐHĐN',
       html,
-      text: `Xin chào ${data.userName},\n\nBạn vừa yêu cầu đặt lại mật khẩu cho tài khoản 5TOT ĐHĐN. Vui lòng truy cập liên kết sau trong vòng 15 phút để đổi mật khẩu:\n\n${resetUrl}\n\nTrân trọng,\nHội Sinh viên Việt Nam Đại học Đà Nẵng`,
+      text,
       idempotencyKey: `password-reset/${tokenDigest}`,
     });
   }

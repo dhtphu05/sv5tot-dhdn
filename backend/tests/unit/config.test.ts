@@ -14,6 +14,8 @@ describe('Backend V2: Environment Configuration Unit Tests', () => {
     assert.equal(config.API_PREFIX, '/api/v2');
     assert.equal(config.LOG_LEVEL, 'info');
     assert.equal(config.MAX_BODY_SIZE_BYTES, 1048576);
+    assert.equal(config.APP_PUBLIC_URL, 'http://localhost:5173');
+    assert.equal(config.APP_URL, 'http://localhost:5173');
   });
 
   it('rejects invalid NODE_ENV', () => {
@@ -144,5 +146,69 @@ describe('Backend V2: Environment Configuration Unit Tests', () => {
         err.message.includes('Cloudflare R2 credentials')
     );
   });
-});
 
+  it('enforces HTTPS for APP_PUBLIC_URL in production', () => {
+    assert.throws(
+      () =>
+        parseEnvironment({
+          NODE_ENV: 'production',
+          DATABASE_URL: 'postgresql://neondb_owner:pass@ep-cool-sky-123-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require',
+          JWT_ACCESS_SECRET: 'production-secret-with-high-entropy-at-least-32-chars-long',
+          REFRESH_TOKEN_PEPPER: 'production-pepper-16-chars',
+          R2_ACCOUNT_ID: 'cf-acc',
+          R2_ACCESS_KEY_ID: 'key',
+          R2_SECRET_ACCESS_KEY: 'secret',
+          R2_BUCKET_NAME: 'bucket',
+          APP_PUBLIC_URL: 'http://sinhvien5tot.udn.vn',
+        }),
+      (err: any) =>
+        err instanceof ConfigurationError &&
+        err.message.includes('APP_PUBLIC_URL must use HTTPS in production')
+    );
+  });
+
+  it('strictly rejects localhost and loopback APP_PUBLIC_URL in production', () => {
+    assert.throws(
+      () =>
+        parseEnvironment({
+          NODE_ENV: 'production',
+          DATABASE_URL: 'postgresql://neondb_owner:pass@ep-cool-sky-123-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require',
+          JWT_ACCESS_SECRET: 'production-secret-with-high-entropy-at-least-32-chars-long',
+          REFRESH_TOKEN_PEPPER: 'production-pepper-16-chars',
+          R2_ACCOUNT_ID: 'cf-acc',
+          R2_ACCESS_KEY_ID: 'key',
+          R2_SECRET_ACCESS_KEY: 'secret',
+          R2_BUCKET_NAME: 'bucket',
+          APP_PUBLIC_URL: 'https://localhost:5173',
+        }),
+      (err: any) =>
+        err instanceof ConfigurationError &&
+        err.message.includes('APP_PUBLIC_URL cannot use localhost/loopback in production')
+    );
+  });
+
+  it('defaults to official production URL https://sinhvien5tot.udn.vn when NODE_ENV is production and not explicitly set', () => {
+    const config = parseEnvironment({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://neondb_owner:pass@ep-cool-sky-123-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require',
+      JWT_ACCESS_SECRET: 'production-secret-with-high-entropy-at-least-32-chars-long',
+      REFRESH_TOKEN_PEPPER: 'production-pepper-16-chars',
+      R2_ACCOUNT_ID: 'cf-acc',
+      R2_ACCESS_KEY_ID: 'key',
+      R2_SECRET_ACCESS_KEY: 'secret',
+      R2_BUCKET_NAME: 'bucket',
+    });
+
+    assert.equal(config.APP_PUBLIC_URL, 'https://sinhvien5tot.udn.vn');
+    assert.equal(config.APP_URL, 'https://sinhvien5tot.udn.vn');
+  });
+
+  it('allows http://localhost:5173 in development mode', () => {
+    const config = parseEnvironment({
+      NODE_ENV: 'development',
+      APP_PUBLIC_URL: 'http://localhost:5173',
+    });
+
+    assert.equal(config.APP_PUBLIC_URL, 'http://localhost:5173');
+  });
+});

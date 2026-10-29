@@ -1,6 +1,7 @@
 /**
  * 5TOT ĐHĐN — Responsive HTML Email Templates
- * Branded for: Hội Sinh viên Việt Nam Đại học Đà Nẵng
+ * Cơ quan quản lý: Đoàn Thanh niên - Hội Sinh viên Đại học Đà Nẵng
+ * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
 export interface PasswordResetTemplateParams {
@@ -14,74 +15,71 @@ export function buildPasswordResetHtmlTemplate({
   resetUrl,
   expiresInMinutes = 15,
 }: PasswordResetTemplateParams): string {
-  const currentYear = new Date().getFullYear();
-
   return `<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yêu cầu đặt lại mật khẩu — 5TOT ĐHĐN</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Yêu cầu đặt lại mật khẩu – Sinh viên 5 tốt ĐHĐN</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background-color: #f1f5f9;
+      background-color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       color: #1e293b;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     .wrapper {
       width: 100%;
-      background-color: #f1f5f9;
+      background-color: #f8fafc;
       padding: 32px 16px;
     }
     .container {
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
-      border-radius: 12px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       border: 1px solid #e2e8f0;
     }
     .header {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      padding: 28px 24px;
+      background-color: #0D78AE;
+      padding: 24px 24px;
       text-align: center;
       color: #ffffff;
     }
-    .badge {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-    .header p {
-      margin: 6px 0 0 0;
+    .org-title {
       font-size: 13px;
-      opacity: 0.9;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin: 0 0 6px 0;
+      color: #ffffff;
+    }
+    .system-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f9ff;
     }
     .content {
       padding: 32px 24px;
+      font-size: 15px;
+      color: #1e293b;
     }
     .greeting {
       font-size: 16px;
       font-weight: 600;
       color: #0f172a;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .main-text {
+      margin: 0 0 24px 0;
+      line-height: 1.6;
     }
     .cta-container {
       text-align: center;
@@ -89,45 +87,80 @@ export function buildPasswordResetHtmlTemplate({
     }
     .cta-button {
       display: inline-block;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      background-color: #0D78AE;
       color: #ffffff !important;
       text-decoration: none;
       font-size: 15px;
       font-weight: 600;
       padding: 14px 32px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+      border-radius: 6px;
+      min-height: 44px;
+      box-sizing: border-box;
+      line-height: 20px;
     }
-    .warning-box {
-      background-color: #fef3c7;
-      border-left: 4px solid #f59e0b;
+    .notice-section {
+      background-color: #f8fafc;
+      border-left: 3px solid #0D78AE;
       padding: 12px 16px;
-      border-radius: 4px;
-      font-size: 13px;
-      color: #92400e;
       margin: 24px 0;
+      font-size: 13.5px;
+      color: #475569;
+      border-radius: 0 4px 4px 0;
     }
-    .fallback-url {
-      font-size: 12px;
+    .notice-section p {
+      margin: 0 0 6px 0;
+    }
+    .notice-section p:last-child {
+      margin-bottom: 0;
+    }
+    .fallback-section {
+      margin-top: 24px;
+      font-size: 13px;
       color: #64748b;
+    }
+    .fallback-url-box {
+      font-size: 12px;
+      color: #0D78AE;
       word-break: break-all;
+      overflow-wrap: break-word;
       background-color: #f8fafc;
       padding: 12px;
       border-radius: 6px;
       border: 1px solid #e2e8f0;
-      margin-top: 16px;
+      margin-top: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .fallback-url-box a {
+      color: #0D78AE;
+      text-decoration: underline;
+      word-break: break-all;
+      overflow-wrap: break-word;
     }
     .footer {
       background-color: #f8fafc;
       padding: 24px;
       text-align: center;
       border-top: 1px solid #e2e8f0;
-      font-size: 12px;
+      font-size: 12.5px;
       color: #64748b;
+      line-height: 1.6;
     }
     .footer a {
-      color: #0284c7;
+      color: #0D78AE;
       text-decoration: none;
+    }
+    @media only screen and (max-width: 480px) {
+      .wrapper {
+        padding: 12px 8px;
+      }
+      .content {
+        padding: 24px 16px;
+      }
+      .cta-button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+      }
     }
   </style>
 </head>
@@ -135,40 +168,67 @@ export function buildPasswordResetHtmlTemplate({
   <div class="wrapper">
     <div class="container">
       <div class="header">
-        <div class="badge">Hội Sinh viên Việt Nam Đại học Đà Nẵng</div>
-        <h1>Cổng Xét chọn Sinh viên 5 tốt</h1>
-        <p>Hệ thống Thông tin & Thẩm định Danh hiệu Cấp Thành phố / Đại học Đà Nẵng</p>
+        <div class="org-title">HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG</div>
+        <div class="system-title">Hệ thống xét chọn danh hiệu và giải thưởng sinh viên</div>
       </div>
 
       <div class="content">
-        <div class="greeting">Kính gửi bạn ${userName},</div>
-        <p>Hệ thống vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản liên kết với địa chỉ email này. Vui lòng bấm vào nút bên dưới để tiến hành tạo mật khẩu mới:</p>
+        <div class="greeting">Kính gửi ${userName},</div>
+        <p class="main-text">Hệ thống đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấn vào nút bên dưới để thiết lập mật khẩu mới.</p>
 
         <div class="cta-container">
           <a href="${resetUrl}" target="_blank" rel="noopener noreferrer" class="cta-button">
-            ĐẶT LẠI MẬT KHẨU
+            Đặt lại mật khẩu
           </a>
         </div>
 
-        <div class="warning-box">
-          <strong>Lưu ý bảo mật:</strong>
-          <ul style="margin: 6px 0 0 0; padding-left: 18px;">
-            <li>Liên kết đặt lại mật khẩu này chỉ có hiệu lực trong vòng <strong>${expiresInMinutes} phút</strong> kể từ khi phát hành.</li>
-            <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua thư này. Mật khẩu và tài khoản của bạn vẫn được giữ an toàn tuyệt đối.</li>
-          </ul>
+        <div class="notice-section">
+          <p>• Liên kết có hiệu lực trong ${expiresInMinutes} phút và chỉ sử dụng một lần.</p>
+          <p>• Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mật khẩu hiện tại của bạn sẽ không thay đổi.</p>
         </div>
 
-        <p style="font-size: 13px; color: #475569;">Nếu không thể nhấp vào nút trên, bạn có thể sao chép và dán trực tiếp liên kết sau vào trình duyệt web:</p>
-        <div class="fallback-url">${resetUrl}</div>
+        <div class="fallback-section">
+          <p style="margin: 0 0 6px 0;">Nếu nút trên không hoạt động, vui lòng sao chép liên kết sau và mở trong trình duyệt:</p>
+          <div class="fallback-url-box">
+            <a href="${resetUrl}" target="_blank" rel="noopener noreferrer">${resetUrl}</a>
+          </div>
+        </div>
       </div>
 
       <div class="footer">
         <p style="margin: 0 0 4px 0; font-weight: 600; color: #334155;">Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng</p>
-        <p style="margin: 0 0 8px 0;">41 Lê Duẩn, Quận Hải Châu, Thành phố Đà Nẵng</p>
-        <p style="margin: 0;">Email công vụ: <a href="mailto:hoisinhvien@udn.vn">hoisinhvien@udn.vn</a> · © ${currentYear} 5TOT ĐHĐN</p>
+        <p style="margin: 0 0 6px 0;">Email hỗ trợ: <a href="mailto:hoisinhvien@udn.vn">hoisinhvien@udn.vn</a></p>
+        <p style="margin: 0; font-size: 11.5px; color: #94a3b8;">Đây là email tự động. Vui lòng không trả lời trực tiếp.</p>
       </div>
     </div>
   </div>
 </body>
 </html>`;
+}
+
+export function buildPasswordResetPlainTextTemplate({
+  userName,
+  resetUrl,
+  expiresInMinutes = 15,
+}: PasswordResetTemplateParams): string {
+  return `HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
+Hệ thống xét chọn danh hiệu và giải thưởng sinh viên
+
+Kính gửi ${userName},
+
+Hệ thống đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấn vào liên kết bên dưới để thiết lập mật khẩu mới:
+
+${resetUrl}
+
+Liên kết có hiệu lực trong ${expiresInMinutes} phút và chỉ sử dụng một lần.
+
+Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mật khẩu hiện tại của bạn sẽ không thay đổi.
+
+Nếu nút trên không hoạt động, vui lòng sao chép liên kết sau và mở trong trình duyệt:
+${resetUrl}
+
+---
+Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng
+Email hỗ trợ: hoisinhvien@udn.vn
+Đây là email tự động. Vui lòng không trả lời trực tiếp.`;
 }
