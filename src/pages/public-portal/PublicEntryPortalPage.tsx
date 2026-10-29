@@ -1,5 +1,5 @@
 /**
- * 5TOT ÄHÄN â€” Public Entry Portal Page (FSD Pages Layer)
+ * 5TOT ĐHĐN — Public Entry Portal Page (FSD Pages Layer)
  * Composes PublicLandingPage, PublicLoginPage, PublicSignupPage, and PrototypeDemoToolbar.
  */
 
@@ -129,15 +129,7 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
   const syncPublicUrl = (route: PublicEntryRoute) => {
     if (typeof window === 'undefined') return;
     const targetPath =
-      route === 'login'
-        ? '/login'
-        : route === 'signup'
-        ? '/signup'
-        : route === 'forgot_password'
-        ? '/forgot-password'
-        : route === 'reset_password'
-        ? '/reset-password'
-        : '/';
+      route === 'login' ? '/login' : route === 'signup' ? '/signup' : route === 'forgot_password' ? '/forgot-password' : route === 'reset_password' ? '/reset-password' : '/';
     if (window.location.pathname !== targetPath) {
       window.history.pushState({}, '', targetPath);
     }
