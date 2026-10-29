@@ -966,7 +966,7 @@ export async function hydrateEvidenceRecordFromNeonDb(
 
 export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false): Promise<boolean> {
   if (!isNeonDbSyncEnabled()) return false;
-  if (isHydrated && !forceRefresh && Date.now() - lastHydratedAt < 4000) {
+  if (isHydrated && !forceRefresh) {
     return true;
   }
   if (!initialHydrationPromise) {
@@ -1287,6 +1287,7 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
               profileObj?.institutionName ||
               mappedInst.instName,
             password: existingReg?.password,
+            passwordHash: relUser.passwordHash || existingReg?.passwordHash,
             profile: profileObj,
           };
           portalState.registeredStudents.set(emailKey, hydratedReg);
