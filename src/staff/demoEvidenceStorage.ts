@@ -194,10 +194,59 @@ export async function saveEvidenceFile(
     const ownerTrack =
       meta?.ownerTrack ||
       (meta?.applicationId?.startsWith('COL-') ? 'COLLECTIVE' : 'INDIVIDUAL');
+    const targetAppId = meta?.applicationId || 'APP-2026-DN-00142';
+    const targetReqId = meta?.reqId || 'general';
 
-    // 1. Index in portalState.evidenceIndex by client evidence ID so any browser/officer can preview
-    if (sizeBytes <= 25 * 1024 * 1024) {
-      fileOrBlob
+    let uploadedToCloudR2 = false;
+    let r2ObjectKey: string | undefined;
+    let r2Bucket: string | undefined;
+    let remoteEvidenceId: string | undefined;
+
+    // 1. Execute 3-step Cloudflare R2 presigned upload first
+    try {
+      const r2Result = await executeR2EvidenceUpload({
+        track: ownerTrack,
+        applicationId: targetAppId,
+        requirementOrCriterionId: targetReqId,
+        fileName,
+        mimeType: resolvedMime,
+        sizeBytes,
+        binary: fileOrBlob,
+        onStateChange: meta?.onStateChange,
+      });
+      record.remoteEvidenceId = r2Result.id;
+      remoteEvidenceId = r2Result.id;
+      r2ObjectKey = r2Result.objectKey;
+      r2Bucket = r2Result.bucketName;
+      uploadedToCloudR2 = Boolean(r2Result.uploadedDirectToCloudR2);
+      remoteEvidenceIdMap.set(id, r2Result.id);
+      await persistRecordLocally(record);
+    } catch (err) {
+      if (meta?.onStateChange) {
+        throw err;
+      }
+      console.warn('R2 presigned upload fallback to portal evidence store:', err);
+    }
+
+    // 2. Index in portal evidence metadata store (send only r2ObjectKey without base64Content when R2 is active)
+    if (uploadedToCloudR2 && r2ObjectKey) {
+      void apiRequest('/api/v2/portal/evidence/upload', {
+        method: 'POST',
+        body: {
+          id,
+          ownerTrack,
+          applicationId: targetAppId,
+          requirementOrCriterionId: targetReqId,
+          fileName,
+          fileType,
+          fileSizeBytes: sizeBytes,
+          r2ObjectKey,
+          r2Bucket,
+          remoteEvidenceId,
+        },
+      }).catch(() => {});
+    } else if (sizeBytes <= 25 * 1024 * 1024) {
+      void fileOrBlob
         .arrayBuffer()
         .then((ab) => {
           const base64Content = uint8ToBase64(new Uint8Array(ab));
@@ -206,40 +255,21 @@ export async function saveEvidenceFile(
             body: {
               id,
               ownerTrack,
-              applicationId: meta?.applicationId || 'APP-2026-DN-00142',
-              requirementOrCriterionId: meta?.reqId || 'general',
+              applicationId: targetAppId,
+              requirementOrCriterionId: targetReqId,
               fileName,
               fileType,
               fileSizeBytes: sizeBytes,
               base64Content,
+              ...(r2ObjectKey ? { r2ObjectKey } : {}),
+              ...(r2Bucket ? { r2Bucket } : {}),
+              ...(remoteEvidenceId ? { remoteEvidenceId } : {}),
             },
           });
         })
         .catch(() => {
           // Non-fatal fallback
         });
-    }
-
-    // 2. Execute 3-step R2 presigned upload
-    try {
-      const r2Result = await executeR2EvidenceUpload({
-        track: ownerTrack,
-        applicationId: meta?.applicationId || 'APP-2026-DN-00142',
-        requirementOrCriterionId: meta?.reqId || 'general',
-        fileName,
-        mimeType: resolvedMime,
-        sizeBytes,
-        binary: fileOrBlob,
-        onStateChange: meta?.onStateChange,
-      });
-      record.remoteEvidenceId = r2Result.id;
-      remoteEvidenceIdMap.set(id, r2Result.id);
-      await persistRecordLocally(record);
-    } catch (err) {
-      if (meta?.onStateChange) {
-        throw err;
-      }
-      console.warn('R2 presigned upload fallback to portal evidence store:', err);
     }
   }
 }
@@ -335,7 +365,10 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
     const targetRemoteId = record?.remoteEvidenceId || remoteEvidenceIdMap.get(id) || id;
     try {
       const viewRes = await getCachedEvidenceViewUrl(targetRemoteId);
-      if (viewRes?.viewUrl) {
+      if (
+        viewRes?.viewUrl &&
+        !viewRes.viewUrl.includes('offline-dev.r2.cloudflarestorage.com')
+      ) {
         return viewRes.viewUrl;
       }
     } catch {
@@ -350,10 +383,17 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
           name: string;
           fileType: string;
           url?: string;
+          viewUrl?: string;
           base64Content?: string;
         };
       }>(`/api/v2/portal/evidence/${encodeURIComponent(id)}`, { method: 'GET' });
       const evData = portalRes?.data;
+      if (
+        evData?.viewUrl &&
+        !evData.viewUrl.includes('offline-dev.r2.cloudflarestorage.com')
+      ) {
+        return evData.viewUrl;
+      }
       if (evData?.base64Content) {
         const mime = resolveCanonicalMimeType(evData.name || 'file.pdf', evData.fileType);
         const bytes = base64ToUint8(evData.base64Content);
@@ -373,7 +413,11 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
           return url;
         }
       }
-      if (evData?.url && !evData.url.startsWith('/api/v2/portal/evidence/')) {
+      if (
+        evData?.url &&
+        !evData.url.startsWith('/api/v2/portal/evidence/') &&
+        !evData.url.includes('offline-dev.r2.cloudflarestorage.com')
+      ) {
         return evData.url;
       }
     } catch {

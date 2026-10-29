@@ -47,6 +47,7 @@ export interface R2FinalizedEvidenceDto {
   isFinalized: boolean;
   uploadedAt: string;
   finalizedAt?: string;
+  uploadedDirectToCloudR2?: boolean;
 }
 
 export interface R2ViewUrlResult {
@@ -292,9 +293,11 @@ export async function executeR2EvidenceUpload(params: {
   // Step 2: Direct PUT to Presigned URL (with automatic retry-upload on network glitch)
   notify('UPLOADING_R2');
   let putSucceeded = false;
+  let uploadedDirectToCloudR2 = false;
   for (let attempt = 0; attempt < 2 && !putSucceeded; attempt++) {
     try {
-      const targetPutUrl = intent.uploadUrl.includes('offline-dev.r2.cloudflarestorage.com')
+      const isOfflineDevUrl = intent.uploadUrl.includes('offline-dev.r2.cloudflarestorage.com');
+      const targetPutUrl = isOfflineDevUrl
         ? `${getApiBaseUrl()}/api/v2/evidence/r2-local-object/${encodeURIComponent(intent.evidenceObjectId)}`
         : intent.uploadUrl;
       const putRes = await fetch(targetPutUrl, {
@@ -308,6 +311,7 @@ export async function executeR2EvidenceUpload(params: {
         throw new Error(`HTTP PUT failed with status ${putRes.status}`);
       }
       putSucceeded = true;
+      uploadedDirectToCloudR2 = !isOfflineDevUrl;
     } catch (putErr) {
       if (attempt === 0) {
         notify('RETRYING_UPLOAD');
@@ -334,7 +338,10 @@ export async function executeR2EvidenceUpload(params: {
       actor: params.actor,
     });
     notify(finalized.scanStatus === 'CLEAN' ? 'CLEAN' : finalized.scanStatus);
-    return finalized;
+    return {
+      ...finalized,
+      uploadedDirectToCloudR2,
+    };
   } catch (err) {
     if (err instanceof BackendApiError) {
       if (err.code === 'MAGIC_BYTES_MISMATCH' || err.code === 'FILE_TOO_LARGE') {

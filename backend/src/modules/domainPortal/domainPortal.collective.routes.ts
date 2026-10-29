@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Router, Request, Response } from 'express';
-import { MAX_EVIDENCE_SIZE_BYTES } from '../../shared/storage/r2StorageClient';
+import { MAX_EVIDENCE_SIZE_BYTES, r2StorageClient } from '../../shared/storage/r2StorageClient';
 import {
   ALLOWED_EXTENSIONS,
   STAFF_SEED_ACCOUNTS,
@@ -19,7 +19,26 @@ import {
   requireAllowedRoles,
   type StoredEvidenceRecord,
 } from './domainPortal.state';
-import { hydrateEvidenceRecordFromNeonDb } from './domainPortal.dbSync';
+import {
+  isNeonDbSyncEnabled,
+  hydrateEvidenceRecordFromNeonDb,
+  persistEvidenceRecordToNeonDb,
+  deleteEvidenceRecordFromNeonDb,
+} from './domainPortal.dbSync';
+
+const EXT_TO_MIME: Record<string, string> = {
+  pdf: 'application/pdf',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  heic: 'image/heic',
+  heif: 'image/heif',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+};
 
 export function registerCollectiveAndEvidencePortalRoutes(router: Router): void {
   // =========================================================================
@@ -618,7 +637,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
   // =========================================================================
   // 4. EVIDENCE UPLOAD / RETRIEVAL & AUDIT LOGS
   // =========================================================================
-  router.post('/evidence/upload', (req: Request, res: Response): void => {
+  router.post('/evidence/upload', async (req: Request, res: Response): Promise<void> => {
     const {
       id: clientEvidenceId,
       ownerTrack,
@@ -629,6 +648,9 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       fileSizeBytes,
       base64Content,
       fileUrl,
+      r2ObjectKey: clientR2ObjectKey,
+      r2Bucket: clientR2Bucket,
+      remoteEvidenceId,
     } = (req.body || {}) as {
       id?: string;
       ownerTrack?: 'INDIVIDUAL' | 'COLLECTIVE';
@@ -639,6 +661,9 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       fileSizeBytes?: number;
       base64Content?: string;
       fileUrl?: string;
+      r2ObjectKey?: string;
+      r2Bucket?: string;
+      remoteEvidenceId?: string;
     };
 
     if (!ownerTrack || !applicationId || !requirementOrCriterionId || !fileName) {
@@ -681,6 +706,41 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
         ? clientEvidenceId.trim()
         : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
+    const normalizedTrack = ownerTrack === 'INDIVIDUAL' ? 'INDIVIDUAL' : 'COLLECTIVE';
+    let resolvedR2ObjectKey =
+      typeof clientR2ObjectKey === 'string' && clientR2ObjectKey.trim()
+        ? clientR2ObjectKey.trim()
+        : undefined;
+    let resolvedR2Bucket =
+      typeof clientR2Bucket === 'string' && clientR2Bucket.trim()
+        ? clientR2Bucket.trim()
+        : undefined;
+
+    // If client uploaded base64Content directly without a pre-uploaded R2 objectKey, push directly to Cloudflare R2 when configured
+    if (!resolvedR2ObjectKey && base64Content && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
+      try {
+        const cleanBase64 = base64Content.includes(',')
+          ? base64Content.slice(base64Content.indexOf(',') + 1)
+          : base64Content;
+        const bodyBuffer = Buffer.from(cleanBase64, 'base64');
+        const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const targetObjectKey = `evidence/${normalizedTrack.toLowerCase()}/${applicationId}/${evidenceId}-${sanitizedFileName}`;
+        const mimeType = EXT_TO_MIME[ext] || 'application/pdf';
+        const uploaded = await r2StorageClient.putObjectBuffer({
+          objectKey: targetObjectKey,
+          mimeType,
+          body: bodyBuffer,
+        });
+        resolvedR2ObjectKey = uploaded.objectKey;
+        resolvedR2Bucket = uploaded.bucketName;
+      } catch (err) {
+        console.warn(
+          '[R2 Evidence Upload] Direct R2 upload fallback to PostgreSQL point-record:',
+          err instanceof Error ? err.message : String(err)
+        );
+      }
+    }
+
     const publicTestPath = path.resolve(process.cwd(), 'public/minhchung_test', path.basename(fileName));
     const resolvedViewUrl =
       fileUrl ||
@@ -688,9 +748,9 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
         ? `/minhchung_test/${encodeURIComponent(path.basename(fileName))}`
         : `/api/v2/portal/evidence/${encodeURIComponent(evidenceId)}`);
 
-    const stored: StoredEvidenceRecord = {
+    const metadataRecord: StoredEvidenceRecord = {
       id: evidenceId,
-      ownerTrack: ownerTrack === 'INDIVIDUAL' ? 'INDIVIDUAL' : 'COLLECTIVE',
+      ownerTrack: normalizedTrack,
       applicationId,
       requirementOrCriterionId,
       name: fileName,
@@ -699,25 +759,40 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       uploadedAt: new Date().toLocaleDateString('vi-VN'),
       status: 'achieved',
       url: resolvedViewUrl,
-      base64Content,
+      ...(resolvedR2ObjectKey ? { r2ObjectKey: resolvedR2ObjectKey } : {}),
+      ...(resolvedR2Bucket ? { r2Bucket: resolvedR2Bucket } : {}),
+      ...(remoteEvidenceId ? { remoteEvidenceId } : {}),
     };
 
-    portalState.evidenceIndex.set(evidenceId, stored);
+    const onlineDbMode = isNeonDbSyncEnabled();
+    if (onlineDbMode) {
+      // Never store base64Content in Node.js RAM in online mode
+      portalState.evidenceIndex.set(evidenceId, metadataRecord);
+      const dbRecord: StoredEvidenceRecord = resolvedR2ObjectKey
+        ? metadataRecord
+        : { ...metadataRecord, base64Content };
+      await persistEvidenceRecordToNeonDb(dbRecord);
+    } else {
+      portalState.evidenceIndex.set(evidenceId, {
+        ...metadataRecord,
+        base64Content: resolvedR2ObjectKey ? undefined : base64Content,
+      });
+    }
 
-    if (stored.ownerTrack === 'COLLECTIVE') {
+    if (metadataRecord.ownerTrack === 'COLLECTIVE') {
       const colApp = portalState.collectiveApplications.find((c) => c.id === applicationId);
       const reqKey = requirementOrCriterionId.toLowerCase() as 'tt01' | 'tt02' | 'tt03' | 'tt04';
       if (colApp && colApp.requirements[reqKey]) {
         colApp.requirements[reqKey].evidenceFiles = [
           ...(colApp.requirements[reqKey].evidenceFiles || []),
           {
-            id: stored.id,
-            name: stored.name,
-            fileType: stored.fileType,
-            size: stored.size,
-            uploadedAt: stored.uploadedAt,
-            status: stored.status,
-            url: stored.url,
+            id: metadataRecord.id,
+            name: metadataRecord.name,
+            fileType: metadataRecord.fileType,
+            size: metadataRecord.size,
+            uploadedAt: metadataRecord.uploadedAt,
+            status: metadataRecord.status,
+            url: metadataRecord.url,
           },
         ];
       }
@@ -725,17 +800,20 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
 
     const actor = resolveSessionActor(req);
     appendPortalAuditLog({
-      track: stored.ownerTrack,
+      track: metadataRecord.ownerTrack,
       applicationId,
       action: 'UPLOAD_EVIDENCE_FILE',
       actorId: actor.id,
       actorName: actor.name,
       actorRole: actor.role,
-      details: `Tải lên minh chứng "${stored.name}" (${stored.size}) cho ${requirementOrCriterionId}`,
+      details: `Tải lên minh chứng "${metadataRecord.name}" (${metadataRecord.size}) cho ${requirementOrCriterionId}`,
     });
     savePortalStateToDisk();
 
-    res.status(201).json({ success: true, data: stored });
+    res.status(201).json({
+      success: true,
+      data: onlineDbMode ? metadataRecord : portalState.evidenceIndex.get(evidenceId)!,
+    });
   });
 
   router.get('/evidence/:id', async (req: Request, res: Response): Promise<void> => {
@@ -749,7 +827,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
         }
       }
     }
-    if (!record || !record.base64Content) {
+    if (!record || (!record.r2ObjectKey && !record.base64Content)) {
       const hydrated = await hydrateEvidenceRecordFromNeonDb(record?.id || targetId);
       if (hydrated) {
         record = hydrated;
@@ -763,6 +841,28 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       });
       return;
     }
+
+    if (record.r2ObjectKey && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
+      try {
+        const presignedGet = await r2StorageClient.createPresignedGetUrl({
+          objectKey: record.r2ObjectKey,
+          fileName: record.name,
+          mimeType: EXT_TO_MIME[record.fileType] || 'application/pdf',
+        });
+        res.status(200).json({
+          success: true,
+          data: {
+            ...record,
+            url: presignedGet.viewUrl,
+            viewUrl: presignedGet.viewUrl,
+          },
+        });
+        return;
+      } catch {
+        // Fall through to returning record
+      }
+    }
+
     res.status(200).json({ success: true, data: record });
   });
 
@@ -770,7 +870,12 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     const { id } = req.params;
     const ownerTrack = (req.query.ownerTrack as string) || 'COLLECTIVE';
     const applicationId = req.query.applicationId as string | undefined;
+    const existing = portalState.evidenceIndex.get(id);
+    if (existing?.r2ObjectKey && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
+      void r2StorageClient.deleteObject(existing.r2ObjectKey).catch(() => {});
+    }
     portalState.evidenceIndex.delete(id);
+    void deleteEvidenceRecordFromNeonDb(id);
     savePortalStateToDisk();
 
     const actor = resolveSessionActor(req);

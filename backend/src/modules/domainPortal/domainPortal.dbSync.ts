@@ -14,6 +14,7 @@ import {
   createDefaultCriteriaList,
   isTestRuntime,
   isLegacyMockOrTestAppId,
+  isNonUdnInstitutionRecord,
   inferInstitutionIdFromName,
   type PortalRegisteredStudent,
   type StoredEvidenceRecord,
@@ -911,6 +912,44 @@ export function schedulePortalStateNeonDbSync(): void {
   }
 }
 
+export async function persistEvidenceRecordToNeonDb(
+  record: StoredEvidenceRecord
+): Promise<void> {
+  persistedEvidenceIds.add(record.id);
+  if (!isNeonDbSyncEnabled()) return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prisma = (await dbManager.getClient()) as any;
+    await ensurePortalDbSchema(prisma);
+    await upsertPersistentRecord(prisma, 'evidence_record', record.id, record);
+  } catch (err) {
+    console.warn(
+      '[NeonDB Sync] Warning during direct evidence persistence:',
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+
+export async function deleteEvidenceRecordFromNeonDb(
+  evidenceId: string
+): Promise<void> {
+  persistedEvidenceIds.delete(evidenceId);
+  lastSyncedPayloadHash.delete(`evidence_record:${evidenceId}`);
+  lastSyncedObjectRef.delete(`evidence_record:${evidenceId}`);
+  if (!isNeonDbSyncEnabled()) return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prisma = (await dbManager.getClient()) as any;
+    await ensurePortalDbSchema(prisma);
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "record_key" = $1`,
+      evidenceId
+    );
+  } catch {
+    // ignore
+  }
+}
+
 export async function clearPortalPersistentRecordsInNeonDb(): Promise<void> {
   lastSyncedPayloadHash.clear();
   lastSyncedObjectRef.clear();
@@ -930,7 +969,7 @@ export async function hydrateEvidenceRecordFromNeonDb(
   targetIdOrName: string
 ): Promise<StoredEvidenceRecord | null> {
   const existing = portalState.evidenceIndex.get(targetIdOrName);
-  if (existing?.base64Content) {
+  if (existing?.base64Content || existing?.r2ObjectKey) {
     return existing;
   }
   if (!isNeonDbSyncEnabled()) {
@@ -956,7 +995,9 @@ export async function hydrateEvidenceRecordFromNeonDb(
     const parsed = (
       typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
     ) as StoredEvidenceRecord;
-    portalState.evidenceIndex.set(row.record_key, parsed);
+    // Keep only lightweight metadata in RAM (never retain multi-megabyte base64Content in Node.js heap in online mode)
+    const { base64Content: _omittedFromRam, ...metadataOnly } = parsed;
+    portalState.evidenceIndex.set(row.record_key, metadataOnly);
     persistedEvidenceIds.add(row.record_key);
     return parsed;
   } catch {
@@ -1011,11 +1052,8 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
               ? JSON.parse(evRow.payload)
               : evRow.payload;
           if (!evData) continue;
-          const existingEv = portalState.evidenceIndex.get(evRow.record_key);
-          portalState.evidenceIndex.set(evRow.record_key, {
-            ...(evData as StoredEvidenceRecord),
-            base64Content: existingEv?.base64Content || evData.base64Content,
-          });
+          const { base64Content: _omitted, ...metadataOnly } = evData as StoredEvidenceRecord;
+          portalState.evidenceIndex.set(evRow.record_key, metadataOnly);
           persistedEvidenceIds.add(evRow.record_key);
           loadedCount++;
         }
@@ -1101,14 +1139,20 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
           }
         }
 
-        // Remove any legacy mock/test records or staff_record whose corresponding student_application is still an un-submitted draft
-        for (const appId of Object.keys(portalState.studentApplications)) {
-          if (!isTestRuntime() && isLegacyMockOrTestAppId(appId)) {
+        // Remove any legacy mock/test records, non-UDN records, or staff_record whose corresponding student_application is still an un-submitted draft
+        for (const [appId, app] of Object.entries(portalState.studentApplications)) {
+          if (
+            !isTestRuntime() &&
+            (isLegacyMockOrTestAppId(appId) || isNonUdnInstitutionRecord(app))
+          ) {
             delete portalState.studentApplications[appId];
           }
         }
         portalState.individualStaffRecords = portalState.individualStaffRecords.filter((rec) => {
-          if (!isTestRuntime() && isLegacyMockOrTestAppId(rec?.applicationId)) {
+          if (
+            !isTestRuntime() &&
+            (isLegacyMockOrTestAppId(rec?.applicationId) || isNonUdnInstitutionRecord(rec))
+          ) {
             return false;
           }
           const matchingStudentApp = portalState.studentApplications[rec.applicationId];
@@ -1127,7 +1171,10 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
           return true;
         });
         portalState.collectiveApplications = portalState.collectiveApplications.filter(
-          (col) => isTestRuntime() || !isLegacyMockOrTestAppId(col?.id || col?.applicationId)
+          (col) =>
+            isTestRuntime() ||
+            (!isLegacyMockOrTestAppId(col?.id || col?.applicationId) &&
+              !isNonUdnInstitutionRecord(col))
         );
 
         // Hydrate relational IndividualApplication and User rows in parallel

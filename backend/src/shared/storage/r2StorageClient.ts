@@ -532,6 +532,45 @@ export class CloudflareR2StorageClient implements IObjectStorageClient {
     };
   }
 
+  public async putObjectBuffer(params: {
+    objectKey: string;
+    mimeType: string;
+    body: Buffer;
+  }): Promise<{ objectKey: string; bucketName: string }> {
+    const cfg = this.effectiveConfig;
+    if (!cfg.hasCustomFetch && (!this.isConfigured() || cfg.env.BACKEND_DATABASE_MODE === 'offline')) {
+      throw ApiError.serviceUnavailable(
+        'Cloudflare R2 chưa được cấu hình hoặc đang ở chế độ offline.',
+        'R2_STORAGE_NOT_CONFIGURED'
+      );
+    }
+
+    const presigned = await this.createPresignedPutUrl({
+      objectKey: params.objectKey,
+      mimeType: params.mimeType,
+      sizeBytes: params.body.byteLength,
+    });
+
+    const response = await cfg.fetchFn!(presigned.uploadUrl, {
+      method: 'PUT',
+      headers: presigned.headers,
+      body: params.body as unknown as BodyInit,
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!response.ok) {
+      throw ApiError.serviceUnavailable(
+        `Không thể tải đối tượng lên Cloudflare R2 (HTTP ${response.status}).`,
+        'R2_PUT_UPLOAD_FAILED'
+      );
+    }
+
+    return {
+      objectKey: params.objectKey,
+      bucketName: presigned.bucketName,
+    };
+  }
+
   public async deleteObject(objectKey: string): Promise<void> {
     const cfg = this.effectiveConfig;
     if (!cfg.hasCustomFetch && (!this.isConfigured() || cfg.env.BACKEND_DATABASE_MODE === 'offline')) {

@@ -14,6 +14,7 @@ import type { SessionService } from '../sessions/session.service';
 import type { SystemRoleCode } from '../identity/identity.types';
 import { defaultPasswordHasher } from '../auth/passwordHasher';
 import {
+  isNeonDbSyncEnabled,
   schedulePortalStateNeonDbSync,
   ensurePortalStateHydratedFromNeonDb,
   clearPortalPersistentRecordsInNeonDb,
@@ -61,6 +62,10 @@ export interface StoredEvidenceRecord {
   uploadedAt: string;
   status: string;
   url: string;
+  viewUrl?: string;
+  r2ObjectKey?: string;
+  r2Bucket?: string;
+  remoteEvidenceId?: string;
   base64Content?: string;
 }
 
@@ -670,23 +675,74 @@ export const LEGACY_MOCK_AND_TEST_APP_IDS = new Set([
   'APP-2026-DN-201122334',
   'APP-2026-DN-00142',
   'APP-2026-DN-102220019',
+  'APP-2026-DN-102220055',
   'APP-2026-DN-102220084',
+  'APP-2026-DN-102220145',
+  'APP-2026-DN-102220188',
+  'APP-2026-DN-102220245',
+  'APP-2026-DN-102220301',
+  'APP-2026-DN-18TDTT031',
+  'APP-2026-DN-193230153',
+  'APP-2026-DN-19YDK042',
+  'APP-2026-DN-19YDK077',
+  'APP-2026-DN-2050192',
+  'APP-2026-DN-2050311',
+  'APP-2026-DN-2050445',
+  'APP-2026-DN-2050618',
+  'APP-2026-DN-2150104',
+  'APP-2026-DN-21504119',
+  'APP-2026-DN-2150890',
+  'APP-2026-DN-21KT0115',
+  'APP-2026-DN-21KT081',
+  'APP-2026-DN-21KT105',
+  'APP-2026-DN-21VNUK018',
+  'APP-2026-DN-22010018',
   'APP-2026-DN-221121004512',
   'APP-2026-DN-221121008901',
-  'APP-2026-DN-314220118',
-  'APP-2026-DN-411220056',
   'APP-2026-DN-22115053120109',
-  'APP-2026-DN-22IT094',
   'APP-2026-DN-22BA031',
-  'APP-2026-DN-22YD042',
-  'APP-2026-DN-22010018',
-  'APP-2026-DN-27211204912',
-  'APP-2026-DN-27212408831',
   'APP-2026-DN-22DA05112',
-  'APP-2026-DN-22KTR019',
-  'APP-2026-DN-22TDTT088',
   'APP-2026-DN-22DD0145',
   'APP-2026-DN-22FPT067',
+  'APP-2026-DN-22IT008',
+  'APP-2026-DN-22IT094',
+  'APP-2026-DN-22IT412',
+  'APP-2026-DN-22KT0241',
+  'APP-2026-DN-22KTR019',
+  'APP-2026-DN-22TDTT088',
+  'APP-2026-DN-22YD015',
+  'APP-2026-DN-22YD042',
+  'APP-2026-DN-27211204567',
+  'APP-2026-DN-27211204912',
+  'APP-2026-DN-27212408831',
+  'APP-2026-DN-282114009',
+  'APP-2026-DN-282114102',
+  'APP-2026-DN-282115088',
+  'APP-2026-DN-312021044',
+  'APP-2026-DN-312021099',
+  'APP-2026-DN-312021210',
+  'APP-2026-DN-312021502',
+  'APP-2026-DN-314220118',
+  'APP-2026-DN-411220056',
+  'APP-2026-DN-471102012',
+  'APP-2026-DN-471102064',
+  'APP-2026-DN-471102088',
+  'APP-2026-DN-471102190',
+  'APP-2026-DN-471102310',
+  'APP-2026-DN-5210094',
+  'APP-2026-DN-5210112',
+  'APP-2026-DN-999000111',
+  'APP-2026-DN-DA210892',
+  'APP-2026-DN-DA220518',
+  'APP-2026-DN-DE170108',
+  'APP-2026-DN-DE170412',
+  'APP-2026-DN-DE170452',
+  'APP-2026-DN-DE180129',
+  'APP-2026-DN-HISTORICAL-01',
+  'APP-2026-DN-TD210152',
+  'APP-2026-DN-TD220094',
+  'APP-2026-DN-TD220218',
+  'APP-2026-DN-YD210312',
   'COL-2026-DN-MVPM6A7N',
   'COL-2026-DN-MVPM6BWD',
   'COL-2026-DN-MVPO9W6K',
@@ -695,11 +751,58 @@ export const LEGACY_MOCK_AND_TEST_APP_IDS = new Set([
   'COL-2026-DN-MVPO9XW1',
   'COL-2026-DN-MVPM6DI5',
   'COL-2026-DN-MVR6LAXP',
+  'COL-2026-DN-22TCLC-KTPM',
+  'COL-2026-DN-LCH-CNTT',
+  'COL-2026-DN-CLB-TINHNGUYEN',
+  'COL-2026-DN-21TCLC-DT1',
   'col-app-2026-dut-01',
   'col-app-2026-due-01',
   'col-app-2026-ued-01',
   'col-app-2026-vku-01',
 ]);
+
+const NON_UDN_SCHOOL_KEYWORDS = [
+  'duy tân',
+  'đông á',
+  'kiến trúc đà nẵng',
+  'thể dục thể thao đà nẵng',
+  'kỹ thuật y - dược đà nẵng',
+  'kỹ thuật y – dược đà nẵng',
+  'đại học fpt',
+];
+
+const NON_UDN_UNIT_IDS = new Set([
+  'unit-dtu',
+  'unit-donga',
+  'unit-dau',
+  'unit-upes3',
+  'unit-tyd',
+  'unit-fpt',
+  'inst-dtu',
+  'inst-donga',
+  'inst-dau',
+  'inst-upes3',
+  'inst-tyd',
+  'inst-fpt',
+]);
+
+export function isNonUdnInstitutionRecord(rec?: Record<string, any> | null): boolean {
+  if (!rec) return false;
+  const unitId = String(rec.schoolReviewUnitId || rec.institutionId || '').trim().toLowerCase();
+  if (unitId && NON_UDN_UNIT_IDS.has(unitId)) return true;
+  const combinedText = [
+    rec.trainingInstitutionName,
+    rec.schoolReviewUnitName,
+    rec.student?.university,
+    rec.applicantProfileSnapshot?.institutionName,
+    rec.collective?.institutionName,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  if (!combinedText) return false;
+  return NON_UDN_SCHOOL_KEYWORDS.some((kw) => combinedText.includes(kw));
+}
 
 export function isLegacyMockOrTestAppId(id?: string | null): boolean {
   if (!id) return false;
@@ -918,7 +1021,8 @@ let diskSaveTimer: NodeJS.Timeout | null = null;
 let diskWriteInFlight = false;
 
 function schedulePortalStateDiskFlush(): void {
-  if (isTestRuntime()) return;
+  // In online mode (Neon PostgreSQL active), /tmp/5tot-dhdn-portal-state.json is completely disabled
+  if (isTestRuntime() || isNeonDbSyncEnabled()) return;
   if (diskSaveTimer) {
     clearTimeout(diskSaveTimer);
   }
@@ -975,12 +1079,24 @@ function schedulePortalStateDiskFlush(): void {
 
 export function savePortalStateToDisk(): void {
   if (isTestRuntime()) return;
-  schedulePortalStateDiskFlush();
+  if (!isNeonDbSyncEnabled()) {
+    schedulePortalStateDiskFlush();
+  }
   schedulePortalStateNeonDbSync();
 }
 
 export function loadPortalStateFromDisk(): boolean {
   if (isTestRuntime()) return false;
+  if (isNeonDbSyncEnabled()) {
+    try {
+      if (fs.existsSync(PORTAL_STATE_FILE_PATH)) {
+        fs.unlinkSync(PORTAL_STATE_FILE_PATH);
+      }
+    } catch {
+      // ignore cleanup errors
+    }
+    return false;
+  }
   try {
     if (!fs.existsSync(PORTAL_STATE_FILE_PATH)) return false;
     const stat = fs.statSync(PORTAL_STATE_FILE_PATH);
@@ -1011,7 +1127,12 @@ export function loadPortalStateFromDisk(): boolean {
     }
     if (Array.isArray(parsed.individualStaffRecords)) {
       portalState.individualStaffRecords = parsed.individualStaffRecords
-        .filter((rec) => !isLegacyMockOrTestAppId(rec?.applicationId))
+        .filter(
+          (rec) =>
+            !isLegacyMockOrTestAppId(rec?.applicationId) &&
+            !isNonUdnInstitutionRecord(rec) &&
+            rec?.schoolPreliminaryStatus !== 'school_not_submitted'
+        )
         .map((rec) => {
           if (rec?.assignment?.officerId) {
             return {
@@ -1035,7 +1156,11 @@ export function loadPortalStateFromDisk(): boolean {
     if (parsed.studentApplications && typeof parsed.studentApplications === 'object') {
       const cleanedApps: Record<string, Record<string, any>> = {};
       for (const [k, v] of Object.entries(parsed.studentApplications)) {
-        if (!isLegacyMockOrTestAppId(k) && !isLegacyMockOrTestAppId(v?.applicationId)) {
+        if (
+          !isLegacyMockOrTestAppId(k) &&
+          !isLegacyMockOrTestAppId(v?.applicationId) &&
+          !isNonUdnInstitutionRecord(v)
+        ) {
           cleanedApps[k] = v;
         }
       }
@@ -1043,7 +1168,11 @@ export function loadPortalStateFromDisk(): boolean {
     }
     if (Array.isArray(parsed.collectiveApplications)) {
       portalState.collectiveApplications = parsed.collectiveApplications
-        .filter((col) => !isLegacyMockOrTestAppId(col?.id || col?.applicationId))
+        .filter(
+          (col) =>
+            !isLegacyMockOrTestAppId(col?.id || col?.applicationId) &&
+            !isNonUdnInstitutionRecord(col)
+        )
         .map((col) => {
           if (col?.assignedOfficerId) {
             return {
