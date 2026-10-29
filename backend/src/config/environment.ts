@@ -1,5 +1,5 @@
 /**
- * 5TOT ĐHĐN — Backend V2 Environment Configuration
+ * 5TOT ÄHÄN â€” Backend V2 Environment Configuration
  * Validates runtime environment with typed schema and strict validation.
  */
 
@@ -29,6 +29,11 @@ export interface BackendEnvironment {
   R2_ENDPOINT?: string;
   R2_PRESIGNED_PUT_TTL_SECONDS: number;
   R2_PRESIGNED_GET_TTL_SECONDS: number;
+  RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL: string;
+  RESEND_MODE: 'mock' | 'safe' | 'live';
+  RESEND_SAFE_OVERRIDE_EMAIL?: string;
+  APP_URL: string;
 }
 
 export class ConfigurationError extends Error {
@@ -119,6 +124,19 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
   const putTtl = Number(env.R2_PRESIGNED_PUT_TTL_SECONDS || env.EVIDENCE_PRESIGNED_PUT_TTL_SECONDS || 300);
   const getTtl = Number(env.R2_PRESIGNED_GET_TTL_SECONDS || env.EVIDENCE_PRESIGNED_GET_TTL_SECONDS || 120);
 
+  // Resend Transactional Email Configuration
+  const resendApiKey = env.RESEND_API_KEY?.trim() || undefined;
+  const resendFromEmail =
+    env.RESEND_FROM_EMAIL?.trim() ||
+    'Hội Sinh viên Đại học Đà Nẵng <no-reply@sv5t.lcdkhoacntt-dut.page>';
+  const rawResendMode = (env.RESEND_MODE || 'safe').toLowerCase();
+  const resendMode = (['mock', 'safe', 'live'].includes(rawResendMode) ? rawResendMode : 'safe') as
+    | 'mock'
+    | 'safe'
+    | 'live';
+  const resendSafeOverride = env.RESEND_SAFE_OVERRIDE_EMAIL?.trim() || 'vanngocnhuy30032006@gmail.com';
+  const appUrl = (env.APP_URL || env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+
   return {
     NODE_ENV: nodeEnv as BackendEnvironment['NODE_ENV'],
     BACKEND_DATABASE_MODE: databaseMode,
@@ -145,6 +163,11 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     R2_ENDPOINT: r2Endpoint,
     R2_PRESIGNED_PUT_TTL_SECONDS: isNaN(putTtl) || putTtl <= 0 ? 300 : putTtl,
     R2_PRESIGNED_GET_TTL_SECONDS: isNaN(getTtl) || getTtl <= 0 ? 120 : getTtl,
+    RESEND_API_KEY: resendApiKey,
+    RESEND_FROM_EMAIL: resendFromEmail,
+    RESEND_MODE: resendMode,
+    RESEND_SAFE_OVERRIDE_EMAIL: resendSafeOverride,
+    APP_URL: appUrl,
   };
 }
 
