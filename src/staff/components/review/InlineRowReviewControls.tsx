@@ -250,7 +250,15 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
 
   const handleOpenSupplement = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsContextualSupplementOpen((prev) => !prev);
+    if (onOpenSupplementModal) {
+      onOpenSupplementModal({
+        criterionId,
+        requirementId: requirement.id,
+        declarationId: declId,
+      });
+    } else {
+      setIsContextualSupplementOpen((prev) => !prev);
+    }
   };
 
   const handleSendContextualSupplement = (payload: {
@@ -478,8 +486,8 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
         </div>
       )}
 
-      {/* Inline Contextual Supplement Editor (LEAN-3) */}
-      {isContextualSupplementOpen && (
+      {/* Inline Contextual Supplement Editor (fallback when modal handler is not provided) */}
+      {!onOpenSupplementModal && isContextualSupplementOpen && (
         <ContextualSupplementEditor
           criterionId={criterionId}
           requirementId={requirement.id}

@@ -27,7 +27,7 @@ export const EvidenceCell: React.FC<EvidenceCellProps> = ({
       editable={editable}
       isDeclarationEmpty={isDeclarationEmpty}
       onExpand={onExpandListClick}
-      onAdd={onAddClick || onExpandListClick}
+      onAdd={editable && onAddClick ? onAddClick : undefined}
       onFileClick={onFileClick}
       className={className}
     />

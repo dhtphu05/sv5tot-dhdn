@@ -240,6 +240,7 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
           </span>
           <EvidenceCell
             files={allEvidenceFiles}
+            editable={!readOnly}
             isDeclarationEmpty={declarationCount === 0}
             onFileClick={onInspectEvidence}
             onExpandListClick={onToggleExpand}
@@ -395,6 +396,7 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
         <div className="grid-col-3 px-6 border-l border-[#E3EBF1] min-w-0 flex items-center h-full overflow-hidden">
           <EvidenceCell
             files={allEvidenceFiles}
+            editable={!readOnly}
             isDeclarationEmpty={declarationCount === 0}
             onFileClick={onInspectEvidence}
             onExpandListClick={onToggleExpand}
