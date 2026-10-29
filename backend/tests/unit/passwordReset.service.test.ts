@@ -1,5 +1,5 @@
 /**
- * 5TOT Đà Nẵng — Password Reset Service Unit Tests (BE2-A2)
+ * 5TOT ÄÃ  Náºµng â€” Password Reset Service Unit Tests (BE2-A2)
  */
 
 import { describe, it, beforeEach } from 'node:test';
@@ -37,7 +37,7 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     testUser = await fakeIdentityRepo.createStudent({
       email: 'student.reset@dut.udn.vn',
       passwordHash: initialHash,
-      fullName: 'Sinh Viên Reset',
+      fullName: 'Sinh ViÃªn Reset',
       studentCode: '102220555',
       institutionId: 'inst-dut',
     });
@@ -54,6 +54,46 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     assert.equal(tokenRecord.userId, testUser.id);
     assert.equal(tokenRecord.usedAt, null);
     assert.ok(tokenRecord.expiresAt > new Date());
+  });
+
+  it('dispatches password reset email when emailService is provided', async () => {
+    const dispatchedEmails: unknown[] = [];
+    const mockEmailService = {
+      send: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendPasswordResetEmail: async (data: unknown) => {
+        dispatchedEmails.push(data);
+        return {
+          success: true,
+          originalRecipient: testUser.email,
+          effectiveRecipient: testUser.email,
+          isRerouted: false,
+          timestamp: new Date().toISOString(),
+        };
+      },
+    };
+
+    const resetServiceWithEmail = new PasswordResetService(
+      fakeResetRepo,
+      fakeIdentityRepo,
+      sessionService,
+      defaultPasswordHasher,
+      mockEmailService
+    );
+
+    const result = await resetServiceWithEmail.requestPasswordReset(testUser.email);
+    assert.equal(result.success, true);
+    assert.equal(dispatchedEmails.length, 1);
+    assert.deepEqual(dispatchedEmails[0], {
+      to: testUser.email,
+      userName: testUser.fullName,
+      resetToken: result.devResetToken,
+    });
   });
 
   it('returns generic message for non-existent email to prevent enumeration', async () => {
