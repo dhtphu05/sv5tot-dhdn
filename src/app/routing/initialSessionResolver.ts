@@ -1,5 +1,5 @@
 /**
- * 5TOT ĐHĐN — Initial URL & Session Resolver (FSD App Layer)
+ * 5TOT ÄHÄN â€” Initial URL & Session Resolver (FSD App Layer)
  * Resolves initial TopLevelViewMode, active scenario, and coherent store from URL path, query params, and session storage.
  */
 
@@ -110,11 +110,52 @@ export function resolveInitialRouteAndSession() {
 
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
   const params = new URLSearchParams(window.location.search);
+  const routeParam = params.get('route');
   const urlScenarioParam = params.get('scenario');
   const urlOfficerParam = params.get('officer');
   const urlCommitteeParam = params.get('committee');
   const isAuthenticated =
     hasActiveAuthSession() || (IS_DEMO_MODE_ENABLED && persisted.isDemoActive);
+
+  if (
+    pathname === '/reset-password' ||
+    routeParam === 'reset_password' ||
+    params.has('token')
+  ) {
+    return {
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'reset_password' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
+      scenarioId: 'new_student' as PrototypeScenarioId,
+      officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+      committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+      schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+      staffRole: 'CITY_OFFICER' as StaffRole,
+      staffRouteId: 'application_review' as StaffRouteId,
+      isDemoActive: false,
+      isToolbarHidden: false,
+      navId: 'overview',
+      store: buildCleanUnauthenticatedStore(),
+    };
+  }
+
+  if (pathname === '/forgot-password' || routeParam === 'forgot_password') {
+    return {
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'forgot_password' as PublicEntryRoute,
+      isSessionExpiredNotice: false,
+      scenarioId: 'new_student' as PrototypeScenarioId,
+      officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
+      committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
+      schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
+      staffRole: 'CITY_OFFICER' as StaffRole,
+      staffRouteId: 'application_review' as StaffRouteId,
+      isDemoActive: false,
+      isToolbarHidden: false,
+      navId: 'overview',
+      store: buildCleanUnauthenticatedStore(),
+    };
+  }
 
   if (pathname === '/login') {
     return {

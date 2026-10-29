@@ -3,7 +3,12 @@
  * Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
-export type PublicEntryRoute = 'landing' | 'login' | 'signup';
+export type PublicEntryRoute =
+  | 'landing'
+  | 'login'
+  | 'signup'
+  | 'forgot_password'
+  | 'reset_password';
 
 export type PublicEntryDemoPresetId =
   | 'screenshot_a_landing'         // A. Landing 1440×900

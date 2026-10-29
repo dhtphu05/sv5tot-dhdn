@@ -1,12 +1,12 @@
 /**
- * 5TOT ĐHĐN — Official Student Login Page
- * Hội Sinh viên Việt Nam Đại học Đà Nẵng
+ * 5TOT ÄHÄN â€” Official Student Login Page
+ * Há»™i Sinh viÃªn Viá»‡t Nam Äáº¡i há»c ÄÃ  Náºµng
  *
- * Implements Prompt 14 Sections 18–26, 55, 57–64, 71–72, 92, 98B:
- * - Fits cleanly at 1366×768 without scrolling (~436px width).
+ * Implements Prompt 14 Sections 18â€“26, 55, 57â€“64, 71â€“72, 92, 98B:
+ * - Fits cleanly at 1366Ã—768 without scrolling (~436px width).
  * - Clear institutional identity at top.
  * - Persistent labels, 46px input height, show/hide password toggle, Enter submits.
- * - Friendly error copy ("Email hoặc mật khẩu chưa chính xác." / "Chưa thể đăng nhập lúc này. Vui lòng thử lại.")
+ * - Friendly error copy ("Email hoáº·c máº­t kháº©u chÆ°a chÃ­nh xÃ¡c." / "ChÆ°a thá»ƒ Ä‘Äƒng nháº­p lÃºc nÃ y. Vui lÃ²ng thá»­ láº¡i.")
  *   that retains entered email without wiping the form.
  * - Supports Session Expired notice (Section 72) and Safe Internal Return URL preservation (Section 71).
  */
@@ -31,6 +31,7 @@ export interface PublicLoginPageProps {
   onNavigateToSignup: () => void;
   onNavigateToLanding: () => void;
   onNavigateToCollectiveLogin?: () => void;
+  onNavigateToForgotPassword?: () => void;
   sessionExpired?: boolean;
   returnTarget?: SafeInternalReturnTarget | null;
   initialEmail?: string;
@@ -42,6 +43,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
   onNavigateToSignup,
   onNavigateToLanding,
   onNavigateToCollectiveLogin,
+  onNavigateToForgotPassword,
   sessionExpired = false,
   returnTarget = null,
   initialEmail = '',
@@ -67,10 +69,10 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
 
   useEffect(() => {
     if (presetError === 'invalid_credentials') {
-      setServerError('Email hoặc mật khẩu chưa chính xác.');
+      setServerError('Email hoáº·c máº­t kháº©u chÆ°a chÃ­nh xÃ¡c.');
       if (!email) setEmail('minhanh.nguyen@dut.udn.vn');
     } else if (presetError === 'general_error') {
-      setServerError('Chưa thể đăng nhập lúc này. Vui lòng thử lại.');
+      setServerError('ChÆ°a thá»ƒ Ä‘Äƒng nháº­p lÃºc nÃ y. Vui lÃ²ng thá»­ láº¡i.');
       if (!email) setEmail('minhanh.nguyen@dut.udn.vn');
     } else {
       setServerError(null);
@@ -79,9 +81,9 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
 
   const validateEmailFormat = (val: string) => {
     const trimmed = val.trim();
-    if (!trimmed) return 'Vui lòng nhập địa chỉ email.';
+    if (!trimmed) return 'Vui lÃ²ng nháº­p Ä‘á»‹a chá»‰ email.';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      return 'Vui lòng nhập địa chỉ email hợp lệ (ví dụ: name@example.com).';
+      return 'Vui lÃ²ng nháº­p Ä‘á»‹a chá»‰ email há»£p lá»‡ (vÃ­ dá»¥: name@example.com).';
     }
     return null;
   };
@@ -98,7 +100,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
 
     setServerError(null);
     const eErr = validateEmailFormat(email);
-    const pErr = !password ? 'Vui lòng nhập mật khẩu.' : null;
+    const pErr = !password ? 'Vui lÃ²ng nháº­p máº­t kháº©u.' : null;
 
     setEmailFieldError(eErr);
     setPasswordFieldError(pErr);
@@ -128,9 +130,9 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
       setIsSubmitting(false);
       const errCode = err?.code || err?.errorCode;
       if (errCode === 'INVALID_CREDENTIALS' || err?.status === 401) {
-        setServerError('Email hoặc mật khẩu chưa chính xác.');
+        setServerError('Email hoáº·c máº­t kháº©u chÆ°a chÃ­nh xÃ¡c.');
       } else {
-        setServerError(err?.message || 'Chưa thể đăng nhập lúc này. Vui lòng thử lại.');
+        setServerError(err?.message || 'ChÆ°a thá»ƒ Ä‘Äƒng nháº­p lÃºc nÃ y. Vui lÃ²ng thá»­ láº¡i.');
       }
     }
   };
@@ -145,15 +147,15 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#466474] hover:text-[#126A9C] transition-colors cursor-pointer"
         >
           <ArrowLeft size={15} />
-          <span>Cổng xét chọn Danh hiệu và Giải thưởng Sinh viên ĐHĐN</span>
+          <span>Cá»•ng xÃ©t chá»n Danh hiá»‡u vÃ  Giáº£i thÆ°á»Ÿng Sinh viÃªn ÄHÄN</span>
         </button>
 
         <div className="hidden sm:flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#607483]">
-          <span>HỘI SINH VIÊN VIỆT NAM · ĐẠI HỌC ĐÀ NẴNG</span>
+          <span>Há»˜I SINH VIÃŠN VIá»†T NAM Â· Äáº I Há»ŒC ÄÃ€ Náº´NG</span>
         </div>
       </div>
 
-      {/* Main Centered Login Container (436px width — fits 1366×768 without scrolling) */}
+      {/* Main Centered Login Container (436px width â€” fits 1366Ã—768 without scrolling) */}
       <main className="w-full max-w-[436px] mx-auto my-auto py-3">
         {/* Institutional Lockup Header */}
         <div className="flex flex-col items-center text-center mb-5">
@@ -162,13 +164,13 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
             <HsvEmblem size={40} />
           </div>
           <div className="mt-2 text-[10.5px] font-bold uppercase tracking-[0.07em] text-[#466474]">
-            HỘI SINH VIÊN VIỆT NAM
+            Há»˜I SINH VIÃŠN VIá»†T NAM
           </div>
           <div className="text-[11.5px] font-extrabold uppercase tracking-[0.05em] text-[#126A9C]">
-            ĐẠI HỌC ĐÀ NẴNG
+            Äáº I Há»ŒC ÄÃ€ Náº´NG
           </div>
           <div className="text-[14px] font-extrabold text-[#172A3A] mt-1">
-            Cổng xét chọn Danh hiệu & Giải thưởng Sinh viên · ĐHĐN
+            Cá»•ng xÃ©t chá»n Danh hiá»‡u & Giáº£i thÆ°á»Ÿng Sinh viÃªn Â· ÄHÄN
           </div>
         </div>
 
@@ -176,10 +178,10 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
         <div className="bg-white rounded-[16px] border border-[#DCE7EE] shadow-elevated p-6 sm:p-7">
           <div className="mb-5">
             <h1 className="text-[22px] font-extrabold text-[#172A3A] tracking-tight">
-              Đăng nhập
+              ÄÄƒng nháº­p
             </h1>
             <p className="text-[13.5px] text-[#607483] mt-1">
-              Tiếp tục quá trình kê khai hoặc quản lý hồ sơ xét chọn.
+              Tiáº¿p tá»¥c quÃ¡ trÃ¬nh kÃª khai hoáº·c quáº£n lÃ½ há»“ sÆ¡ xÃ©t chá»n.
             </p>
           </div>
 
@@ -191,9 +193,9 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
             >
               <Clock size={15} className="text-[#D97706] shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold">Phiên đăng nhập đã hết hạn.</p>
+                <p className="font-bold">PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ háº¿t háº¡n.</p>
                 <p className="text-[12.5px] mt-0.5">
-                  Vui lòng đăng nhập lại.
+                  Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.
                 </p>
               </div>
             </div>
@@ -207,7 +209,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
             >
               <Info size={14} className="shrink-0 mt-0.5" />
               <span>
-                Sau khi đăng nhập, hệ thống sẽ mở trực tiếp:{' '}
+                Sau khi Ä‘Äƒng nháº­p, há»‡ thá»‘ng sáº½ má»Ÿ trá»±c tiáº¿p:{' '}
                 <strong className="font-bold">{returnTarget.label}</strong>
               </span>
             </div>
@@ -276,7 +278,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                 htmlFor="login-password"
                 className="text-[13px] font-bold text-[#172A3A]"
               >
-                Mật khẩu
+                Máº­t kháº©u
               </label>
               <div className="relative flex items-center">
                 <input
@@ -286,7 +288,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                   autoComplete="current-password"
                   disabled={isSubmitting}
                   value={password}
-                  placeholder="Nhập mật khẩu của bạn"
+                  placeholder="Nháº­p máº­t kháº©u cá»§a báº¡n"
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (passwordFieldError) setPasswordFieldError(null);
@@ -305,7 +307,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showPassword ? 'áº¨n máº­t kháº©u' : 'Hiá»‡n máº­t kháº©u'}
                   className="absolute right-2.5 p-1.5 text-[#607483] hover:text-[#172A3A] rounded-[6px] transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -321,6 +323,17 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                   <span>{passwordFieldError}</span>
                 </p>
               )}
+              {onNavigateToForgotPassword && (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={onNavigateToForgotPassword}
+                    className="text-[12.5px] font-medium text-[#0D78AE] hover:text-[#126A9C] hover:underline cursor-pointer"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Primary Login Button (Prompt 14 Section 23 & 84) */}
@@ -332,7 +345,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                 disabled={isSubmitting}
                 className="w-full font-bold justify-center h-[46px]"
               >
-                {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {isSubmitting ? 'Äang Ä‘Äƒng nháº­p...' : 'ÄÄƒng nháº­p'}
               </Button>
             </div>
           </form>
@@ -340,13 +353,13 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
           {/* Secondary Link to Signup (Prompt 14 Section 19 & 70) */}
           <div className="mt-5 pt-4 border-t border-[#EEF4F8] text-center text-[13.5px] text-[#607483] space-y-2">
             <div>
-              <span>Chưa có tài khoản sinh viên? </span>
+              <span>ChÆ°a cÃ³ tÃ i khoáº£n sinh viÃªn? </span>
               <button
                 type="button"
                 onClick={onNavigateToSignup}
                 className="font-bold text-[#0D78AE] hover:text-[#126A9C] hover:underline cursor-pointer"
               >
-                Đăng ký
+                ÄÄƒng kÃ½
               </button>
             </div>
 
@@ -358,7 +371,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                   className="text-[12.5px] font-bold text-[#0D78AE] hover:text-[#095386] hover:underline cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <Users size={14} />
-                  <span>Đăng nhập Cổng Kê khai Tập thể (Chi hội, LCH) →</span>
+                  <span>ÄÄƒng nháº­p Cá»•ng KÃª khai Táº­p thá»ƒ (Chi há»™i, LCH) â†’</span>
                 </button>
               </div>
             )}
@@ -368,7 +381,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
 
       {/* Quiet Institutional Footer */}
       <footer className="text-center text-[12px] text-[#607483]">
-        Hệ thống quản lý và xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · Hội Sinh viên Việt Nam Đại học Đà Nẵng
+        Há»‡ thá»‘ng quáº£n lÃ½ vÃ  xÃ©t chá»n Sinh viÃªn 5 tá»‘t cáº¥p Äáº¡i há»c ÄÃ  Náºµng Â· Há»™i Sinh viÃªn Viá»‡t Nam Äáº¡i há»c ÄÃ  Náºµng
       </footer>
     </div>
   );
