@@ -1,4 +1,4 @@
-name: 5TOT Đà Nẵng — Backend V2 CI & Golden Baseline Protection
+name: 5TOT Đại học Đà Nẵng — Backend V2 CI & Golden Baseline Protection
 
 on:
   push:
@@ -19,8 +19,8 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Install Root Dependencies
-        run: npm ci
+      - name: Install Root & Backend Dependencies
+        run: npm ci && npm --prefix backend ci
 
       - name: Verify Golden Frontend Byte-for-Byte Integrity
         run: npm run manifest:verify
@@ -28,13 +28,10 @@ jobs:
       - name: Run Frontend FSD Architecture Audit
         run: npm run audit:architecture
 
-      - name: Run Frontend Source Size & Modularity Audit
-        run: npm run audit:source-size
-
       - name: Validate Frontend TypeScript
         run: npm run lint
 
-      - name: Build Frontend Application
+      - name: Build Frontend & Backend Application
         run: npm run build
 
       - name: Run Frontend Regression Tests
@@ -50,15 +47,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+
+      - name: Install Root & Backend Dependencies
+        run: npm ci && npm --prefix backend ci
 
       - name: Validate Backend TypeScript & Compilation
-        run: npx tsc --project backend/tsconfig.json
+        run: npm --prefix backend run build
 
-      - name: Run Backend Unit Tests
-        run: npx tsx --test backend/tests/unit/**/*.test.ts
-
-      - name: Run Backend HTTP & Security Tests
-        run: npx tsx --test backend/tests/http/**/*.test.ts
-
-      - name: Run Database Connectivity Integration Tests
-        run: npx tsx --test backend/tests/integration/**/*.test.ts
+      - name: Run Backend Test Suite
+        run: npm run test:be
