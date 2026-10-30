@@ -96,16 +96,8 @@ export async function hydrateWhiteBirdStore(): Promise<WhiteBirdApplication[]> {
       '/api/v2/portal/white-bird/applications'
     );
     if (res && Array.isArray(res.data)) {
-      const mergedMap = new Map<string, WhiteBirdApplication>();
-      for (const remote of res.data) {
-        if (remote?.id) mergedMap.set(remote.id, remote);
-      }
-      for (const local of loadFromStorage()) {
-        if (local?.id && !mergedMap.has(local.id)) {
-          mergedMap.set(local.id, local);
-        }
-      }
-      saveToStorage(Array.from(mergedMap.values()));
+      const validRecords = res.data.filter((remote) => Boolean(remote?.id));
+      saveToStorage(validRecords);
     }
   } catch {
     // fallback to local storage

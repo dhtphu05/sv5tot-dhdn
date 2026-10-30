@@ -52,8 +52,10 @@ import {
 } from '../../staff/adminSelectors';
 import {
   fetchAdminSnapshotFromServer,
+  isRealBackendActive,
   syncAdminActionToServer,
 } from './adminApiService';
+import { apiRequest } from '../../shared/api/httpClient';
 import { useAdminSeasonAndOperations } from './useAdminSeasonAndOperations';
 
 export interface AdminActionFeedback {
@@ -66,17 +68,36 @@ export function useAdminControlPlane(
   setStaffApplications?: Dispatch<SetStateAction<StaffApplicationRecord[]>>
 ) {
   const [adminInstitutions, setAdminInstitutions] = useState<Institution[]>(
-    () => JSON.parse(JSON.stringify(INITIAL_INSTITUTIONS))
+    () => {
+      const cloned = JSON.parse(
+        JSON.stringify(INITIAL_INSTITUTIONS)
+      ) as Institution[];
+      return isRealBackendActive()
+        ? cloned.map((inst) => ({ ...inst, applicationCount: 0 }))
+        : cloned;
+    }
   );
   const [adminSchoolReviewUnits, setAdminSchoolReviewUnits] = useState<
     SchoolReviewUnitConfig[]
   >(() => JSON.parse(JSON.stringify(INITIAL_SCHOOL_REVIEW_UNITS)));
   const [adminStaffAccounts, setAdminStaffAccounts] = useState<StaffAccount[]>(
-    () => JSON.parse(JSON.stringify(INITIAL_STAFF_ACCOUNTS))
+    () => {
+      const cloned = JSON.parse(
+        JSON.stringify(INITIAL_STAFF_ACCOUNTS)
+      ) as StaffAccount[];
+      return isRealBackendActive()
+        ? cloned.map((acc) => ({ ...acc, assignedApplicationCount: 0 }))
+        : cloned;
+    }
   );
-  const [adminSeasons, setAdminSeasons] = useState<Season[]>(() =>
-    JSON.parse(JSON.stringify(INITIAL_SEASONS))
-  );
+  const [adminSeasons, setAdminSeasons] = useState<Season[]>(() => {
+    const cloned = JSON.parse(JSON.stringify(INITIAL_SEASONS)) as Season[];
+    return isRealBackendActive()
+      ? cloned.map((s) =>
+          s.isCurrentActive ? { ...s, applicationCount: 0 } : s
+        )
+      : cloned;
+  });
   const [adminCriteriaVersions, setAdminCriteriaVersions] = useState<
     CriteriaVersion[]
   >(() => JSON.parse(JSON.stringify(INITIAL_CRITERIA_VERSIONS)));
@@ -106,7 +127,7 @@ export function useAdminControlPlane(
       bootstrapMode: 'NORMAL_OPERATION',
     }));
   const [adminAuditLogs, setAdminAuditLogs] = useState<AuditEvent[]>(() =>
-    JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS))
+    isRealBackendActive() ? [] : JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS))
   );
   const [adminActionFeedback, setAdminActionFeedback] =
     useState<AdminActionFeedback | null>(null);
@@ -135,18 +156,75 @@ export function useAdminControlPlane(
       if (snap.bootstrapState) setAdminBootstrapState(snap.bootstrapState);
       if (snap.auditEvents) setAdminAuditLogs(snap.auditEvents);
     });
+    if (isRealBackendActive()) {
+      apiRequest<{
+        success: boolean;
+        data: Array<{
+          id: string;
+          timestamp: string;
+          track: string;
+          applicationId?: string;
+          action: string;
+          actorId: string;
+          actorName: string;
+          actorRole: string;
+          details: string;
+        }>;
+      }>('/api/v2/portal/audit-logs')
+        .then((res) => {
+          if (!mounted || !res || !Array.isArray(res.data)) return;
+          const mappedEvents: AuditEvent[] = res.data.map((log) => ({
+            id: log.id,
+            timestamp: new Date(log.timestamp).toLocaleString('vi-VN'),
+            actorId: log.actorId,
+            actorName: log.actorName,
+            actorRoleLabel: log.actorRole,
+            category:
+              log.action.includes('LOGIN') || log.action.includes('REGISTER')
+                ? 'security'
+                : log.track === 'COLLECTIVE' || log.track === 'INDIVIDUAL'
+                ? 'season'
+                : 'staff',
+            actionType: log.action,
+            targetEntity: log.applicationId || log.track,
+            summary: log.details,
+          }));
+          setAdminAuditLogs(mappedEvents);
+        })
+        .catch(() => {});
+    }
     return () => {
       mounted = false;
     };
   }, [staffUser.primaryRole, staffUser.id]);
 
   const resetAdminControlPlane = useCallback(() => {
-    setAdminInstitutions(JSON.parse(JSON.stringify(INITIAL_INSTITUTIONS)));
+    setAdminInstitutions(
+      isRealBackendActive()
+        ? (
+            JSON.parse(JSON.stringify(INITIAL_INSTITUTIONS)) as Institution[]
+          ).map((inst) => ({ ...inst, applicationCount: 0 }))
+        : JSON.parse(JSON.stringify(INITIAL_INSTITUTIONS))
+    );
     setAdminSchoolReviewUnits(
       JSON.parse(JSON.stringify(INITIAL_SCHOOL_REVIEW_UNITS))
     );
-    setAdminStaffAccounts(JSON.parse(JSON.stringify(INITIAL_STAFF_ACCOUNTS)));
-    setAdminSeasons(JSON.parse(JSON.stringify(INITIAL_SEASONS)));
+    setAdminStaffAccounts(
+      isRealBackendActive()
+        ? (
+            JSON.parse(
+              JSON.stringify(INITIAL_STAFF_ACCOUNTS)
+            ) as StaffAccount[]
+          ).map((acc) => ({ ...acc, assignedApplicationCount: 0 }))
+        : JSON.parse(JSON.stringify(INITIAL_STAFF_ACCOUNTS))
+    );
+    setAdminSeasons(
+      isRealBackendActive()
+        ? (JSON.parse(JSON.stringify(INITIAL_SEASONS)) as Season[]).map((s) =>
+            s.isCurrentActive ? { ...s, applicationCount: 0 } : s
+          )
+        : JSON.parse(JSON.stringify(INITIAL_SEASONS))
+    );
     setAdminCriteriaVersions(
       JSON.parse(JSON.stringify(INITIAL_CRITERIA_VERSIONS))
     );
@@ -156,7 +234,9 @@ export function useAdminControlPlane(
     );
     setAdminWorkflowPolicy(JSON.parse(JSON.stringify(INITIAL_WORKFLOW_POLICY)));
     setAdminSystemHealth(JSON.parse(JSON.stringify(INITIAL_SYSTEM_HEALTH)));
-    setAdminAuditLogs(JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS)));
+    setAdminAuditLogs(
+      isRealBackendActive() ? [] : JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS))
+    );
     setAdminActionFeedback(null);
   }, []);
 

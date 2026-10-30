@@ -31,7 +31,11 @@ import { ResultDemoScenarioId } from './components/results/resultTypes';
 import { ApplicationSubmissionState } from './components/submission/submissionTypes';
 import { CollectivePortal } from './components/collective/CollectivePortal';
 import { CollectiveLoginPage } from './components/collective/CollectiveLoginPage';
-import { subscribeToCollectiveStore } from './staff/collectiveStore';
+import {
+  subscribeToCollectiveStore,
+  hydrateCollectiveStore,
+} from './staff/collectiveStore';
+import { hydrateWhiteBirdStore } from './components/white-bird/whiteBirdStore';
 import {
   PublicEntryRoute,
   SafeInternalReturnTarget,
@@ -790,10 +794,11 @@ export default function App() {
           });
         }
 
-        if (synthesizedNotifs.length > 0) {
-          setNotifications(synthesizedNotifs);
-          savePersistedDemoSession({ mutatedNotifications: synthesizedNotifs });
-        }
+        setNotifications(synthesizedNotifs);
+        savePersistedDemoSession({
+          mutatedNotifications: synthesizedNotifs,
+          scenarioId: resolvedScenarioId,
+        });
 
         setPrototypeScenarioId(resolvedScenarioId);
         setHomeScenario(resolvedHomeScenario);
@@ -801,30 +806,37 @@ export default function App() {
       })
       .catch(() => {
         setSharedApplication((prev) => {
+          const isSameStudent =
+            prev.student?.studentId === studentIdentity.studentId &&
+            !isDemoFixtureApplication(prev, studentIdentity.studentId);
+          const basePrev = isSameStudent
+            ? prev
+            : buildCleanStudentApplication({
+                fullName: studentIdentity.fullName,
+                studentId: studentIdentity.studentId,
+                university: studentIdentity.university,
+              });
           const cachedProfile = loadPersistedStudentProfile({
             studentId: studentIdentity.studentId,
-            email: prev.student?.email,
+            email: basePrev.student?.email,
           });
           const mergedSnapshot = mergeStudentProfileSnapshots(
-            prev.applicantProfileSnapshot,
+            basePrev.applicantProfileSnapshot,
             cachedProfile
           );
           const nextPrev: StudentApplicationData = {
-            ...prev,
+            ...basePrev,
             applicantProfileSnapshot: mergedSnapshot,
             student: {
-              ...prev.student,
-              fullName: mergedSnapshot.fullName || prev.student.fullName,
-              university: mergedSnapshot.institutionName || prev.student.university,
-              class: mergedSnapshot.className || prev.student.class,
-              email: mergedSnapshot.email || prev.student.email,
+              ...basePrev.student,
+              fullName: mergedSnapshot.fullName || basePrev.student.fullName,
+              university:
+                mergedSnapshot.institutionName || basePrev.student.university,
+              class: mergedSnapshot.className || basePrev.student.class,
+              email: mergedSnapshot.email || basePrev.student.email,
             },
           };
-          const localDecls =
-            nextPrev.student?.studentId === studentIdentity.studentId &&
-            !isDemoFixtureApplication(nextPrev, studentIdentity.studentId)
-              ? countAppDeclarations(nextPrev)
-              : 0;
+          const localDecls = isSameStudent ? countAppDeclarations(nextPrev) : 0;
           if (localDecls > 0 && nextPrev.applicationId) {
             apiRequest(
               `/api/v2/portal/individual/applications/${encodeURIComponent(nextPrev.applicationId)}/student-view`,
@@ -833,10 +845,30 @@ export default function App() {
                 body: { application: nextPrev, isUserMutation: true },
               }
             ).catch(() => {});
+          } else {
+            setNotifications([]);
+            setPrototypeScenarioId('draft');
+            setHomeScenario('state_b_draft_clean');
+            setAppSubmissionState('draft');
+            savePersistedDemoSession({
+              mutatedNotifications: [],
+              scenarioId: 'draft',
+            });
           }
           return nextPrev;
         });
       });
+
+    services.collective
+      .listApplications()
+      .then((colApps) => {
+        if (!cancelled && Array.isArray(colApps)) {
+          hydrateCollectiveStore(colApps);
+        }
+      })
+      .catch(() => {});
+    void hydrateWhiteBirdStore();
+
     return () => {
       cancelled = true;
     };

@@ -79,6 +79,7 @@ import {
 import { isBackendMode } from '../../shared/config/executionMode';
 import { resolveDomainServices } from '../../entities/services/modeResolver';
 import { apiRequest } from '../../shared/api/httpClient';
+import { hydrateWhiteBirdStore } from '../../components/white-bird/whiteBirdStore';
 
 const HERO_STAFF_APP_ID = 'APP-2026-DN-102220123';
 
@@ -104,6 +105,7 @@ function normalizeCriteriaReviewArray(
         (item) => item && typeof item === 'object' && item.criterionId
       )
     : [];
+  const defaultCount = isBackendMode() ? 0 : 1;
   return CANONICAL_CRITERIA_META.map((meta) => {
     const existing = arr.find((c: any) => c?.criterionId === meta.criterionId);
     const rawStatus = existing?.status;
@@ -127,11 +129,11 @@ function normalizeCriteriaReviewArray(
       declaredCount:
         typeof existing?.declaredCount === 'number'
           ? existing.declaredCount
-          : 1,
+          : defaultCount,
       evidenceCount:
         typeof existing?.evidenceCount === 'number'
           ? existing.evidenceCount
-          : 1,
+          : defaultCount,
     };
   });
 }
@@ -576,6 +578,8 @@ export function useStaffWorkflowCoordination({
         }
       })
       .catch(() => {});
+
+    void hydrateWhiteBirdStore();
 
     return () => {
       cancelled = true;

@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-30T06:19:38.703Z",
+  "createdAt": "2026-10-30T06:48:26.159Z",
   "totalProtectedFiles": 525,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 63122,
-      "sha256": "ba16859a63a55f93486369ba27634130aaa4ff4fc6639e55333adeb90523d210"
+      "sizeBytes": 64153,
+      "sha256": "94a485b516c848fd9868eb3535558c5186f570e8388d648771608ecaa4027e26"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -1166,8 +1166,8 @@
     },
     {
       "path": "src/components/white-bird/whiteBirdStore.ts",
-      "sizeBytes": 17973,
-      "sha256": "65ef40ac916059e47f41340cd5cd57f6b6999e6d0ae88f27a646f2ee25e68947"
+      "sizeBytes": 17702,
+      "sha256": "b4affeae3df9648e6ad1c1d359cc5c106283826fb7353b9e6249d9f4468a1328"
     },
     {
       "path": "src/components/white-bird/whiteBirdTypes.ts",
@@ -1326,8 +1326,8 @@
     },
     {
       "path": "src/features/admin-control-plane/useAdminControlPlane.ts",
-      "sizeBytes": 32937,
-      "sha256": "837a6cef4db53b7a1ff52915aed9c93b643c15787af8190ed2d23280b5f4e31a"
+      "sizeBytes": 35530,
+      "sha256": "aad75a32c6c428991fc5f3d51e8c5a32a5bacd6f50e93f053ad98b22fe4e468c"
     },
     {
       "path": "src/features/admin-control-plane/useAdminSeasonAndOperations.ts",
@@ -1526,8 +1526,8 @@
     },
     {
       "path": "src/features/staff-workflow/useStaffWorkflowCoordination.ts",
-      "sizeBytes": 56440,
-      "sha256": "7923bcaa79dacbf3a35ca75c13f95a8654cca3ac6ef1b646691b52681d7f9c71"
+      "sizeBytes": 56629,
+      "sha256": "0e79015a796d165b0c9ac6f8d3e6e48f0f764c2f7de5ba3085d8c291d75f3cc7"
     },
     {
       "path": "src/features/student-application/useStudentDeclarationAndEvidenceModals.ts",
