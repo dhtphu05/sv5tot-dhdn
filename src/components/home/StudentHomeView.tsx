@@ -148,15 +148,19 @@ export const StudentHomeView: React.FC<StudentHomeViewProps> = ({
           </div>
           <h1 className="text-[22px] sm:text-[24px] font-extrabold text-[#172A3A] tracking-tight mt-0.5">
             Xin chào, {
-              application?.student?.fullName && !application.student.fullName.startsWith('Cán bộ')
+              application?.applicantProfileSnapshot?.fullName ||
+              (application?.student?.fullName && !application.student.fullName.startsWith('Cán bộ')
                 ? application.student.fullName
-                : application?.applicantProfileSnapshot?.fullName || MOCK_STUDENT.fullName
+                : undefined) ||
+              MOCK_STUDENT.fullName
             }
           </h1>
           <p className="text-[13px] text-[#607483] mt-0.5">
             MSSV:{' '}
             <strong className="text-[#172A3A]">
-              {application?.student?.studentId || MOCK_STUDENT.studentId}
+              {(application?.applicantProfileSnapshot as any)?.studentCode ||
+                application?.student?.studentId ||
+                MOCK_STUDENT.studentId}
             </strong>
             {application?.student?.faculty ? ` · ${application.student.faculty}` : ''}
           </p>

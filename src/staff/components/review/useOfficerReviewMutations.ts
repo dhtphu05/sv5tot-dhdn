@@ -225,22 +225,23 @@ export function useOfficerReviewMutations({
   );
 
   const handleConfirmSendSupplement = useCallback(
-    (payload: SupplementRequestFormPayload): boolean => {
+    async (payload: SupplementRequestFormPayload): Promise<boolean> => {
       if (!effectiveCanMutate) return false;
-      onMutateWorkspaceState((prevWs) =>
-        buildSendSupplementMutation(
-          prevWs,
-          payload,
-          studentApp,
-          currentUser,
-          effectiveStage,
-          isSchoolStage,
-          schoolReviewUnitName
-        )
-      );
 
       // Authoritative Wire to Backend V2 School Reviews API
       const targetAppId = applicationRecord?.applicationId || studentApp.applicationId;
+      const targetStaffToken =
+        (currentUser as any).token ||
+        `staff-token-${currentUser.id || (isSchoolStage ? 'staff-sch-dut' : 'staff-off-nam')}`;
+      const staffActor = {
+        userId: currentUser.id || (isSchoolStage ? 'staff-sch-dut' : 'staff-off-nam'),
+        userName: currentUser.fullName,
+        userEmail: currentUser.email || (isSchoolStage ? 'canbo.dut@udn.vn' : 'canbo.dhdn@udn.vn'),
+        role: currentUser.primaryRole || (isSchoolStage ? 'SCHOOL_OFFICER' : 'CITY_OFFICER'),
+        unitId: currentUser.schoolReviewUnitId || (isSchoolStage ? 'unit-dut' : undefined),
+        token: targetStaffToken,
+      };
+
       if (targetAppId) {
         let parsedDeadline: string | undefined = undefined;
         if (payload.requestedDueDate) {
@@ -273,20 +274,37 @@ export function useOfficerReviewMutations({
           deadlineAt: parsedDeadline,
         };
 
-        apiRequest(`/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`, {
-          method: 'POST',
-          body: supplementPayload,
-        })
-          .then(() => {
-            showToast('Đã gửi yêu cầu bổ sung và gửi email thông báo qua Resend đến sinh viên!');
-          })
-          .catch((err: any) => {
-            console.warn('Backend V2 School Review supplement request notice:', err?.message || err);
-          });
+        try {
+          await apiRequest(
+            `/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`,
+            {
+              method: 'POST',
+              body: supplementPayload,
+              actor: staffActor,
+            }
+          );
+        } catch (err: any) {
+          const msg = err?.message || 'Lỗi gửi yêu cầu bổ sung đến máy chủ.';
+          console.error('Backend V2 School Review supplement request notice:', err);
+          showToast(`Lỗi gửi yêu cầu bổ sung: ${msg}`);
+          throw err;
+        }
       }
 
+      onMutateWorkspaceState((prevWs) =>
+        buildSendSupplementMutation(
+          prevWs,
+          payload,
+          studentApp,
+          currentUser,
+          effectiveStage,
+          isSchoolStage,
+          schoolReviewUnitName
+        )
+      );
+
       showToast(
-        'Đã gửi yêu cầu bổ sung. Trạng thái hồ sơ sinh viên và thông báo đã được đồng bộ.'
+        'Đã gửi yêu cầu bổ sung và gửi email thông báo qua Resend đến sinh viên!'
       );
       return true;
     },

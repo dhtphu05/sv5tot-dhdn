@@ -66,6 +66,13 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
         isRerouted: false,
         timestamp: new Date().toISOString(),
       }),
+      sendSupplementRequestEmail: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
       sendPasswordResetEmail: async (data: unknown) => {
         dispatchedEmails.push(data);
         return {
@@ -100,6 +107,13 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
     const dispatchedEmails: unknown[] = [];
     const safeModeEmailService = {
       send: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendSupplementRequestEmail: async () => ({
         success: true,
         originalRecipient: '',
         effectiveRecipient: '',
@@ -142,6 +156,14 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
       send: async () => ({
         success: false,
         error: 'Network timeout',
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendSupplementRequestEmail: async () => ({
+        success: false,
+        error: 'Provider rejection',
         originalRecipient: '',
         effectiveRecipient: '',
         isRerouted: false,

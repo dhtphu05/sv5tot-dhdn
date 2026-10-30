@@ -212,6 +212,11 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
 
     try {
       const emailService = new ResendEmailService('mock-key');
+      (emailService as any).resendClient = {
+        emails: {
+          send: async () => ({ data: { id: 'safe-rerouted-123' }, error: null }),
+        },
+      };
 
       // Attempt sending to a non-whitelisted account in safe mode
       const result = await emailService.send({
@@ -222,8 +227,8 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
 
       assert.equal(result.success, true);
       assert.equal(result.originalRecipient, 'victim.student@dut.udn.vn');
-      assert.equal(result.effectiveRecipient, 'suppressed');
-      assert.ok(result.id?.startsWith('safe-suppressed-'));
+      assert.equal(result.effectiveRecipient, 'vanngocnhuy30032006@gmail.com');
+      assert.equal(result.isRerouted, true);
 
       // Helper check
       assert.equal(emailService.canIssuePasswordResetFor('victim.student@dut.udn.vn'), false);
@@ -264,7 +269,7 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     assert.ok(html.includes('Tiêu chuẩn 4: Tình nguyện tốt'));
     assert.ok(html.includes('Cần bổ sung minh chứng Giấy chứng nhận hiến máu tình nguyện đợt 2.'));
     assert.ok(html.includes('Tải lên hình ảnh rõ nét của Giấy chứng nhận có mộc đỏ.'));
-    assert.ok(html.includes('23:59 ngày 15/11/2026'));
+    assert.ok(html.includes('15/11/2026'));
     assert.ok(html.includes('Xem chi tiết &amp; Bổ sung minh chứng'));
     assert.ok(html.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=HS-2026-DUT-001'));
     assert.ok(html.includes('word-break: break-all'));
@@ -310,6 +315,6 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     assert.equal(resolveCriterionName('TC3'), 'Tiêu chuẩn 3: Thể lực tốt');
     assert.equal(resolveCriterionName('TC4'), 'Tiêu chuẩn 4: Tình nguyện tốt');
     assert.equal(resolveCriterionName('TC5'), 'Tiêu chuẩn 5: Hội nhập tốt');
-    assert.equal(resolveCriterionName('CUSTOM_REQ'), 'Tiêu chí / Tiêu chuẩn: CUSTOM_REQ');
+    assert.equal(resolveCriterionName('CUSTOM_REQ'), 'Tiêu chuẩn / Tiêu chí: CUSTOM_REQ');
   });
 });

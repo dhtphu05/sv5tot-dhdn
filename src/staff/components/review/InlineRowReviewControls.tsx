@@ -54,7 +54,9 @@ export interface InlineRowReviewControlsProps {
   ) => void;
   onSaveInternalNote?: (scope: SelectedReviewScope, note: string) => void;
   onOpenSupplementModal?: (scope: SelectedReviewScope) => void;
-  onSendSupplementRequest?: (payload: SupplementRequestFormPayload) => boolean;
+  onSendSupplementRequest?: (
+    payload: SupplementRequestFormPayload
+  ) => boolean | Promise<boolean>;
   isSchoolStage?: boolean;
   compact?: boolean;
   isAlternativeOption?: boolean;

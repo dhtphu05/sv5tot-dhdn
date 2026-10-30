@@ -201,7 +201,7 @@ describe('Backend V2: School Review Service Unit Tests', () => {
 
     // Check Email Dispatch
     assert.equal(dispatchedEmails.length, 1);
-    const sentData = dispatchedEmails[0];
+    const sentData = dispatchedEmails[0] as any;
     assert.equal(sentData.to, '102210001@edu.vn');
     assert.equal(sentData.applicationCode, 'HS-2026-001');
     assert.equal(sentData.criterionOrReqCode, 'TC4');

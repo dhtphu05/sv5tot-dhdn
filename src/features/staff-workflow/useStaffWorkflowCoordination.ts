@@ -1165,6 +1165,18 @@ export function useStaffWorkflowCoordination({
       });
 
       if (isBackendMode()) {
+        const targetStaffToken =
+          (staffUser as any).token ||
+          `staff-token-${staffUser.id || (staffUser.primaryRole === 'SCHOOL_OFFICER' ? 'staff-sch-dut' : 'staff-off-nam')}`;
+        const staffActor = {
+          userId: staffUser.id || (staffUser.primaryRole === 'SCHOOL_OFFICER' ? 'staff-sch-dut' : 'staff-off-nam'),
+          userName: staffUser.fullName,
+          userEmail: staffUser.email,
+          role: staffUser.primaryRole,
+          unitId: staffUser.schoolReviewUnitId,
+          token: targetStaffToken,
+        };
+
         apiRequest(
           `/api/v2/portal/individual/applications/${encodeURIComponent(
             appId
@@ -1180,6 +1192,7 @@ export function useStaffWorkflowCoordination({
               studentSupplementCreated: result.studentSupplementCreated,
               studentApplication: effectiveNextStudentApp,
             },
+            actor: staffActor,
           }
         ).catch(() => {});
       }

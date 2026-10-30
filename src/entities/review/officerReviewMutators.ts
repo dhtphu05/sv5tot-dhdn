@@ -434,7 +434,9 @@ export function buildSendSupplementMutation(
   );
   const decl = decls.find((d) => d.id === payload.scope.declarationId);
   const declTitle = decl?.value || reqTitle;
-  const nowStr = '15/10/2026 · 09:10';
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const nowStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} - ${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const newReqId = `sup-req-${Date.now()}`;
 
   const key = getScopeKey(

@@ -41,6 +41,12 @@ describe('Backend V2: Authentication HTTP Contract & Security Tests', () => {
       identityRepo: fakeIdentityRepo,
       sessionRepo: fakeSessionRepo,
       resetRepo: fakeResetRepo,
+      emailService: {
+        sendPasswordResetEmail: async () => ({ success: true, timestamp: new Date().toISOString() }),
+        sendSupplementRequestEmail: async () => ({ success: true, timestamp: new Date().toISOString() }),
+        send: async () => ({ success: true, timestamp: new Date().toISOString() }),
+        canIssuePasswordResetFor: () => true,
+      },
     });
 
     await new Promise<void>((resolve) => {

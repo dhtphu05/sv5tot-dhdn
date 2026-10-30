@@ -1002,8 +1002,19 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
         return (
           <SupplementRequestFormModal
             isOpen={supplementModalState.isOpen}
-            studentName={applicationRecord.student.fullName || studentApp.student?.fullName || 'Sinh viên'}
-            studentCode={applicationRecord.student.studentCode || studentApp.student?.studentId || ''}
+            studentName={
+              applicationRecord?.applicantProfileSnapshot?.fullName ||
+              applicationRecord?.student?.fullName ||
+              studentApp?.applicantProfileSnapshot?.fullName ||
+              studentApp?.student?.fullName ||
+              'Sinh viên'
+            }
+            studentCode={
+              (applicationRecord?.applicantProfileSnapshot as any)?.studentCode ||
+              applicationRecord?.student?.studentCode ||
+              studentApp?.student?.studentId ||
+              ''
+            }
             scope={supplementModalState.scope}
             requirementTitle={modalReqTitle}
             declarationTitle={modalDeclTitle}
