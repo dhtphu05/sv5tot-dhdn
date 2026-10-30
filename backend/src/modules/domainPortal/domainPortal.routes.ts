@@ -1181,6 +1181,67 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       }
     }
 
+    // Authoritative hydration of supplementRequests from Neon DB
+    try {
+      const prisma = await dbManager.getClient();
+      if (prisma) {
+        const dbSups = await (prisma as any).supplementRequest.findMany({
+          where: {
+            OR: [
+              { individualApplicationId: req.params.id },
+              { individualApplication: { id: req.params.id } },
+              { individualApplication: { applicationCode: req.params.id } },
+            ],
+          },
+          include: { responses: true },
+          orderBy: { requestedAt: 'desc' },
+        });
+
+        if (Array.isArray(dbSups) && dbSups.length > 0) {
+          const activeSups = dbSups.filter((s: any) => s.status === 'OPEN');
+          if (activeSups.length > 0) {
+            app.status = 'supplement_required';
+            app.schoolPreliminaryStatus = 'SCHOOL_SUPPLEMENT_REQUESTED';
+          }
+          app.supplementRequests = dbSups.map((s: any) => {
+            const normCode = (s.criterionOrReqCode || '').toLowerCase();
+            let cId = 'ethics';
+            let cNum = 1;
+            let cName = 'Đạo đức tốt';
+            if (normCode.includes('academic') || normCode.startsWith('tc2') || normCode.includes('tc02')) {
+              cId = 'academic'; cNum = 2; cName = 'Học tập tốt';
+            } else if (normCode.includes('physical') || normCode.startsWith('tc3') || normCode.includes('tc03')) {
+              cId = 'physical'; cNum = 3; cName = 'Thể lực tốt';
+            } else if (normCode.includes('volunteer') || normCode.startsWith('tc4') || normCode.includes('tc04')) {
+              cId = 'volunteer'; cNum = 4; cName = 'Tình nguyện tốt';
+            } else if (normCode.includes('integration') || normCode.startsWith('tc5') || normCode.includes('tc05')) {
+              cId = 'integration'; cNum = 5; cName = 'Hội nhập tốt';
+            }
+            return {
+              id: s.id,
+              criterionId: cId,
+              criterionName: cName,
+              criterionNumber: cNum,
+              requirementId: s.criterionOrReqCode,
+              requirementTitle: cName,
+              declarationId: s.targetDeclarationId || undefined,
+              declarationTitle: s.declarationTitle || undefined,
+              scopeLevel: s.targetDeclarationId ? 'declaration' : 'criterion',
+              message: s.requestReason,
+              requestedAt: s.requestedAt ? new Date(s.requestedAt).toLocaleDateString('vi-VN') : '',
+              deadline: s.deadlineAt ? new Date(s.deadlineAt).toLocaleDateString('vi-VN') : '',
+              allowedActions: s.requiredAction ? [s.requiredAction] : ['addEvidence', 'editText'],
+              status: s.status === 'OPEN' ? 'active' : 'completed',
+              staffStatus: s.status === 'OPEN' ? 'waiting_student' : 'closed',
+              responses: s.responses || [],
+            };
+          });
+        }
+      }
+    } catch {
+      // Ignore if offline
+    }
+
     res.status(200).json({ success: true, data: app });
   });
 
@@ -1883,17 +1944,18 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         : Array.isArray(existingStuApp.supplementRequests)
         ? existingStuApp.supplementRequests
         : [];
-      const normalizedStuSupps = incomingSupps.map((s: Record<string, any>) =>
-        (requestId ? s.id === requestId : true) &&
-        (s.status === 'active' || s.status === 'open')
-          ? {
-              ...s,
-              status: 'completed',
-              respondedAt: nowStr,
-              studentExplanation: explanation || s.studentExplanation,
-            }
-          : s
-      );
+      const normalizedStuSupps = incomingSupps.map((s: Record<string, any>) => {
+        const matchesTarget = requestId ? s.id === requestId : (rawIsFullyCompleted === true);
+        if (matchesTarget && (s.status === 'active' || s.status === 'open')) {
+          return {
+            ...s,
+            status: 'completed',
+            respondedAt: nowStr,
+            studentExplanation: explanation || s.studentExplanation,
+          };
+        }
+        return s;
+      });
       const remainingActiveStuSupps = normalizedStuSupps.filter(
         (s: Record<string, any>) => s.status === 'active'
       );
@@ -1911,17 +1973,18 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     } else if (portalState.studentApplications[id]) {
       if (Array.isArray(portalState.studentApplications[id].supplementRequests)) {
         portalState.studentApplications[id].supplementRequests =
-          portalState.studentApplications[id].supplementRequests.map((s: Record<string, any>) =>
-            (requestId ? s.id === requestId : true) &&
-            (s.status === 'active' || s.status === 'open')
-              ? {
-                  ...s,
-                  status: 'completed',
-                  respondedAt: nowStr,
-                  studentExplanation: explanation || s.studentExplanation,
-                }
-              : s
-          );
+          portalState.studentApplications[id].supplementRequests.map((s: Record<string, any>) => {
+            const matchesTarget = requestId ? s.id === requestId : (rawIsFullyCompleted === true);
+            if (matchesTarget && (s.status === 'active' || s.status === 'open')) {
+              return {
+                ...s,
+                status: 'completed',
+                respondedAt: nowStr,
+                studentExplanation: explanation || s.studentExplanation,
+              };
+            }
+            return s;
+          });
       }
       const remainingActiveStuSupps = Array.isArray(
         portalState.studentApplications[id].supplementRequests
@@ -2004,18 +2067,19 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
     };
 
     const nextWsSupplementRequests = Array.isArray(existingWs.supplementRequests)
-      ? existingWs.supplementRequests.map((sr: Record<string, any>) =>
-          (requestId ? sr.id === requestId : true) &&
-          (sr.status === 'active' || sr.staffStatus === 'waiting_student')
-            ? {
-                ...sr,
-                staffStatus: 'student_returned',
-                studentReturnedAt: nowStr,
-                studentRespondedAt: nowStr,
-                studentExplanation: explanation || sr.studentExplanation,
-              }
-            : sr
-        )
+      ? existingWs.supplementRequests.map((sr: Record<string, any>) => {
+          const matchesTarget = requestId ? sr.id === requestId : (rawIsFullyCompleted === true);
+          if (matchesTarget && (sr.status === 'active' || sr.staffStatus === 'waiting_student')) {
+            return {
+              ...sr,
+              staffStatus: 'student_returned',
+              studentReturnedAt: nowStr,
+              studentRespondedAt: nowStr,
+              studentExplanation: explanation || sr.studentExplanation,
+            };
+          }
+          return sr;
+        })
       : [];
 
     const returnedCriterionIds = new Set<string>(
@@ -2261,6 +2325,36 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       actorRole: actor.role,
       details: `Gửi phản hồi bổ sung hồ sơ cá nhân: ${explanation || 'Bổ sung minh chứng'}`,
     });
+
+    // Persist SupplementResponse in Neon DB if available
+    dbManager.getClient().then(async (prisma: any) => {
+      if (!prisma) return;
+      try {
+        if (requestId) {
+          await prisma.supplementResponse.create({
+            data: {
+              supplementRequestId: requestId,
+              responderUserId: actor.id || 'student',
+              responderNameSnapshot: actor.name || 'Sinh viên',
+              explanationNote: explanation || 'Sinh viên đã bổ sung minh chứng',
+              attachedEvidenceIds: [],
+            },
+          });
+          if (isCompletedFinal) {
+            await prisma.supplementRequest.update({
+              where: { id: requestId },
+              data: {
+                status: 'RESOLVED',
+                resolvedAt: new Date(),
+                resolutionNote: explanation || undefined,
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[DomainPortal] Warning persisting supplement response to DB:', err);
+      }
+    }).catch(() => {});
 
     res.status(200).json({ success: true, data: updated });
   });

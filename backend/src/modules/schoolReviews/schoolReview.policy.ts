@@ -37,9 +37,22 @@ export class SchoolReviewPolicy {
     officer: AuthenticatedActor,
     application: IndividualApplicationDto
   ): void {
+    const isCityLevelOrAdmin =
+      officer.activeRole === 'ADMIN' ||
+      officer.roles.includes('ADMIN') ||
+      officer.activeRole === 'CITY_OFFICER' ||
+      officer.roles.includes('CITY_OFFICER') ||
+      officer.activeRole === 'CITY_MANAGER' ||
+      officer.roles.includes('CITY_MANAGER');
+
+    if (isCityLevelOrAdmin) {
+      // City-level officers and Admins oversee all member units across ĐHĐN
+      return;
+    }
+
     if (officer.activeRole !== 'SCHOOL_OFFICER' && !officer.roles.includes('SCHOOL_OFFICER')) {
       throw ApiError.forbidden(
-        'Chỉ Cán bộ xét sơ tuyển cấp Trường (SCHOOL_OFFICER) mới có quyền thực hiện thao tác này.',
+        'Chỉ Cán bộ xét sơ tuyển cấp Trường hoặc Cán bộ ĐHĐN mới có quyền thực hiện thao tác này.',
         'INSUFFICIENT_ROLE'
       );
     }

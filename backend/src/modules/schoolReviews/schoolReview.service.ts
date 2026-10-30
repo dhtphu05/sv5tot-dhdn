@@ -182,6 +182,92 @@ export class SchoolReviewService {
       },
     });
 
+    // 0. Synchronize directly into in-memory portalState for instantaneous Student Portal reflection
+    try {
+      const { portalState, savePortalStateToDisk } = await import('../domainPortal/domainPortal.state');
+      const studentApp = portalState.studentApplications[applicationId];
+      const normCode = (data.criterionOrReqCode || '').toLowerCase();
+      let cId = 'ethics';
+      let cNum = 1;
+      let cName = 'Đạo đức tốt';
+      if (normCode.includes('academic') || normCode.startsWith('tc2') || normCode.includes('tc02')) {
+        cId = 'academic'; cNum = 2; cName = 'Học tập tốt';
+      } else if (normCode.includes('physical') || normCode.startsWith('tc3') || normCode.includes('tc03')) {
+        cId = 'physical'; cNum = 3; cName = 'Thể lực tốt';
+      } else if (normCode.includes('volunteer') || normCode.startsWith('tc4') || normCode.includes('tc04')) {
+        cId = 'volunteer'; cNum = 4; cName = 'Tình nguyện tốt';
+      } else if (normCode.includes('integration') || normCode.startsWith('tc5') || normCode.includes('tc05')) {
+        cId = 'integration'; cNum = 5; cName = 'Hội nhập tốt';
+      }
+
+      const mappedSup = {
+        id: supplement.id,
+        criterionId: cId,
+        criterionName: data.criterionName || cName,
+        criterionNumber: cNum,
+        requirementId: data.criterionOrReqCode,
+        requirementTitle: data.requirementTitle || cName,
+        declarationId: data.targetDeclarationId,
+        declarationTitle: data.declarationTitle,
+        scopeLevel: data.targetDeclarationId ? 'declaration' : 'criterion',
+        message: data.requestReason,
+        requestedAt: supplement.requestedAt ? new Date(supplement.requestedAt).toLocaleDateString('vi-VN') : '',
+        deadline: data.deadlineAt ? new Date(data.deadlineAt).toLocaleDateString('vi-VN') : '',
+        allowedActions: data.requiredAction ? [data.requiredAction] : ['addEvidence', 'editText'],
+        status: 'active',
+        staffStatus: 'waiting_student',
+      };
+
+      if (studentApp) {
+        studentApp.status = 'supplement_required';
+        studentApp.schoolPreliminaryStatus = 'SCHOOL_SUPPLEMENT_REQUESTED';
+        if (!Array.isArray(studentApp.supplementRequests)) {
+          studentApp.supplementRequests = [];
+        }
+        const existingIdx = studentApp.supplementRequests.findIndex(
+          (r: any) => r.id === supplement.id || (data.targetDeclarationId && r.declarationId === data.targetDeclarationId)
+        );
+        if (existingIdx >= 0) {
+          studentApp.supplementRequests[existingIdx] = mappedSup;
+        } else {
+          studentApp.supplementRequests.push(mappedSup);
+        }
+      }
+
+      const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === applicationId);
+      if (staffRec) {
+        staffRec.workflowStatus = 'supplement_requested';
+        staffRec.schoolPreliminaryStatus = 'supplement_requested';
+        if (!staffRec.workspaceState) {
+          staffRec.workspaceState = {
+            applicationId,
+            reviewStage: 'SCHOOL',
+            hasStartedReview: true,
+            scopeRecords: {},
+            evidenceRecords: {},
+            criterionCompletedMap: {},
+            criterionConclusions: {},
+            supplementRequests: [],
+            historyEvents: [],
+          };
+        }
+        if (!Array.isArray(staffRec.workspaceState.supplementRequests)) {
+          staffRec.workspaceState.supplementRequests = [];
+        }
+        const wsIdx = staffRec.workspaceState.supplementRequests.findIndex(
+          (r: any) => r.id === supplement.id || (data.targetDeclarationId && r.declarationId === data.targetDeclarationId)
+        );
+        if (wsIdx >= 0) {
+          staffRec.workspaceState.supplementRequests[wsIdx] = mappedSup;
+        } else {
+          staffRec.workspaceState.supplementRequests.push(mappedSup);
+        }
+      }
+      savePortalStateToDisk();
+    } catch {
+      // Ignore if portalState not available
+    }
+
     // 1. Authoritative In-App Notification (Dịch vụ 1)
     if (typeof this.schoolReviewRepo.createNotification === 'function') {
       await this.schoolReviewRepo.createNotification({
@@ -283,6 +369,37 @@ export class SchoolReviewService {
       action: 'RESOLVE_SCHOOL_SUPPLEMENT',
       metadata: { supplementId, status, note },
     });
+
+    // Synchronize resolution to portalState
+    try {
+      const { portalState, savePortalStateToDisk } = await import('../domainPortal/domainPortal.state');
+      const studentApp = portalState.studentApplications[applicationId];
+      if (studentApp && Array.isArray(studentApp.supplementRequests)) {
+        const targetReq = studentApp.supplementRequests.find((r: any) => r.id === supplementId);
+        if (targetReq) {
+          targetReq.status = 'completed';
+          targetReq.staffStatus = 'closed';
+        }
+        const hasOpen = studentApp.supplementRequests.some(
+          (r: any) => r.status === 'active' || r.staffStatus === 'waiting_student'
+        );
+        if (!hasOpen) {
+          studentApp.status = 'under_review';
+          studentApp.schoolPreliminaryStatus = 'under_review';
+        }
+      }
+      const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === applicationId);
+      if (staffRec?.workspaceState && Array.isArray(staffRec.workspaceState.supplementRequests)) {
+        const wsReq = staffRec.workspaceState.supplementRequests.find((r: any) => r.id === supplementId);
+        if (wsReq) {
+          wsReq.status = 'completed';
+          wsReq.staffStatus = 'closed';
+        }
+      }
+      savePortalStateToDisk();
+    } catch {
+      // Ignore
+    }
 
     return resolved;
   }
