@@ -36,6 +36,7 @@ export interface RequirementRowProps {
   isSupplementWindowClosed?: boolean;
   isSupplementSubmitting?: boolean;
   onSendSupplement?: (requestId: string, explanationNote?: string) => void;
+  onUpdateExplanation?: (requestId: string, explanation: string) => void;
   customReviewStatus?: { status: RequirementStatus; customLabel?: string };
   reviewerActionSlot?: React.ReactNode;
   renderDeclarationReviewerSlot?: (

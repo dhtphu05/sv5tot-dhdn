@@ -30,11 +30,22 @@ import {
 } from '../../reviewTypes';
 import { Button } from '../../../components/buttons/Button';
 
+export function computePresetDueDate(hoursAhead: number): string {
+  const d = new Date(Date.now() + hoursAhead * 60 * 60 * 1000);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `20:00 · ${day}/${month}/${year}`;
+}
+
 export interface SupplementRequestFormPayload {
   scope: SelectedReviewScope;
   message: string;
   allowedActions: SupplementAllowedAction[];
   requestedDueDate: string;
+  criterionName?: string;
+  requirementTitle?: string;
+  declarationTitle?: string;
 }
 
 export interface SupplementRequestFormModalProps {
@@ -100,7 +111,7 @@ export const SupplementRequestFormModal: React.FC<
       setSavedPreviousMessage(null);
       // Section 44: Default conservative scope for single declaration = "Bổ sung minh chứng"
       setAllowedActions(['addEvidence']);
-      setRequestedDueDate('20:00 · 18/10/2026');
+      setRequestedDueDate(computePresetDueDate(72));
 
       if (initialDraftMessage) {
         setMessage(initialDraftMessage);
@@ -141,7 +152,7 @@ export const SupplementRequestFormModal: React.FC<
         ? `Kính gửi sinh viên, minh chứng cho nội dung "${targetContentLabel}" chưa thể hiện rõ số ngày hoặc mốc thời gian hoạt động thực tế theo quy định (tối thiểu 03 ngày tình nguyện/năm). Đề nghị bạn bổ sung giấy xác nhận có con dấu xác nhận hợp lệ.`
         : scope.criterionId === 'academic'
         ? `Kính gửi sinh viên, minh chứng bảng điểm cho nội dung "${targetContentLabel}" cần bổ sung bảng điểm chính thức cả năm học 2025–2026 có xác nhận của Phòng Đào tạo.`
-        : `Kính gửi sinh viên, để đảm bảo tính xác thực cho nội dung "${targetContentLabel}", đề nghị bạn bổ sung văn bản minh chứng có đầy đủ con dấu, chữ ký của đơn vị ban hành trong thời hạn quy định.`);
+        : `Kính gửi sinh viên, minh chứng cho nội dung "${targetContentLabel}" chưa đáp ứng yêu cầu thẩm định. Đề nghị bạn bổ sung văn bản minh chứng hợp lệ trong thời hạn quy định.`);
 
     if (!force && message.trim() && message.trim() !== draftText) {
       setShowAiOverwriteConfirm(true);
@@ -195,7 +206,10 @@ export const SupplementRequestFormModal: React.FC<
       scope,
       message: message.trim(),
       allowedActions,
-      requestedDueDate: requestedDueDate.trim() || '20:00 · 18/10/2026',
+      requestedDueDate: requestedDueDate.trim() || computePresetDueDate(72),
+      criterionName: criterionToken?.name || scope.criterionId,
+      requirementTitle,
+      declarationTitle,
     });
 
     if (!ok) {

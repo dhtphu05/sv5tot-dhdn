@@ -102,7 +102,8 @@ export interface StudentPortalPageProps {
   handleSupplementBusinessResolved: (
     updatedApp?: StudentApplicationData,
     explanationNote?: string,
-    requestId?: string
+    requestId?: string,
+    isFullyCompleted?: boolean
   ) => void;
   handleEvidenceBusinessResolved: (fileId: string) => void;
   isToolbarHidden: boolean;

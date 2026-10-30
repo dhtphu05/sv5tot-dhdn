@@ -125,6 +125,9 @@ export class SchoolReviewService {
       scopeType: SupplementScopeType;
       targetDeclarationId?: string;
       targetEvidenceLinkId?: string;
+      criterionName?: string;
+      requirementTitle?: string;
+      declarationTitle?: string;
       requestReason: string;
       requiredAction?: string;
       deadlineAt?: Date;
@@ -186,7 +189,7 @@ export class SchoolReviewService {
         category: 'SUPPLEMENT_REQUESTED',
         channel: 'IN_APP_AND_EMAIL',
         title: `[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ ${detail.applicationCode}`,
-        body: `Cán bộ thẩm định yêu cầu bổ sung minh chứng cho ${resolveCriterionName(data.criterionOrReqCode)}. Lý do: ${data.requestReason}`,
+        body: `Cán bộ thẩm định yêu cầu bổ sung minh chứng cho ${data.criterionName || resolveCriterionName(data.criterionOrReqCode)}${data.requirementTitle ? ' (' + data.requirementTitle + ')' : ''}. Lý do: ${data.requestReason}`,
         track: 'INDIVIDUAL',
         applicationId,
         actionUrl: `/?route=application_detail&id=${applicationId}`,
@@ -207,7 +210,9 @@ export class SchoolReviewService {
           applicationCode: detail.applicationCode,
           institutionName: detail.institutionName,
           criterionOrReqCode: data.criterionOrReqCode,
-          criterionName: resolveCriterionName(data.criterionOrReqCode),
+          criterionName: data.criterionName || resolveCriterionName(data.criterionOrReqCode),
+          requirementTitle: data.requirementTitle,
+          declarationTitle: data.declarationTitle,
           requestReason: data.requestReason,
           requiredAction: data.requiredAction,
           deadlineAt: data.deadlineAt,

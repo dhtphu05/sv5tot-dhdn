@@ -39,6 +39,8 @@ export interface SupplementRequestEmailData {
   institutionName?: string;
   criterionOrReqCode: string;
   criterionName?: string;
+  requirementTitle?: string;
+  declarationTitle?: string;
   requestReason: string;
   requiredAction?: string;
   deadlineAt?: Date | string;

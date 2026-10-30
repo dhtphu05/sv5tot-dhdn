@@ -66,7 +66,8 @@ export interface StudentApplicationWorkspaceProps {
   onSupplementBusinessResolved?: (
     updatedApp?: StudentApplicationData,
     explanationNote?: string,
-    requestId?: string
+    requestId?: string,
+    isFullyCompleted?: boolean
   ) => void;
   onEvidenceBusinessResolved?: (fileId: string) => void;
   submissionDeadlineText?: string;
@@ -382,6 +383,7 @@ export const StudentApplicationWorkspace: React.FC<
     recordSupplementDeclarationEdit,
     recordSupplementEvidenceAdded,
     recordSupplementEvidenceRemoved,
+    recordSupplementExplanation,
     handleApplySupplementScenario,
     handleConfirmSendSupplement,
     handleViewSupplementRequest,
@@ -924,6 +926,9 @@ export const StudentApplicationWorkspace: React.FC<
                   setActiveSupplementRequestId(reqId);
                   setIsSupplementConfirmOpen(true);
                 }
+              }}
+              onUpdateExplanation={(reqId, exp) => {
+                recordSupplementExplanation(reqId, exp);
               }}
               onSelectActivity={handleSelectActivity}
               onOpenPreSubmitReview={handleOpenPreSubmitReview}

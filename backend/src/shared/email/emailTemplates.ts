@@ -235,42 +235,147 @@ Email hỗ trợ: hoisinhvien@udn.vn
 Đây là email tự động. Vui lòng không trả lời trực tiếp.`;
 }
 
-export function resolveCriterionName(code: string): string {
-  const normalized = code.trim().toUpperCase();
-  switch (normalized) {
-    case 'TC1':
-    case 'TC01':
-    case 'DAO_DUC_TOT':
-      return 'Tiêu chuẩn 1: Đạo đức tốt';
-    case 'TC2':
-    case 'TC02':
-    case 'HOC_TAP_TOT':
-      return 'Tiêu chuẩn 2: Học tập tốt';
-    case 'TC3':
-    case 'TC03':
-    case 'THE_LUC_TOT':
-      return 'Tiêu chuẩn 3: Thể lực tốt';
-    case 'TC4':
-    case 'TC04':
-    case 'TINH_NGUYEN_TOT':
-      return 'Tiêu chuẩn 4: Tình nguyện tốt';
-    case 'TC5':
-    case 'TC05':
-    case 'HOI_NHAP_TOT':
-      return 'Tiêu chuẩn 5: Hội nhập tốt';
-    default:
-      return `Tiêu chí / Tiêu chuẩn: ${code}`;
+export function parseFlexibleDateTime(input?: string | Date | null): Date | undefined {
+  if (!input) return undefined;
+  if (input instanceof Date) return isNaN(input.getTime()) ? undefined : input;
+  const s = String(input).trim();
+  if (!s) return undefined;
+
+  const standardParsed = Date.parse(s);
+  if (!isNaN(standardParsed)) return new Date(standardParsed);
+
+  const vnMatch = s.match(/(\d{1,2}):(\d{2})\s*(?:·|,|-)?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (vnMatch) {
+    const [, hour, min, day, month, year] = vnMatch;
+    const isoStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${min.padStart(2, '0')}:00+07:00`;
+    const d = new Date(isoStr);
+    if (!isNaN(d.getTime())) return d;
   }
+
+  const dateOnlyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dateOnlyMatch) {
+    const [, day, month, year] = dateOnlyMatch;
+    const isoStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T23:59:59+07:00`;
+    const d = new Date(isoStr);
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  return undefined;
+}
+
+export function formatVietnameseDateTime(date?: string | Date | null): string {
+  const d = parseFlexibleDateTime(date);
+  if (!d) return 'Trong vòng 72 giờ kể từ khi nhận được thông báo này';
+
+  try {
+    const parts = new Intl.DateTimeFormat('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour12: false,
+    }).formatToParts(d);
+    const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+    return `${map.hour}:${map.minute} · Ngày ${map.day}/${map.month}/${map.year}`;
+  } catch {
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${hours}:${minutes} · Ngày ${day}/${month}/${year}`;
+  }
+}
+
+export function formatRequiredActions(actionStr?: string): string {
+  if (!actionStr) return 'Bổ sung minh chứng mới';
+  const actionMap: Record<string, string> = {
+    addEvidence: 'Bổ sung minh chứng mới',
+    editDeclaration: 'Chỉnh sửa thông tin kê khai',
+    replaceEvidence: 'Thay thế minh chứng hiện tại',
+    addDeclaration: 'Kê khai thêm thông tin / hoạt động mới',
+    explanation: 'Giải trình / xác nhận nội dung',
+  };
+  const parts = actionStr.split(/[,;\n]+/).map((p) => p.trim()).filter(Boolean);
+  const mapped = parts.map((p) => actionMap[p] || p);
+  return mapped.join(', ') || actionStr;
+}
+
+export function resolveCriterionName(code: string): string {
+  if (!code) return 'Tiêu chuẩn xét chọn';
+  const normalized = code.trim().toLowerCase();
+
+  // Primary Criteria
+  if (
+    normalized === 'tc1' ||
+    normalized === 'tc01' ||
+    normalized === 'ethics' ||
+    normalized === 'dao_duc_tot' ||
+    normalized === 'dao-duc-tot'
+  ) {
+    return 'Tiêu chuẩn 1: Đạo đức tốt';
+  }
+  if (
+    normalized === 'tc2' ||
+    normalized === 'tc02' ||
+    normalized === 'academic' ||
+    normalized === 'hoc_tap_tot' ||
+    normalized === 'hoc-tap-tot'
+  ) {
+    return 'Tiêu chuẩn 2: Học tập tốt';
+  }
+  if (
+    normalized === 'tc3' ||
+    normalized === 'tc03' ||
+    normalized === 'physical' ||
+    normalized === 'the_luc_tot' ||
+    normalized === 'the-luc-tot'
+  ) {
+    return 'Tiêu chuẩn 3: Thể lực tốt';
+  }
+  if (
+    normalized === 'tc4' ||
+    normalized === 'tc04' ||
+    normalized === 'volunteer' ||
+    normalized === 'tinh_nguyen_tot' ||
+    normalized === 'tinh-nguyen-tot'
+  ) {
+    return 'Tiêu chuẩn 4: Tình nguyện tốt';
+  }
+  if (
+    normalized === 'tc5' ||
+    normalized === 'tc05' ||
+    normalized === 'integration' ||
+    normalized === 'hoi_nhap_tot' ||
+    normalized === 'hoi-nhap-tot'
+  ) {
+    return 'Tiêu chuẩn 5: Hội nhập tốt';
+  }
+
+  // Common Specific Requirements
+  if (normalized.startsWith('ethics-drl')) return 'Tiêu chuẩn 1: Đạo đức tốt · Điểm rèn luyện';
+  if (normalized.startsWith('ethics-law')) return 'Tiêu chuẩn 1: Đạo đức tốt · Chấp hành pháp luật, quy chế';
+  if (normalized.startsWith('ethics-party')) return 'Tiêu chuẩn 1: Đạo đức tốt · Đảng viên / Đoàn viên ưu tú';
+  if (normalized.startsWith('academic-gpa')) return 'Tiêu chuẩn 2: Học tập tốt · Điểm trung bình học tập GPA';
+  if (normalized.startsWith('academic-sci') || normalized.startsWith('academic-research')) return 'Tiêu chuẩn 2: Học tập tốt · Nghiên cứu khoa học';
+  if (normalized.startsWith('academic-comp')) return 'Tiêu chuẩn 2: Học tập tốt · Cuộc thi học thuật';
+  if (normalized.startsWith('physical-test')) return 'Tiêu chuẩn 3: Thể lực tốt · Đạt tiêu chuẩn thể lực';
+  if (normalized.startsWith('physical-sport')) return 'Tiêu chuẩn 3: Thể lực tốt · Thể dục thể thao';
+  if (normalized.startsWith('volunteer-act') || normalized.startsWith('volunteer-mhx')) return 'Tiêu chuẩn 4: Tình nguyện tốt · Hoạt động tình nguyện';
+  if (normalized.startsWith('volunteer-blood')) return 'Tiêu chuẩn 4: Tình nguyện tốt · Hiến máu tình nguyện';
+  if (normalized.startsWith('integration-lang') || normalized.startsWith('integration-ielts')) return 'Tiêu chuẩn 5: Hội nhập tốt · Ngoại ngữ / Chứng chỉ quốc tế';
+  if (normalized.startsWith('integration-skill')) return 'Tiêu chuẩn 5: Hội nhập tốt · Kỹ năng hội nhập';
+
+  return `Tiêu chuẩn / Tiêu chí: ${code}`;
 }
 
 export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailData): string {
   const criterionDisplayName = data.criterionName || resolveCriterionName(data.criterionOrReqCode);
   const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
-  const deadlineStr = data.deadlineAt
-    ? data.deadlineAt instanceof Date
-      ? data.deadlineAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
-      : String(data.deadlineAt)
-    : 'Trong vòng 72 giờ kể từ khi nhận được thông báo này';
+  const deadlineStr = formatVietnameseDateTime(data.deadlineAt);
+  const actionDisplay = formatRequiredActions(data.requiredAction);
 
   return `<!DOCTYPE html>
 <html lang="vi">
@@ -357,7 +462,7 @@ export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailD
       font-weight: 600;
       color: #475569;
       display: inline-block;
-      min-width: 130px;
+      min-width: 140px;
     }
     .detail-value {
       color: #0f172a;
@@ -478,9 +583,19 @@ export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailD
             <span class="detail-label">Tiêu chuẩn:</span>
             <span class="detail-value"><strong>${criterionDisplayName}</strong></span>
           </div>
+          ${data.requirementTitle ? `
+          <div class="detail-row">
+            <span class="detail-label">Tiêu chí:</span>
+            <span class="detail-value"><strong>${data.requirementTitle}</strong></span>
+          </div>` : ''}
+          ${data.declarationTitle ? `
+          <div class="detail-row">
+            <span class="detail-label">Nội dung kê khai:</span>
+            <span class="detail-value">${data.declarationTitle}</span>
+          </div>` : ''}
           <div class="detail-row">
             <span class="detail-label">Thời hạn hoàn thành:</span>
-            <span class="detail-value" style="color: #b91c1c; font-weight: 600;">${deadlineStr}</span>
+            <span class="detail-value" style="color: #b91c1c; font-weight: 700;">${deadlineStr}</span>
           </div>
           <div class="detail-row" style="margin-top: 12px;">
             <span class="detail-label" style="display: block; margin-bottom: 4px;">Nội dung yêu cầu từ Cán bộ:</span>
@@ -488,10 +603,10 @@ export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailD
               ${data.requestReason}
             </div>
           </div>
-          ${data.requiredAction ? `
+          ${actionDisplay ? `
           <div class="detail-row" style="margin-top: 10px;">
             <span class="detail-label">Hành động yêu cầu:</span>
-            <span class="detail-value">${data.requiredAction}</span>
+            <span class="detail-value">${actionDisplay}</span>
           </div>` : ''}
         </div>
 
@@ -527,11 +642,8 @@ export function buildSupplementRequestHtmlTemplate(data: SupplementRequestEmailD
 export function buildSupplementRequestPlainTextTemplate(data: SupplementRequestEmailData): string {
   const criterionDisplayName = data.criterionName || resolveCriterionName(data.criterionOrReqCode);
   const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
-  const deadlineStr = data.deadlineAt
-    ? data.deadlineAt instanceof Date
-      ? data.deadlineAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
-      : String(data.deadlineAt)
-    : 'Trong vòng 72 giờ kể từ khi nhận được thông báo này';
+  const deadlineStr = formatVietnameseDateTime(data.deadlineAt);
+  const actionDisplay = formatRequiredActions(data.requiredAction);
 
   return `HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
 Hệ thống xét chọn danh hiệu và giải thưởng sinh viên
@@ -543,9 +655,9 @@ Hội đồng thẩm định hồ sơ xét chọn danh hiệu Sinh viên 5 tốt
 THÔNG TIN CHI TIẾT YÊU CẦU:
 - Mã hồ sơ: ${data.applicationCode}
 ${data.institutionName ? `- Đơn vị / Trường: ${data.institutionName}\n` : ''}- Tiêu chuẩn: ${criterionDisplayName}
-- Thời hạn hoàn thành: ${deadlineStr}
+${data.requirementTitle ? `- Tiêu chí: ${data.requirementTitle}\n` : ''}${data.declarationTitle ? `- Nội dung kê khai: ${data.declarationTitle}\n` : ''}- Thời hạn hoàn thành: ${deadlineStr}
 - Nội dung yêu cầu từ Cán bộ: ${data.requestReason}
-${data.requiredAction ? `- Hành động yêu cầu: ${data.requiredAction}\n` : ''}
+${actionDisplay ? `- Hành động yêu cầu: ${actionDisplay}\n` : ''}
 Vui lòng truy cập liên kết bên dưới để bổ sung minh chứng:
 ${actionUrl}
 

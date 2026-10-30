@@ -43,6 +43,9 @@ export const CreateSupplementRequestSchema = z.object({
     .default('CRITERION_OR_REQUIREMENT'),
   targetDeclarationId: z.string().optional(),
   targetEvidenceLinkId: z.string().optional(),
+  criterionName: z.string().optional(),
+  requirementTitle: z.string().optional(),
+  declarationTitle: z.string().optional(),
   requestReason: z
     .string()
     .min(5, 'Lý do yêu cầu bổ sung phải có ít nhất 5 ký tự để sinh viên nắm rõ thông tin.')

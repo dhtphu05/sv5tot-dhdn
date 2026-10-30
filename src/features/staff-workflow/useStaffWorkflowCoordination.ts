@@ -233,6 +233,7 @@ export interface StaffWorkflowCoordinationOptions {
   setPrototypeScenarioId: (id: PrototypeScenarioId) => void;
   setHomeScenario: (id: HomeDevScenarioId) => void;
   setAppSubmissionState: (state: ApplicationSubmissionState) => void;
+  setSharedApplication?: React.Dispatch<React.SetStateAction<StudentApplicationData>>;
   isActive?: boolean;
 }
 
@@ -968,6 +969,7 @@ export function useStaffWorkflowCoordination({
           savePersistedOfficerStudentApps(next);
           return next;
         });
+        setSharedApplication?.(effectiveNextStudentApp);
       }
 
       const completedCount = Object.values(

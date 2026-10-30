@@ -376,6 +376,7 @@ export default function App() {
     setPrototypeScenarioId,
     setHomeScenario,
     setAppSubmissionState,
+    setSharedApplication,
     isActive: viewMode === 'staff_app',
   });
 
@@ -774,7 +775,9 @@ export default function App() {
         ? sharedApplication.supplementRequests
         : isNonDemo
         ? []
-        : base.supplementRequests;
+        : (!studentIdentity.studentId || studentIdentity.studentId === '102220123') && homeScenario === 'state_h_supplement_active'
+        ? base.supplementRequests
+        : [];
 
     return {
       ...base,

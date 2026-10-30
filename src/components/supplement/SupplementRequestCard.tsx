@@ -41,6 +41,14 @@ export const SupplementRequestCard: React.FC<SupplementRequestCardProps> = ({
           <p className="text-[#335340] mt-1 leading-relaxed">
             Yêu cầu bổ sung của cán bộ: “{request.message}” đã được phản hồi.
           </p>
+          {request.studentExplanation && (
+            <div className="mt-2 p-2.5 bg-white border border-[#BBF7D0] rounded-[7px] text-[#14532D]">
+              <span className="font-bold text-[#166534] block text-[11px] mb-0.5">
+                Giải trình của bạn:
+              </span>
+              <span>“{request.studentExplanation}”</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -98,26 +106,23 @@ export const SupplementRequestCard: React.FC<SupplementRequestCardProps> = ({
                 <Clock size={12} className="shrink-0" />
                 <span>Hạn bổ sung:</span>
                 <strong>{request.deadline}</strong>
+                {request.isDeadlinePassed && (
+                  <span className="text-[#991B1B] text-[10.5px] font-bold bg-[#FEE2E2] px-1.5 py-0.2 rounded">
+                    Đã quá hạn
+                  </span>
+                )}
               </div>
-            )}
-
-            {/* Informational message when request deadline passed but server still allows (Section 31) */}
-            {request.isDeadlinePassed && !isWindowClosed && (
-              <span className="text-[11px] text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] px-2 py-0.5 rounded-[4px] font-normal">
-                Hạn đề nghị đã qua. Bạn vẫn có thể gửi thông tin bổ sung khi hệ thống còn nhận.
-              </span>
-            )}
-
-            {/* Hard gate notice when City supplement window is closed (Section 30, 32) */}
-            {isWindowClosed && (
-              <span className="text-[11px] text-[#991B1B] bg-[#FEE2E2] border border-[#FCA5A5] px-2 py-0.5 rounded-[4px] font-semibold flex items-center gap-1">
-                <ShieldAlert size={12} />
-                <span>Thời gian nhận bổ sung hiện đã kết thúc.</span>
-              </span>
             )}
           </div>
         </div>
       </div>
+
+      {isWindowClosed && (
+        <div className="text-[11.5px] text-[#991B1B] font-semibold flex items-center gap-1 bg-[#FEE2E2] px-2.5 py-1 rounded-[6px]">
+          <ShieldAlert size={13} />
+          <span>Thời gian nhận bổ sung hiện đã kết thúc. Bạn chỉ có thể xem lại yêu cầu.</span>
+        </div>
+      )}
     </div>
   );
 };

@@ -1856,7 +1856,9 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       note,
       updatedApplication: rawUpdatedApp,
       application,
+      isFullyCompleted: rawIsFullyCompleted,
     } = (req.body || {}) as {
+      isFullyCompleted?: boolean;
       requestId?: string;
       explanation?: string;
       note?: string;
@@ -2196,14 +2198,19 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
         (sr: Record<string, any>) => sr.staffStatus === 'student_returned'
       ) || current.supplementSummary?.latestRequest;
 
+    const hasRemainingActive = (nextWsSupplementRequests || []).some(
+      (sr: Record<string, any>) => sr.status === 'active' || sr.staffStatus === 'waiting_student'
+    );
+    const isCompletedFinal = rawIsFullyCompleted !== undefined ? Boolean(rawIsFullyCompleted) : !hasRemainingActive;
+
     if (stuApp && isSchoolStage) {
-      stuApp.schoolPreliminaryStatus = 'supplement_returned';
+      stuApp.schoolPreliminaryStatus = isCompletedFinal ? 'supplement_returned' : (stuApp.schoolPreliminaryStatus || 'supplement_requested');
     }
 
     const updated = {
       ...current,
       workspaceState: nextWorkspaceState,
-      workflowStatus: 'supplement_returned',
+      workflowStatus: isCompletedFinal ? 'supplement_returned' : (current.workflowStatus || 'supplement_requested'),
       schoolPreliminaryStatus: isSchoolStage
         ? 'supplement_returned'
         : current.schoolPreliminaryStatus,

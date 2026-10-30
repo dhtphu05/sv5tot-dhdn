@@ -1,3 +1,4 @@
+import { parseFlexibleDateTime } from '../../../utils/dateUtils';
 import { apiRequest } from '../../../shared/api/httpClient';
 /**
  * 5TOT ĐHĐN — Officer Review Mutations Hook
@@ -243,20 +244,32 @@ export function useOfficerReviewMutations({
       if (targetAppId) {
         let parsedDeadline: string | undefined = undefined;
         if (payload.requestedDueDate) {
-          const parsed = Date.parse(payload.requestedDueDate);
-          if (!isNaN(parsed)) {
-            parsedDeadline = new Date(parsed).toISOString();
+          const d = parseFlexibleDateTime(payload.requestedDueDate);
+          if (d) {
+            parsedDeadline = d.toISOString();
           }
         }
+
+        const ACTION_LABELS: Record<string, string> = {
+          addEvidence: 'Bổ sung minh chứng mới',
+          editDeclaration: 'Chỉnh sửa thông tin kê khai',
+          replaceEvidence: 'Thay thế minh chứng hiện tại',
+          addDeclaration: 'Kê khai thêm thông tin / hoạt động mới',
+          explanation: 'Giải trình / xác nhận nội dung',
+        };
+        const friendlyActions = Array.isArray(payload.allowedActions)
+          ? payload.allowedActions.map((a) => ACTION_LABELS[a] || a).join(', ')
+          : 'Bổ sung minh chứng mới';
 
         const supplementPayload = {
           criterionOrReqCode: payload.scope.requirementId || payload.scope.criterionId,
           scopeType: payload.scope.declarationId ? 'DECLARATION_ITEM' : 'CRITERION_OR_REQUIREMENT',
           targetDeclarationId: payload.scope.declarationId || undefined,
+          criterionName: payload.criterionName,
+          requirementTitle: payload.requirementTitle,
+          declarationTitle: payload.declarationTitle,
           requestReason: payload.message,
-          requiredAction: Array.isArray(payload.allowedActions)
-            ? payload.allowedActions.join(', ')
-            : 'Bổ sung minh chứng',
+          requiredAction: friendlyActions,
           deadlineAt: parsedDeadline,
         };
 
