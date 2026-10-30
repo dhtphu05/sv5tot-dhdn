@@ -63,7 +63,7 @@ export const CollectiveResultsTab: React.FC<CollectiveResultsTabProps> = ({
                   • Tập thể: <strong>{currentApp.collectiveName}</strong> ({COLLECTIVE_TYPE_LABELS[currentApp.collectiveType]})
                 </div>
                 <div>• Đơn vị: <strong>{currentApp.institutionName}</strong></div>
-                <div>• Quyết định công nhận số: <strong>{currentApp.finalResult?.decisionNumber || '86/QĐ-HSV-TP'}</strong></div>
+                <div>• Quyết định công nhận số: <strong>{currentApp.finalResult?.decisionNumber || '86/QĐ-HSV-ĐHĐN'}</strong></div>
                 <div>• Ngày ban hành: <strong>{currentApp.finalResult?.decisionDate || '24/10/2026'}</strong></div>
                 <div>• Cơ quan ban hành: <strong>Hội Sinh viên Việt Nam Đại học Đà Nẵng</strong></div>
                 <div>

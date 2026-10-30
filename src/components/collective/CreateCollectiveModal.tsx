@@ -22,6 +22,7 @@ import {
 } from '../../staff/schoolReviewTypes';
 import { resolveInstitutionFromUniversity } from '../../demo/fixtures/studentApplication';
 import { getAllCollectiveApplications } from '../../staff/collectiveStore';
+import { isBackendMode } from '../../shared/config/executionMode';
 import { Button } from '../buttons/Button';
 import { Input } from '../forms/Input';
 
@@ -130,6 +131,7 @@ export const CreateCollectiveModal: React.FC<CreateCollectiveModalProps> = ({
   }, [selectedUnitId, defaultResolvedUnit]);
 
   const suggestedEntities = useMemo(() => {
+    if (isBackendMode()) return [];
     const instId = selectedUnit.memberInstitutionIds[0] || 'inst-dut';
     return AUTHORIZED_COLLECTIVE_REGISTRY.filter(
       (e) => e.institutionId === instId || e.schoolReviewUnitId === selectedUnit.id
@@ -186,7 +188,7 @@ export const CreateCollectiveModal: React.FC<CreateCollectiveModalProps> = ({
       schoolReviewUnitId: selectedUnit.id,
       schoolReviewUnitName: selectedUnit.officialName,
       facultyName: facultyName.trim() || 'Khoa / Liên chi hội trực thuộc',
-      contactPhone: contactPhone.trim() || '0905 123 456',
+      contactPhone: contactPhone.trim(),
     });
   };
 

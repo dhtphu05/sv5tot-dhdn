@@ -294,7 +294,9 @@ export default function App() {
           savePersistedDemoSession({
             scenarioId: config.id,
             isDemoActive: true,
-            viewMode: 'student_app',
+            ...(shouldNavigate || !options?.preserveUrl
+              ? { viewMode: 'student_app' as const }
+              : {}),
             navId: targetNavId,
             mutatedApplication: nextApp,
             mutatedNotifications: [],
@@ -316,7 +318,9 @@ export default function App() {
         savePersistedDemoSession({
           scenarioId: config.id,
           isDemoActive: true,
-          viewMode: 'student_app',
+          ...(shouldNavigate || !options?.preserveUrl
+            ? { viewMode: 'student_app' as const }
+            : {}),
           navId: targetNavId,
           mutatedApplication: null,
           mutatedNotifications: null,
@@ -342,7 +346,9 @@ export default function App() {
           );
       setNotifTab(hasActionable ? 'actionable' : 'all');
 
-      setViewMode('student_app');
+      if (shouldNavigate || !options?.preserveUrl) {
+        setViewMode('student_app');
+      }
       setIsDemoActive(true);
       setActiveNavId(targetNavId);
 

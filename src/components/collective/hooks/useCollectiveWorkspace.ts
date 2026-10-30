@@ -65,19 +65,25 @@ export function useCollectiveWorkspace({
   // FORM STATE FOR TT01 (Công nhận cấp Trường)
   // -------------------------------------------------------------------------
   const [tt01RecognitionStatus, setTt01RecognitionStatus] = useState<SchoolRecognitionStatus>(
-    application.tt01.recognitionStatus || (application.tt01.isRecognizedSchoolLevel ? 'recognized' : 'not_recognized')
+    application.tt01.recognitionStatus ||
+      (application.tt01.isRecognizedSchoolLevel || !application.tt01.decisionNumber
+        ? 'recognized'
+        : 'not_recognized')
   );
   const [tt01CollectiveName, setTt01CollectiveName] = useState(
     application.tt01.recognizedCollectiveName || application.collectiveName
   );
   const [tt01IssuingUnit, setTt01IssuingUnit] = useState(
-    application.tt01.issuingUnitName || application.institutionName
+    application.tt01.issuingUnitName ||
+      (application.institutionName
+        ? `Hội Sinh viên ${application.institutionName}`
+        : '')
   );
   const [tt01DecisionNumber, setTt01DecisionNumber] = useState(
     application.tt01.decisionNumber || ''
   );
   const [tt01DecisionDate, setTt01DecisionDate] = useState(
-    application.tt01.decisionDate || '28/05/2026'
+    application.tt01.decisionDate || ''
   );
   const [tt01Notes, setTt01Notes] = useState(application.tt01.referenceNotes || '');
 
@@ -86,7 +92,7 @@ export function useCollectiveWorkspace({
   // -------------------------------------------------------------------------
   const [tt02TotalMembers, setTt02TotalMembers] = useState(application.tt02.totalMembers);
   const [tt02Participating, setTt02Participating] = useState(application.tt02.participatingCount);
-  const [tt02CensusDate, setTt02CensusDate] = useState(application.tt02.censusDate || '01/06/2026');
+  const [tt02CensusDate, setTt02CensusDate] = useState(application.tt02.censusDate || '');
   const [tt02Notes, setTt02Notes] = useState(application.tt02.notes || '');
 
   // -------------------------------------------------------------------------
@@ -102,16 +108,16 @@ export function useCollectiveWorkspace({
   // FORM STATE FOR TT04 (Không vi phạm quy định)
   // -------------------------------------------------------------------------
   const [tt04ViolationStatus, setTt04ViolationStatus] = useState<ViolationConfirmationStatus>(
-    application.tt04.violationStatus || (application.tt04.noViolationsConfirmed ? 'no_violations' : 'needs_clarification')
+    application.tt04.violationStatus || 'no_violations'
   );
   const [tt04ConfirmingUnit, setTt04ConfirmingUnit] = useState(
-    application.tt04.confirmingUnitName || 'Ban Chủ nhiệm Khoa'
+    application.tt04.confirmingUnitName || application.facultyName || application.institutionName || ''
   );
   const [tt04ConfirmationDate, setTt04ConfirmationDate] = useState(
-    application.tt04.confirmationDate || '05/06/2026'
+    application.tt04.confirmationDate || ''
   );
   const [tt04DocNumber, setTt04DocNumber] = useState(
-    application.tt04.confirmationDocNumber || '48/XN-KĐTVT'
+    application.tt04.confirmationDocNumber || ''
   );
   const [tt04Notes, setTt04Notes] = useState(application.tt04.notes || '');
 
@@ -120,17 +126,25 @@ export function useCollectiveWorkspace({
   // Synchronize when application prop updates
   useEffect(() => {
     setTt01RecognitionStatus(
-      application.tt01.recognitionStatus || (application.tt01.isRecognizedSchoolLevel ? 'recognized' : 'not_recognized')
+      application.tt01.recognitionStatus ||
+        (application.tt01.isRecognizedSchoolLevel || !application.tt01.decisionNumber
+          ? 'recognized'
+          : 'not_recognized')
     );
     setTt01CollectiveName(application.tt01.recognizedCollectiveName || application.collectiveName);
-    setTt01IssuingUnit(application.tt01.issuingUnitName || application.institutionName);
+    setTt01IssuingUnit(
+      application.tt01.issuingUnitName ||
+        (application.institutionName
+          ? `Hội Sinh viên ${application.institutionName}`
+          : '')
+    );
     setTt01DecisionNumber(application.tt01.decisionNumber || '');
-    setTt01DecisionDate(application.tt01.decisionDate || '28/05/2026');
+    setTt01DecisionDate(application.tt01.decisionDate || '');
     setTt01Notes(application.tt01.referenceNotes || '');
 
     setTt02TotalMembers(application.tt02.totalMembers);
     setTt02Participating(application.tt02.participatingCount);
-    setTt02CensusDate(application.tt02.censusDate || '01/06/2026');
+    setTt02CensusDate(application.tt02.censusDate || '');
     setTt02Notes(application.tt02.notes || '');
 
     setTt03RecognizedCount(application.tt03.recognizedCount);
@@ -138,11 +152,13 @@ export function useCollectiveWorkspace({
     setTt03Notes(application.tt03.notes || '');
 
     setTt04ViolationStatus(
-      application.tt04.violationStatus || (application.tt04.noViolationsConfirmed ? 'no_violations' : 'needs_clarification')
+      application.tt04.violationStatus || 'no_violations'
     );
-    setTt04ConfirmingUnit(application.tt04.confirmingUnitName || 'Ban Chủ nhiệm Khoa');
-    setTt04ConfirmationDate(application.tt04.confirmationDate || '05/06/2026');
-    setTt04DocNumber(application.tt04.confirmationDocNumber || '48/XN-KĐTVT');
+    setTt04ConfirmingUnit(
+      application.tt04.confirmingUnitName || application.facultyName || application.institutionName || ''
+    );
+    setTt04ConfirmationDate(application.tt04.confirmationDate || '');
+    setTt04DocNumber(application.tt04.confirmationDocNumber || '');
     setTt04Notes(application.tt04.notes || '');
   }, [application]);
 

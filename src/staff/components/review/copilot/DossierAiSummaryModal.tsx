@@ -247,7 +247,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
             <div className="text-[12px] text-[#526B7C]">
               Cán bộ phụ trách:{' '}
               <strong className="text-[#172A3A]">
-                {applicationRecord.assignment?.officerName || 'Trần Hoàng Nam'}
+                {applicationRecord.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
               </strong>
             </div>
           </div>

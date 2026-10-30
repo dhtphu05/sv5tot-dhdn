@@ -324,11 +324,11 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [institutionFilter, setInstitutionFilter] = useState<string>('all');
-  const [selectedRowKey, setSelectedRowKey] = useState<string | null>(
-    'APP-2026-DN-102220123'
+  const [selectedRowKey, setSelectedRowKey] = useState<string | null>(() =>
+    isBackendMode() ? null : 'APP-2026-DN-102220123'
   );
-  const [selectedCollectiveId, setSelectedCollectiveId] = useState<string>(
-    'COL-2026-DN-22TCLC-KTPM'
+  const [selectedCollectiveId, setSelectedCollectiveId] = useState<string>(() =>
+    isBackendMode() ? '' : 'COL-2026-DN-22TCLC-KTPM'
   );
   const [collectiveWorkspaceOpen, setCollectiveWorkspaceOpen] =
     useState<boolean>(() => !isBackendMode());

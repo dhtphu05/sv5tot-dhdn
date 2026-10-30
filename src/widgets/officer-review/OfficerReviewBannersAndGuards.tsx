@@ -47,7 +47,7 @@ export const OfficerReviewGuardScreen: React.FC<
             </h1>
             <p className="text-[13px] text-[#526B7C] leading-relaxed">
               Hồ sơ xét duyệt này hiện thuộc phạm vi phụ trách của cán bộ khác (
-              {assignedOfficerName || 'Võ Thị Minh Châu'}). Cán bộ xét duyệt chỉ có thể mở các hồ sơ được phân công trực tiếp.
+              {assignedOfficerName || 'Cán bộ xét duyệt khác'}). Cán bộ xét duyệt chỉ có thể mở các hồ sơ được phân công trực tiếp.
             </p>
           </div>
           <div className="pt-2">

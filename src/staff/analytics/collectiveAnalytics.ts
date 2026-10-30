@@ -2,6 +2,7 @@ import { CollectiveApplication } from "../collectiveTypes";
 import { StaffUser } from "../types";
 import { canInspectUnpublishedResults } from "./workflowClassification";
 import { getAllCollectiveApplications } from "../collectiveStore";
+import { isBackendMode } from "../../shared/config/executionMode";
 
 export interface CollectiveInstitutionRow {
   institutionId: string;
@@ -64,7 +65,10 @@ export function getCollectiveSeasonAnalytics(
   user: StaffUser
 ): CollectiveSeasonAnalytics {
   const canSeeUnpublished = canInspectUnpublishedResults(user);
-  const totalSubmitted = collectiveApps.length;
+  const submittedApps = isBackendMode()
+    ? collectiveApps.filter((app) => app.status !== 'draft')
+    : collectiveApps;
+  const totalSubmitted = submittedApps.length;
 
   let facultyCount = 0;
   let branchCount = 0;
@@ -97,7 +101,7 @@ export function getCollectiveSeasonAnalytics(
   let totalParticipatingMembers = 0;
   let totalRecognizedMembers = 0;
 
-  for (const app of collectiveApps) {
+  for (const app of submittedApps) {
     const rawType = String(app.collectiveType || '').toLowerCase();
     if (rawType === 'faculty_association' || rawType === 'lien_chi_hoi') {
       facultyCount++;
@@ -220,7 +224,7 @@ export function getCollectiveSeasonAnalytics(
     totalRecognizedMembers,
     byInstitution: (() => {
       const institutionMap = new Map<string, CollectiveInstitutionRow>();
-      for (const app of collectiveApps) {
+      for (const app of submittedApps) {
         const instId = app.institutionId || 'other';
         const instName = app.institutionName || 'Khác';
         if (!institutionMap.has(instId)) {

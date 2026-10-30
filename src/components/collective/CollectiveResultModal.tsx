@@ -132,18 +132,35 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
             <div className="font-bold text-[#172A3A] pb-1 border-b border-[#EEF4F8]">
               Căn cứ kết quả thẩm định 04 tiêu chuẩn:
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[#466474]">
-              <div>• TT01: Đã đạt danh hiệu cấp Trường</div>
-              <div className="text-right font-semibold text-[#16A34A]">Đạt chuẩn</div>
-              <div>• TT02: 100% sinh viên tham gia phong trào</div>
-              <div className="text-right font-semibold text-[#16A34A]">100% ({application.tt02.participatingCount}/{application.tt02.totalMembers})</div>
-              <div>• TT03: Ít nhất 20% đạt SV5T cấp Trường</div>
-              <div className="text-right font-semibold text-[#16A34A]">
-                {((application.tt03.recognizedCount / (application.tt02.totalMembers || 1)) * 100).toFixed(1)}% (Ngưỡng &ge; 20%)
-              </div>
-              <div>• TT04: Chấp hành pháp luật & quy định</div>
-              <div className="text-right font-semibold text-[#16A34A]">Xác nhận không vi phạm</div>
-            </div>
+            {(() => {
+              const tt01Ok = Boolean(application.tt01.isRecognizedSchoolLevel);
+              const totalMem = application.tt02.totalMembers || 0;
+              const partRate = totalMem > 0 ? Math.round((application.tt02.participatingCount / totalMem) * 100) : 0;
+              const tt02Ok = totalMem > 0 && application.tt02.participatingCount >= totalMem;
+              const recRate = totalMem > 0 ? (application.tt03.recognizedCount / totalMem) * 100 : 0;
+              const tt03Ok = totalMem > 0 && recRate >= 20;
+              const tt04Ok = Boolean(application.tt04.noViolationsConfirmed);
+              return (
+                <div className="grid grid-cols-2 gap-2 text-[#466474]">
+                  <div>• TT01: Đã đạt danh hiệu cấp Trường</div>
+                  <div className={`text-right font-semibold ${tt01Ok ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {tt01Ok ? 'Đạt chuẩn' : 'Chưa đạt'}
+                  </div>
+                  <div>• TT02: 100% sinh viên tham gia phong trào</div>
+                  <div className={`text-right font-semibold ${tt02Ok ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {partRate}% ({application.tt02.participatingCount}/{application.tt02.totalMembers})
+                  </div>
+                  <div>• TT03: Ít nhất 20% đạt SV5T cấp Trường</div>
+                  <div className={`text-right font-semibold ${tt03Ok ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {recRate.toFixed(1)}% (Ngưỡng &ge; 20%)
+                  </div>
+                  <div>• TT04: Chấp hành pháp luật & quy định</div>
+                  <div className={`text-right font-semibold ${tt04Ok ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {tt04Ok ? 'Xác nhận không vi phạm' : 'Chưa xác nhận'}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Signatory Footer */}
@@ -158,7 +175,7 @@ export const CollectiveResultModal: React.FC<CollectiveResultModalProps> = ({
         {/* Footer Actions */}
         <div className="px-6 py-4 bg-[#F8FBFD] border-t border-[#DCE7EE] flex items-center justify-between">
           <div className="text-[11.5px] text-[#607483]">
-            Trích lục số {res?.decisionNumber || '86/QĐ-HSV-TP'}
+            Trích lục số {res?.decisionNumber || '86/QĐ-HSV-ĐHĐN'}
           </div>
           <div className="flex items-center gap-2">
             <Button

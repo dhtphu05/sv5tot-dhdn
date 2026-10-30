@@ -123,8 +123,8 @@ export const CommitteeViews: React.FC<CommitteeViewsProps> = ({
   const [publicationFilter, setPublicationFilter] = useState<string>('all');
   const [officerFilter, setOfficerFilter] = useState<string>('all');
 
-  const [selectedRowAppId, setSelectedRowAppId] = useState<string | null>(
-    'APP-2026-DN-102220123'
+  const [selectedRowAppId, setSelectedRowAppId] = useState<string | null>(() =>
+    isBackendMode() ? null : 'APP-2026-DN-102220123'
   );
   const [resultsTrack, setResultsTrack] = useState<'individual' | 'collective'>('individual');
 

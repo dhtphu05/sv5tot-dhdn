@@ -20,6 +20,7 @@ import {
 } from "./exportTypes";
 import { REPORT_DEFINITIONS } from "./reportDefinitions";
 import { deriveApplicationCriteriaReviewProgress } from "../criteriaProgress";
+import { isBackendMode } from "../../shared/config/executionMode";
 
 function formatCleanExportDate(raw?: string): string {
   if (!raw) return '—';
@@ -113,7 +114,7 @@ export function filterApplicationsByReportPreset(
 }
 
 /**
- * Builds formatted report rows matching UI filters and sort order (Sections 73–76, 84, 136)
+ * Builds formatted report rows matching UI filters and sort order (Sections 73–76, 136)
  */
 export function getReportRows(params: {
   presetId: ReportPresetId;
@@ -142,6 +143,7 @@ export function getReportRows(params: {
   if (presetId.startsWith('COLLECTIVE_')) {
     const allColls = getAllCollectiveApplications();
     const filteredColls = allColls.filter((c) => {
+      if (isBackendMode() && c.status === 'draft') return false;
       // Preset conditions
       if (presetId === 'COLLECTIVE_RECOGNIZED_RESULTS') {
         const outcome = c.finalResult?.outcome || c.committeeOutcome;
@@ -188,7 +190,7 @@ export function getReportRows(params: {
               ? 'Chưa được công nhận trong đợt xét này'
               : 'Hội đồng cần xem xét lại';
           if (outcome === 'recognized') {
-            decisionNumber = c.finalResult?.decisionNumber || '86/QĐ-HSV-TP';
+            decisionNumber = c.finalResult?.decisionNumber || '86/QĐ-HSV-ĐHĐN';
           }
           decidedAt = c.finalResult?.decisionDate || '24/10/2026';
         } else {

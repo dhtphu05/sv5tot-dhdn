@@ -373,7 +373,7 @@ export const CollectiveCommitteeCriterionDetail: React.FC<CollectiveCommitteeCri
           </div>
 
           <div className="text-[11px] text-[#64748B] pt-1 pl-5 border-t border-[#E2E8F0]">
-            Thực hiện bởi Cán bộ: <strong>{cityReview?.reviewedBy || appData.assignedOfficerName || 'Trần Hoàng Nam'}</strong>
+            Thực hiện bởi Cán bộ: <strong>{cityReview?.reviewedBy || appData.assignedOfficerName || 'Cán bộ xét duyệt cấp ĐHĐN'}</strong>
             {cityReview?.reviewedAt && ` · ${new Date(cityReview.reviewedAt).toLocaleDateString('vi-VN')}`}
           </div>
         </div>

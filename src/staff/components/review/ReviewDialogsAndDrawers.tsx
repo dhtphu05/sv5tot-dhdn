@@ -385,7 +385,7 @@ export const ApplicationInfoModal: React.FC<ApplicationInfoModalProps> = ({
                 Cán bộ phụ trách
               </span>
               <span className="font-bold text-[#1680DE]">
-                {record.assignment?.officerName || 'Trần Hoàng Nam'}
+                {record.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
               </span>
             </div>
             <div className="p-3 rounded-[12px] bg-[#F5F8FB]">

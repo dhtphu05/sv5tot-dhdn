@@ -65,7 +65,10 @@ import {
   resolveAuthoritativeResultForRecord,
   getCollectiveSeasonAnalytics,
 } from '../../analyticsSelectors';
-import { getAllCollectiveApplications } from '../../collectiveStore';
+import {
+  getAllCollectiveApplications,
+  subscribeToCollectiveStore,
+} from '../../collectiveStore';
 import {
   COLLECTIVE_TYPE_LABELS,
 } from '../../collectiveTypes';
@@ -149,8 +152,18 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
     DrillDownHistorySnapshot | null
   >(null);
   const [analyticsTrack, setAnalyticsTrack] = useState<'individual' | 'collective'>('individual');
+  const [collectiveTick, setCollectiveTick] = useState(0);
 
-  const allCollectiveApps = useMemo(() => getAllCollectiveApplications(), []);
+  useEffect(() => {
+    return subscribeToCollectiveStore(() => {
+      setCollectiveTick((t) => t + 1);
+    });
+  }, []);
+
+  const allCollectiveApps = useMemo(
+    () => getAllCollectiveApplications(),
+    [collectiveTick]
+  );
   const collectiveSeasonAnalytics = useMemo(
     () => getCollectiveSeasonAnalytics(allCollectiveApps, currentUser),
     [allCollectiveApps, currentUser]

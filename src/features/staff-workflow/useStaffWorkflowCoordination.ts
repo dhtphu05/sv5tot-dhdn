@@ -278,7 +278,7 @@ export function useStaffWorkflowCoordination({
         return decodeURIComponent(m[1]);
       }
     }
-    return HERO_STAFF_APP_ID;
+    return isBackendMode() ? '' : HERO_STAFF_APP_ID;
   });
 
   const initialHeroOfficerBundle = useMemo(
@@ -489,11 +489,35 @@ export function useStaffWorkflowCoordination({
           return next;
         });
 
-        const committeeBundle = buildCommitteeScenarioBundle(
-          DEFAULT_COMMITTEE_SCENARIO_ID,
-          records
-        );
-        setCommitteeCasesMap(committeeBundle.committeeCasesMap);
+        setCommitteeCasesMap((prev) => {
+          const nextCases: Record<string, CommitteeCaseDetail> = {};
+          for (const rec of records) {
+            if (!isApplicationForwardedToCityScope(rec)) continue;
+            const isInCommitteeScope =
+              rec.workflowStatus === 'review_completed' ||
+              rec.workflowStatus === 'needs_committee_review' ||
+              rec.workflowStatus === 'waiting_decision' ||
+              rec.workflowStatus === 'ready_for_finalization' ||
+              rec.workflowStatus === 'finalized_recognized' ||
+              rec.workflowStatus === 'finalized_not_recognized' ||
+              rec.committeeSummary !== null ||
+              rec.finalResultSummary !== null;
+            if (isInCommitteeScope) {
+              const built = buildDefaultCommitteeCase(rec);
+              const existing = prev[rec.applicationId];
+              nextCases[rec.applicationId] = existing
+                ? {
+                    ...built,
+                    committeeNotes:
+                      existing.committeeNotes?.length > 0
+                        ? existing.committeeNotes
+                        : built.committeeNotes,
+                  }
+                : built;
+            }
+          }
+          return nextCases;
+        });
 
         if (records.length > 0) {
           setSelectedStaffAppId((prev) =>
@@ -502,6 +526,7 @@ export function useStaffWorkflowCoordination({
               : records[0].applicationId
           );
         } else {
+          setSelectedStaffAppId('');
           setOfficerStudentAppMap({});
           savePersistedOfficerStudentApps({});
         }
@@ -1164,20 +1189,22 @@ export function useStaffWorkflowCoordination({
         ).catch(() => {});
       }
 
-      const hasWaitingSupp = result.nextWorkspace.supplementRequests.some(
-        (r) => r.staffStatus === 'waiting_student'
-      );
-      if (
-        result.nextStaffStatus === 'supplement_requested' ||
-        hasWaitingSupp
-      ) {
-        setPrototypeScenarioId('supplement_required');
-        setHomeScenario('state_h_supplement_active');
-        setAppSubmissionState('supplement_required');
-      } else if (result.nextStaffStatus === 'review_completed') {
-        setPrototypeScenarioId('waiting_final');
-        setHomeScenario('state_j_waiting_final');
-        setAppSubmissionState('all_reviewed');
+      if (!isBackendMode()) {
+        const hasWaitingSupp = result.nextWorkspace.supplementRequests.some(
+          (r) => r.staffStatus === 'waiting_student'
+        );
+        if (
+          result.nextStaffStatus === 'supplement_requested' ||
+          hasWaitingSupp
+        ) {
+          setPrototypeScenarioId('supplement_required');
+          setHomeScenario('state_h_supplement_active');
+          setAppSubmissionState('supplement_required');
+        } else if (result.nextStaffStatus === 'review_completed') {
+          setPrototypeScenarioId('waiting_final');
+          setHomeScenario('state_j_waiting_final');
+          setAppSubmissionState('all_reviewed');
+        }
       }
     },
     [
@@ -1415,7 +1442,7 @@ export function useStaffWorkflowCoordination({
       setStaffApplications(nextApps);
       savePersistedStaffApplications(nextApps);
 
-      if (applicationId === HERO_STAFF_APP_ID) {
+      if (!isBackendMode() && applicationId === HERO_STAFF_APP_ID) {
         applyPrototypeScenario('waiting_final', {
           navigateToDefaultScreen: false,
           preserveUrl: true,
@@ -1458,21 +1485,38 @@ export function useStaffWorkflowCoordination({
 
     const allCol = getAllCollectiveApplications();
     allCol.forEach((app) => {
-      publishCollectiveResult(app.id, '86/QĐ-HSV-ĐHĐN', {
-        name: staffUser.fullName,
-        role: staffUser.roleLabel,
-      });
+      if (app.status === 'finalized' || Boolean(app.committeeOutcome)) {
+        publishCollectiveResult(app.id, '86/QĐ-HSV-ĐHĐN', {
+          name: staffUser.fullName,
+          role: staffUser.roleLabel,
+        });
+        if (isBackendMode()) {
+          resolveDomainServices()
+            .committeeDecision.publishCollectiveResult({
+              applicationId: app.id,
+              decisionNumber: '86/QĐ-HSV-ĐHĐN',
+              actor: {
+                id: staffUser.id,
+                name: staffUser.fullName,
+                role: 'CITY_COMMITTEE',
+              },
+            })
+            .catch(() => {});
+        }
+      }
     });
 
-    applyPrototypeScenario(
-      heroOutcome === 'recognized'
-        ? 'final_recognized'
-        : 'final_not_recognized',
-      {
-        navigateToDefaultScreen: false,
-        preserveUrl: true,
-      }
-    );
+    if (!isBackendMode()) {
+      applyPrototypeScenario(
+        heroOutcome === 'recognized'
+          ? 'final_recognized'
+          : 'final_not_recognized',
+        {
+          navigateToDefaultScreen: false,
+          preserveUrl: true,
+        }
+      );
+    }
   }, [
     committeeCasesMap,
     staffApplications,

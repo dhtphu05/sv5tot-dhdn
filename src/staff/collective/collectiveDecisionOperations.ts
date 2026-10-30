@@ -379,9 +379,9 @@ export function publishCollectiveResultRecord(
     academicYear: app.academicYear,
     outcome,
     awardTitle: 'Tập thể Sinh viên 5 tốt cấp Đại học Đà Nẵng',
-    decisionNumber: decisionNumber?.trim() || '86/QĐ-HSV-TP',
+    decisionNumber: decisionNumber?.trim() || '86/QĐ-HSV-ĐHĐN',
     decisionDate,
-    signedBy: 'TM. BAN THƯ KÝ — CHỦ TỊCH HỘI SINH VIÊN TP. ĐÀ NẴNG',
+    signedBy: 'TM. BAN THƯ KÝ — CHỦ TỊCH HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG',
     isPublished: true,
     publishedAt: now,
   };

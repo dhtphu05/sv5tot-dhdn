@@ -101,7 +101,7 @@ export const CommitteeCriterionContentSection: React.FC<
           <div>
             <span className="font-bold text-[#334E68]">
               Nhận xét thẩm định của Cán bộ (
-              {application.assignment?.officerName || 'Trần Hoàng Nam'}):
+              {application.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}):
             </span>{' '}
             <span className="text-[#172A3A]">
               {activeCriterionSummary?.noteSummary ||

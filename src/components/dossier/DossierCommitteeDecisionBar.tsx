@@ -97,7 +97,7 @@ export const DossierCommitteeDecisionBar: React.FC<
           <span className="text-[12px] text-[#526B7C]">
             Cán bộ thẩm định:{' '}
             <strong className="text-[#172A3A]">
-              {application.assignment?.officerName || 'Trần Hoàng Nam'}
+              {application.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
             </strong>
           </span>
 
