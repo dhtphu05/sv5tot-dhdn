@@ -18,6 +18,7 @@ import { RegulationInspectorContent } from '../../inspector/RegulationInspectorC
 import { DocumentViewer } from './DocumentViewer';
 import { InformationPanel } from './InformationPanel';
 import { RecognizedFieldItem } from './RecognizedField';
+import { isBackendMode } from '../../../shared/config/executionMode';
 
 export interface EvidenceDetailWorkspaceProps {
   evidence: ApplicationEvidence;
@@ -49,10 +50,11 @@ function getInitialRecognizedFields(
 ): RecognizedFieldItem[] {
   const name = file.name.toLowerCase();
 
-  if (name.includes('ielts')) {
-    return [
-      {
-        id: 'f-ielts-1',
+  if (!isBackendMode()) {
+    if (name.includes('ielts')) {
+      return [
+        {
+          id: 'f-ielts-1',
         label: 'Tên chứng chỉ',
         effectiveValue: 'IELTS Academic Test Report Form (7.0)',
         recognizedValue: 'IELTS Academic Test Report Form (7.0)',
@@ -239,6 +241,7 @@ function getInitialRecognizedFields(
         editable: true,
       },
     ];
+  }
   }
 
   // Real files and user-uploaded evidence

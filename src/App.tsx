@@ -249,10 +249,9 @@ export default function App() {
         PROTOTYPE_SCENARIO_MAP[DEFAULT_PROTOTYPE_SCENARIO_ID];
       const pristine = clonePristineStoreForScenario(config.id);
       const isNonDemoStudent =
-        (isBackendMode() ||
-          (Boolean(studentIdentity.studentId) &&
-            studentIdentity.studentId !== '102220123')) &&
-        (config.id === 'draft' || config.id === 'new_student');
+        isBackendMode() ||
+        (Boolean(studentIdentity.studentId) &&
+          studentIdentity.studentId !== '102220123');
 
       const shouldNavigate = options?.navigateToDefaultScreen ?? true;
       const targetNavId = shouldNavigate ? config.defaultNavId : activeNavId;

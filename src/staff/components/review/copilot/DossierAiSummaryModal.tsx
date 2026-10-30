@@ -105,13 +105,15 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const criteriaProgress = {
-        ethics: 'Đã hoàn thành rà soát',
-        academic: 'Đạt ngưỡng điểm giỏi / NCKH',
-        physical: 'Đạt chuẩn Sinh viên khỏe',
-        volunteer: 'Tham gia Mùa hè xanh & Hiến máu',
-        integration: 'Chứng chỉ ngoại ngữ hợp lệ',
-      };
+      const criteriaProgress: Record<string, string> = {};
+      for (const crit of applicationRecord.criteriaReview || []) {
+        criteriaProgress[crit.criterionId] =
+          crit.status === 'reviewed'
+            ? `Đã hoàn tất rà soát (${crit.declaredCount} kê khai, ${crit.evidenceCount} minh chứng)`
+            : crit.status === 'needs_supplement'
+            ? `Cần bổ sung (${crit.declaredCount} kê khai, ${crit.evidenceCount} minh chứng)`
+            : `${crit.declaredCount} kê khai, ${crit.evidenceCount} minh chứng — ${crit.noteSummary || 'Chờ thẩm định'}`;
+      }
 
       const res = await fetchCopilotDossierSummary(applicationRecord, criteriaProgress);
       setSummary(res);
@@ -150,6 +152,67 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
     onClose();
   };
 
+  const isDemo = isDemoMode();
+  const dynamicCriteriaList: Array<{ id: CriterionId; code: string; name: string }> = [
+    { id: 'ethics', code: '01', name: 'Đạo đức tốt' },
+    { id: 'academic', code: '02', name: 'Học tập tốt' },
+    { id: 'physical', code: '03', name: 'Thể lực tốt' },
+    { id: 'volunteer', code: '04', name: 'Tình nguyện tốt' },
+    { id: 'integration', code: '05', name: 'Hội nhập tốt' },
+  ];
+
+  const dynamicAttentionItems = !isDemo
+    ? dynamicCriteriaList
+        .map((c) => {
+          const rev = applicationRecord.criteriaReview.find((r) => r.criterionId === c.id);
+          const aiRow = summary?.criteriaReadinessMatrix?.find((m) =>
+            m.criterionName.toLowerCase().includes(c.name.toLowerCase())
+          );
+          const declCount = rev?.declaredCount ?? 0;
+          const evCount = rev?.evidenceCount ?? 0;
+          if (rev?.status === 'needs_supplement') {
+            return {
+              id: c.id,
+              name: `Tiêu chí ${c.name}`,
+              headline: rev.noteSummary || 'Đang có yêu cầu bổ sung minh chứng',
+              detail: `Kê khai: ${declCount} mục · Minh chứng: ${evCount} tệp`,
+            };
+          }
+          if (declCount === 0 || evCount === 0) {
+            return {
+              id: c.id,
+              name: `Tiêu chí ${c.name}`,
+              headline: declCount === 0 ? 'Chưa có nội dung kê khai' : 'Chưa có tệp minh chứng đính kèm',
+              detail: `Kê khai: ${declCount} mục · Minh chứng: ${evCount} tệp`,
+            };
+          }
+          if (aiRow && aiRow.status !== 'Đạt') {
+            return {
+              id: c.id,
+              name: `Tiêu chí ${c.name}`,
+              headline: aiRow.highlight || 'Cần cán bộ kiểm tra đối chiếu',
+              detail: `Kê khai: ${declCount} mục · Minh chứng: ${evCount} tệp`,
+            };
+          }
+          return null;
+        })
+        .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    : [];
+
+  const workflowLabel =
+    applicationRecord.workflowStatus === 'review_completed' ||
+    applicationRecord.workflowStatus === 'waiting_decision' ||
+    applicationRecord.workflowStatus === 'ready_for_finalization' ||
+    applicationRecord.workflowStatus === 'finalized_recognized' ||
+    applicationRecord.workflowStatus === 'finalized_not_recognized'
+      ? 'Đã hoàn tất thẩm định'
+      : applicationRecord.workflowStatus === 'supplement_requested'
+      ? 'Chờ bổ sung minh chứng'
+      : applicationRecord.workflowStatus === 'supplement_returned' ||
+        applicationRecord.workflowStatus === 'needs_recheck'
+      ? 'Đã nhận bổ sung'
+      : 'Đang xét duyệt';
+
   return (
     <div
       role="dialog"
@@ -178,7 +241,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                 </span>
               </div>
               <p className="text-[12px] text-[#607483] mt-0.5">
-                Hội đồng xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · Năm học 2025–2026
+                Hội đồng xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng · {applicationRecord.schoolYear || 'Năm học 2025–2026'}
               </p>
             </div>
           </div>
@@ -240,7 +303,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                 <GraduationCap size={14} className="text-[#0D78AE]" />
                 <span>{applicationRecord.institution.officialName}</span>
                 <span>·</span>
-                <span>Năm học {applicationRecord.schoolYear}</span>
+                <span>{applicationRecord.schoolYear}</span>
               </div>
             </div>
 
@@ -258,12 +321,35 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
               <span className="text-[11px] font-bold text-[#607483] uppercase tracking-wider block">
                 1. AI Đánh giá sơ bộ
               </span>
-              <div className="text-[15px] font-bold text-[#B45309]">
-                CHƯA ĐỦ CĂN CỨ
-              </div>
-              <p className="text-[11.5px] text-[#526B7C]">
-                Đã quét 5 tiêu chí. Có 2 điểm cần kiểm chứng trước khi kết luận sơ bộ.
-              </p>
+              {isDemo ? (
+                <>
+                  <div className="text-[15px] font-bold text-[#B45309]">
+                    CHƯA ĐỦ CĂN CỨ
+                  </div>
+                  <p className="text-[11.5px] text-[#526B7C]">
+                    Đã quét 5 tiêu chí. Có 2 điểm cần kiểm chứng trước khi kết luận sơ bộ.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={`text-[15px] font-bold ${
+                      dynamicAttentionItems.length === 0
+                        ? 'text-[#136F3A]'
+                        : 'text-[#B45309]'
+                    }`}
+                  >
+                    {summary?.candidateRating ||
+                      (dynamicAttentionItems.length === 0
+                        ? 'ĐỦ CƠ SỞ ĐỐI SOÁT'
+                        : 'CẦN KIỂM CHỨNG THÊM')}
+                  </div>
+                  <p className="text-[11.5px] text-[#526B7C]">
+                    {summary?.overallVerdict ||
+                      `Tổng hợp ${applicationRecord.totalDeclarations} kê khai & ${applicationRecord.totalEvidence} minh chứng trên 5 tiêu chí.`}
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="p-3.5 rounded-[12px] bg-white border border-[#DCE7EE] space-y-1 shadow-2xs">
@@ -283,7 +369,7 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                 3. Trạng thái quy trình
               </span>
               <div className="text-[15px] font-bold text-[#B45309]">
-                Đang xét duyệt
+                {isDemo ? 'Đang xét duyệt' : workflowLabel}
               </div>
               <p className="text-[11.5px] text-[#526B7C]">
                 Giai đoạn thẩm định chuyên môn trước khi trình Hội đồng biểu quyết.
@@ -292,58 +378,102 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
           </div>
 
           {/* Key Findings Requiring Verification */}
-          <div className="p-4 rounded-[14px] bg-[#FEF6EB] border border-[#FADDB6] space-y-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={17} className="text-[#D97706] shrink-0" />
-              <span className="text-[13.5px] font-bold text-[#8C3A19]">
-                Nội dung phát hiện cần Cán bộ kiểm chứng (2 điểm)
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12px]">
-              {/* Finding 1: Volunteer */}
-              <div className="p-3 rounded-[10px] bg-white border border-[#FADDB6] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <strong className="text-[#B45309]">Tiêu chí Tình nguyện tốt</strong>
-                  <button
-                    type="button"
-                    onClick={() => handleJumpToCriterion('volunteer')}
-                    className="text-[11px] font-bold text-[#0D78AE] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    <span>Mở tiêu chí</span>
-                    <ArrowRight size={12} />
-                  </button>
-                </div>
-                <p className="text-[#172A3A] font-semibold leading-snug">
-                  Chênh lệch số ngày tham gia Chiến dịch Mùa hè xanh 2026.
-                </p>
-                <div className="text-[#607483] text-[11px]">
-                  Kê khai: <strong>05 ngày</strong> vs Văn bản cấp: <strong>04 ngày</strong>
-                </div>
+          {isDemo ? (
+            <div className="p-4 rounded-[14px] bg-[#FEF6EB] border border-[#FADDB6] space-y-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={17} className="text-[#D97706] shrink-0" />
+                <span className="text-[13.5px] font-bold text-[#8C3A19]">
+                  Nội dung phát hiện cần Cán bộ kiểm chứng (2 điểm)
+                </span>
               </div>
 
-              {/* Finding 2: Academic */}
-              <div className="p-3 rounded-[10px] bg-white border border-[#FADDB6] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <strong className="text-[#B45309]">Tiêu chí Học tập tốt</strong>
-                  <button
-                    type="button"
-                    onClick={() => handleJumpToCriterion('academic')}
-                    className="text-[11px] font-bold text-[#0D78AE] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    <span>Mở tiêu chí</span>
-                    <ArrowRight size={12} />
-                  </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12px]">
+                {/* Finding 1: Volunteer */}
+                <div className="p-3 rounded-[10px] bg-white border border-[#FADDB6] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <strong className="text-[#B45309]">Tiêu chí Tình nguyện tốt</strong>
+                    <button
+                      type="button"
+                      onClick={() => handleJumpToCriterion('volunteer')}
+                      className="text-[11px] font-bold text-[#0D78AE] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>Mở tiêu chí</span>
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
+                  <p className="text-[#172A3A] font-semibold leading-snug">
+                    Chênh lệch số ngày tham gia Chiến dịch Mùa hè xanh 2026.
+                  </p>
+                  <div className="text-[#607483] text-[11px]">
+                    Kê khai: <strong>05 ngày</strong> vs Văn bản cấp: <strong>04 ngày</strong>
+                  </div>
                 </div>
-                <p className="text-[#172A3A] font-semibold leading-snug">
-                  Minh chứng chỉ thể hiện điểm Học kỳ 1, thiếu điểm cả năm học.
-                </p>
-                <div className="text-[#607483] text-[11px]">
-                  Cần bổ sung bảng điểm HK2 hoặc điểm trung bình chung cả năm học.
+
+                {/* Finding 2: Academic */}
+                <div className="p-3 rounded-[10px] bg-white border border-[#FADDB6] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <strong className="text-[#B45309]">Tiêu chí Học tập tốt</strong>
+                    <button
+                      type="button"
+                      onClick={() => handleJumpToCriterion('academic')}
+                      className="text-[11px] font-bold text-[#0D78AE] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>Mở tiêu chí</span>
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
+                  <p className="text-[#172A3A] font-semibold leading-snug">
+                    Minh chứng chỉ thể hiện điểm Học kỳ 1, thiếu điểm cả năm học.
+                  </p>
+                  <div className="text-[#607483] text-[11px]">
+                    Cần bổ sung bảng điểm HK2 hoặc điểm trung bình chung cả năm học.
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : dynamicAttentionItems.length > 0 ? (
+            <div className="p-4 rounded-[14px] bg-[#FEF6EB] border border-[#FADDB6] space-y-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={17} className="text-[#D97706] shrink-0" />
+                <span className="text-[13.5px] font-bold text-[#8C3A19]">
+                  Nội dung phát hiện cần Cán bộ kiểm chứng ({dynamicAttentionItems.length} điểm)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12px]">
+                {dynamicAttentionItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-3 rounded-[10px] bg-white border border-[#FADDB6] space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <strong className="text-[#B45309]">{item.name}</strong>
+                      <button
+                        type="button"
+                        onClick={() => handleJumpToCriterion(item.id)}
+                        className="text-[11px] font-bold text-[#0D78AE] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <span>Mở tiêu chí</span>
+                        <ArrowRight size={12} />
+                      </button>
+                    </div>
+                    <p className="text-[#172A3A] font-semibold leading-snug">
+                      {item.headline}
+                    </p>
+                    <div className="text-[#607483] text-[11px]">{item.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-[14px] bg-[#EAFBF1] border border-[#B6E6C9] flex items-center gap-3 text-[12.5px] text-[#136F3A]">
+              <CheckCircle2 size={18} className="text-[#1A934E] shrink-0" />
+              <div>
+                <strong>Cả 05 tiêu chí đều có nội dung kê khai và minh chứng đính kèm.</strong>{' '}
+                Cán bộ vui lòng đối chiếu từng tệp văn bản gốc để xác nhận kết quả thẩm định.
+              </div>
+            </div>
+          )}
 
           {/* 5-Criteria Status Matrix Table */}
           <div className="space-y-2.5">
@@ -362,96 +492,156 @@ export const DossierAiSummaryModal: React.FC<DossierAiSummaryModalProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EEF2F6]">
-                  <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#172A3A]">01 · Đạo đức tốt</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-[#EAFBF1] text-[#136F3A] font-bold text-[11px]">
-                        Có cơ sở đạt
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#526B7C]">ĐRL 94/100, đủ chứng nhận Đoàn - Hội</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleJumpToCriterion('ethics')}
-                        className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
-                      >
-                        Xem
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#172A3A]">02 · Học tập tốt</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-[#FEF6EB] text-[#B45309] font-bold text-[11px]">
-                        Chưa đủ căn cứ
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#526B7C]">Bảng điểm chỉ có HK1, thiếu điểm cả năm</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleJumpToCriterion('academic')}
-                        className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
-                      >
-                        Xem
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#172A3A]">03 · Thể lực tốt</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-[#F0F8FD] text-[#0369A1] font-bold text-[11px]">
-                        Cần xác minh
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#526B7C]">Cần công văn quy đổi cự ly giải chạy 5km</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleJumpToCriterion('physical')}
-                        className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
-                      >
-                        Xem
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#172A3A]">04 · Tình nguyện tốt</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-[#FEF6EB] text-[#B45309] font-bold text-[11px]">
-                        Chưa đủ căn cứ
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#526B7C]">Kê khai 5 ngày vs văn bản 4 ngày</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleJumpToCriterion('volunteer')}
-                        className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
-                      >
-                        Xem
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#172A3A]">05 · Hội nhập tốt</td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-[#EAFBF1] text-[#136F3A] font-bold text-[11px]">
-                        Có cơ sở đạt
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#526B7C]">IELTS 7.0 còn hạn đến năm 2027</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleJumpToCriterion('integration')}
-                        className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
-                      >
-                        Xem
-                      </button>
-                    </td>
-                  </tr>
+                  {isDemo ? (
+                    <>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold text-[#172A3A]">01 · Đạo đức tốt</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-[#EAFBF1] text-[#136F3A] font-bold text-[11px]">
+                            Có cơ sở đạt
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#526B7C]">ĐRL 94/100, đủ chứng nhận Đoàn - Hội</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleJumpToCriterion('ethics')}
+                            className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                          >
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold text-[#172A3A]">02 · Học tập tốt</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-[#FEF6EB] text-[#B45309] font-bold text-[11px]">
+                            Chưa đủ căn cứ
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#526B7C]">Bảng điểm chỉ có HK1, thiếu điểm cả năm</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleJumpToCriterion('academic')}
+                            className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                          >
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold text-[#172A3A]">03 · Thể lực tốt</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-[#F0F8FD] text-[#0369A1] font-bold text-[11px]">
+                            Cần xác minh
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#526B7C]">Cần công văn quy đổi cự ly giải chạy 5km</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleJumpToCriterion('physical')}
+                            className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                          >
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold text-[#172A3A]">04 · Tình nguyện tốt</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-[#FEF6EB] text-[#B45309] font-bold text-[11px]">
+                            Chưa đủ căn cứ
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#526B7C]">Kê khai 5 ngày vs văn bản 4 ngày</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleJumpToCriterion('volunteer')}
+                            className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                          >
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold text-[#172A3A]">05 · Hội nhập tốt</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded-full bg-[#EAFBF1] text-[#136F3A] font-bold text-[11px]">
+                            Có cơ sở đạt
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#526B7C]">IELTS 7.0 còn hạn đến năm 2027</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleJumpToCriterion('integration')}
+                            className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                          >
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
+                    </>
+                  ) : (
+                    dynamicCriteriaList.map((crit) => {
+                      const rev = applicationRecord.criteriaReview.find(
+                        (r) => r.criterionId === crit.id
+                      );
+                      const aiRow = summary?.criteriaReadinessMatrix?.find((m) =>
+                        m.criterionName.toLowerCase().includes(crit.name.toLowerCase())
+                      );
+                      const declCount = rev?.declaredCount ?? 0;
+                      const evCount = rev?.evidenceCount ?? 0;
+                      const isReady =
+                        rev?.status === 'reviewed' ||
+                        (declCount > 0 && evCount > 0 && rev?.status !== 'needs_supplement');
+                      const badgeText =
+                        aiRow?.status ||
+                        (rev?.status === 'reviewed'
+                          ? 'Đã thẩm định'
+                          : rev?.status === 'needs_supplement'
+                          ? 'Cần bổ sung'
+                          : isReady
+                          ? 'Có cơ sở đạt'
+                          : 'Chưa đủ căn cứ');
+                      const badgeClass =
+                        badgeText === 'Đạt' || badgeText === 'Đã thẩm định' || badgeText === 'Có cơ sở đạt'
+                          ? 'bg-[#EAFBF1] text-[#136F3A]'
+                          : 'bg-[#FEF6EB] text-[#B45309]';
+                      const noteText =
+                        aiRow?.highlight ||
+                        rev?.noteSummary ||
+                        `${declCount} nội dung kê khai · ${evCount} tệp minh chứng`;
+
+                      return (
+                        <tr key={crit.id}>
+                          <td className="py-2.5 px-3 font-bold text-[#172A3A]">
+                            {crit.code} · {crit.name}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span
+                              className={`px-2 py-0.5 rounded-full font-bold text-[11px] ${badgeClass}`}
+                            >
+                              {badgeText}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-[#526B7C]">{noteText}</td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleJumpToCriterion(crit.id)}
+                              className="text-[11.5px] font-bold text-[#0D78AE] hover:underline cursor-pointer"
+                            >
+                              Xem
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

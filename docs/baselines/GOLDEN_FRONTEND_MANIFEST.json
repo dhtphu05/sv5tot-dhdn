@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-30T05:56:02.733Z",
+  "createdAt": "2026-10-30T06:19:38.703Z",
   "totalProtectedFiles": 525,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 63194,
-      "sha256": "c752448965dd995471169f3e6e190faf7331a88af9b14ce683eaf0a48efe4278"
+      "sizeBytes": 63122,
+      "sha256": "ba16859a63a55f93486369ba27634130aaa4ff4fc6639e55333adeb90523d210"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -726,8 +726,8 @@
     },
     {
       "path": "src/components/evidence/detail/EvidenceDetailWorkspace.tsx",
-      "sizeBytes": 21746,
-      "sha256": "12acba2cbea3531fa4009bcdda35be313c138a4c9f1596c92a7b15a321257509"
+      "sizeBytes": 21854,
+      "sha256": "37b1051ae0f1321bb6dee790be19ec25641ca7ecc993456aa42d94dc2345deb8"
     },
     {
       "path": "src/components/evidence/detail/InformationPanel.tsx",
@@ -976,8 +976,8 @@
     },
     {
       "path": "src/components/results/FinalResultView.tsx",
-      "sizeBytes": 24775,
-      "sha256": "83117b2347cf40e9ee8d7bd7512e7138bfb3d411d6f93ac3a302c36a85bbb270"
+      "sizeBytes": 27607,
+      "sha256": "4a26c9056e203518af21d5a234be815be9e203d905e52072866bf8196ad00241"
     },
     {
       "path": "src/components/results/OfficialCertificateModal.tsx",
@@ -1011,8 +1011,8 @@
     },
     {
       "path": "src/components/results/panels/RecognizedResultPanel.tsx",
-      "sizeBytes": 8126,
-      "sha256": "74fc39b2f70b7b619e6bf9add8a6a2ab9089ddf5c538c164a3832c8a03f2d714"
+      "sizeBytes": 8144,
+      "sha256": "62adee6d4582fccc9038e9698f3739f84e756a296d69310264939bd0e37c1068"
     },
     {
       "path": "src/components/results/panels/WaitingFinalResultPanel.tsx",
@@ -1426,8 +1426,8 @@
     },
     {
       "path": "src/features/ai-review-copilot/committeeSecretaryComposer.ts",
-      "sizeBytes": 24498,
-      "sha256": "2892e35bef16140036140ef9af2a704e4bbaf8013b13c5b1babc4db1dd0f8e70"
+      "sizeBytes": 26261,
+      "sha256": "b93a8e4b0dd0c37ef73b40b8ee47bb6475d7f0b126f4b224ac4577015325ebd8"
     },
     {
       "path": "src/features/ai-review-copilot/committeeSecretaryTypes.ts",
@@ -1436,8 +1436,8 @@
     },
     {
       "path": "src/features/ai-review-copilot/copilotAggregation.ts",
-      "sizeBytes": 25450,
-      "sha256": "5035a806c045a689fb1634a81c352119ded2d81f615222bc6d3d89670cbd1913"
+      "sizeBytes": 27023,
+      "sha256": "bbee9559e7027128547b392951275855ae1770bfb9874ae31c9becf4145aa184"
     },
     {
       "path": "src/features/ai-review-copilot/copilotTypes.ts",
@@ -1451,8 +1451,8 @@
     },
     {
       "path": "src/features/ai-review-copilot/demoCopilotInsightsData.ts",
-      "sizeBytes": 17389,
-      "sha256": "d393a4096438e910baae19c666980399dca65eb7f1ded202405534963fc43196"
+      "sizeBytes": 17559,
+      "sha256": "b6cdc1248cb3f828b038dc00af89f86356fd70130c143b859705b9563a04f4b4"
     },
     {
       "path": "src/features/ai-review-copilot/index.ts",
@@ -1461,8 +1461,8 @@
     },
     {
       "path": "src/features/ai-review-copilot/reportComposer.ts",
-      "sizeBytes": 29958,
-      "sha256": "878cf66a8143c67270b2679059941e4783698a073f9a08830d9c4668bc0d02fc"
+      "sizeBytes": 33055,
+      "sha256": "de85d70157fb0947bb78f8b833236ccd2d7d000318c6bc7ddfdd922a3809cae6"
     },
     {
       "path": "src/features/ai-review-copilot/useAiReviewCopilot.ts",
@@ -1546,8 +1546,8 @@
     },
     {
       "path": "src/features/student-portal/useStudentPortalWorkflow.ts",
-      "sizeBytes": 33425,
-      "sha256": "9069927c1bdb3a688e44d1f46c81b4e0b74fe3055ebf38a67e5c9bc7f65932aa"
+      "sizeBytes": 33669,
+      "sha256": "524b939a25f90f006c164eb9b951193239eda58fe08c528640342aede1ffdadc"
     },
     {
       "path": "src/features/supplement-request/SupplementComposers.tsx",
@@ -1801,8 +1801,8 @@
     },
     {
       "path": "src/staff/components/admin/CriteriaManagement.tsx",
-      "sizeBytes": 31059,
-      "sha256": "61ba1d5f6b3de5c7ba577d0fb0b9c123cd4ac68ba4583528440ca12765880bbb"
+      "sizeBytes": 31063,
+      "sha256": "b2bab3eedcaa76d2cbe00e62989fd1f5379e63e43966f83711ccad20f5bda892"
     },
     {
       "path": "src/staff/components/admin/CriteriaPreviewModal.tsx",
@@ -1821,8 +1821,8 @@
     },
     {
       "path": "src/staff/components/admin/OperationsConfigView.tsx",
-      "sizeBytes": 20523,
-      "sha256": "ee62b81786af51d31580db9c9b848e89cfe1f5e170611e840cef8ee93bcd6159"
+      "sizeBytes": 20531,
+      "sha256": "1caf2fa19fd38b7148a673a496643317c95b702b8053acd24429b72171725602"
     },
     {
       "path": "src/staff/components/admin/PermissionManagement.tsx",
@@ -1836,18 +1836,18 @@
     },
     {
       "path": "src/staff/components/admin/SeasonCreateModal.tsx",
-      "sizeBytes": 11747,
-      "sha256": "f8d9b84854b7dfb56de91fac4dfe79bb1217df9be56200578c266b4a4721734d"
+      "sizeBytes": 11759,
+      "sha256": "01d24e3159227b8e529f84fcd8d4bcdbbb50e63be04753b1112b1ae94e9ee78a"
     },
     {
       "path": "src/staff/components/admin/SeasonManagement.tsx",
-      "sizeBytes": 37750,
-      "sha256": "ac9b45349328951164f0a20a9dfc4f40b7be93d3afa183b440838c993312a587"
+      "sizeBytes": 37774,
+      "sha256": "d893b68913061c9d5005fdf5583050cef3c8b6eca5edc9ae1df712466befa35b"
     },
     {
       "path": "src/staff/components/admin/StaffManagement.tsx",
-      "sizeBytes": 41984,
-      "sha256": "4d8fd7a086be9ecea0002d604996a34324988f675f204f95ce8be54abfc275b7"
+      "sizeBytes": 43168,
+      "sha256": "c459955453ab3c977979974aa1f7fbe7190e69a9031943fe138cf59190e5901f"
     },
     {
       "path": "src/staff/components/admin/StaffProvisioningPanels.tsx",
@@ -1981,8 +1981,8 @@
     },
     {
       "path": "src/staff/components/committee/views/CommitteeOverviewView.tsx",
-      "sizeBytes": 19946,
-      "sha256": "f8045045c25404b06de6feb15d74100d50e33d3c4c640de8648254714258ca9c"
+      "sizeBytes": 19987,
+      "sha256": "a3397b0d68a53b5d0a2f2f88f1bf299e442495e24d911f5f7e63352f64a80b3d"
     },
     {
       "path": "src/staff/components/committee/views/CommitteeQueueQuickPreview.tsx",
@@ -2006,8 +2006,8 @@
     },
     {
       "path": "src/staff/components/review/CollectiveOfficerReviewWorkspace.tsx",
-      "sizeBytes": 47859,
-      "sha256": "d99e472fa835530a9933901429ed08717a6a752a9f435669761c2d6766588f0a"
+      "sizeBytes": 47877,
+      "sha256": "302fb05c6faeb68069840a72bd1ad38e1847f823444c44896097d52c04dcf535"
     },
     {
       "path": "src/staff/components/review/ContextualSupplementEditor.tsx",
@@ -2026,8 +2026,8 @@
     },
     {
       "path": "src/staff/components/review/EvidenceReviewViewer.tsx",
-      "sizeBytes": 50814,
-      "sha256": "9aca63da8910f53d5661499dcbdcafefc4042a4fd83c265aafb3ffa2cba1115b"
+      "sizeBytes": 51273,
+      "sha256": "6b3a0a8e0efe189a76274f0b565b1011f9ce8a484965f317b73fe8f8eb3bdc5b"
     },
     {
       "path": "src/staff/components/review/InlineRowReviewControls.tsx",
@@ -2041,8 +2041,8 @@
     },
     {
       "path": "src/staff/components/review/OfficerReviewWorkspace.tsx",
-      "sizeBytes": 43991,
-      "sha256": "a5279b6ac602b5178d07ac6d5384df5d63cd70f259a05375dca393229072ef98"
+      "sizeBytes": 44171,
+      "sha256": "62ad3dba92b73837fefc290358e6928cef41e6492b2c6fbd71a70b01791194ac"
     },
     {
       "path": "src/staff/components/review/ReviewApplicationHeader.tsx",
@@ -2086,8 +2086,8 @@
     },
     {
       "path": "src/staff/components/review/copilot/DossierAiSummaryModal.tsx",
-      "sizeBytes": 24231,
-      "sha256": "676293918ac51aeb9be258dbd16bfa472565584e78182388075bb4877a142e2d"
+      "sizeBytes": 34076,
+      "sha256": "9f9c8d6778dd8a504cff3d7f1c8e632d7fe53bd29c461cc641c88e8fe7816657"
     },
     {
       "path": "src/staff/components/review/copilot/ReviewCopilotPanel.tsx",

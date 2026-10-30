@@ -14,6 +14,7 @@
  */
 
 import { CriterionId } from '../../types/application';
+import { isBackendMode } from '../../shared/config/executionMode';
 import {
   AiFinding,
   AiEvidenceInsight,
@@ -465,6 +466,36 @@ export function evaluateCriterionPreliminaryAssessment(
       actionType: 'inspect_evidence',
       targetId: unclearFindings[0].evidenceId,
     };
+  } else if (isBackendMode() && studentApp?.criteria) {
+    const critNode = studentApp.criteria.find((c: any) => c.id === criterionId);
+    const reqs = critNode
+      ? Array.isArray(critNode.groups) && critNode.groups.length > 0
+        ? critNode.groups.flatMap((g: any) => g.requirements || [])
+        : critNode.requirements || []
+      : [];
+    let declCount = 0;
+    let evCount = 0;
+    for (const r of reqs) {
+      const decls = r.declarations || [];
+      declCount += decls.length;
+      for (const d of decls) {
+        evCount += (d.evidence?.length || d.evidenceFiles?.length || 0);
+      }
+    }
+    if (declCount === 0 || evCount === 0) {
+      verdict = 'insufficient_evidence';
+      headline =
+        declCount === 0
+          ? `Tiêu chí 0${meta.number}: Chưa có nội dung kê khai.`
+          : `Tiêu chí 0${meta.number}: Chưa có tệp minh chứng đính kèm.`;
+      detail = 'Cần bổ sung nội dung kê khai hoặc tài liệu minh chứng hợp lệ trước khi kết luận.';
+      insufficientReqs.push(meta.name);
+    } else {
+      verdict = 'preliminary_meets';
+      headline = `Tiêu chí 0${meta.number}: Đã ghi nhận ${declCount} kê khai và ${evCount} tệp minh chứng đính kèm.`;
+      detail = 'Các nội dung kê khai đã có tệp minh chứng đính kèm để cán bộ đối soát.';
+      supportedReqs.push(meta.name);
+    }
   } else {
     // Everything consistent
     if (criterionId === 'academic') {
@@ -482,7 +513,10 @@ export function evaluateCriterionPreliminaryAssessment(
 
   const vMeta = PRELIMINARY_VERDICT_META[verdict];
   const unresolvedIssuesCount =
-    activeDiscrepancies.length + missingEvFindings.length + unclearFindings.length;
+    activeDiscrepancies.length +
+    missingEvFindings.length +
+    unclearFindings.length +
+    (isBackendMode() && verdict === 'insufficient_evidence' && findings.length === 0 ? 1 : 0);
 
   return {
     criterionId,

@@ -198,7 +198,7 @@ export const SeasonCreateModal: React.FC<SeasonCreateModalProps> = ({
             <div className="text-[12px] text-[#0F2335]">
               <strong>Lập lịch nhanh:</strong> Chọn{' '}
               <strong>Ngày mở cổng (T01)</strong> rồi bấm nút bên phải để tự
-              động tính toàn bộ hạn nộp Cá nhân, Trường gửi TP và Tập thể.
+              động tính toàn bộ hạn nộp Cá nhân, Trường gửi ĐHĐN và Tập thể.
             </div>
             <Button
               variant="secondary"
@@ -241,7 +241,7 @@ export const SeasonCreateModal: React.FC<SeasonCreateModalProps> = ({
             />
             <VietnameseDateTimePicker
               stageBadge="T03 · Cấp Trường"
-              label="Hạn Trường gửi danh sách lên TP"
+              label="Hạn Trường gửi danh sách lên ĐHĐN"
               value={createForm.schoolForwardingDeadline}
               onChange={(val) =>
                 setCreateForm({
@@ -253,7 +253,7 @@ export const SeasonCreateModal: React.FC<SeasonCreateModalProps> = ({
             />
             <VietnameseDateTimePicker
               stageBadge="T04 · Tập thể"
-              label="Hạn nộp Tập thể trực tiếp lên TP"
+              label="Hạn nộp Tập thể trực tiếp lên ĐHĐN"
               value={createForm.collectiveSubmissionDeadline}
               onChange={(val) =>
                 setCreateForm({
