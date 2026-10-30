@@ -157,10 +157,10 @@ export function resolveInitialRouteAndSession() {
     pathname.startsWith('/collective/login')
   ) {
     return {
-      viewMode: 'collective_login' as TopLevelViewMode,
-      publicRoute: 'landing' as PublicEntryRoute,
+      viewMode: 'public' as TopLevelViewMode,
+      publicRoute: 'login' as PublicEntryRoute,
       isSessionExpiredNotice: false,
-      scenarioId: DEFAULT_PROTOTYPE_SCENARIO_ID,
+      scenarioId: 'new_student' as PrototypeScenarioId,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
       schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
@@ -216,11 +216,18 @@ export function resolveInitialRouteAndSession() {
       };
     }
 
+    const baseStore = clonePristineStoreForScenario(persisted.scenarioId);
+    if (persisted.mutatedApplication) {
+      baseStore.application = persisted.mutatedApplication;
+    }
+    if (persisted.mutatedNotifications) {
+      baseStore.notifications = persisted.mutatedNotifications;
+    }
     return {
-      viewMode: 'collective_portal' as TopLevelViewMode,
+      viewMode: 'student_app' as TopLevelViewMode,
       publicRoute: 'landing' as PublicEntryRoute,
       isSessionExpiredNotice: false,
-      scenarioId: DEFAULT_PROTOTYPE_SCENARIO_ID,
+      scenarioId: persisted.scenarioId || DEFAULT_PROTOTYPE_SCENARIO_ID,
       officerScenarioId: DEFAULT_OFFICER_SCENARIO_ID,
       committeeScenarioId: DEFAULT_COMMITTEE_SCENARIO_ID,
       schoolScenarioId: 'B_school_under_review' as SchoolDemoScenarioId,
@@ -230,8 +237,8 @@ export function resolveInitialRouteAndSession() {
       collectiveUserEmail: persisted.collectiveUserEmail,
       isDemoActive: persisted.isDemoActive,
       isToolbarHidden: false,
-      navId: 'overview',
-      store: clonePristineStoreForScenario(DEFAULT_PROTOTYPE_SCENARIO_ID),
+      navId: 'collective',
+      store: baseStore,
     };
   }
 
@@ -559,6 +566,8 @@ export function resolveInitialRouteAndSession() {
     else if (pathname === '/app/notifications') targetNav = 'notifications';
     else if (pathname === '/app/evidence') targetNav = 'evidence';
     else if (pathname === '/app/application') targetNav = 'application';
+    else if (pathname === '/app/collective') targetNav = 'collective';
+    else if (pathname === '/app/profile') targetNav = 'profile';
 
     savePersistedDemoSession({
       viewMode: 'student_app',
@@ -611,8 +620,16 @@ export function resolveInitialRouteAndSession() {
     baseStore.notifications = persisted.mutatedNotifications;
   }
 
+  const normalizedViewMode: TopLevelViewMode =
+    persisted.viewMode === 'collective_portal' ||
+    persisted.viewMode === 'collective_login'
+      ? 'student_app'
+      : persisted.viewMode;
+  const normalizedNavId =
+    persisted.viewMode === 'collective_portal' ? 'collective' : persisted.navId;
+
   return {
-    viewMode: persisted.viewMode,
+    viewMode: normalizedViewMode,
     publicRoute: 'landing' as PublicEntryRoute,
     isSessionExpiredNotice: false,
     scenarioId: persisted.scenarioId,
@@ -625,7 +642,7 @@ export function resolveInitialRouteAndSession() {
     collectiveUserEmail: persisted.collectiveUserEmail,
     isDemoActive: persisted.isDemoActive,
     isToolbarHidden: persisted.isToolbarHidden,
-    navId: persisted.navId,
+    navId: normalizedNavId,
     store: baseStore,
   };
 }

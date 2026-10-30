@@ -978,8 +978,9 @@ export default function App() {
       }
 
       if (pathname === '/collective/login') {
-        setViewMode('collective_login');
-        savePersistedDemoSession({ viewMode: 'collective_login' });
+        setViewMode('public');
+        setPublicRoute('login');
+        savePersistedDemoSession({ viewMode: 'public' });
         return;
       }
 
@@ -996,8 +997,9 @@ export default function App() {
       }
 
       if (pathname === '/collective' || pathname.startsWith('/collective')) {
-        setViewMode('collective_portal');
-        savePersistedDemoSession({ viewMode: 'collective_portal' });
+        setViewMode('student_app');
+        setActiveNavId('collective');
+        savePersistedDemoSession({ viewMode: 'student_app', navId: 'collective' });
         return;
       }
 
@@ -1014,6 +1016,8 @@ export default function App() {
           setActiveNavId('notifications');
         else if (pathname === '/app/evidence') setActiveNavId('evidence');
         else if (pathname === '/app/application') setActiveNavId('application');
+        else if (pathname === '/app/collective') setActiveNavId('collective');
+        else if (pathname === '/app/profile') setActiveNavId('profile');
         savePersistedDemoSession({ viewMode: 'student_app' });
         return;
       }
@@ -1095,7 +1099,13 @@ export default function App() {
       setResultUnavailableNotice(null);
       setActiveNavId(navId);
       savePersistedDemoSession({ navId });
-      updateBrowserUrl(navId === 'results' ? '/app/results' : '/app');
+      updateBrowserUrl(
+        navId === 'results'
+          ? '/app/results'
+          : navId === 'collective'
+          ? '/app/collective'
+          : '/app'
+      );
       if (typeof window !== 'undefined') {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
@@ -1251,8 +1261,13 @@ export default function App() {
         onOpenPublicEntry={handleOpenPublicFromDemo}
         onEnterStudentApp={handleEnterStudentAppFromDemo}
         onLaunchCollectivePortal={() => {
-          setViewMode('collective_portal');
-          updateBrowserUrl('/collective');
+          setViewMode('student_app');
+          setActiveNavId('collective');
+          savePersistedDemoSession({
+            viewMode: 'student_app',
+            navId: 'collective',
+          });
+          updateBrowserUrl('/app/collective');
           if (typeof window !== 'undefined')
             window.scrollTo({ top: 0, behavior: 'instant' });
         }}
@@ -1269,14 +1284,18 @@ export default function App() {
               userId: email,
               userName: email,
               userEmail: email,
-              role: 'COLLECTIVE_PREPARER',
+              role: 'STUDENT',
               token: `session-${Date.now()}`,
             });
           }
           setCollectiveUserEmail(email);
-          setViewMode('collective_portal');
-          savePersistedDemoSession({ viewMode: 'collective_portal' });
-          updateBrowserUrl('/collective');
+          setViewMode('student_app');
+          setActiveNavId('collective');
+          savePersistedDemoSession({
+            viewMode: 'student_app',
+            navId: 'collective',
+          });
+          updateBrowserUrl('/app/collective');
           if (typeof window !== 'undefined')
             window.scrollTo({ top: 0, behavior: 'instant' });
         }}
@@ -1441,8 +1460,8 @@ export default function App() {
         handleLoginSuccess={handleLoginSuccess}
         handleSignupSuccess={handleSignupSuccess}
         onNavigateToCollectiveLogin={() => {
-          setViewMode('collective_login');
-          updateBrowserUrl('/collective/login');
+          setPublicRoute('login');
+          updateBrowserUrl('/login');
           window.scrollTo({ top: 0, behavior: 'instant' });
         }}
         onEnterAuthenticatedHome={() => {

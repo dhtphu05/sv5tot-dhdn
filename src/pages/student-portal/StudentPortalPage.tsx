@@ -10,6 +10,7 @@ import { StudentHomeView } from '../../components/home/StudentHomeView';
 import { StudentApplicationWorkspace } from '../../components/application/StudentApplicationWorkspace';
 import { EvidenceLibraryView } from '../../components/evidence/EvidenceLibraryView';
 import { StudentProfileView } from '../../components/profile/StudentProfileView';
+import { CollectivePortal } from '../../components/collective/CollectivePortal';
 import { FinalResultView } from '../../components/results/FinalResultView';
 import {
   StudentNotificationsView,
@@ -251,6 +252,15 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
             onOpenEvidenceLibrary={() => handleSidebarNavSelect('evidence')}
             onOpenProfile={() => handleSidebarNavSelect('profile')}
             onActivateNotification={handleActivateNotification}
+          />
+        ) : activeNavId === 'collective' ? (
+          <CollectivePortal
+            embeddedInStudentPortal
+            currentEmail={activeStoreState.application.student.email}
+            studentIdentity={studentIdentity}
+            studentProfileSnapshot={
+              activeStoreState.application.applicantProfileSnapshot
+            }
           />
         ) : activeNavId === 'evidence' ? (
           <EvidenceLibraryView

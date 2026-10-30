@@ -8,6 +8,7 @@ import {
   Layers,
   LogOut,
   UserCircle,
+  Users,
 } from 'lucide-react';
 import { ProductBrandLockup } from '../brand/HsvLogo';
 import { MOCK_STUDENT } from '../../tokens';
@@ -68,6 +69,11 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       id: 'application',
       label: 'Hồ sơ của tôi',
       icon: <FileCheck2 size={17} strokeWidth={1.9} />,
+    },
+    {
+      id: 'collective',
+      label: 'Tập thể Sinh viên 5 tốt',
+      icon: <Users size={17} strokeWidth={1.9} />,
     },
     {
       id: 'evidence',

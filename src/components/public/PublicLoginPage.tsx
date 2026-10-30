@@ -349,19 +349,6 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                 Đăng ký
               </button>
             </div>
-
-            {onNavigateToCollectiveLogin && (
-              <div className="pt-2 border-t border-[#F1F6FA]">
-                <button
-                  type="button"
-                  onClick={onNavigateToCollectiveLogin}
-                  className="text-[12.5px] font-bold text-[#0D78AE] hover:text-[#095386] hover:underline cursor-pointer inline-flex items-center gap-1.5"
-                >
-                  <Users size={14} />
-                  <span>Đăng nhập Cổng Kê khai Tập thể (Chi hội, LCH) →</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </main>
