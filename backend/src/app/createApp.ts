@@ -1,5 +1,5 @@
 /**
- * 5TOT ĐHĐN — Express Application Factory (Backend V2)
+ * 5TOT ÄHÄN â€” Express Application Factory (Backend V2)
  * Creates and configures the production Express app with complete security,
  * observability middlewares, and runtime route-to-service-to-Prisma dependency wiring.
  */
@@ -87,6 +87,8 @@ import { EvidenceService } from '../modules/evidence/evidence.service';
 import { EvidenceController } from '../modules/evidence/evidence.controller';
 import { createEvidenceRouter } from '../modules/evidence/evidence.routes';
 import { type IObjectStorageClient, r2StorageClient } from '../shared/storage/r2StorageClient';
+import type { IEmailService } from '../shared/email/email.types';
+import { getEmailService } from '../shared/email';
 
 // City Workflow & Assignment
 import type { ICityWorkflowRepository } from '../modules/cityWorkflow/cityWorkflow.repository';
@@ -142,6 +144,7 @@ export interface AppDependencies {
   committeeRepo?: ICommitteeRepository;
   auditAndAnalyticsRepo?: IAuditAndAnalyticsRepository;
   adminRepo?: IAdminRepository;
+  emailService?: IEmailService;
 }
 
 export function createApp(dependencies: AppDependencies = {}): Express {
@@ -200,7 +203,14 @@ export function createApp(dependencies: AppDependencies = {}): Express {
   // Domain Services
   const identityService = new IdentityService(identityRepo);
   const sessionService = new SessionService(sessionRepo, identityRepo);
-  const passwordResetService = new PasswordResetService(resetRepo, identityRepo, sessionService);
+  const emailService = dependencies.emailService || getEmailService();
+  const passwordResetService = new PasswordResetService(
+    resetRepo,
+    identityRepo,
+    sessionService,
+    undefined,
+    emailService
+  );
   const authService = new AuthService(
     identityService,
     sessionService,
@@ -231,7 +241,7 @@ export function createApp(dependencies: AppDependencies = {}): Express {
   );
   const applicationController = new IndividualApplicationController(applicationService);
 
-  const schoolReviewService = new SchoolReviewService(schoolReviewRepo, applicationRepo);
+  const schoolReviewService = new SchoolReviewService(schoolReviewRepo, applicationRepo, emailService);
   const schoolReviewController = new SchoolReviewController(schoolReviewService);
 
   const schoolForwardingBatchRepo = dependencies.schoolForwardingBatchRepo || new PrismaSchoolForwardingBatchRepository();

@@ -602,7 +602,8 @@ export function useStudentPortalWorkflow({
     (
       updatedApp?: StudentApplicationData,
       explanationNote?: string,
-      requestId?: string
+      requestId?: string,
+      isFullyCompleted: boolean = true
     ) => {
       const effectiveApp = updatedApp || activeStoreState.application;
       const effectiveExplanation =
@@ -612,9 +613,14 @@ export function useStudentPortalWorkflow({
       if (effectiveApp) {
         setSharedApplication(effectiveApp);
       }
-      setPrototypeScenarioId('supplement_submitted');
-      setHomeScenario('state_i_supplement_sent');
-      setAppSubmissionState('supplement_sent');
+      if (isFullyCompleted) {
+        setPrototypeScenarioId('supplement_submitted');
+        setHomeScenario('state_i_supplement_sent');
+        setAppSubmissionState('supplement_sent');
+      } else {
+        setAppSubmissionState('supplement_required');
+        setHomeScenario('state_h_supplement_active');
+      }
 
       if (isBackendMode()) {
         apiRequest(
@@ -625,6 +631,7 @@ export function useStudentPortalWorkflow({
               requestId,
               explanation: effectiveExplanation,
               updatedApplication: effectiveApp,
+              isFullyCompleted,
             },
           }
         ).catch(() => {});
@@ -635,12 +642,11 @@ export function useStudentPortalWorkflow({
           app.applicationId === targetAppId
             ? {
                 ...app,
-                workflowStatus: 'supplement_returned' as const,
+                workflowStatus: isFullyCompleted ? ('supplement_returned' as const) : app.workflowStatus,
                 schoolPreliminaryStatus:
-                  app.currentReviewStage === 'SCHOOL'
+                  isFullyCompleted && app.currentReviewStage === 'SCHOOL'
                     ? ('supplement_returned' as const)
                     : app.schoolPreliminaryStatus,
-                supplementStatus: 'returned' as const,
                 updatedAt: 'Vừa xong',
                 updatedSortKey: Date.now(),
                 latestOperationalNote: effectiveExplanation,

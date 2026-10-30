@@ -46,6 +46,7 @@ export interface ExpandedRequirementProps {
   isSupplementWindowClosed?: boolean;
   isSupplementSubmitting?: boolean;
   onSendSupplement?: (requestId: string, explanationNote?: string) => void;
+  onUpdateExplanation?: (requestId: string, explanation: string) => void;
   reviewerActionSlot?: React.ReactNode;
   renderDeclarationReviewerSlot?: (
     req: ApplicationRequirement,

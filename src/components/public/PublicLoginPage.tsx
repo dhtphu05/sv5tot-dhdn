@@ -31,6 +31,7 @@ export interface PublicLoginPageProps {
   onNavigateToSignup: () => void;
   onNavigateToLanding: () => void;
   onNavigateToCollectiveLogin?: () => void;
+  onNavigateToForgotPassword?: () => void;
   sessionExpired?: boolean;
   returnTarget?: SafeInternalReturnTarget | null;
   initialEmail?: string;
@@ -42,6 +43,7 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
   onNavigateToSignup,
   onNavigateToLanding,
   onNavigateToCollectiveLogin,
+  onNavigateToForgotPassword,
   sessionExpired = false,
   returnTarget = null,
   initialEmail = '',
@@ -320,6 +322,17 @@ export const PublicLoginPage: React.FC<PublicLoginPageProps> = ({
                   <AlertCircle size={13.5} className="shrink-0" />
                   <span>{passwordFieldError}</span>
                 </p>
+              )}
+                          {onNavigateToForgotPassword && (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={onNavigateToForgotPassword}
+                    className="text-[12.5px] font-medium text-[#0D78AE] hover:text-[#126A9C] hover:underline cursor-pointer"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
               )}
             </div>
 

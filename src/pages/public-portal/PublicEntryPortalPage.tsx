@@ -7,6 +7,8 @@ import React from 'react';
 import { PublicLandingPage } from '../../components/public/PublicLandingPage';
 import { PublicLoginPage } from '../../components/public/PublicLoginPage';
 import { PublicSignupPage } from '../../components/public/PublicSignupPage';
+import { PublicForgotPasswordPage } from '../../components/public/PublicForgotPasswordPage';
+import { PublicResetPasswordPage } from '../../components/public/PublicResetPasswordPage';
 import {
   PublicEntryRoute,
   SafeInternalReturnTarget,
@@ -127,7 +129,7 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
   const syncPublicUrl = (route: PublicEntryRoute) => {
     if (typeof window === 'undefined') return;
     const targetPath =
-      route === 'login' ? '/login' : route === 'signup' ? '/signup' : '/';
+      route === 'login' ? '/login' : route === 'signup' ? '/signup' : route === 'forgot_password' ? '/forgot-password' : route === 'reset_password' ? '/reset-password' : '/';
     if (window.location.pathname !== targetPath) {
       window.history.pushState({}, '', targetPath);
     }
@@ -179,10 +181,56 @@ export const PublicEntryPortalPage: React.FC<PublicEntryPortalPageProps> = ({
             syncPublicUrl('landing');
             window.scrollTo({ top: 0, behavior: 'instant' });
           }}
+          onNavigateToForgotPassword={() => {
+            setPublicRoute('forgot_password');
+            syncPublicUrl('forgot_password');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
           sessionExpired={isSessionExpiredNotice}
           returnTarget={safeReturnTarget}
           initialEmail={loginPrefillEmail}
           presetError={loginPresetError}
+        />
+      )}
+
+      {publicRoute === 'forgot_password' && (
+        <PublicForgotPasswordPage
+          initialEmail={loginPrefillEmail}
+          onNavigateToLogin={(prefill) => {
+            if (prefill) setLoginPrefillEmail(prefill);
+            setLoginPresetError(null);
+            setPublicRoute('login');
+            syncPublicUrl('login');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+          onNavigateToLanding={() => {
+            setPublicRoute('landing');
+            syncPublicUrl('landing');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+        />
+      )}
+
+      {publicRoute === 'reset_password' && (
+        <PublicResetPasswordPage
+          initialEmail={loginPrefillEmail}
+          onNavigateToLogin={(prefill) => {
+            if (prefill) setLoginPrefillEmail(prefill);
+            setLoginPresetError(null);
+            setPublicRoute('login');
+            syncPublicUrl('login');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+          onNavigateToForgotPassword={() => {
+            setPublicRoute('forgot_password');
+            syncPublicUrl('forgot_password');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+          onNavigateToLanding={() => {
+            setPublicRoute('landing');
+            syncPublicUrl('landing');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
         />
       )}
 

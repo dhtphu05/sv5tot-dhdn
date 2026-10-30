@@ -41,6 +41,7 @@ export interface CriterionSectionProps {
   isSupplementWindowClosed?: boolean;
   isSupplementSubmitting?: boolean;
   onSendSupplement?: (requestId: string, explanationNote?: string) => void;
+  onUpdateExplanation?: (requestId: string, explanation: string) => void;
   customStatusLabel?: string;
   customStatusVariant?: RequirementStatus;
   requirementReviewStatuses?: Record<string, { status: RequirementStatus; customLabel?: string }>;

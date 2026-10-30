@@ -1228,6 +1228,9 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
               include: {
                 applicant: true,
                 declarations: true,
+                supplementRequests: {
+                  include: { responses: true },
+                },
               },
             })
             .catch(() => []),
@@ -1241,7 +1244,56 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
         for (const relApp of relationalApps || []) {
           const code = String(relApp.applicationCode || relApp.id);
           if (!isTestRuntime() && isLegacyMockOrTestAppId(code)) continue;
-          if (portalState.studentApplications[code]) continue;
+
+          // Map supplementRequests from Neon DB
+          const mappedSupplementRequests = Array.isArray(relApp.supplementRequests)
+            ? relApp.supplementRequests.map((s: any) => {
+                const normCode = (s.criterionOrReqCode || '').toLowerCase();
+                let cId = 'ethics';
+                let cNum = 1;
+                let cName = 'Đạo đức tốt';
+                if (normCode.includes('academic') || normCode.startsWith('tc2') || normCode.includes('tc02')) {
+                  cId = 'academic'; cNum = 2; cName = 'Học tập tốt';
+                } else if (normCode.includes('physical') || normCode.startsWith('tc3') || normCode.includes('tc03')) {
+                  cId = 'physical'; cNum = 3; cName = 'Thể lực tốt';
+                } else if (normCode.includes('volunteer') || normCode.startsWith('tc4') || normCode.includes('tc04')) {
+                  cId = 'volunteer'; cNum = 4; cName = 'Tình nguyện tốt';
+                } else if (normCode.includes('integration') || normCode.startsWith('tc5') || normCode.includes('tc05')) {
+                  cId = 'integration'; cNum = 5; cName = 'Hội nhập tốt';
+                }
+                return {
+                  id: s.id,
+                  criterionId: cId,
+                  criterionName: cName,
+                  criterionNumber: cNum,
+                  requirementId: s.criterionOrReqCode,
+                  requirementTitle: cName,
+                  declarationId: s.targetDeclarationId || undefined,
+                  declarationTitle: s.declarationTitle || undefined,
+                  scopeLevel: s.targetDeclarationId ? 'declaration' : 'criterion',
+                  message: s.requestReason,
+                  requestedAt: s.requestedAt ? new Date(s.requestedAt).toLocaleDateString('vi-VN') : '',
+                  deadline: s.deadlineAt ? new Date(s.deadlineAt).toLocaleDateString('vi-VN') : '',
+                  allowedActions: s.requiredAction ? [s.requiredAction] : ['addEvidence', 'editText'],
+                  status: s.status === 'OPEN' ? 'active' : 'completed',
+                  staffStatus: s.status === 'OPEN' ? 'waiting_student' : 'closed',
+                  responses: s.responses || [],
+                };
+              })
+            : [];
+
+          const existingApp = portalState.studentApplications[code];
+          if (existingApp) {
+            if (mappedSupplementRequests.length > 0) {
+              existingApp.supplementRequests = mappedSupplementRequests;
+              const hasActive = mappedSupplementRequests.some((s: any) => s.status === 'active');
+              if (hasActive) {
+                existingApp.status = 'supplement_required';
+                existingApp.schoolPreliminaryStatus = 'SCHOOL_SUPPLEMENT_REQUESTED';
+              }
+            }
+            continue;
+          }
 
           const defaultCrit = createDefaultCriteriaList();
           const hydratedOtherAchievements: Record<string, any>[] = [];
@@ -1358,7 +1410,7 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
             },
             criteria: defaultCrit,
             otherAchievements: hydratedOtherAchievements,
-            supplementRequests: [],
+            supplementRequests: mappedSupplementRequests,
           };
           loadedCount++;
         }

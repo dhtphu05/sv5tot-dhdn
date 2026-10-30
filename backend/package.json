@@ -1,7 +1,7 @@
 {
   "name": "@5tot-danang/backend-v2",
   "version": "2.0.0",
-  "description": "5TOT Đà Nẵng — Authoritative Production Backend V2 (Express, TypeScript, PostgreSQL, Prisma)",
+  "description": "5TOT ÄÃ  Náºµng â€” Authoritative Production Backend V2 (Express, TypeScript, PostgreSQL, Prisma)",
   "type": "module",
   "scripts": {
     "dev": "tsx watch --ignore '**/.data/**' --ignore '**/dist/**' src/app/server.ts",
@@ -19,7 +19,8 @@
     "db:push": "prisma db push --schema=prisma/schema.prisma",
     "db:migrate": "prisma migrate deploy --schema=prisma/schema.prisma",
     "db:seed": "tsx src/scripts/seedNeonDatabase.ts",
-    "verify:cloud": "tsx src/scripts/verifyCloudIntegration.ts"
+    "verify:cloud": "tsx src/scripts/verifyCloudIntegration.ts",
+    "verify:email": "tsx src/scripts/verifyResendIntegration.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -28,6 +29,7 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
+    "resend": "^6.35.0",
     "zod": "^4.6.6"
   },
   "devDependencies": {

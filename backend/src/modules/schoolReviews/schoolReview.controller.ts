@@ -1,3 +1,4 @@
+import { parseFlexibleDateTime } from '../../shared/email/emailTemplates';
 /**
  * 5TOT ĐHĐN — School Review Controller (Backend V2)
  */
@@ -74,9 +75,10 @@ export class SchoolReviewController {
     if (!req.actor) throw ApiError.unauthorized('Yêu cầu xác thực tài khoản.');
     const { id } = req.params;
     const body = CreateSupplementRequestSchema.parse(req.body);
+    const parsedDeadline = parseFlexibleDateTime(body.deadlineAt);
     const supplement = await this.service.requestSupplement(req.actor, id, {
       ...body,
-      deadlineAt: body.deadlineAt ? new Date(body.deadlineAt) : undefined,
+      deadlineAt: parsedDeadline,
     });
     res.status(201).json({
       success: true,

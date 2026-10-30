@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { getApiActorContext, setApiActorContext } from '../../shared/api/httpClient';
 import {
   StaffApplicationRecord,
   StaffNotificationItem,
@@ -234,6 +235,7 @@ export interface StaffWorkflowCoordinationOptions {
   setPrototypeScenarioId: (id: PrototypeScenarioId) => void;
   setHomeScenario: (id: HomeDevScenarioId) => void;
   setAppSubmissionState: (state: ApplicationSubmissionState) => void;
+  setSharedApplication?: React.Dispatch<React.SetStateAction<StudentApplicationData>>;
   isActive?: boolean;
 }
 
@@ -252,6 +254,7 @@ export function useStaffWorkflowCoordination({
   setPrototypeScenarioId,
   setHomeScenario,
   setAppSubmissionState,
+  setSharedApplication,
   isActive = true,
 }: StaffWorkflowCoordinationOptions) {
   const [staffUser, setStaffUser] = useState<StaffUser>(
@@ -259,6 +262,23 @@ export function useStaffWorkflowCoordination({
       initialStaffUser ||
       STAFF_DEMO_USERS[initialStaffRole || 'CITY_OFFICER']
   );
+
+  useEffect(() => {
+    if (!isActive) return;
+    if (staffUser && (staffUser.primaryRole === 'SCHOOL_OFFICER' || staffUser.primaryRole === 'CITY_OFFICER')) {
+      const current = getApiActorContext();
+      if (!current || current.userId !== staffUser.id) {
+        setApiActorContext({
+          userId: staffUser.id || 'staff-sch-dut',
+          userName: staffUser.fullName,
+          userEmail: staffUser.email || 'canbo.dut@udn.vn',
+          role: staffUser.primaryRole || 'SCHOOL_OFFICER',
+          unitId: staffUser.schoolReviewUnitId || 'unit-dut',
+          token: `staff-token-${staffUser.id || 'staff-sch-dut'}`,
+        });
+      }
+    }
+  }, [staffUser, isActive]);
   const [staffRouteId, setStaffRouteId] =
     useState<StaffRouteId>(initialStaffRouteId);
   const [activeOfficerScenarioId, setActiveOfficerScenarioId] =
@@ -980,6 +1000,7 @@ export function useStaffWorkflowCoordination({
           savePersistedOfficerStudentApps(next);
           return next;
         });
+        setSharedApplication?.(effectiveNextStudentApp);
       }
 
       const completedCount = Object.values(

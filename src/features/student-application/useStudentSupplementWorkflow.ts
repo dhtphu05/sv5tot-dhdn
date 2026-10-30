@@ -42,7 +42,8 @@ interface UseStudentSupplementWorkflowParams {
   onSupplementBusinessResolved?: (
     updatedApp?: StudentApplicationData,
     explanationNote?: string,
-    requestId?: string
+    requestId?: string,
+    isFullyCompleted?: boolean
   ) => void;
 }
 
@@ -61,11 +62,16 @@ export function useStudentSupplementWorkflow({
   onSupplementBusinessResolved,
 }: UseStudentSupplementWorkflowParams) {
   const heroSuppScenario = SUPPLEMENT_DEMO_SCENARIOS.hero_evidence_only;
+  const isDemoPersona =
+    !isBackendMode() &&
+    (!initialData?.student?.studentId ||
+      initialData.student.studentId === '102220123');
+
   const incomingRequests =
     Array.isArray(initialData?.supplementRequests) &&
     initialData.supplementRequests.length > 0
       ? initialData.supplementRequests
-      : !isBackendMode() && initialSubmissionState === 'supplement_required'
+      : isDemoPersona && initialSubmissionState === 'supplement_required'
       ? heroSuppScenario.requests
       : [];
 
@@ -80,7 +86,7 @@ export function useStudentSupplementWorkflow({
   const [supplementChangesMap, setSupplementChangesMap] = useState<
     Record<string, SupplementChangeRecord>
   >(
-    !isBackendMode() &&
+    isDemoPersona &&
       (!initialData?.supplementRequests ||
         initialData.supplementRequests.length === 0) &&
       initialSubmissionState === 'supplement_required'
@@ -257,9 +263,18 @@ export function useStudentSupplementWorkflow({
     setIsSupplementSubmitting(false);
     setIsSupplementConfirmOpen(false);
 
-    // Update target request status to completed
+    const changeRec = supplementChangesMap[targetReq.id];
+    const finalExplanation = explanationNote || changeRec?.explanationNote;
+
+    // Update target request status to completed and store student explanation
     const updatedRequests = supplementRequests.map((r) =>
-      r.id === targetReq.id ? { ...r, status: 'completed' as const } : r
+      r.id === targetReq.id
+        ? {
+            ...r,
+            status: 'completed' as const,
+            studentExplanation: finalExplanation || r.studentExplanation,
+          }
+        : r
     );
     setSupplementRequests(updatedRequests);
 
@@ -268,10 +283,18 @@ export function useStudentSupplementWorkflow({
 
     if (allCompleted) {
       setSubmissionState('supplement_sent');
+      setActiveSupplementRequestId(null);
+    } else {
+      setSubmissionState('supplement_required');
+      const nextActive = remainingActive[0];
+      setActiveSupplementRequestId(nextActive.id);
+      setExpandedCriteria((prev) => ({
+        ...prev,
+        [nextActive.criterionId]: true,
+      }));
+      setExpandedRowId(nextActive.requirementId || null);
+      setHighlightedRequirementId(nextActive.requirementId || null);
     }
-
-    const changeRec = supplementChangesMap[targetReq.id];
-    const finalExplanation = explanationNote || changeRec?.explanationNote;
 
     const buildUpdatedApp = (prevApp: StudentApplicationData): StudentApplicationData => {
       const nextCriteria = prevApp.criteria.map((c) => {
@@ -331,13 +354,22 @@ export function useStudentSupplementWorkflow({
     // Attach newly supplemented evidence to application while preserving original files
     setApplication((prevApp) => buildUpdatedApp(prevApp));
 
-    setActivities(SUPPLEMENT_SENT_ACTIVITIES);
-    onSupplementBusinessResolved?.(resolvedNextApp, finalExplanation, targetReq.id);
+    if (allCompleted) {
+      setActivities(SUPPLEMENT_SENT_ACTIVITIES);
+    }
+    onSupplementBusinessResolved?.(resolvedNextApp, finalExplanation, targetReq.id, allCompleted);
 
-    showToast(
-      'Đã gửi thông tin bổ sung thành công. Hồ sơ đang chờ cán bộ xét lại.',
-      4000
-    );
+    if (allCompleted) {
+      showToast(
+        'Đã gửi toàn bộ thông tin bổ sung thành công. Hồ sơ đang chờ cán bộ xét lại.',
+        4000
+      );
+    } else {
+      showToast(
+        `Đã gửi bổ sung cho mục này. Còn ${remainingActive.length} nội dung cần bổ sung tiếp.`,
+        4000
+      );
+    }
   };
 
   const handleViewSupplementRequest = (requestId?: string) => {

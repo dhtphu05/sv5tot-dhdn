@@ -36,6 +36,7 @@ export interface RequirementRowProps {
   isSupplementWindowClosed?: boolean;
   isSupplementSubmitting?: boolean;
   onSendSupplement?: (requestId: string, explanationNote?: string) => void;
+  onUpdateExplanation?: (requestId: string, explanation: string) => void;
   customReviewStatus?: { status: RequirementStatus; customLabel?: string };
   reviewerActionSlot?: React.ReactNode;
   renderDeclarationReviewerSlot?: (
@@ -240,6 +241,7 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
           </span>
           <EvidenceCell
             files={allEvidenceFiles}
+            editable={!readOnly}
             isDeclarationEmpty={declarationCount === 0}
             onFileClick={onInspectEvidence}
             onExpandListClick={onToggleExpand}
@@ -395,6 +397,7 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
         <div className="grid-col-3 px-6 border-l border-[#E3EBF1] min-w-0 flex items-center h-full overflow-hidden">
           <EvidenceCell
             files={allEvidenceFiles}
+            editable={!readOnly}
             isDeclarationEmpty={declarationCount === 0}
             onFileClick={onInspectEvidence}
             onExpandListClick={onToggleExpand}

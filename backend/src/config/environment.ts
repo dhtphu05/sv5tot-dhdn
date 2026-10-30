@@ -1,5 +1,5 @@
 /**
- * 5TOT ĐHĐN — Backend V2 Environment Configuration
+ * 5TOT ÄHÄN â€” Backend V2 Environment Configuration
  * Validates runtime environment with typed schema and strict validation.
  */
 
@@ -29,6 +29,12 @@ export interface BackendEnvironment {
   R2_ENDPOINT?: string;
   R2_PRESIGNED_PUT_TTL_SECONDS: number;
   R2_PRESIGNED_GET_TTL_SECONDS: number;
+  RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL: string;
+  RESEND_MODE: 'mock' | 'safe' | 'live';
+  RESEND_SAFE_OVERRIDE_EMAIL?: string;
+  APP_PUBLIC_URL: string;
+  APP_URL: string;
 }
 
 export class ConfigurationError extends Error {
@@ -119,6 +125,46 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
   const putTtl = Number(env.R2_PRESIGNED_PUT_TTL_SECONDS || env.EVIDENCE_PRESIGNED_PUT_TTL_SECONDS || 300);
   const getTtl = Number(env.R2_PRESIGNED_GET_TTL_SECONDS || env.EVIDENCE_PRESIGNED_GET_TTL_SECONDS || 120);
 
+  // Resend Transactional Email Configuration
+  const resendApiKey = env.RESEND_API_KEY?.trim() || undefined;
+  const resendFromEmail =
+    env.RESEND_FROM_EMAIL?.trim() ||
+    'Hội Sinh viên Đại học Đà Nẵng <no-reply@sv5t.lcdkhoacntt-dut.page>';
+  const rawResendMode = (env.RESEND_MODE || 'safe').toLowerCase();
+  const resendMode = (['mock', 'safe', 'live'].includes(rawResendMode) ? rawResendMode : 'safe') as
+    | 'mock'
+    | 'safe'
+    | 'live';
+  const resendSafeOverride = env.RESEND_SAFE_OVERRIDE_EMAIL?.trim() || 'vanngocnhuy30032006@gmail.com';
+  // Public Frontend URL Configuration (P0 - Production Hardening)
+  const defaultPublicUrl = nodeEnv === 'production' ? 'https://sinhvien5tot.udn.vn' : 'http://localhost:5173';
+  const rawAppPublicUrl = env.APP_PUBLIC_URL?.trim() || env.APP_URL?.trim() || env.FRONTEND_URL?.trim() || defaultPublicUrl;
+  const appPublicUrl = rawAppPublicUrl.replace(/\/+$/, '');
+
+  try {
+    const parsedUrl = new URL(appPublicUrl);
+    if (nodeEnv === 'production') {
+      if (parsedUrl.protocol !== 'https:') {
+        throw new ConfigurationError(
+          `APP_PUBLIC_URL must use HTTPS in production. Received: "${appPublicUrl}".`
+        );
+      }
+      const host = parsedUrl.hostname.toLowerCase();
+      if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local') || host === '0.0.0.0') {
+        throw new ConfigurationError(
+          `APP_PUBLIC_URL cannot use localhost/loopback in production. Received: "${appPublicUrl}".`
+        );
+      }
+    }
+  } catch (err) {
+    if (err instanceof ConfigurationError) {
+      throw err;
+    }
+    throw new ConfigurationError(
+      `Invalid APP_PUBLIC_URL: "${appPublicUrl}". Must be a valid absolute URL.`
+    );
+  }
+
   return {
     NODE_ENV: nodeEnv as BackendEnvironment['NODE_ENV'],
     BACKEND_DATABASE_MODE: databaseMode,
@@ -145,6 +191,12 @@ export function parseEnvironment(env: Record<string, string | undefined> = proce
     R2_ENDPOINT: r2Endpoint,
     R2_PRESIGNED_PUT_TTL_SECONDS: isNaN(putTtl) || putTtl <= 0 ? 300 : putTtl,
     R2_PRESIGNED_GET_TTL_SECONDS: isNaN(getTtl) || getTtl <= 0 ? 120 : getTtl,
+    RESEND_API_KEY: resendApiKey,
+    RESEND_FROM_EMAIL: resendFromEmail,
+    RESEND_MODE: resendMode,
+    RESEND_SAFE_OVERRIDE_EMAIL: resendSafeOverride,
+    APP_PUBLIC_URL: appPublicUrl,
+    APP_URL: appPublicUrl,
   };
 }
 

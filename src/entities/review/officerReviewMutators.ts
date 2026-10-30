@@ -539,6 +539,14 @@ export function buildSendSupplementMutation(
       allowedActions: payload.allowedActions,
       deadline: payload.requestedDueDate,
     },
+    nextStudentApp: {
+      ...studentApp,
+      status: 'supplement_required' as const,
+      supplementRequests: [
+        newSupplementRequest,
+        ...(studentApp.supplementRequests || []).filter((r) => r.id !== newReqId),
+      ],
+    },
   };
 }
 

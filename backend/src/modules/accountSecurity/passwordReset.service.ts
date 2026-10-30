@@ -7,17 +7,20 @@ import crypto from 'node:crypto';
 import type { IPasswordResetRepository } from './passwordReset.repository';
 import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
-import type { IPasswordHasher} from '../auth/passwordHasher';
+import type { IPasswordHasher } from '../auth/passwordHasher';
 import { defaultPasswordHasher } from '../auth/passwordHasher';
+import type { IEmailService } from '../../shared/email/email.types';
 import { ApiError } from '../../shared/errors/apiError';
 import { getEnvironment } from '../../config/environment';
+import { logger } from '../../shared/logging/logger';
 
 export class PasswordResetService {
   constructor(
     private readonly resetRepo: IPasswordResetRepository,
     private readonly identityRepo: IIdentityRepository,
     private readonly sessionService: SessionService,
-    private readonly passwordHasher: IPasswordHasher = defaultPasswordHasher
+    private readonly passwordHasher: IPasswordHasher = defaultPasswordHasher,
+    private readonly emailService?: IEmailService
   ) {}
 
   private hashToken(rawToken: string): string {
@@ -40,6 +43,16 @@ export class PasswordResetService {
       return genericResponse;
     }
 
+    // In safe mode: strictly prevent issuing or sending reset tokens for third-party accounts
+    if (this.emailService && typeof this.emailService.canIssuePasswordResetFor === 'function') {
+      if (!this.emailService.canIssuePasswordResetFor(normalizedEmail)) {
+        logger.info(
+          `[PasswordReset:SAFE_MODE] Reset token issuance suppressed for non-whitelisted account in safe mode: ${normalizedEmail}`
+        );
+        return genericResponse;
+      }
+    }
+
     // Invalidate existing active tokens for this user
     await this.resetRepo.invalidateUserTokens(user.id);
 
@@ -49,6 +62,30 @@ export class PasswordResetService {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes TTL
 
     await this.resetRepo.createResetToken(user.id, tokenHash, expiresAt);
+
+    // Dispatch password reset email via EmailService
+    if (this.emailService) {
+      try {
+        const sendResult = await this.emailService.sendPasswordResetEmail({
+          to: user.email,
+          userName: user.fullName || user.email,
+          resetToken: rawToken,
+        });
+
+        if (!sendResult.success) {
+          // If delivery fails, invalidate token so an undelivered token does not linger
+          await this.resetRepo.invalidateUserTokens(user.id).catch(() => undefined);
+          logger.error('Password reset email delivery failed', {
+            error: sendResult.error,
+          });
+        }
+      } catch (err: unknown) {
+        await this.resetRepo.invalidateUserTokens(user.id).catch(() => undefined);
+        logger.error('Password reset email dispatch exception', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
 
     const env = getEnvironment();
     return {

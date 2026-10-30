@@ -156,4 +156,55 @@ describe('Backend V2: School Review Service Unit Tests', () => {
     assert.equal(forwarded.cityWorkflowStatus, 'CITY_UNASSIGNED');
     assert.equal(forwarded.currentReviewStage, 'CITY_REVIEW');
   });
+
+  it('Dịch vụ 1: dispatches supplement request email and in-app notification to student', async () => {
+    const dispatchedEmails: unknown[] = [];
+    const mockEmailService = {
+      send: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendPasswordResetEmail: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendSupplementRequestEmail: async (data: unknown) => {
+        dispatchedEmails.push(data);
+        return {
+          success: true,
+          originalRecipient: '102210001@edu.vn',
+          effectiveRecipient: '102210001@edu.vn',
+          isRerouted: false,
+          timestamp: new Date().toISOString(),
+        };
+      },
+    };
+
+    const serviceWithEmail = new SchoolReviewService(reviewRepo, appRepo, mockEmailService);
+    await serviceWithEmail.requestSupplement(mockOfficer, 'app-udn-001', {
+      criterionOrReqCode: 'TC4',
+      scopeType: 'CRITERION_OR_REQUIREMENT',
+      requestReason: 'Cần bổ sung minh chứng hiến máu đợt 2.',
+    });
+
+    // Check In-App Notification
+    assert.ok(reviewRepo.notifications.length >= 1);
+    const notif = reviewRepo.notifications[reviewRepo.notifications.length - 1];
+    assert.equal(notif.recipientUserId, 'user-student-1');
+    assert.equal(notif.category, 'SUPPLEMENT_REQUESTED');
+
+    // Check Email Dispatch
+    assert.equal(dispatchedEmails.length, 1);
+    const sentData = dispatchedEmails[0] as Record<string, unknown>;
+    assert.equal(sentData.to, '102210001@edu.vn');
+    assert.equal(sentData.applicationCode, 'HS-2026-001');
+    assert.equal(sentData.criterionOrReqCode, 'TC4');
+    assert.equal(sentData.requestReason, 'Cần bổ sung minh chứng hiến máu đợt 2.');
+  });
 });

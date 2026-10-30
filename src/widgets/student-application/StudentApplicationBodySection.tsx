@@ -95,6 +95,7 @@ export interface StudentApplicationBodySectionProps {
     declTitle: string
   ) => void;
   onSendSupplementRequestConfirm: (reqId: string, explanationNote?: string) => void;
+  onUpdateExplanation?: (requestId: string, explanation: string) => void;
   onSelectActivity: (activity: TrackingActivity) => void;
   onOpenPreSubmitReview: () => void;
   onApplySupplementScenario: (config: SupplementScenarioConfig) => void;

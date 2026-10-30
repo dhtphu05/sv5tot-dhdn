@@ -839,6 +839,7 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
                 onUpdateScopeStatus={handleUpdateScopeStatus}
                 onSaveInternalNote={handleSaveInternalNote}
                 onOpenSupplementModal={(scope) => {
+                  setSelectedScope(scope);
                   setSupplementModalState({ isOpen: true, scope });
                 }}
                 onSendSupplementRequest={handleConfirmSendSupplement}
@@ -858,6 +859,7 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
               onUpdateScopeStatus={handleUpdateScopeStatus}
               onSaveInternalNote={handleSaveInternalNote}
               onOpenSupplementModal={(scope) => {
+                setSelectedScope(scope);
                 setSupplementModalState({ isOpen: true, scope });
               }}
               onSendSupplementRequest={handleConfirmSendSupplement}
@@ -977,24 +979,54 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
         />
       )}
 
-      {supplementModalState.isOpen && (
-        <SupplementRequestFormModal
-          isOpen={supplementModalState.isOpen}
-          studentName={applicationRecord.student.fullName || studentApp.student?.fullName || 'Sinh viên'}
-          studentCode={applicationRecord.student.studentCode || studentApp.student?.studentId || ''}
-          scope={supplementModalState.scope}
-          requirementTitle={selectedRequirementDef.title}
-          declarationTitle={selectedDeclaration?.value}
-          isCityWindowClosed={false}
-          existingActiveRequest={getActiveSupplementForScope(
-            workspaceState,
-            supplementModalState.scope
-          )}
-          initialDraftMessage={supplementModalState.initialDraft}
-          onClose={() => setSupplementModalState({ isOpen: false, scope: selectedScope })}
-          onConfirmSend={handleConfirmSendSupplement}
-        />
-      )}
+      {supplementModalState.isOpen && (() => {
+        const modalCritDef = CRITERIA_DEFINITIONS[supplementModalState.scope.criterionId];
+        let modalReqTitle = selectedRequirementDef.title;
+        if (modalCritDef) {
+          for (const g of modalCritDef.groups) {
+            const reqMatch = g.requirements.find(
+              (r) => r.id === supplementModalState.scope.requirementId
+            );
+            if (reqMatch) {
+              modalReqTitle = reqMatch.title;
+              break;
+            }
+          }
+        }
+        const modalDecls = getDeclarationsForRequirement(
+          effectiveStudentApp,
+          supplementModalState.scope.criterionId,
+          supplementModalState.scope.requirementId
+        );
+        const modalDeclMatch = modalDecls.find(
+          (d) => d.id === supplementModalState.scope.declarationId
+        );
+        const modalDeclTitle = modalDeclMatch?.value || selectedDeclaration?.value;
+
+        return (
+          <SupplementRequestFormModal
+            isOpen={supplementModalState.isOpen}
+            studentName={applicationRecord.student.fullName || studentApp.student?.fullName || 'Sinh viên'}
+            studentCode={applicationRecord.student.studentCode || studentApp.student?.studentId || ''}
+            scope={supplementModalState.scope}
+            requirementTitle={modalReqTitle}
+            declarationTitle={modalDeclTitle}
+            isCityWindowClosed={false}
+            existingActiveRequest={getActiveSupplementForScope(
+              workspaceState,
+              supplementModalState.scope
+            )}
+            initialDraftMessage={supplementModalState.initialDraft}
+            onClose={() => setSupplementModalState({ isOpen: false, scope: selectedScope })}
+            onConfirmSend={handleConfirmSendSupplement}
+            onRevokeSupplement={() => {
+              handleUpdateScopeStatus(supplementModalState.scope, 'not_reviewed');
+              setSupplementModalState({ isOpen: false, scope: selectedScope });
+              showToast('Đã thu hồi yêu cầu bổ sung cho mục này.');
+            }}
+          />
+        );
+      })()}
 
       <OfficerReviewAuxiliaryModals
         isAppInfoModalOpen={isAppInfoModalOpen}

@@ -552,4 +552,19 @@ export class FakeSchoolReviewRepository implements ISchoolReviewRepository {
       payload: event.payload,
     });
   }
+
+  public readonly notifications: Array<Record<string, unknown>> = [];
+
+  public async createNotification(notification: {
+    recipientUserId: string;
+    category: string;
+    channel?: 'IN_APP' | 'EMAIL' | 'IN_APP_AND_EMAIL';
+    title: string;
+    body: string;
+    track?: 'INDIVIDUAL' | 'COLLECTIVE';
+    applicationId?: string;
+    actionUrl?: string;
+  }): Promise<void> {
+    this.notifications.push(notification);
+  }
 }

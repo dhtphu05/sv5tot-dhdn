@@ -63,6 +63,8 @@ export interface SupplementRequest {
   requestingReviewUnitName?: string;
   requestingOfficerId?: string;
   requestingOfficerName?: string;
+  studentExplanation?: string;
+  respondedAt?: string;
 }
 
 export interface SupplementSessionState {

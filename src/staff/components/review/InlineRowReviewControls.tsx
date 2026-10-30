@@ -250,7 +250,15 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
 
   const handleOpenSupplement = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsContextualSupplementOpen((prev) => !prev);
+    if (onOpenSupplementModal) {
+      onOpenSupplementModal({
+        criterionId,
+        requirementId: requirement.id,
+        declarationId: declId,
+      });
+    } else {
+      setIsContextualSupplementOpen((prev) => !prev);
+    }
   };
 
   const handleSendContextualSupplement = (payload: {
@@ -437,7 +445,7 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
               ? 'text-[#B45309] font-bold underline'
               : 'text-[#D97706] hover:text-[#B45309] hover:underline'
           }`}
-          title="Yêu cầu sinh viên bổ sung minh chứng hoặc cập nhật kê khai"
+          title={isNeedsSupplement ? 'Xem chi tiết yêu cầu bổ sung đang chờ phản hồi' : 'Yêu cầu sinh viên bổ sung minh chứng hoặc cập nhật kê khai'}
         >
           <AlertTriangle size={11.5} />
           <span>{isNeedsSupplement ? 'Đang yêu cầu BS' : 'Yêu cầu bổ sung'}</span>
@@ -478,8 +486,8 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
         </div>
       )}
 
-      {/* Inline Contextual Supplement Editor (LEAN-3) */}
-      {isContextualSupplementOpen && (
+      {/* Inline Contextual Supplement Editor (fallback when modal handler is not provided) */}
+      {!onOpenSupplementModal && isContextualSupplementOpen && (
         <ContextualSupplementEditor
           criterionId={criterionId}
           requirementId={requirement.id}

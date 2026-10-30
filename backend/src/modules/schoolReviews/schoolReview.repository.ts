@@ -2,7 +2,6 @@
  * 5TOT ĐHĐN — School Review Repository Interface (Backend V2)
  */
 
-import type { PaginatedResult } from '../../shared/query/pagination';
 import type {
   SchoolApplicationQueueItemDto,
   SchoolQueueFilter,
@@ -14,22 +13,27 @@ import type {
   ReviewJudgmentStatus,
   SupplementScopeType,
   SupplementLifecycleStatus,
+  SchoolPreliminaryStatus,
   SchoolRecommendation,
 } from './schoolReview.types';
 import type {
   IndividualApplicationDto,
   IndividualCriterionCode,
 } from '../individualApplications/individualApplication.types';
-import type { SystemRoleCode } from '../identity/identity.types';
+import type { PaginatedResult } from '../../shared/query/pagination';
 
 export interface ISchoolReviewRepository {
   listSchoolApplications(filter: SchoolQueueFilter): Promise<PaginatedResult<SchoolApplicationQueueItemDto>>;
 
   getSchoolQueueMetrics(schoolReviewUnitId: string, seasonId?: string): Promise<SchoolQueueMetricsDto>;
 
-  getApplicationWithReviewDetails(id: string): Promise<SchoolApplicationDetailDto | null>;
+  getApplicationWithReviewDetails(
+    applicationId: string
+  ): Promise<SchoolApplicationDetailDto | null>;
 
-  getCriterionJudgments(applicationId: string): Promise<SchoolCriterionJudgmentDto[]>;
+  getCriterionJudgments(
+    applicationId: string
+  ): Promise<SchoolCriterionJudgmentDto[]>;
 
   saveCriterionJudgment(data: {
     applicationId: string;
@@ -51,17 +55,22 @@ export interface ISchoolReviewRepository {
     deadlineAt?: Date;
     requestedByUserId: string;
     requestedByNameSnapshot: string;
-    requestedByRole: SystemRoleCode;
+    requestedByRole: string;
   }): Promise<SupplementRequestDto>;
 
-  getSupplementRequestById(id: string): Promise<SupplementRequestDto | null>;
+  listSupplementRequests(
+    applicationId: string,
+    stage?: 'SCHOOL' | 'CITY'
+  ): Promise<SupplementRequestDto[]>;
 
-  listSupplementRequests(applicationId: string, stage?: string): Promise<SupplementRequestDto[]>;
+  getSupplementRequestById(
+    supplementId: string
+  ): Promise<SupplementRequestDto | null>;
 
   resolveSupplementRequest(
-    id: string,
+    supplementId: string,
     status: SupplementLifecycleStatus,
-    resolvedByUserId: string,
+    officerUserId: string,
     note?: string
   ): Promise<SupplementRequestDto>;
 
@@ -73,12 +82,7 @@ export interface ISchoolReviewRepository {
     attachedEvidenceIds: string[];
   }): Promise<SupplementResponseDto>;
 
-  saveSchoolRecommendation(
-    applicationId: string,
-    recommendation: SchoolRecommendation,
-    reviewerUserId: string,
-    note?: string
-  ): Promise<void>;
+  saveSchoolRecommendation(applicationId: string, recommendation: SchoolRecommendation, reviewerUserId: string, note?: string): Promise<void>;
 
   forwardApplicationToCity(
     applicationId: string,
@@ -98,5 +102,16 @@ export interface ISchoolReviewRepository {
   recordOutboxEvent(event: {
     eventType: string;
     payload: Record<string, unknown>;
+  }): Promise<void>;
+
+  createNotification?(notification: {
+    recipientUserId: string;
+    category: string;
+    channel?: 'IN_APP' | 'EMAIL' | 'IN_APP_AND_EMAIL';
+    title: string;
+    body: string;
+    track?: 'INDIVIDUAL' | 'COLLECTIVE';
+    applicationId?: string;
+    actionUrl?: string;
   }): Promise<void>;
 }

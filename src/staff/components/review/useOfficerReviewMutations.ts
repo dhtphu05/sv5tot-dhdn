@@ -1,3 +1,5 @@
+import { parseFlexibleDateTime } from '../../../utils/dateUtils';
+import { apiRequest } from '../../../shared/api/httpClient';
 /**
  * 5TOT ĐHĐN — Officer Review Mutations Hook
  * Extracted mutation handlers for OfficerReviewWorkspace:
@@ -236,6 +238,53 @@ export function useOfficerReviewMutations({
           schoolReviewUnitName
         )
       );
+
+      // Authoritative Wire to Backend V2 School Reviews API
+      const targetAppId = applicationRecord?.applicationId || studentApp.applicationId;
+      if (targetAppId) {
+        let parsedDeadline: string | undefined = undefined;
+        if (payload.requestedDueDate) {
+          const d = parseFlexibleDateTime(payload.requestedDueDate);
+          if (d) {
+            parsedDeadline = d.toISOString();
+          }
+        }
+
+        const ACTION_LABELS: Record<string, string> = {
+          addEvidence: 'Bổ sung minh chứng mới',
+          editDeclaration: 'Chỉnh sửa thông tin kê khai',
+          replaceEvidence: 'Thay thế minh chứng hiện tại',
+          addDeclaration: 'Kê khai thêm thông tin / hoạt động mới',
+          explanation: 'Giải trình / xác nhận nội dung',
+        };
+        const friendlyActions = Array.isArray(payload.allowedActions)
+          ? payload.allowedActions.map((a) => ACTION_LABELS[a] || a).join(', ')
+          : 'Bổ sung minh chứng mới';
+
+        const supplementPayload = {
+          criterionOrReqCode: payload.scope.requirementId || payload.scope.criterionId,
+          scopeType: payload.scope.declarationId ? 'DECLARATION_ITEM' : 'CRITERION_OR_REQUIREMENT',
+          targetDeclarationId: payload.scope.declarationId || undefined,
+          criterionName: payload.criterionName,
+          requirementTitle: payload.requirementTitle,
+          declarationTitle: payload.declarationTitle,
+          requestReason: payload.message,
+          requiredAction: friendlyActions,
+          deadlineAt: parsedDeadline,
+        };
+
+        apiRequest(`/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`, {
+          method: 'POST',
+          body: supplementPayload,
+        })
+          .then(() => {
+            showToast('Đã gửi yêu cầu bổ sung và gửi email thông báo qua Resend đến sinh viên!');
+          })
+          .catch((err: any) => {
+            console.warn('Backend V2 School Review supplement request notice:', err?.message || err);
+          });
+      }
+
       showToast(
         'Đã gửi yêu cầu bổ sung. Trạng thái hồ sơ sinh viên và thông báo đã được đồng bộ.'
       );
@@ -250,6 +299,7 @@ export function useOfficerReviewMutations({
       isSchoolStage,
       schoolReviewUnitName,
       showToast,
+      applicationRecord,
     ]
   );
 

@@ -22,6 +22,8 @@ import type {
 } from '../individualApplications/individualApplication.types';
 import type { SystemRoleCode } from '../identity/identity.types';
 
+export type { SchoolPreliminaryStatus };
+
 export type ReviewJudgmentStatus =
   | 'NOT_REVIEWED'
   | 'REVIEWING'

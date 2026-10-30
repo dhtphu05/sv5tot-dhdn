@@ -69,7 +69,7 @@ export interface StudentApplicationInspectorsAndModalsProps {
   onConfirmSubmission: () => Promise<void>;
   isSupplementConfirmOpen: boolean;
   onSetIsSupplementConfirmOpen: (open: boolean) => void;
-  onConfirmSendSupplement: () => Promise<void>;
+  onConfirmSendSupplement: (explanation?: string) => Promise<void> | void;
   supplementChangesMap: Record<string, SupplementChangeRecord>;
   isSupplementSubmitting: boolean;
   isReviewPaused: boolean;

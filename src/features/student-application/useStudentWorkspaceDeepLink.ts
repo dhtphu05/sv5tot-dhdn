@@ -112,18 +112,31 @@ export function useStudentWorkspaceDeepLink({
     if (deepLinkTarget.enterSupplementMode) {
       const suppConfig = SUPPLEMENT_DEMO_SCENARIOS.hero_evidence_only;
       setSubmissionState('supplement_required');
-      setSupplementScenarioId('hero_evidence_only');
-      setSupplementRequests(suppConfig.requests);
-      setActiveSupplementRequestId(
-        deepLinkTarget.supplementRequestId || suppConfig.requests[0]?.id || null
-      );
-      setSupplementChangesMap(suppConfig.initialChanges || {});
       setIsSupplementWindowClosed(false);
+
       if (isDemoPersona) {
+        setSupplementScenarioId('hero_evidence_only');
+        setSupplementRequests(suppConfig.requests);
+        setActiveSupplementRequestId(
+          deepLinkTarget.supplementRequestId || suppConfig.requests[0]?.id || null
+        );
+        setSupplementChangesMap(suppConfig.initialChanges || {});
         setApplication(buildApplicationForSupplementScenario(suppConfig));
         setActivities(SUPPLEMENT_REQUIRED_ACTIVITIES);
-      } else if (initialData) {
-        setApplication(initialData);
+      } else {
+        const realSupps =
+          Array.isArray(initialData?.supplementRequests) &&
+          initialData.supplementRequests.length > 0
+            ? initialData.supplementRequests
+            : [];
+        setSupplementRequests(realSupps);
+        setActiveSupplementRequestId(
+          deepLinkTarget.supplementRequestId || realSupps[0]?.id || null
+        );
+        setSupplementChangesMap({});
+        if (initialData) {
+          setApplication(initialData);
+        }
       }
     } else if (deepLinkTarget.submissionStateOverride) {
       const nextState = deepLinkTarget.submissionStateOverride;

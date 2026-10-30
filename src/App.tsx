@@ -124,18 +124,27 @@ export default function App() {
     university: string;
   }>(() => {
     const actorCtx = getApiActorContext();
+    const isActorStudent = actorCtx?.role === 'STUDENT';
+    const initApp = initialSession.store.application;
+    const profileSnap = initApp?.applicantProfileSnapshot;
+    const rawName =
+      (isActorStudent && actorCtx?.userName) ||
+      profileSnap?.fullName ||
+      initApp?.student?.fullName ||
+      (allowMockStudentFallback ? MOCK_STUDENT.fullName : '');
+    const cleanName = rawName.startsWith('Cán bộ') ? (profileSnap?.fullName || '') : rawName;
+
     return {
-      fullName:
-        initialSession.store.application.student.fullName ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.userName || '' : '') ||
-        (allowMockStudentFallback ? MOCK_STUDENT.fullName : ''),
+      fullName: cleanName,
       studentId:
-        initialSession.store.application.student.studentId ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.studentCode || '' : '') ||
+        (isActorStudent && actorCtx?.studentCode) ||
+        profileSnap?.studentCode ||
+        initApp?.student?.studentId ||
         (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
       university:
-        initialSession.store.application.student.university ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.institutionName || '' : '') ||
+        (isActorStudent && actorCtx?.institutionName) ||
+        profileSnap?.institutionName ||
+        initApp?.student?.university ||
         (allowMockStudentFallback ? MOCK_STUDENT.university : ''),
     };
   });
@@ -385,6 +394,7 @@ export default function App() {
     setPrototypeScenarioId,
     setHomeScenario,
     setAppSubmissionState,
+    setSharedApplication,
     isActive: viewMode === 'staff_app',
   });
 
@@ -501,7 +511,18 @@ export default function App() {
           (res.profile as { studentCode?: string }).studentCode ||
           getApiActorContext()?.studentCode ||
           studentIdentity.studentId;
-        if (resolvedCode && !studentIdentity.studentId) {
+        const resolvedName = res.profile.fullName;
+        if (
+          resolvedName &&
+          (!studentIdentity.fullName || studentIdentity.fullName.startsWith('Cán bộ'))
+        ) {
+          setStudentIdentity((prev) => ({
+            ...prev,
+            fullName: resolvedName,
+            studentId: resolvedCode || prev.studentId,
+            university: res.profile.institutionName || prev.university,
+          }));
+        } else if (resolvedCode && !studentIdentity.studentId) {
           setStudentIdentity((prev) => ({
             fullName: res.profile.fullName || prev.fullName,
             studentId: resolvedCode,
@@ -907,17 +928,25 @@ export default function App() {
           })
         : sharedApplication;
 
-    const realSupps = Array.isArray(effectiveSharedApp.supplementRequests)
-      ? effectiveSharedApp.supplementRequests
-      : [];
+    const effectiveSupplementRequests =
+      Array.isArray(effectiveSharedApp.supplementRequests) &&
+      effectiveSharedApp.supplementRequests.length > 0
+        ? effectiveSharedApp.supplementRequests
+        : Array.isArray(sharedApplication.supplementRequests) &&
+          sharedApplication.supplementRequests.length > 0
+        ? sharedApplication.supplementRequests
+        : isNonDemo
+        ? []
+        : (!studentIdentity.studentId || studentIdentity.studentId === '102220123') && homeScenario === 'state_h_supplement_active'
+        ? base.supplementRequests
+        : [];
 
     return {
       ...base,
       advisoryCount: isNonDemo ? 0 : base.advisoryCount,
       submissionState: appSubmissionState,
       submissionDeadlineText: configuredDeadline,
-      supplementRequests:
-        isNonDemo || realSupps.length > 0 ? realSupps : base.supplementRequests,
+      supplementRequests: effectiveSupplementRequests,
       reviewStage: effectiveSharedApp.reviewStage || base.reviewStage,
       schoolReviewUnitName:
         effectiveSharedApp.schoolReviewUnitName ||
@@ -931,13 +960,20 @@ export default function App() {
         effectiveSharedApp.schoolRecommendation || base.schoolRecommendation,
       application: {
         ...effectiveSharedApp,
+        supplementRequests: effectiveSupplementRequests,
         schoolReviewUnitName:
           effectiveSharedApp.schoolReviewUnitName || studentIdentity.university,
         student: {
           ...effectiveSharedApp.student,
-          fullName: studentIdentity.fullName,
-          studentId: studentIdentity.studentId,
-          university: studentIdentity.university,
+          fullName:
+            studentIdentity.fullName && !studentIdentity.fullName.startsWith('Cán bộ')
+              ? studentIdentity.fullName
+              : effectiveSharedApp.applicantProfileSnapshot?.fullName ||
+                (effectiveSharedApp.student?.fullName && !effectiveSharedApp.student.fullName.startsWith('Cán bộ')
+                  ? effectiveSharedApp.student.fullName
+                  : 'Sinh viên'),
+          studentId: studentIdentity.studentId || effectiveSharedApp.student.studentId,
+          university: studentIdentity.university || effectiveSharedApp.student.university,
           academicYear: activeSeasonYear,
         },
       },

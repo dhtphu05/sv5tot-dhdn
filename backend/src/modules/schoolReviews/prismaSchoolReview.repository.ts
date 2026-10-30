@@ -284,7 +284,7 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
       applicantUserId: app['applicantUserId'] as string,
       applicantName: (app['fullNameSnapshot'] || applicant?.['fullName'] || '') as string,
       studentCode: (app['studentCodeSnapshot'] || applicant?.['studentCode'] || '') as string,
-      email: (applicant?.['email'] || '') as string,
+      email: (applicant?.['email'] || (app['applicantProfileSnapshot'] as any)?.email || '') as string,
       phone: (applicant?.['phone'] || null) as string | null,
       institutionId: app['institutionId'] as string,
       institutionName: (institution?.['officialName'] || '') as string,
@@ -607,10 +607,13 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     const prisma = await this.getPrisma();
     await prisma.auditLogEvent.create({
       data: {
+        requestId: `req-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         actorUserId: event.actorUserId,
-        action: event.action,
+        actorRole: 'SCHOOL_OFFICER',
+        actionCode: event.action,
         entityType: 'INDIVIDUAL_APPLICATION',
         entityId: event.applicationId,
+        applicationId: event.applicationId,
         metadata: {
           seasonId: event.seasonId,
           institutionId: event.institutionId,
@@ -628,8 +631,36 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     const prisma = await this.getPrisma();
     await prisma.transactionalOutboxEvent.create({
       data: {
+        aggregateType: 'INDIVIDUAL_APPLICATION',
+        aggregateId: (event.payload?.applicationId as string) || (event.payload?.supplementRequestId as string) || 'UNKNOWN',
         eventType: event.eventType,
-        payload: event.payload,
+        payload: event.payload as any,
+      },
+    });
+  }
+
+  public async createNotification(notification: {
+    recipientUserId: string;
+    category: string;
+    channel?: 'IN_APP' | 'EMAIL' | 'IN_APP_AND_EMAIL';
+    title: string;
+    body: string;
+    track?: 'INDIVIDUAL' | 'COLLECTIVE';
+    applicationId?: string;
+    actionUrl?: string;
+  }): Promise<void> {
+    const prisma = await this.getPrisma();
+    await prisma.notification.create({
+      data: {
+        recipientUserId: notification.recipientUserId,
+        category: notification.category,
+        channel: notification.channel === 'EMAIL' ? 'EMAIL' : 'IN_APP',
+        title: notification.title,
+        body: notification.body,
+        track: (notification.track as any) || 'INDIVIDUAL',
+        applicationId: notification.applicationId,
+        actionUrl: notification.actionUrl,
+        status: 'UNREAD',
       },
     });
   }

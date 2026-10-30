@@ -1,9 +1,10 @@
 /**
  * 5TOT ĐHĐN — Supplement Confirmation Dialog
- * Implements Prompt 10: Section 26 & Section 33
+ * Implements Prompt 10: Section 26 & Section 33 with robust Student Explanation field.
  */
 
-import { Send, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, X, MessageSquare } from 'lucide-react';
 import { Button } from '../buttons/Button';
 import { SupplementRequest, SupplementChangeRecord } from './supplementTypes';
 
@@ -13,7 +14,7 @@ export interface SupplementConfirmDialogProps {
   changes: SupplementChangeRecord | null;
   isSubmitting?: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (explanation?: string) => void;
 }
 
 export const SupplementConfirmDialog: React.FC<SupplementConfirmDialogProps> = ({
@@ -24,6 +25,14 @@ export const SupplementConfirmDialog: React.FC<SupplementConfirmDialogProps> = (
   onClose,
   onConfirm,
 }) => {
+  const [explanation, setExplanation] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setExplanation(changes?.explanationNote || request?.studentExplanation || '');
+    }
+  }, [isOpen, changes?.explanationNote, request?.studentExplanation]);
+
   if (!isOpen || !request) return null;
 
   const addedFilesCount = changes?.addedEvidenceFiles?.length || 0;
@@ -43,7 +52,7 @@ export const SupplementConfirmDialog: React.FC<SupplementConfirmDialogProps> = (
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-supplement-title"
-        className="relative z-10 w-full max-w-[500px] bg-white rounded-[18px] shadow-[0_20px_50px_rgba(0,0,0,0.16)] border border-[#DCE7EE] overflow-hidden p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150 select-none"
+        className="relative z-10 w-full max-w-[520px] bg-white rounded-[18px] shadow-[0_20px_50px_rgba(0,0,0,0.16)] border border-[#DCE7EE] overflow-hidden p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150 select-none"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -90,6 +99,25 @@ export const SupplementConfirmDialog: React.FC<SupplementConfirmDialogProps> = (
           </div>
         </div>
 
+        {/* Student Explanation Field */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="dialog-student-explanation"
+            className="text-[12.5px] font-bold text-[#172A3A] flex items-center gap-1.5"
+          >
+            <MessageSquare size={13} className="text-[#0D78AE]" />
+            <span>Nội dung giải trình (Tùy chọn)</span>
+          </label>
+          <textarea
+            id="dialog-student-explanation"
+            rows={3}
+            value={explanation}
+            onChange={(e) => setExplanation(e.target.value)}
+            placeholder="Nhập nội dung giải trình hoặc làm rõ thêm thông tin cho cán bộ thẩm định..."
+            className="w-full text-[12.5px] p-2.5 bg-[#F8FAFC] border border-[#DCE7EE] rounded-[8px] text-[#172A3A] placeholder:text-[#94A3B8] focus:outline-none focus:ring-1.5 focus:ring-[#0D78AE] focus:border-[#0D78AE] focus:bg-white resize-none"
+          />
+        </div>
+
         {/* Dialog Actions */}
         <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#E3EBF1]">
           <Button
@@ -105,7 +133,7 @@ export const SupplementConfirmDialog: React.FC<SupplementConfirmDialogProps> = (
           <Button
             variant="primary"
             size="md"
-            onClick={onConfirm}
+            onClick={() => onConfirm(explanation.trim())}
             disabled={isSubmitting}
             className="bg-[#18A6E0] hover:bg-[#1390C5] text-white font-semibold text-[13px] shadow-xs px-5"
           >

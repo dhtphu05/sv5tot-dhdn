@@ -95,6 +95,7 @@ export interface ApplicationCriterion {
 export interface StudentProfileDto {
   // Group A — Thông tin cá nhân
   fullName: string;
+  studentCode?: string;
   gender: 'Nam' | 'Nữ' | 'Khác' | string;
   dateOfBirth: string; // DD/MM/YYYY
   ethnicity: string;

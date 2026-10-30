@@ -104,7 +104,8 @@ export interface StudentPortalPageProps {
   handleSupplementBusinessResolved: (
     updatedApp?: StudentApplicationData,
     explanationNote?: string,
-    requestId?: string
+    requestId?: string,
+    isFullyCompleted?: boolean
   ) => void;
   handleEvidenceBusinessResolved: (fileId: string) => void;
   isToolbarHidden: boolean;
@@ -207,7 +208,13 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
         activeNavId={activeNavId}
         onNavSelect={handleSidebarNavSelect}
         notificationCount={actionableBadgeCount}
-        studentName={studentIdentity.fullName}
+        studentName={
+          studentIdentity.fullName && !studentIdentity.fullName.startsWith('Cán bộ')
+            ? studentIdentity.fullName
+            : activeStoreState.application.applicantProfileSnapshot?.fullName ||
+              activeStoreState.application.student.fullName ||
+              'Sinh viên'
+        }
         studentId={studentIdentity.studentId}
         studentUniversity={studentIdentity.university}
       >
