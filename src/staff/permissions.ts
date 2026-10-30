@@ -78,6 +78,7 @@ export const ROUTE_REQUIRED_CAPABILITIES: Record<
   results: ['FINALIZE_RESULTS', 'PUBLISH_RESULTS'],
   recognition: ['PUBLISH_RESULTS'],
   collective_review: [],
+  white_bird_review: [],
   analytics: ['VIEW_ANALYTICS'],
   notifications: [
     'VIEW_ASSIGNED_APPLICATIONS',
@@ -147,6 +148,10 @@ export function getPathForStaffRoute(
       return '/staff/results';
     case 'recognition':
       return '/staff/recognition';
+    case 'collective_review':
+      return '/staff/collective';
+    case 'white_bird_review':
+      return '/staff/white-bird';
     case 'analytics':
       return '/staff/analytics';
     case 'notifications':
@@ -244,6 +249,10 @@ export function parseStaffUrlPath(pathname: string): {
       return { routeId: 'results' };
     case '/staff/recognition':
       return { routeId: 'recognition' };
+    case '/staff/collective':
+      return { routeId: 'collective_review' };
+    case '/staff/white-bird':
+      return { routeId: 'white_bird_review' };
     case '/staff/analytics':
     case '/staff/analytics/overview':
     case '/staff/analytics/institutions':

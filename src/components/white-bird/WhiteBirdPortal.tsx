@@ -211,6 +211,7 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
           size: sizeFormatted,
           reqId: uploadTargetReqId,
           applicationId: activeApp.id,
+          ownerTrack: 'COLLECTIVE',
         });
 
         const newItem: ApplicationEvidence = {
@@ -220,6 +221,7 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
           size: sizeFormatted,
           uploadedAt: new Date().toLocaleDateString('vi-VN'),
           status: 'ready',
+          url: `/api/v2/portal/evidence/${encodeURIComponent(newEvidenceId)}`,
         };
         addWhiteBirdEvidence(activeApp.id, uploadTargetReqId, newItem);
       }
@@ -235,7 +237,12 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
     reqId: WhiteBirdRequirementId,
     evidenceId: string
   ) => {
-    if (!activeApp || activeApp.status !== 'draft') return;
+    if (
+      !activeApp ||
+      (activeApp.status !== 'draft' && activeApp.status !== 'supplement_requested')
+    ) {
+      return;
+    }
     await deleteEvidenceFile(evidenceId).catch(() => {});
     removeWhiteBirdEvidence(activeApp.id, reqId, evidenceId);
     showToast('Đã xóa tệp minh chứng');
@@ -271,13 +278,16 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
 
   const handleSubmitDossier = () => {
     if (!activeApp) return;
+    const wasSupplement = activeApp.status === 'supplement_requested';
     const res = submitWhiteBirdApplication(activeApp.id);
     if (!res.success) {
       showToast(res.error || 'Chưa đủ điều kiện nộp hồ sơ', 'warn');
       return;
     }
     showToast(
-      'Đã nộp hồ sơ Giải thưởng Cánh chim trắng về Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng!'
+      wasSupplement
+        ? 'Đã gửi lại hồ sơ bổ sung Giải thưởng Cánh chim trắng trực tiếp lên Văn phòng Hội Sinh viên ĐHĐN!'
+        : 'Đã nộp thẳng hồ sơ Giải thưởng Cánh chim trắng về Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng!'
     );
     setActiveTab('overview');
   };
@@ -476,8 +486,18 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
       case 'submitted':
       case 'under_review':
         return {
-          label: 'Đã nộp về Văn phòng Hội Sinh viên ĐHĐN · Đang chờ Hội đồng thẩm định',
+          label: 'Đã nộp thẳng về Văn phòng Hội Sinh viên ĐHĐN · Đang thẩm định',
           cls: 'bg-[#E0F2FE] text-[#0369A1] border-[#BAE6FD]',
+        };
+      case 'supplement_returned':
+        return {
+          label: 'Đã gửi lại hồ sơ bổ sung · Đang chờ cấp ĐHĐN thẩm định lại',
+          cls: 'bg-[#E0E7FF] text-[#3730A3] border-[#C7D2FE]',
+        };
+      case 'awaiting_committee':
+        return {
+          label: 'Đã qua thẩm định · Đang trình Hội đồng xét duyệt Giải thưởng Cánh chim trắng ĐHĐN',
+          cls: 'bg-[#F0F9FF] text-[#0284C7] border-[#BAE6FD]',
         };
       case 'recognized':
         return {
@@ -528,6 +548,29 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
             className={toastMessage.type === 'warn' ? 'text-[#D97706]' : 'text-[#38BDF8]'}
           />
           <span>{toastMessage.text}</span>
+        </div>
+      )}
+
+      {/* Supplement Request Alert Banner from UDN */}
+      {activeApp.status === 'supplement_requested' && (
+        <div className="bg-[#FFFBEB] border border-[#F59E0B] rounded-[13px] p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-[12.5px] font-extrabold text-[#B45309] uppercase tracking-wide flex items-center gap-1.5">
+              <AlertCircle size={15} />
+              <span>Yêu cầu bổ sung hồ sơ từ Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng</span>
+            </div>
+            <p className="text-[13px] text-[#78350F] font-medium">
+              {activeApp.supplementRequestNote ||
+                'Vui lòng kiểm tra và bổ sung thông tin/minh chứng theo yêu cầu của Cán bộ thẩm định cấp Đại học Đà Nẵng, sau đó nhấn “Gửi lại hồ sơ bổ sung về Văn phòng HSV ĐHĐN”.'}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => setActiveTab('workspace')}
+          >
+            Bổ sung & Gửi lại ngay
+          </Button>
         </div>
       )}
 
@@ -1346,13 +1389,16 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
             <div className="w-11 h-11 rounded-[11px] bg-[#E5F5FC] text-[#0D78AE] flex items-center justify-center shrink-0">
               {activeApp.status === 'recognized' ? (
                 <Award size={22} />
-              ) : activeApp.status === 'submitted' || activeApp.status === 'under_review' ? (
+              ) : activeApp.status === 'submitted' ||
+                activeApp.status === 'under_review' ||
+                activeApp.status === 'supplement_returned' ||
+                activeApp.status === 'awaiting_committee' ? (
                 <Clock size={22} />
               ) : (
                 <AlertCircle size={22} />
               )}
             </div>
-            <div>
+            <div className="space-y-2 flex-1">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#0D78AE]">
                 Hội đồng xét duyệt Giải thưởng “Cánh chim trắng” · Hội Sinh viên Việt Nam ĐHĐN
               </span>
@@ -1361,9 +1407,35 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
               </h2>
               <p className="text-[13px] text-[#55697B] mt-1 leading-relaxed">
                 {activeApp.status === 'draft'
-                  ? 'Hồ sơ hiện đang ở trạng thái Bản nháp. Vui lòng hoàn tất đủ 3 mục WB01, WB02, WB03 và nhấn “Nộp về Văn phòng HSV ĐHĐN” để đưa hồ sơ vào danh sách trình Hội đồng xét duyệt Giải thưởng.'
-                  : 'Hồ sơ đề cử đã được tiếp nhận tại Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng (Cơ quan Thường trực Giải thưởng) để tổng hợp trình Ban Thư ký và Hội đồng xét duyệt Giải thưởng Cánh chim trắng.'}
+                  ? 'Hồ sơ hiện đang ở trạng thái Bản nháp. Vui lòng hoàn tất đủ 3 mục WB01, WB02, WB03 và nhấn “Nộp về Văn phòng HSV ĐHĐN” để gửi thẳng hồ sơ lên Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng.'
+                  : activeApp.status === 'recognized'
+                  ? `Chúc mừng! Đề cử "${activeApp.nominationTitle}" (${categoryMeta.name}) đã được Hội đồng xét duyệt cấp Đại học Đà Nẵng quyết định trao Giải thưởng “Cánh chim trắng” (${
+                      activeApp.decisionNumber || 'Quyết định của Ban Thư ký HSV ĐHĐN'
+                    }).`
+                  : activeApp.status === 'not_recognized'
+                  ? 'Hội đồng xét duyệt cấp Đại học Đà Nẵng đã hoàn tất phiên họp xét chọn. Hồ sơ đề cử chưa đạt Giải thưởng trong kỳ xét này.'
+                  : 'Hồ sơ đề cử đã được nộp thẳng và tiếp nhận tại Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng (Cơ quan Thường trực Giải thưởng) để thẩm định và trình Hội đồng xét duyệt Giải thưởng Cánh chim trắng.'}
               </p>
+              {(activeApp.councilNote || activeApp.decisionNumber) && (
+                <div className="p-3.5 rounded-[10px] bg-[#F8FBFD] border border-[#DCE7EE] text-[12.5px] text-[#334155] space-y-1">
+                  {activeApp.decisionNumber && (
+                    <div>
+                      <strong>Số Quyết định:</strong> {activeApp.decisionNumber}
+                      {activeApp.decisionDate
+                        ? ` · Ngày ban hành: ${new Date(
+                            activeApp.decisionDate
+                          ).toLocaleDateString('vi-VN')}`
+                        : ''}
+                    </div>
+                  )}
+                  {activeApp.councilNote && (
+                    <div>
+                      <strong>Nhận xét / Kết luận của Hội đồng cấp ĐHĐN:</strong>{' '}
+                      {activeApp.councilNote}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

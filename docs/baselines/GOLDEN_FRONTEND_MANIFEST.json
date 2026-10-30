@@ -1,8 +1,8 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-30T03:01:23.812Z",
-  "totalProtectedFiles": 524,
+  "createdAt": "2026-10-30T05:04:07.708Z",
+  "totalProtectedFiles": 525,
   "files": [
     {
       "path": "index.html",
@@ -1161,18 +1161,18 @@
     },
     {
       "path": "src/components/white-bird/WhiteBirdPortal.tsx",
-      "sizeBytes": 62564,
-      "sha256": "07ae45a38d967fb659099d1ff08c22df5ec17bd58896c13e9acf6a103d2b1443"
+      "sizeBytes": 66521,
+      "sha256": "ea22efcab92d83d64b1c8c5cad1d07f80dfa39a201b07dae002ae556ac77facf"
     },
     {
       "path": "src/components/white-bird/whiteBirdStore.ts",
-      "sizeBytes": 12842,
-      "sha256": "de1e28c67d00012a1369caaac4970be8a86a85df6bcbf0fee6df8771da46a58f"
+      "sizeBytes": 17973,
+      "sha256": "65ef40ac916059e47f41340cd5cd57f6b6999e6d0ae88f27a646f2ee25e68947"
     },
     {
       "path": "src/components/white-bird/whiteBirdTypes.ts",
-      "sizeBytes": 7993,
-      "sha256": "a49714bd1ad1e694e8580686d159c818a389c81e2cb7c2360d9f42e2dc669288"
+      "sizeBytes": 8573,
+      "sha256": "981a5ad97734461c8ad3def378a06f021b94c42f1acfd8661b05358f90d20ccc"
     },
     {
       "path": "src/demo/fixtures/criteriaDefinitions.ts",
@@ -2151,18 +2151,18 @@
     },
     {
       "path": "src/staff/components/shell/AwardProgramContextBar.tsx",
-      "sizeBytes": 11017,
-      "sha256": "576a56fd45ef90da70ed54532fc9bdc70c4a95b487597ed72de210825757b6b8"
+      "sizeBytes": 11151,
+      "sha256": "8778e90c3c7a06be7a6958afc9607166ee18d647f52e3abb2ac06d00535c2456"
     },
     {
       "path": "src/staff/components/shell/StaffAppShell.tsx",
-      "sizeBytes": 20043,
-      "sha256": "90ac2d11a8007c40403e01acb5070b7ba5798f8ead8fb0ac427a7ca60dc503f2"
+      "sizeBytes": 20339,
+      "sha256": "127255e92791918496bb792ff44a9992806b71bdd7881ffd9edf454efbc1b27f"
     },
     {
       "path": "src/staff/components/views/StaffBackofficeViews.tsx",
-      "sizeBytes": 22286,
-      "sha256": "24eb93c612c665ad27e28b90eb576a10f89a80e5f9487c9fe1ad9913080ea3a6"
+      "sizeBytes": 22623,
+      "sha256": "a91d471393e36af9e31aca901ed53df6e712ac870c207a6c5ff0ab660d32f4bd"
     },
     {
       "path": "src/staff/criteriaProgress.ts",
@@ -2286,8 +2286,8 @@
     },
     {
       "path": "src/staff/permissions.ts",
-      "sizeBytes": 10715,
-      "sha256": "7576457e3712a42cc25bc1e0a4de06b2aece772284a3bd75b891f3c25713ca47"
+      "sizeBytes": 11022,
+      "sha256": "cb6a066f2c70d9e2107ab21525cfe8193d64a7bd81662489c55394ba5229d49d"
     },
     {
       "path": "src/staff/reviewSelectors.ts",
@@ -2321,8 +2321,8 @@
     },
     {
       "path": "src/staff/types.ts",
-      "sizeBytes": 10405,
-      "sha256": "65c6bc2fdf8c4435d03b271aeab3a144b7bb64a930ee9cab83c9e71bc2ea15da"
+      "sizeBytes": 10429,
+      "sha256": "561fc32d69ad2617dd4439b89deb7f075060fc36dddafef0966aa13ee328abf8"
     },
     {
       "path": "src/test/aiCommitteeSecretary.test.ts",
@@ -2578,6 +2578,11 @@
       "path": "src/widgets/staff-backoffice/StaffQueueAndUtilityViews.tsx",
       "sizeBytes": 31971,
       "sha256": "1580dde1d4be999dc72c588563b466ff8e010d76c2b3f116d7f3d1e759a11b2f"
+    },
+    {
+      "path": "src/widgets/staff-backoffice/StaffWhiteBirdReviewRoute.tsx",
+      "sizeBytes": 35388,
+      "sha256": "bbdcacc91c91c4f917b471a4a3f4c121071f1988a23776ba98cd7cfbf91e2d83"
     },
     {
       "path": "src/widgets/staff-backoffice/staffTableColumns.tsx",

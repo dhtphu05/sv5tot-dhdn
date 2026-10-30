@@ -326,6 +326,7 @@ export type StaffRouteId =
   | 'results'
   | 'recognition'
   | 'collective_review'
+  | 'white_bird_review'
   | 'analytics'
   | 'notifications'
   | 'admin_institutions'

@@ -69,6 +69,7 @@ import {
   buildIndividualApplicationTableColumns,
 } from '../../../widgets/staff-backoffice/staffTableColumns';
 import { StaffCollectiveReviewRoute } from '../../../widgets/staff-backoffice/StaffCollectiveReviewRoute';
+import { StaffWhiteBirdReviewRoute } from '../../../widgets/staff-backoffice/StaffWhiteBirdReviewRoute';
 import {
   StaffOverviewDashboard,
   StaffWorkloadView,
@@ -612,6 +613,16 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
         statusFilter={statusFilter}
         onChangeStatusFilter={setStatusFilter}
         collectiveTableColumns={collectiveTableColumns}
+        onSelectRoute={onSelectRoute}
+        activeSeasonLabel={activeSeasonLabel}
+      />
+    );
+  }
+
+  if (activeRouteId === 'white_bird_review') {
+    return (
+      <StaffWhiteBirdReviewRoute
+        currentUser={currentUser}
         onSelectRoute={onSelectRoute}
         activeSeasonLabel={activeSeasonLabel}
       />

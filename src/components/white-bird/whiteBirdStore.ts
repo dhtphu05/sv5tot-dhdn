@@ -1,6 +1,7 @@
 /**
  * 5TOT Đại học Đà Nẵng — Giải thưởng "Cánh chim trắng" Store & Backend Sync
  * Căn cứ Quyết định số 1720/QĐ-HSV của Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng.
+ * Hồ sơ Giải thưởng Cánh chim trắng được nộp thẳng lên Văn phòng Hội Sinh viên Việt Nam Đại học Đà Nẵng.
  */
 
 import { isBackendMode } from '../../shared/config/executionMode';
@@ -11,6 +12,7 @@ import {
   WhiteBirdEvidenceItem,
   WhiteBirdNomineeType,
   WhiteBirdRequirementId,
+  WhiteBirdRequirementJudgment,
   WhiteBirdWB01Declaration,
   WhiteBirdWB02Declaration,
   WhiteBirdWB03Declaration,
@@ -73,6 +75,14 @@ function syncAppToBackend(app: WhiteBirdApplication): void {
 
 export function getAllWhiteBirdApplications(): WhiteBirdApplication[] {
   return [...storeApps];
+}
+
+/**
+ * Trả về danh sách hồ sơ Giải thưởng Cánh chim trắng đã nộp thẳng lên Đại học Đà Nẵng.
+ * Tuyệt đối không hiển thị hồ sơ đang lưu nháp ('draft') của sinh viên ở cổng cán bộ / Hội đồng ĐHĐN.
+ */
+export function getSubmittedWhiteBirdApplicationsForUdn(): WhiteBirdApplication[] {
+  return storeApps.filter((app) => app.status !== 'draft');
 }
 
 export async function hydrateWhiteBirdStore(): Promise<WhiteBirdApplication[]> {
@@ -146,6 +156,9 @@ export function createWhiteBirdApplication(payload: {
     status: 'draft',
     createdAt: now,
     updatedAt: now,
+    wb01Judgment: 'not_reviewed',
+    wb02Judgment: 'not_reviewed',
+    wb03Judgment: 'not_reviewed',
     requirements: {
       wb01: {
         nominatingUnitType: 'BTK_HSV_TRUONG',
@@ -428,10 +441,12 @@ export function submitWhiteBirdApplication(appId: string): {
   }
 
   const now = new Date().toISOString();
+  const isResubmittingSupplement = current.status === 'supplement_requested';
   const updated: WhiteBirdApplication = {
     ...current,
-    status: 'submitted',
-    submittedAt: now,
+    status: isResubmittingSupplement ? 'supplement_returned' : 'submitted',
+    submittedAt: current.submittedAt || now,
+    ...(isResubmittingSupplement ? { supplementRespondedAt: now } : {}),
     updatedAt: now,
   };
   const next = [...storeApps];
@@ -439,4 +454,149 @@ export function submitWhiteBirdApplication(appId: string): {
   saveToStorage(next);
   syncAppToBackend(updated);
   return { success: true, application: updated };
+}
+
+/**
+ * Cán bộ xét duyệt cấp Đại học Đà Nẵng chấm từng thành phần WB01, WB02, WB03
+ */
+export function reviewWhiteBirdRequirement(
+  appId: string,
+  reqId: WhiteBirdRequirementId,
+  judgment: WhiteBirdRequirementJudgment,
+  reviewerNote: string,
+  officerName: string
+): WhiteBirdApplication | null {
+  const idx = storeApps.findIndex((a) => a.id === appId);
+  if (idx < 0) return null;
+  const current = storeApps[idx];
+  const now = new Date().toISOString();
+
+  const judgmentField =
+    reqId === 'WB01'
+      ? 'wb01Judgment'
+      : reqId === 'WB02'
+      ? 'wb02Judgment'
+      : 'wb03Judgment';
+  const noteField =
+    reqId === 'WB01'
+      ? 'wb01ReviewerNote'
+      : reqId === 'WB02'
+      ? 'wb02ReviewerNote'
+      : 'wb03ReviewerNote';
+
+  const nextStatus =
+    current.status === 'submitted' || current.status === 'supplement_returned'
+      ? 'under_review'
+      : current.status;
+
+  const updated: WhiteBirdApplication = {
+    ...current,
+    [judgmentField]: judgment,
+    [noteField]: reviewerNote,
+    reviewedByOfficerName: officerName,
+    reviewedAt: now,
+    status: nextStatus,
+    updatedAt: now,
+  };
+
+  const next = [...storeApps];
+  next[idx] = updated;
+  saveToStorage(next);
+  syncAppToBackend(updated);
+  return updated;
+}
+
+/**
+ * Cán bộ / Quản lý cấp Đại học Đà Nẵng yêu cầu sinh viên bổ sung hồ sơ Giải thưởng Cánh chim trắng
+ */
+export function requestWhiteBirdSupplementFromUdn(
+  appId: string,
+  supplementNote: string,
+  officerName: string
+): WhiteBirdApplication | null {
+  const idx = storeApps.findIndex((a) => a.id === appId);
+  if (idx < 0) return null;
+  const current = storeApps[idx];
+  const now = new Date().toISOString();
+
+  const updated: WhiteBirdApplication = {
+    ...current,
+    status: 'supplement_requested',
+    supplementRequestNote: supplementNote.trim(),
+    supplementRequestedAt: now,
+    reviewedByOfficerName: officerName,
+    updatedAt: now,
+  };
+
+  const next = [...storeApps];
+  next[idx] = updated;
+  saveToStorage(next);
+  syncAppToBackend(updated);
+  return updated;
+}
+
+/**
+ * Cán bộ / Quản lý cấp Đại học Đà Nẵng hoàn tất thẩm định và trình Hội đồng xét duyệt Giải thưởng Cánh chim trắng
+ */
+export function completeWhiteBirdOfficerReviewForCommittee(
+  appId: string,
+  summaryNote: string,
+  officerName: string
+): WhiteBirdApplication | null {
+  const idx = storeApps.findIndex((a) => a.id === appId);
+  if (idx < 0) return null;
+  const current = storeApps[idx];
+  const now = new Date().toISOString();
+
+  const updated: WhiteBirdApplication = {
+    ...current,
+    status: 'awaiting_committee',
+    wb01Judgment: current.wb01Judgment === 'not_reviewed' ? 'approved' : current.wb01Judgment,
+    wb02Judgment: current.wb02Judgment === 'not_reviewed' ? 'approved' : current.wb02Judgment,
+    wb03Judgment: current.wb03Judgment === 'not_reviewed' ? 'approved' : current.wb03Judgment,
+    councilNote: summaryNote.trim() || current.councilNote,
+    reviewedByOfficerName: officerName,
+    reviewedAt: now,
+    committeeSubmittedAt: now,
+    updatedAt: now,
+  };
+
+  const next = [...storeApps];
+  next[idx] = updated;
+  saveToStorage(next);
+  syncAppToBackend(updated);
+  return updated;
+}
+
+/**
+ * Hội đồng xét duyệt cấp Đại học Đà Nẵng ra quyết định Công nhận / Không công nhận Giải thưởng Cánh chim trắng
+ */
+export function recordWhiteBirdCommitteeDecision(
+  appId: string,
+  outcome: 'recognized' | 'not_recognized',
+  decisionNumber: string,
+  councilNote: string,
+  decidedByName: string
+): WhiteBirdApplication | null {
+  const idx = storeApps.findIndex((a) => a.id === appId);
+  if (idx < 0) return null;
+  const current = storeApps[idx];
+  const now = new Date().toISOString();
+
+  const updated: WhiteBirdApplication = {
+    ...current,
+    status: outcome,
+    decisionNumber:
+      decisionNumber.trim() || (outcome === 'recognized' ? '1720/QĐ-HSV-CCT' : ''),
+    decisionDate: now,
+    councilNote: councilNote.trim(),
+    decidedByName,
+    updatedAt: now,
+  };
+
+  const next = [...storeApps];
+  next[idx] = updated;
+  saveToStorage(next);
+  syncAppToBackend(updated);
+  return updated;
 }

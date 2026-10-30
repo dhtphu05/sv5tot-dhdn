@@ -809,7 +809,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     if (metadataRecord.ownerTrack === 'COLLECTIVE') {
       const colApp = portalState.collectiveApplications.find((c) => c.id === applicationId);
       const reqKey = requirementOrCriterionId.toLowerCase() as 'tt01' | 'tt02' | 'tt03' | 'tt04';
-      if (colApp && colApp.requirements[reqKey]) {
+      if (colApp && colApp.requirements?.[reqKey]) {
         colApp.requirements[reqKey].evidenceFiles = [
           ...(colApp.requirements[reqKey].evidenceFiles || []),
           {
@@ -822,6 +822,28 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
             url: metadataRecord.url,
           },
         ];
+      }
+
+      const wbApp = portalState.whiteBirdApplications.find((w) => w.id === applicationId);
+      const wbReqKey = requirementOrCriterionId.toLowerCase() as 'wb01' | 'wb02' | 'wb03';
+      if (wbApp && wbApp.requirements?.[wbReqKey]) {
+        const existing = Array.isArray(wbApp.requirements[wbReqKey].evidenceFiles)
+          ? wbApp.requirements[wbReqKey].evidenceFiles
+          : [];
+        if (!existing.some((f: Record<string, any>) => f.id === metadataRecord.id)) {
+          wbApp.requirements[wbReqKey].evidenceFiles = [
+            ...existing,
+            {
+              id: metadataRecord.id,
+              name: metadataRecord.name,
+              fileType: metadataRecord.fileType,
+              size: metadataRecord.size,
+              uploadedAt: metadataRecord.uploadedAt,
+              status: 'ready',
+              url: metadataRecord.url,
+            },
+          ];
+        }
       }
     }
 

@@ -15,11 +15,19 @@ export type WhiteBirdNomineeType = 'INDIVIDUAL' | 'COLLECTIVE';
 
 export type WhiteBirdRequirementId = 'WB01' | 'WB02' | 'WB03';
 
+export type WhiteBirdRequirementJudgment =
+  | 'not_reviewed'
+  | 'approved'
+  | 'needs_supplement'
+  | 'rejected';
+
 export type WhiteBirdApplicationStatus =
   | 'draft'
   | 'submitted'
   | 'under_review'
   | 'supplement_requested'
+  | 'supplement_returned'
+  | 'awaiting_committee'
   | 'recognized'
   | 'not_recognized';
 
@@ -165,8 +173,20 @@ export interface WhiteBirdApplication {
   createdAt: string;
   updatedAt: string;
   requirements: WhiteBirdRequirementsMap;
-  councilNote?: string;
+  wb01Judgment?: WhiteBirdRequirementJudgment;
+  wb02Judgment?: WhiteBirdRequirementJudgment;
+  wb03Judgment?: WhiteBirdRequirementJudgment;
+  wb01ReviewerNote?: string;
+  wb02ReviewerNote?: string;
+  wb03ReviewerNote?: string;
+  reviewedByOfficerName?: string;
+  reviewedAt?: string;
   supplementRequestNote?: string;
+  supplementRequestedAt?: string;
+  supplementRespondedAt?: string;
+  committeeSubmittedAt?: string;
+  councilNote?: string;
   decisionNumber?: string;
   decisionDate?: string;
+  decidedByName?: string;
 }

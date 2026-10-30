@@ -32,6 +32,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
+  Feather,
 } from 'lucide-react';
 import { formatAcademicYearLabel } from '@5tot/contracts';
 import { UdnEmblem, HsvEmblem } from '../../../components/brand/HsvLogo';
@@ -168,6 +169,14 @@ const ALL_STAFF_NAV_ITEMS: StaffNavItemConfig[] = [
     icon: <Users size={16} />,
     group: 'core',
     badgeKey: 'collective_pending',
+  },
+  {
+    id: 'white_bird_review',
+    label: 'Giải thưởng Cánh chim trắng',
+    managerLabel: 'Giải thưởng Cánh chim trắng',
+    committeeLabel: 'Giải thưởng Cánh chim trắng',
+    icon: <Feather size={16} />,
+    group: 'core',
   },
   {
     id: 'deadlines',
@@ -322,6 +331,7 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
         'results',
         'recognition',
         'collective_review',
+        'white_bird_review',
         'analytics',
         'notifications',
       ];
