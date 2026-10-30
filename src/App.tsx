@@ -1017,6 +1017,7 @@ export default function App() {
         else if (pathname === '/app/evidence') setActiveNavId('evidence');
         else if (pathname === '/app/application') setActiveNavId('application');
         else if (pathname === '/app/collective') setActiveNavId('collective');
+        else if (pathname === '/app/white-bird') setActiveNavId('white-bird');
         else if (pathname === '/app/profile') setActiveNavId('profile');
         savePersistedDemoSession({ viewMode: 'student_app' });
         return;
@@ -1104,6 +1105,8 @@ export default function App() {
           ? '/app/results'
           : navId === 'collective'
           ? '/app/collective'
+          : navId === 'white-bird'
+          ? '/app/white-bird'
           : '/app'
       );
       if (typeof window !== 'undefined') {

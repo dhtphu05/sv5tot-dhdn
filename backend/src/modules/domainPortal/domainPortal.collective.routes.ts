@@ -42,8 +42,35 @@ const EXT_TO_MIME: Record<string, string> = {
 
 export function registerCollectiveAndEvidencePortalRoutes(router: Router): void {
   // =========================================================================
-  // 3. COLLECTIVE APPLICATIONS LIFECYCLE
+  // 3. COLLECTIVE & WHITE BIRD APPLICATIONS LIFECYCLE
   // =========================================================================
+  router.get('/white-bird/applications', (_req: Request, res: Response): void => {
+    res.status(200).json({
+      success: true,
+      count: portalState.whiteBirdApplications.length,
+      data: portalState.whiteBirdApplications,
+    });
+  });
+
+  router.put('/white-bird/applications/:id', (req: Request, res: Response): void => {
+    const { id } = req.params;
+    const incoming = (req.body?.application || req.body || {}) as Record<string, any>;
+    const idx = portalState.whiteBirdApplications.findIndex((w) => w.id === id);
+    const merged: Record<string, any> = {
+      ...(idx >= 0 ? portalState.whiteBirdApplications[idx] : {}),
+      ...incoming,
+      id,
+      updatedAt: incoming.updatedAt || new Date().toISOString(),
+    };
+    if (idx >= 0) {
+      portalState.whiteBirdApplications[idx] = merged;
+    } else {
+      portalState.whiteBirdApplications.unshift(merged);
+    }
+    savePortalStateToDisk();
+    res.status(200).json({ success: true, data: merged });
+  });
+
   router.get('/collective/applications', (_req: Request, res: Response): void => {
     res.status(200).json({
       success: true,

@@ -11,6 +11,7 @@ import { StudentApplicationWorkspace } from '../../components/application/Studen
 import { EvidenceLibraryView } from '../../components/evidence/EvidenceLibraryView';
 import { StudentProfileView } from '../../components/profile/StudentProfileView';
 import { CollectivePortal } from '../../components/collective/CollectivePortal';
+import { WhiteBirdPortal } from '../../components/white-bird/WhiteBirdPortal';
 import { FinalResultView } from '../../components/results/FinalResultView';
 import {
   StudentNotificationsView,
@@ -256,6 +257,14 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
         ) : activeNavId === 'collective' ? (
           <CollectivePortal
             embeddedInStudentPortal
+            currentEmail={activeStoreState.application.student.email}
+            studentIdentity={studentIdentity}
+            studentProfileSnapshot={
+              activeStoreState.application.applicantProfileSnapshot
+            }
+          />
+        ) : activeNavId === 'white-bird' ? (
+          <WhiteBirdPortal
             currentEmail={activeStoreState.application.student.email}
             studentIdentity={studentIdentity}
             studentProfileSnapshot={

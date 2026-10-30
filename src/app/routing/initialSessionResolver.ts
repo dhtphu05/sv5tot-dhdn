@@ -567,6 +567,7 @@ export function resolveInitialRouteAndSession() {
     else if (pathname === '/app/evidence') targetNav = 'evidence';
     else if (pathname === '/app/application') targetNav = 'application';
     else if (pathname === '/app/collective') targetNav = 'collective';
+    else if (pathname === '/app/white-bird') targetNav = 'white-bird';
     else if (pathname === '/app/profile') targetNav = 'profile';
 
     savePersistedDemoSession({
