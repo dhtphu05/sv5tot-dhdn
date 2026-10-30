@@ -21,6 +21,8 @@ import {
   ArrowLeft,
   Send,
   Sparkles,
+  Clock,
+  RotateCcw,
 } from 'lucide-react';
 import { CRITERIA } from '../../../tokens';
 import { SupplementAllowedAction } from '../../../components/supplement/supplementTypes';
@@ -67,6 +69,7 @@ export interface SupplementRequestFormModalProps {
   initialDraftMessage?: string;
   onClose: () => void;
   onConfirmSend: (payload: SupplementRequestFormPayload) => boolean;
+  onRevokeSupplement?: () => void;
 }
 
 export const SupplementRequestFormModal: React.FC<
@@ -84,6 +87,7 @@ export const SupplementRequestFormModal: React.FC<
   initialDraftMessage,
   onClose,
   onConfirmSend,
+  onRevokeSupplement,
 }) => {
   const [step, setStep] = useState<'form' | 'confirm'>('form');
   const [message, setMessage] = useState<string>('');
@@ -217,6 +221,7 @@ export const SupplementRequestFormModal: React.FC<
       return;
     }
 
+    setStep('form');
     onClose();
   };
 
@@ -232,11 +237,17 @@ export const SupplementRequestFormModal: React.FC<
         <div className="px-6 py-4.5 bg-[#F8FBFD] border-b border-[#F0F4F8] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-[10px] bg-[#FEF6EB] text-[#B45309] flex items-center justify-center">
-              <MessageSquareWarning size={17} />
+              {existingActiveRequest ? (
+                <Clock size={17} />
+              ) : (
+                <MessageSquareWarning size={17} />
+              )}
             </div>
             <h2 className="text-[16px] font-bold text-[#172A3A]">
-              {step === 'confirm'
-                ? 'Gửi yêu cầu bổ sung?'
+              {existingActiveRequest
+                ? 'Yêu cầu bổ sung đang chờ phản hồi'
+                : step === 'confirm'
+                ? 'Xác nhận gửi yêu cầu bổ sung'
                 : 'Yêu cầu sinh viên bổ sung'}
             </h2>
           </div>
@@ -297,48 +308,84 @@ export const SupplementRequestFormModal: React.FC<
           </div>
         ) : existingActiveRequest ? (
           /* ================================================================= */
-          /* GUARD 2: DUPLICATE ACTIVE REQUEST (Section 49)                    */
+          /* GUARD 2: ACTIVE SUPPLEMENT DETAILS & ACTIONS                      */
           /* ================================================================= */
-          <div className="p-5 space-y-4">
-            <div className="p-4 rounded-[10px] bg-[#FEF6EB] border border-[#FADDB6] text-[#92400E] space-y-2 text-[13px]">
-              <div className="font-bold text-[#B45309] flex items-center gap-2">
-                <AlertCircle size={16} />
-                <span>Đang có yêu cầu bổ sung cho nội dung này.</span>
-              </div>
-              <p className="text-[12px]">
-                Hệ thống không tạo trùng lặp yêu cầu bổ sung khi sinh viên đang trong quá trình phản hồi cho cùng một nội dung kê khai.
-              </p>
-
-              {!viewingExistingDetail ? (
-                <button
-                  type="button"
-                  onClick={() => setViewingExistingDetail(true)}
-                  className="text-[12px] font-bold text-[#B45309] underline cursor-pointer pt-1"
-                >
-                  Xem yêu cầu hiện tại
-                </button>
-              ) : (
-                <div className="mt-2 p-3 rounded-[8px] bg-white border border-[#FDE68A] space-y-1.5 text-[12px] text-[#172A3A]">
-                  <div className="font-bold text-[#0F2335]">
-                    Nội dung yêu cầu đã gửi ({existingActiveRequest.requestedAt}):
-                  </div>
-                  <p>“{existingActiveRequest.message}”</p>
-                  <div className="text-[11.5px] text-[#526B7C]">
-                    Thao tác cho phép:{' '}
-                    {existingActiveRequest.allowedActions
-                      .map(
-                        (a) =>
-                          SUPPLEMENT_ALLOWED_ACTION_OPTIONS.find(
-                            (o) => o.id === a
-                          )?.label || a
-                      )
-                      .join(', ')}
-                  </div>
+          <div className="p-6 space-y-4">
+            {/* Status Highlight Banner */}
+            <div className="p-4 rounded-[12px] bg-[#FEF6EB] border border-[#FADDB6] text-[#92400E] space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="font-bold text-[#B45309] flex items-center gap-2 text-[13px]">
+                  <Clock size={16} className="text-[#D97706]" />
+                  <span>Trạng thái: Đang chờ sinh viên bổ sung</span>
                 </div>
-              )}
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FDE68A] text-[#92400E]">
+                  Đã gửi yêu cầu
+                </span>
+              </div>
+              <p className="text-[12px] text-[#78350F] leading-relaxed">
+                Hệ thống đã gửi thông báo và mở quyền cập nhật cho sinh viên đối với mục kê khai này. Không thể tạo thêm yêu cầu mới cho đến khi sinh viên phản hồi hoặc cán bộ thu hồi yêu cầu.
+              </p>
             </div>
 
-            <div className="flex justify-end">
+            {/* Active Request Details Card */}
+            <div className="p-4 rounded-[14px] bg-[#F8FBFD] border border-[#E2EEF5] space-y-2.5 text-[12.5px]">
+              <div className="grid grid-cols-3 gap-2">
+                <span className="text-[#526B7C] font-medium">Thời gian gửi:</span>
+                <span className="col-span-2 font-semibold text-[#172A3A] tabular-nums">
+                  {existingActiveRequest.requestedAt || 'Vừa xong'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <span className="text-[#526B7C] font-medium">Hạn đề nghị bổ sung:</span>
+                <span className="col-span-2 font-bold text-[#0D78AE] tabular-nums">
+                  {existingActiveRequest.deadline || 'Theo lịch chung'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <span className="text-[#526B7C] font-medium">Thao tác cho phép:</span>
+                <span className="col-span-2 flex flex-wrap gap-1.5">
+                  {(existingActiveRequest.allowedActions || []).map((action) => (
+                    <span
+                      key={action}
+                      className="px-2 py-0.5 rounded-[5px] bg-[#EBF4FA] border border-[#D0E8F5] text-[#0D78AE] font-semibold text-[11px]"
+                    >
+                      {SUPPLEMENT_ALLOWED_ACTION_OPTIONS.find((o) => o.id === action)?.label || action}
+                    </span>
+                  ))}
+                </span>
+              </div>
+
+              <div className="pt-2 border-t border-[#EAEFF4] space-y-1">
+                <span className="text-[#526B7C] font-medium block">
+                  Nội dung yêu cầu gửi sinh viên:
+                </span>
+                <div className="p-3 rounded-[8px] bg-white border border-[#DCE7EE] text-[12.5px] text-[#172A3A] italic font-medium leading-relaxed">
+                  “{existingActiveRequest.message}”
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2 border-t border-[#F0F4F8] flex items-center justify-between gap-2.5">
+              {onRevokeSupplement ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRevokeSupplement();
+                    onClose();
+                  }}
+                  className="h-[38px] px-3.5 rounded-[12px] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#DC2626] font-semibold text-[12.5px] inline-flex items-center gap-1.5 cursor-pointer transition-colors border border-[#FECACA]"
+                  title="Thu hồi yêu cầu bổ sung và chuyển lại về trạng thái Chưa xét"
+                >
+                  <RotateCcw size={13.5} />
+                  <span>Thu hồi yêu cầu bổ sung</span>
+                </button>
+              ) : (
+                <div />
+              )}
+
               <Button variant="secondary" size="sm" onClick={onClose}>
                 Đóng
               </Button>

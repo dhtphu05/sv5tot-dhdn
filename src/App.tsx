@@ -120,18 +120,27 @@ export default function App() {
     university: string;
   }>(() => {
     const actorCtx = getApiActorContext();
+    const isActorStudent = actorCtx?.role === 'STUDENT';
+    const initApp = initialSession.store.application;
+    const profileSnap = initApp?.applicantProfileSnapshot;
+    const rawName =
+      (isActorStudent && actorCtx?.userName) ||
+      profileSnap?.fullName ||
+      initApp?.student?.fullName ||
+      (allowMockStudentFallback ? MOCK_STUDENT.fullName : '');
+    const cleanName = rawName.startsWith('Cán bộ') ? (profileSnap?.fullName || '') : rawName;
+
     return {
-      fullName:
-        initialSession.store.application.student.fullName ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.userName || '' : '') ||
-        (allowMockStudentFallback ? MOCK_STUDENT.fullName : ''),
+      fullName: cleanName,
       studentId:
-        initialSession.store.application.student.studentId ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.studentCode || '' : '') ||
+        (isActorStudent && actorCtx?.studentCode) ||
+        profileSnap?.studentCode ||
+        initApp?.student?.studentId ||
         (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
       university:
-        initialSession.store.application.student.university ||
-        (actorCtx?.role === 'STUDENT' ? actorCtx.institutionName || '' : '') ||
+        (isActorStudent && actorCtx?.institutionName) ||
+        profileSnap?.institutionName ||
+        initApp?.student?.university ||
         (allowMockStudentFallback ? MOCK_STUDENT.university : ''),
     };
   });
@@ -493,7 +502,18 @@ export default function App() {
           (res.profile as { studentCode?: string }).studentCode ||
           getApiActorContext()?.studentCode ||
           studentIdentity.studentId;
-        if (resolvedCode && !studentIdentity.studentId) {
+        const resolvedName = res.profile.fullName;
+        if (
+          resolvedName &&
+          (!studentIdentity.fullName || studentIdentity.fullName.startsWith('Cán bộ'))
+        ) {
+          setStudentIdentity((prev) => ({
+            ...prev,
+            fullName: resolvedName,
+            studentId: resolvedCode || prev.studentId,
+            university: res.profile.institutionName || prev.university,
+          }));
+        } else if (resolvedCode && !studentIdentity.studentId) {
           setStudentIdentity((prev) => ({
             fullName: res.profile.fullName || prev.fullName,
             studentId: resolvedCode,
@@ -796,9 +816,15 @@ export default function App() {
           effectiveSharedApp.schoolReviewUnitName || studentIdentity.university,
         student: {
           ...effectiveSharedApp.student,
-          fullName: studentIdentity.fullName,
-          studentId: studentIdentity.studentId,
-          university: studentIdentity.university,
+          fullName:
+            studentIdentity.fullName && !studentIdentity.fullName.startsWith('Cán bộ')
+              ? studentIdentity.fullName
+              : effectiveSharedApp.applicantProfileSnapshot?.fullName ||
+                (effectiveSharedApp.student?.fullName && !effectiveSharedApp.student.fullName.startsWith('Cán bộ')
+                  ? effectiveSharedApp.student.fullName
+                  : 'Sinh viên'),
+          studentId: studentIdentity.studentId || effectiveSharedApp.student.studentId,
+          university: studentIdentity.university || effectiveSharedApp.student.university,
           academicYear: activeSeasonYear,
         },
       },

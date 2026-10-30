@@ -445,7 +445,7 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
               ? 'text-[#B45309] font-bold underline'
               : 'text-[#D97706] hover:text-[#B45309] hover:underline'
           }`}
-          title="Yêu cầu sinh viên bổ sung minh chứng hoặc cập nhật kê khai"
+          title={isNeedsSupplement ? 'Xem chi tiết yêu cầu bổ sung đang chờ phản hồi' : 'Yêu cầu sinh viên bổ sung minh chứng hoặc cập nhật kê khai'}
         >
           <AlertTriangle size={11.5} />
           <span>{isNeedsSupplement ? 'Đang yêu cầu BS' : 'Yêu cầu bổ sung'}</span>

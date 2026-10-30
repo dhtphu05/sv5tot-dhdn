@@ -261,6 +261,7 @@ export function useStaffWorkflowCoordination({
   );
 
   useEffect(() => {
+    if (!isActive) return;
     if (staffUser && (staffUser.primaryRole === 'SCHOOL_OFFICER' || staffUser.primaryRole === 'CITY_OFFICER')) {
       const current = getApiActorContext();
       if (!current || current.userId !== staffUser.id) {
@@ -274,7 +275,7 @@ export function useStaffWorkflowCoordination({
         });
       }
     }
-  }, [staffUser]);
+  }, [staffUser, isActive]);
   const [staffRouteId, setStaffRouteId] =
     useState<StaffRouteId>(initialStaffRouteId);
   const [activeOfficerScenarioId, setActiveOfficerScenarioId] =

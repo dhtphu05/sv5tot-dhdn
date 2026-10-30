@@ -1015,6 +1015,11 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
             initialDraftMessage={supplementModalState.initialDraft}
             onClose={() => setSupplementModalState({ isOpen: false, scope: selectedScope })}
             onConfirmSend={handleConfirmSendSupplement}
+            onRevokeSupplement={() => {
+              handleUpdateScopeStatus(supplementModalState.scope, 'not_reviewed');
+              setSupplementModalState({ isOpen: false, scope: selectedScope });
+              showToast('Đã thu hồi yêu cầu bổ sung cho mục này.');
+            }}
           />
         );
       })()}
