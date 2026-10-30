@@ -298,6 +298,7 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
           <FinalResultView
             key={`${derivedResultScenario}-${scenarioResetKey}`}
             hasApplication={activeStoreState.hasApplication}
+            application={activeStoreState.application}
             submissionState={activeStoreState.submissionState}
             studentIdentity={studentIdentity}
             onStartNewApplication={handleStartNewApplication}

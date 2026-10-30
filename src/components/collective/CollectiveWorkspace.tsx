@@ -196,6 +196,38 @@ export const CollectiveWorkspace: React.FC<CollectiveWorkspaceProps> = ({
         onOpenPreSubmit={() => setIsPreSubmitOpen(true)}
       />
 
+      {/* Active Supplement Request Banner */}
+      {(status === 'city_supplement_pending' ||
+        status === 'returned_for_correction' ||
+        (currentApp.supplementRequests || []).some((s) => s.status === 'pending')) && (
+        <div className="max-w-7xl w-full mx-auto px-6 pt-4 shrink-0">
+          <div className="p-3.5 rounded-[12px] bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1 text-[12.5px]">
+              <div className="font-extrabold flex items-center gap-2">
+                <span>Yêu cầu bổ sung hồ sơ từ Cán bộ xét duyệt cấp Đại học Đà Nẵng:</span>
+              </div>
+              {(currentApp.supplementRequests || [])
+                .filter((s) => s.status === 'pending')
+                .map((req) => (
+                  <div key={req.id} className="text-[12px] text-[#78350F]">
+                    • <strong>[{req.requirementId}]</strong> {req.reason}
+                    {req.requestedByOfficerName ? ` (${req.requestedByOfficerName})` : ''}
+                  </div>
+                ))}
+              {(currentApp.correctionHistory?.length || 0) > 0 &&
+                !(currentApp.supplementRequests || []).some((s) => s.status === 'pending') && (
+                  <div className="text-[12px] text-[#78350F]">
+                    • {currentApp.correctionHistory[currentApp.correctionHistory.length - 1]?.reason}
+                  </div>
+                )}
+            </div>
+            <div className="text-[11.5px] font-semibold text-[#B45309]">
+              Sau khi cập nhật kê khai/minh chứng, bấm &ldquo;Gửi hồ sơ bổ sung lên ĐHĐN&rdquo; ở góc phải trên cùng.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Workspace Body */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-6 py-5 flex gap-6 overflow-hidden">
         {/* Left Rail: 4 Requirements Navigation */}

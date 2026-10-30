@@ -685,6 +685,111 @@ export default function App() {
           });
           return finalApp;
         });
+
+        const synthesizedNotifs: StudentNotificationItem[] = [];
+        const rawSupps = Array.isArray(hydratedApp.supplementRequests)
+          ? hydratedApp.supplementRequests
+          : [];
+        rawSupps.forEach((sr: Record<string, any>, idx: number) => {
+          const isResolved =
+            sr.status === 'completed' ||
+            sr.status === 'resolved' ||
+            sr.staffStatus === 'student_returned' ||
+            st === 'supplement_sent';
+          synthesizedNotifs.push({
+            id: sr.id ? `notif-supp-${sr.id}` : `notif-supp-real-${idx}`,
+            type: isResolved ? 'supplement_received' : 'supplement_requested',
+            isActionable: !isResolved,
+            isActionResolved: isResolved,
+            isRead: isResolved,
+            priority: 1,
+            timeGroup: 'today',
+            title: isResolved
+              ? `Đã gửi bổ sung: ${sr.criterionName || 'Tiêu chí hồ sơ'}`
+              : `Cần bổ sung minh chứng: ${sr.criterionName || 'Tiêu chí hồ sơ'}`,
+            criterionId: sr.criterionId,
+            criterionName: sr.criterionName,
+            contextLabel: sr.targetLabel || sr.requirementName,
+            message:
+              sr.message ||
+              'Cán bộ xét duyệt đề nghị bổ sung hoặc làm rõ minh chứng cho nội dung kê khai này.',
+            timestamp: sr.requestedAt || 'Hôm nay',
+            actionLabel: isResolved ? 'Xem hồ sơ' : 'Thực hiện bổ sung',
+            target: {
+              targetType: 'SUPPLEMENT_REQUEST',
+              applicationId: hydratedApp.applicationId,
+              criterionId: sr.criterionId,
+              requirementId: sr.requirementId,
+              declarationId: sr.declarationId,
+              supplementRequestId: sr.id,
+            },
+          });
+        });
+
+        if (st === 'recognized' || st === 'not_recognized') {
+          synthesizedNotifs.unshift({
+            id: `notif-res-${hydratedApp.applicationId}`,
+            type: 'result_published',
+            isActionable: false,
+            isActionResolved: true,
+            isRead: false,
+            priority: 4,
+            timeGroup: 'today',
+            title:
+              st === 'recognized'
+                ? 'Chúc mừng! Kết quả xét chọn Sinh viên 5 tốt đã được công bố'
+                : 'Thông báo kết quả xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+            message:
+              st === 'recognized'
+                ? `Hồ sơ ${hydratedApp.applicationId} đã được công nhận danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng${
+                    hydratedApp.decisionCode ? ` (Quyết định ${hydratedApp.decisionCode})` : ''
+                  }.`
+                : hydratedApp.councilFeedback ||
+                  `Hội đồng xét chọn đã hoàn tất đợt xét duyệt đối với hồ sơ ${hydratedApp.applicationId}.`,
+            timestamp: hydratedApp.awardedAt || 'Vừa cập nhật',
+            actionLabel: 'Xem kết quả',
+            target: {
+              targetType: 'RESULT',
+              applicationId: hydratedApp.applicationId,
+            },
+          });
+        } else if (!isDraftApp) {
+          synthesizedNotifs.push({
+            id: `notif-sub-${hydratedApp.applicationId}`,
+            type: st === 'all_reviewed' ? 'review_started' : 'submission_received',
+            isActionable: false,
+            isActionResolved: true,
+            isRead: true,
+            priority: 5,
+            timeGroup: 'earlier',
+            title:
+              st === 'all_reviewed'
+                ? 'Đã hoàn tất thẩm định 5 tiêu chí — Chờ Hội đồng xét chọn'
+                : hydratedApp.reviewStage === 'CITY'
+                ? 'Hồ sơ đã được chuyển lên Hội Sinh viên Đại học Đà Nẵng'
+                : 'Hồ sơ đã được nộp về Đơn vị xét sơ tuyển',
+            message:
+              st === 'all_reviewed'
+                ? 'Hồ sơ của bạn đã được thẩm định đủ 5 tiêu chí và chuyển sang Hội đồng xét chọn cấp Đại học Đà Nẵng.'
+                : `Hồ sơ ${hydratedApp.applicationId} đang được xử lý tại ${
+                    hydratedApp.reviewStage === 'CITY'
+                      ? 'Hội Sinh viên Việt Nam Đại học Đà Nẵng'
+                      : hydratedApp.schoolReviewUnitName || studentIdentity.university
+                  }.`,
+            timestamp: hydratedApp.submittedAt || 'Đã ghi nhận',
+            actionLabel: 'Xem hồ sơ',
+            target: {
+              targetType: 'APPLICATION',
+              applicationId: hydratedApp.applicationId,
+            },
+          });
+        }
+
+        if (synthesizedNotifs.length > 0) {
+          setNotifications(synthesizedNotifs);
+          savePersistedDemoSession({ mutatedNotifications: synthesizedNotifs });
+        }
+
         setPrototypeScenarioId(resolvedScenarioId);
         setHomeScenario(resolvedHomeScenario);
         setAppSubmissionState(resolvedSubState);
@@ -765,15 +870,28 @@ export default function App() {
           })
         : sharedApplication;
 
+    const realSupps = Array.isArray(effectiveSharedApp.supplementRequests)
+      ? effectiveSharedApp.supplementRequests
+      : [];
+
     return {
       ...base,
       advisoryCount: isNonDemo ? 0 : base.advisoryCount,
       submissionState: appSubmissionState,
       submissionDeadlineText: configuredDeadline,
+      supplementRequests:
+        isNonDemo || realSupps.length > 0 ? realSupps : base.supplementRequests,
+      reviewStage: effectiveSharedApp.reviewStage || base.reviewStage,
       schoolReviewUnitName:
         effectiveSharedApp.schoolReviewUnitName ||
         studentIdentity.university ||
         base.schoolReviewUnitName,
+      schoolPreliminaryStatus:
+        effectiveSharedApp.schoolPreliminaryStatus || base.schoolPreliminaryStatus,
+      isSchoolForwarded:
+        effectiveSharedApp.isSchoolForwarded ?? base.isSchoolForwarded,
+      schoolRecommendation:
+        effectiveSharedApp.schoolRecommendation || base.schoolRecommendation,
       application: {
         ...effectiveSharedApp,
         schoolReviewUnitName:

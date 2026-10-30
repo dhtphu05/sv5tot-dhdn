@@ -357,7 +357,12 @@ export function submitCollectiveDirectlyToCity(
   }
 
   // Idempotency check (Section 49): If already submitted, return current state without duplicating events
-  if (app.status === 'city_unassigned' || app.status === 'city_assigned' || app.status === 'city_in_review') {
+  if (
+    app.status === 'city_unassigned' ||
+    app.status === 'city_assigned' ||
+    app.status === 'city_in_review' ||
+    app.status === 'city_supplement_returned'
+  ) {
     return {
       success: true,
       message: 'Hồ sơ đã được nộp lên cấp Đại học Đà Nẵng trước đó.',
@@ -366,8 +371,12 @@ export function submitCollectiveDirectlyToCity(
     };
   }
 
-  // Must be in draft or returned state
-  if (app.status !== 'draft' && app.status !== 'returned_for_correction') {
+  // Must be in draft, returned, or supplement pending state
+  if (
+    app.status !== 'draft' &&
+    app.status !== 'returned_for_correction' &&
+    app.status !== 'city_supplement_pending'
+  ) {
     return {
       success: false,
       message: `Hồ sơ đang ở trạng thái "${app.status}", không thể nộp lại.`,
@@ -384,23 +393,66 @@ export function submitCollectiveDirectlyToCity(
 
   const now = new Date().toISOString();
   const nextRevision = (app.submissionRevisionNumber || 0) + 1;
+  const isSupplementResubmission = app.status === 'city_supplement_pending';
+
+  const updatedSupplements = isSupplementResubmission
+    ? (app.supplementRequests || []).map((req) =>
+        req.status === 'pending'
+          ? {
+              ...req,
+              status: 'returned' as const,
+              returnedAt: now,
+              returnedNotes:
+                'Đại diện tập thể đã cập nhật kê khai và bổ sung minh chứng theo yêu cầu.',
+            }
+          : req
+      )
+    : app.supplementRequests;
+
+  const updatedRequirementReviews = isSupplementResubmission && app.cityRequirementReviews
+    ? {
+        TT01:
+          app.cityRequirementReviews.TT01?.judgment === 'needs_supplement'
+            ? { ...app.cityRequirementReviews.TT01, judgment: 'reviewing' as const }
+            : app.cityRequirementReviews.TT01,
+        TT02:
+          app.cityRequirementReviews.TT02?.judgment === 'needs_supplement'
+            ? { ...app.cityRequirementReviews.TT02, judgment: 'reviewing' as const }
+            : app.cityRequirementReviews.TT02,
+        TT03:
+          app.cityRequirementReviews.TT03?.judgment === 'needs_supplement'
+            ? { ...app.cityRequirementReviews.TT03, judgment: 'reviewing' as const }
+            : app.cityRequirementReviews.TT03,
+        TT04:
+          app.cityRequirementReviews.TT04?.judgment === 'needs_supplement'
+            ? { ...app.cityRequirementReviews.TT04, judgment: 'reviewing' as const }
+            : app.cityRequirementReviews.TT04,
+      }
+    : app.cityRequirementReviews;
+
   const updatedApp: CollectiveApplication = {
     ...app,
     applicationType: 'COLLECTIVE',
-    status: 'city_unassigned',
-    submittedAt: now,
-    submittedDirectlyToCityAt: now,
+    status: isSupplementResubmission ? 'city_supplement_returned' : 'city_unassigned',
+    submittedAt: app.submittedAt || now,
+    submittedDirectlyToCityAt: app.submittedDirectlyToCityAt || now,
     submissionRevisionNumber: nextRevision,
+    supplementRequests: updatedSupplements,
+    cityRequirementReviews: updatedRequirementReviews,
     updatedAt: now,
     auditHistory: [
       ...app.auditHistory,
       {
         id: `aud-${Date.now()}`,
-        action: 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng',
+        action: isSupplementResubmission
+          ? 'Gửi lại hồ sơ tập thể sau khi bổ sung minh chứng'
+          : 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng',
         actorName: actor.name,
         actorRole: actor.role || 'Người lập hồ sơ tập thể',
         timestamp: now,
-        details: 'Hồ sơ đã được nộp trực tiếp đến Hội Sinh viên Việt Nam Đại học Đà Nẵng để tiếp nhận và xét chọn (không qua khâu trung gian của Trường).',
+        details: isSupplementResubmission
+          ? 'Đại diện tập thể đã hoàn tất cập nhật kê khai/minh chứng theo yêu cầu bổ sung và gửi lại cấp Đại học Đà Nẵng thẩm định.'
+          : 'Hồ sơ đã được nộp trực tiếp đến Hội Sinh viên Việt Nam Đại học Đà Nẵng để tiếp nhận và xét chọn (không qua khâu trung gian của Trường).',
       },
     ],
   };
@@ -408,7 +460,9 @@ export function submitCollectiveDirectlyToCity(
   saveCollectiveApplication(updatedApp);
   return {
     success: true,
-    message: 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng thành công!',
+    message: isSupplementResubmission
+      ? 'Đã gửi hồ sơ bổ sung lên cấp Đại học Đà Nẵng thành công!'
+      : 'Nộp hồ sơ trực tiếp lên cấp Đại học Đà Nẵng thành công!',
     application: updatedApp,
   };
 }

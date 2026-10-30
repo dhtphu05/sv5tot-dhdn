@@ -1,7 +1,7 @@
 {
   "baselineName": "5TOT_DANANG_GOLDEN_FRONTEND_S487A_R3",
   "version": "2.0.0",
-  "createdAt": "2026-10-30T05:04:07.708Z",
+  "createdAt": "2026-10-30T05:23:04.025Z",
   "totalProtectedFiles": 525,
   "files": [
     {
@@ -436,8 +436,8 @@
     },
     {
       "path": "src/App.tsx",
-      "sizeBytes": 57340,
-      "sha256": "4f5075cf36da9173c152d3e720f88119c140d6e32db727e5b6bb66635f1c8b1c"
+      "sizeBytes": 62949,
+      "sha256": "0aa8cdca46c7677b04db01d0b42f9ad93a34a1d0d0c707d02f27b8af2866b050"
     },
     {
       "path": "src/app/routing/initialSessionResolver.ts",
@@ -566,8 +566,8 @@
     },
     {
       "path": "src/components/collective/CollectiveWorkspace.tsx",
-      "sizeBytes": 16963,
-      "sha256": "5997cf9e59faa3ce7c894d8d98079bb68b13f49ad84cec245fa534f2fb2f285f"
+      "sizeBytes": 18778,
+      "sha256": "63ea459014aa79a86f1426ecffe5b50aa80bd7d8991bb8d188a72d6c84f1af7d"
     },
     {
       "path": "src/components/collective/CreateCollectiveModal.tsx",
@@ -591,8 +591,8 @@
     },
     {
       "path": "src/components/collective/forms/CollectiveWorkspaceHeader.tsx",
-      "sizeBytes": 4250,
-      "sha256": "2f8f4b584f598b0ecfa3bc8ad8a55cc198dbf38a2cabc917cddf4c19adcbf4d1"
+      "sizeBytes": 4468,
+      "sha256": "31717f5c429e79f0d29e41be13f52786b76e4a7596613b8b9119f58ab3a7d237"
     },
     {
       "path": "src/components/collective/forms/TT01RecognitionForm.tsx",
@@ -616,8 +616,8 @@
     },
     {
       "path": "src/components/collective/hooks/useCollectiveWorkspace.ts",
-      "sizeBytes": 20602,
-      "sha256": "be9314cddd8a5c60f0725a4d5bebada48b8c46ae1952b351921dab60af603a50"
+      "sizeBytes": 21602,
+      "sha256": "ee13c60b38adc4781504e17d1c751892b2ad0150814823b2a4391730cb314ceb"
     },
     {
       "path": "src/components/collective/portal/CollectiveAccountTab.tsx",
@@ -976,8 +976,8 @@
     },
     {
       "path": "src/components/results/FinalResultView.tsx",
-      "sizeBytes": 22506,
-      "sha256": "2e5f34164d58363fabd8b48221fe340dc47ba695fecb1274ca82bf5dcb68ba97"
+      "sizeBytes": 24775,
+      "sha256": "83117b2347cf40e9ee8d7bd7512e7138bfb3d411d6f93ac3a302c36a85bbb270"
     },
     {
       "path": "src/components/results/OfficialCertificateModal.tsx",
@@ -1601,13 +1601,13 @@
     },
     {
       "path": "src/pages/staff-portal/StaffPortalPage.tsx",
-      "sizeBytes": 25541,
-      "sha256": "05ea9ed51c419e48f430ca816f9803d24ebb1f8e306b30b4687a79654babad68"
+      "sizeBytes": 25660,
+      "sha256": "4b9461c78b0fc556df6a211ded6fc499012dddc4dccaeb7c001e88298d89baa6"
     },
     {
       "path": "src/pages/student-portal/StudentPortalPage.tsx",
-      "sizeBytes": 15683,
-      "sha256": "a842419702d367632534b225a3796cebfd0a9b600a52dbebffb1fe7d6b757067"
+      "sizeBytes": 15738,
+      "sha256": "b18904bf4ea45208439bc622442f49be58f1b83361aaa89da7e1d867f88fa1cf"
     },
     {
       "path": "src/playground/DesignPlayground.tsx",
@@ -1741,13 +1741,13 @@
     },
     {
       "path": "src/staff/collective/collectiveOperations.ts",
-      "sizeBytes": 17922,
-      "sha256": "6b1c03f468cff1e00341015152fdeef50480c42f66823940379a9e54fa318b75"
+      "sizeBytes": 20296,
+      "sha256": "47cf8873a7bb10a0b0adc33a817f3fe9a7e95bdbffef7bb7693d93aee1b3410a"
     },
     {
       "path": "src/staff/collective/collectiveReviewOperations.ts",
-      "sizeBytes": 18868,
-      "sha256": "8cff58460fa2787fc83f671189f6769ff873c723f4c1aaa5b9efdf49b708d787"
+      "sizeBytes": 21045,
+      "sha256": "cc6d28aba5bf231eb64a493223c9631ab19a21784478221460917a6bdb6363b6"
     },
     {
       "path": "src/staff/collective/collectiveStoreCore.ts",
@@ -1946,8 +1946,8 @@
     },
     {
       "path": "src/staff/components/committee/CommitteeViews.tsx",
-      "sizeBytes": 23755,
-      "sha256": "71cf0457993dc6740a1d5bd0f0ac00a265632fa6beb3f8a4d3caa094d9839aee"
+      "sizeBytes": 24000,
+      "sha256": "47a2693c7dccd21e39ed20731b403258c68e9388d98eeabae7e5bf009a357703"
     },
     {
       "path": "src/staff/components/committee/DecisionDialog.tsx",
@@ -2566,8 +2566,8 @@
     },
     {
       "path": "src/widgets/staff-backoffice/StaffCollectiveReviewRoute.tsx",
-      "sizeBytes": 8409,
-      "sha256": "ec8a7c735930fd50a5af70171656db69c7cb6271cc2e34f7ac46e663ef3882fe"
+      "sizeBytes": 8789,
+      "sha256": "fe46b1fbd6d8a233493d6a8d636ee0d4f92c310233fde847d159674f79e44fe2"
     },
     {
       "path": "src/widgets/staff-backoffice/StaffOverviewAndWorkload.tsx",
@@ -2576,8 +2576,8 @@
     },
     {
       "path": "src/widgets/staff-backoffice/StaffQueueAndUtilityViews.tsx",
-      "sizeBytes": 31971,
-      "sha256": "1580dde1d4be999dc72c588563b466ff8e010d76c2b3f116d7f3d1e759a11b2f"
+      "sizeBytes": 32328,
+      "sha256": "bed785fec4bc6b09a893cfd4c7377fe1fe75acce7248f461f5b00cea60dcbf40"
     },
     {
       "path": "src/widgets/staff-backoffice/StaffWhiteBirdReviewRoute.tsx",

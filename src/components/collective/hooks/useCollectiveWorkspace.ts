@@ -158,12 +158,20 @@ export function useCollectiveWorkspace({
   const editingRecognitionRate = calculateRecognitionRate(tt03RecognizedCount, sharedTotalMembers);
 
   const { status } = application;
-  const isReadOnly = status !== 'draft';
+  const isReadOnly =
+    status !== 'draft' &&
+    status !== 'city_supplement_pending' &&
+    status !== 'returned_for_correction';
 
   const getStatusBadge = () => {
     switch (status) {
       case 'draft':
         return { label: 'Đang hoàn thiện hồ sơ', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
+      case 'city_supplement_pending':
+      case 'returned_for_correction':
+        return { label: 'Cần bổ sung hồ sơ theo yêu cầu ĐHĐN', style: 'text-[#B45309] bg-[#FFFBEB] border-[#FDE68A]' };
+      case 'city_supplement_returned':
+        return { label: 'Đã gửi bổ sung — Chờ thẩm định lại', style: 'text-[#0D78AE] bg-[#EAF6FC] border-[#CFE3F0]' };
       case 'city_unassigned':
       case 'city_assigned':
         return { label: 'Đã nộp — Chờ phân công xét', style: 'text-[#D97706] bg-[#FEF6EB] border-[#FADDB6]' };
@@ -377,6 +385,7 @@ export function useCollectiveWorkspace({
           size: sizeFormatted,
           reqId: uploadTargetReqId,
           applicationId: application.id,
+          ownerTrack: 'COLLECTIVE',
         });
 
         const newEvidenceItem: ApplicationEvidence = {
@@ -386,6 +395,7 @@ export function useCollectiveWorkspace({
           size: sizeFormatted,
           uploadedAt: new Date().toLocaleDateString('vi-VN'),
           status: 'ready',
+          url: `/api/v2/portal/evidence/${encodeURIComponent(newEvidenceId)}/download`,
         };
 
         addCollectiveEvidence(application.id, uploadTargetReqId, newEvidenceItem);
@@ -440,14 +450,21 @@ export function useCollectiveWorkspace({
   };
 
   const handleConfirmSubmit = () => {
+    const isResubmittingSupplement =
+      application.status === 'city_supplement_pending' ||
+      application.status === 'returned_for_correction';
     const result = submitCollectiveDirectlyToCity(application.id, {
-      name: 'Nguyễn Thị Mai',
-      role: 'Đại diện tập thể',
+      name: application.preparedByUserName || 'Đại diện tập thể',
+      role: application.representative?.position || 'Đại diện tập thể',
     });
 
     if (result.success && result.application) {
       setIsPreSubmitOpen(false);
-      showToast('Hồ sơ đã được nộp trực tiếp lên Hội Sinh viên Việt Nam Đại học Đà Nẵng thành công!');
+      showToast(
+        isResubmittingSupplement
+          ? 'Đã gửi hồ sơ bổ sung lên Hội Sinh viên Việt Nam Đại học Đà Nẵng thành công!'
+          : 'Hồ sơ đã được nộp trực tiếp lên Hội Sinh viên Việt Nam Đại học Đà Nẵng thành công!'
+      );
       if (onApplicationUpdated) {
         onApplicationUpdated(result.application);
       }

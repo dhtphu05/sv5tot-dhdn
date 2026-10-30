@@ -52,9 +52,11 @@ import {
 } from '../../demo/fixtures/resultScenarios';
 import { OfficialCertificateModal } from './OfficialCertificateModal';
 import { ResultDevToolbar } from './ResultDevToolbar';
+import { StudentApplicationData } from '../../entities/application/studentApplicationTypes';
 
 export interface FinalResultViewProps {
   hasApplication?: boolean;
+  application?: StudentApplicationData;
   submissionState?: 'draft' | 'submitted' | 'under_review' | 'supplement_required' | 'supplement_sent' | 'all_reviewed' | 'result_published';
   studentIdentity?: {
     fullName: string;
@@ -77,6 +79,7 @@ const LONG_SCHOOL_NAME =
 
 export const FinalResultView: React.FC<FinalResultViewProps> = ({
   hasApplication = true,
+  application,
   submissionState,
   studentIdentity,
   onStartNewApplication,
@@ -107,7 +110,7 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Resolve active FinalResultData based on scenario + QA toggles
+  // Resolve active FinalResultData based on scenario + QA toggles + real application data
   const activeResult: FinalResultData = useMemo(() => {
     let base: FinalResultData;
     switch (scenario) {
@@ -137,20 +140,83 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
         }
       : base.student;
 
+    let realDeclaredCount = 0;
+    let realEvidenceCount = 0;
+    if (application?.criteria) {
+      for (const crit of application.criteria) {
+        const reqs =
+          Array.isArray(crit.groups) && crit.groups.length > 0
+            ? crit.groups.flatMap((g) => g.requirements || [])
+            : crit.requirements || [];
+        for (const r of reqs) {
+          for (const d of r.declarations || []) {
+            realDeclaredCount++;
+            realEvidenceCount += d.evidenceFiles?.length || 0;
+          }
+        }
+      }
+    }
+    if (Array.isArray(application?.otherAchievements)) {
+      for (const d of application.otherAchievements) {
+        realDeclaredCount++;
+        realEvidenceCount += d.evidenceFiles?.length || 0;
+      }
+    }
+
+    const effectiveDecisionNumber =
+      application?.decisionCode || (showDecisionMeta ? '142/QĐ-HSV' : undefined);
+    const effectivePublishedAt = application?.awardedAt || base.publishedAt;
+    const effectiveDecisionDocument = application?.decisionCode
+      ? {
+          ...DEMO_DECISION_DOCUMENT,
+          title: `Quyết định công nhận số ${application.decisionCode}`,
+          fileName: `QD_${application.decisionCode.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`,
+          publishedDate: effectivePublishedAt || DEMO_DECISION_DOCUMENT.publishedDate,
+        }
+      : showDecisionMeta
+      ? DEMO_DECISION_DOCUMENT
+      : undefined;
+
+    const effectiveReason =
+      base.status === 'not_recognized'
+        ? application?.councilFeedback ||
+          (showAuthoritativeReason ? AUTHORITATIVE_DEMO_REASON : undefined)
+        : undefined;
+
     return {
       ...base,
-      decisionNumber: showDecisionMeta ? '142/QĐ-HSV' : undefined,
-      decisionDocument: showDecisionMeta ? DEMO_DECISION_DOCUMENT : undefined,
-      studentFacingReason:
-        base.status === 'not_recognized' && showAuthoritativeReason
-          ? AUTHORITATIVE_DEMO_REASON
-          : undefined,
+      publishedAt: effectivePublishedAt,
+      decisionNumber: effectiveDecisionNumber,
+      decisionDocument: effectiveDecisionDocument,
+      studentFacingReason: effectiveReason,
+      applicationSnapshot: {
+        ...base.applicationSnapshot,
+        applicationId:
+          application?.applicationId || base.applicationSnapshot.applicationId,
+        submittedAt:
+          application?.submittedAt || base.applicationSnapshot.submittedAt,
+        declaredCount:
+          realDeclaredCount > 0
+            ? realDeclaredCount
+            : base.applicationSnapshot.declaredCount,
+        evidenceCount:
+          realDeclaredCount > 0
+            ? realEvidenceCount
+            : base.applicationSnapshot.evidenceCount,
+      },
       student: {
         ...resolvedStudent,
         university: isLongSchoolName ? LONG_SCHOOL_NAME : resolvedStudent.university,
       },
     };
-  }, [scenario, showDecisionMeta, showAuthoritativeReason, isLongSchoolName, studentIdentity]);
+  }, [
+    scenario,
+    showDecisionMeta,
+    showAuthoritativeReason,
+    isLongSchoolName,
+    studentIdentity,
+    application,
+  ]);
 
   const handleResetDemo = () => {
     setScenario('recognized_hero');

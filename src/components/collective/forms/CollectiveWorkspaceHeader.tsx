@@ -95,7 +95,12 @@ export const CollectiveWorkspaceHeader: React.FC<CollectiveWorkspaceHeaderProps>
                 className="gap-1.5 shadow-sm"
               >
                 <Send size={15} />
-                <span>Nộp hồ sơ lên cấp Đại học Đà Nẵng</span>
+                <span>
+                  {status === 'city_supplement_pending' ||
+                  status === 'returned_for_correction'
+                    ? 'Gửi hồ sơ bổ sung lên ĐHĐN'
+                    : 'Nộp hồ sơ lên cấp Đại học Đà Nẵng'}
+                </span>
               </Button>
             </>
           )}

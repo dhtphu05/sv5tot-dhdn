@@ -227,10 +227,70 @@ export function saveCityRequirementJudgment(
     },
   };
 
-  const nextStatus =
-    app.status === 'city_assigned' || app.status === 'city_unassigned'
-      ? 'city_in_review'
-      : app.status;
+  const existingSupps = [...(app.supplementRequests || [])];
+  let nextSupps = existingSupps;
+
+  if (judgment === 'needs_supplement') {
+    const suppMessage =
+      notes?.trim() ||
+      `Đề nghị bổ sung hoặc làm rõ minh chứng cho điều kiện ${reqId}.`;
+    const pendingIdx = existingSupps.findIndex(
+      (s) => s.requirementId === reqId && s.status === 'pending'
+    );
+    if (pendingIdx >= 0) {
+      nextSupps = existingSupps.map((s, idx) =>
+        idx === pendingIdx
+          ? {
+              ...s,
+              reason: suppMessage,
+              requestedByOfficerName: actor.name,
+              requestedAt: now,
+            }
+          : s
+      );
+    } else {
+      nextSupps = [
+        {
+          id: `col-sup-${reqId}-${Date.now()}`,
+          requirementId: reqId,
+          allowedActions: ['editDeclaration', 'addEvidence'],
+          targetUserEmail: app.preparedByUserEmail || 'student@udn.vn',
+          targetUserName: app.preparedByUserName || 'Đại diện tập thể',
+          requestedByOfficerId: app.assignedOfficerId || 'city-officer',
+          requestedByOfficerName: actor.name,
+          requestedAt: now,
+          reason: suppMessage,
+          status: 'pending',
+        },
+        ...existingSupps,
+      ];
+    }
+  } else if (
+    judgment === 'suitable' ||
+    judgment === 'passed' ||
+    judgment === 'unsuitable' ||
+    judgment === 'failed' ||
+    judgment === 'needs_consideration'
+  ) {
+    nextSupps = existingSupps.map((s) =>
+      s.requirementId === reqId && (s.status === 'pending' || s.status === 'returned')
+        ? { ...s, status: 'resolved' as const }
+        : s
+    );
+  }
+
+  const hasAnyPendingSupplement =
+    nextSupps.some((s) => s.status === 'pending') ||
+    Object.values(updatedReviews).some((r) => r?.judgment === 'needs_supplement');
+
+  const nextStatus: CollectiveWorkflowStatus = hasAnyPendingSupplement
+    ? 'city_supplement_pending'
+    : app.status === 'city_assigned' ||
+      app.status === 'city_unassigned' ||
+      app.status === 'city_supplement_pending' ||
+      app.status === 'city_supplement_returned'
+    ? 'city_in_review'
+    : app.status;
 
   const judgmentLabels: Record<CityRequirementJudgment, string> = {
     not_reviewed: 'Chưa xét',
@@ -247,12 +307,16 @@ export function saveCityRequirementJudgment(
     ...app,
     status: nextStatus,
     cityRequirementReviews: updatedReviews,
+    supplementRequests: nextSupps,
     updatedAt: now,
     auditHistory: [
       ...app.auditHistory,
       {
         id: `aud-${Date.now()}`,
-        action: 'Cán bộ ghi nhận kết quả thẩm định tiêu chuẩn',
+        action:
+          judgment === 'needs_supplement'
+            ? `Gửi yêu cầu bổ sung điều kiện ${reqId}`
+            : 'Cán bộ ghi nhận kết quả thẩm định tiêu chuẩn',
         actorName: actor.name,
         actorRole: actor.role || 'Cán bộ xét duyệt',
         timestamp: now,
