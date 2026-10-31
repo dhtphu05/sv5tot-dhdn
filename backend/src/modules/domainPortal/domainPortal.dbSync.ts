@@ -895,6 +895,13 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
         await upsertPersistentRecord(prisma, 'collective_application', colId, col);
       }
 
+      // 4b. White Bird Award Applications
+      for (const wb of portalState.whiteBirdApplications) {
+        const wbId = String(wb?.id || '');
+        if (!wbId) continue;
+        await upsertPersistentRecord(prisma, 'white_bird_application', wbId, wb);
+      }
+
       // 5. Evidence Index — only persist newly added/modified evidence records (never re-stringify 68MB of already-persisted blobs)
       for (const [evId, ev] of portalState.evidenceIndex.entries()) {
         if (persistedEvidenceIds.has(evId)) continue;
@@ -1151,6 +1158,19 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
                 portalState.collectiveApplications[idx] = data;
               } else {
                 portalState.collectiveApplications.push(data);
+              }
+              loadedCount++;
+              break;
+            }
+            case 'white_bird_application': {
+              const wbId = row.record_key;
+              const idx = portalState.whiteBirdApplications.findIndex(
+                (w) => w.id === wbId
+              );
+              if (idx >= 0) {
+                portalState.whiteBirdApplications[idx] = data;
+              } else {
+                portalState.whiteBirdApplications.push(data);
               }
               loadedCount++;
               break;

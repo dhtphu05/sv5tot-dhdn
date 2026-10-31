@@ -17,9 +17,11 @@
 import { StaffApplicationRecord } from '../types';
 import {
   StudentApplicationData,
+  buildCleanStudentApplication,
   buildCriteriaFromDefinitions,
 } from '../../demo/fixtures/studentApplication';
 import { buildHeroStudentApplicationForOfficer } from './officerReviewFixtures';
+import { isBackendMode } from '../../shared/config/executionMode';
 import {
   CommitteeCaseDetail,
   CommitteeDemoScenarioConfig,
@@ -141,6 +143,21 @@ export function buildStudentApplicationForCommitteeRecord(
       );
     }
     return clonedEmbedded;
+  }
+
+  if (isBackendMode()) {
+    const clean = buildCleanStudentApplication({
+      fullName: app.student.fullName,
+      studentId: app.student.studentCode,
+      email: app.student.email,
+      university: app.institution.officialName,
+      existingProfileSnapshot: app.applicantProfileSnapshot,
+    });
+    clean.applicationId = app.applicationId;
+    if (Array.isArray(embedded?.otherAchievements) && embedded.otherAchievements.length > 0) {
+      clean.otherAchievements = JSON.parse(JSON.stringify(embedded.otherAchievements));
+    }
+    return clean;
   }
 
   const base = buildHeroStudentApplicationForOfficer(true);

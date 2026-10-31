@@ -422,13 +422,14 @@ export const CommitteeOverviewView: React.FC<CommitteeOverviewViewProps> = ({
             <Button
               variant="secondary"
               size="md"
-              onClick={() =>
-                onOpenApplicationWorkspace(
+              onClick={() => {
+                const targetAppId =
                   attentionApps[0]?.applicationId ||
-                    homePriorityList[0]?.applicationId ||
-                    'APP-2026-DN-102220123'
-                )
-              }
+                  homePriorityList[0]?.applicationId;
+                if (targetAppId) {
+                  onOpenApplicationWorkspace(targetAppId);
+                }
+              }}
             >
               Mở hồ sơ {attentionApps[0]?.student.fullName || 'cần xem xét'}
             </Button>

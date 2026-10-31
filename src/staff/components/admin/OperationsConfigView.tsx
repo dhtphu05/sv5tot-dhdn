@@ -341,7 +341,7 @@ export const OperationsConfigView: React.FC<OperationsConfigViewProps> = ({
               <li className="flex items-center gap-1.5">
                 <CheckCircle2 size={12} className="text-[#16A34A]" />
                 <span>
-                  Bắt buộc 01 PDF công văn/tờ trình chung khi Trường gửi TP
+                  Bắt buộc 01 PDF công văn/tờ trình chung khi Trường gửi ĐHĐN
                 </span>
               </li>
               <li className="flex items-center gap-1.5">
@@ -353,7 +353,7 @@ export const OperationsConfigView: React.FC<OperationsConfigViewProps> = ({
               <li className="flex items-center gap-1.5">
                 <CheckCircle2 size={12} className="text-[#16A34A]" />
                 <span>
-                  Tập thể (TT01–TT04) nộp trực tiếp lên TP; AI chỉ tư vấn
+                  Tập thể (TT01–TT04) nộp trực tiếp lên ĐHĐN; AI chỉ tư vấn
                 </span>
               </li>
             </ul>

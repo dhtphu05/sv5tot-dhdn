@@ -50,7 +50,7 @@ export class ResendEmailService implements IEmailService {
 
   public canIssuePasswordResetFor(accountEmail: string): boolean {
     const env = getEnvironment();
-    if (env.RESEND_MODE === 'safe') {
+    if (env.RESEND_MODE === 'safe' && this.resendClient) {
       const allowedOverride = (
         env.RESEND_SAFE_OVERRIDE_EMAIL || 'vanngocnhuy30032006@gmail.com'
       ).trim().toLowerCase();

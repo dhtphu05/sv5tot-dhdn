@@ -28,6 +28,7 @@ import {
   getDeclarationAiInsight,
   getEvidenceAiInsight,
 } from './demoCopilotFixtures';
+import { isBackendMode } from '../../shared/config/executionMode';
 
 export interface ComposeVirtualReportOptions {
   applicationId: string;
@@ -123,7 +124,8 @@ export function composeVirtualAiReviewReport(
       preliminaryVerdictState,
       customFindings,
       studentName,
-      policySeason
+      policySeason,
+      studentApp
     );
   } else if (scope === 'criterion') {
     composeCriterionScopeBlocks(
@@ -192,7 +194,8 @@ function composeApplicationScopeBlocks(
   preliminaryVerdictState: ApplicationPreliminaryVerdictState,
   findings: AiFinding[],
   studentName: string,
-  policySeason: string
+  policySeason: string,
+  studentApp?: StudentApplication
 ) {
   if (verdict === 'unavailable') {
     blocks.push({
@@ -218,6 +221,73 @@ function composeApplicationScopeBlocks(
       description: 'Cập nhật lại nhận định và đối chiếu tự động với các tệp minh chứng vừa nộp.',
       actionType: 'inspect_evidence',
       actionLabel: 'Cập nhật rà soát ngay',
+    });
+    return;
+  }
+
+  if (isBackendMode() && studentApp?.criteria) {
+    const cList: CriterionId[] = ['ethics', 'academic', 'physical', 'volunteer', 'integration'];
+    let totalDecl = 0;
+    let totalEv = 0;
+    const critStats = cList.map((cid) => {
+      const cToken = CRITERIA[cid];
+      const critNode = studentApp.criteria.find((c: any) => c.id === cid);
+      const reqs = critNode
+        ? Array.isArray((critNode as any).groups) && (critNode as any).groups.length > 0
+          ? (critNode as any).groups.flatMap((g: any) => g.requirements || [])
+          : critNode.requirements || []
+        : [];
+      let declCount = 0;
+      let evCount = 0;
+      for (const r of reqs) {
+        const decls = r.declarations || [];
+        declCount += decls.length;
+        for (const d of decls) {
+          evCount += (d.evidence?.length || d.evidenceFiles?.length || 0);
+        }
+      }
+      totalDecl += declCount;
+      totalEv += evCount;
+      return { cid, cToken, declCount, evCount };
+    });
+
+    blocks.push({
+      type: 'paragraph',
+      id: 'block-p-lead-real',
+      text: `Kính gửi Cán bộ thẩm định, hồ sơ của ứng viên ${studentName} trong năm học ${policySeason} hiện có tổng cộng ${totalDecl} nội dung kê khai và ${totalEv} tệp minh chứng đính kèm trên 05 tiêu chuẩn xét chọn.`,
+      emphasis: 'lead',
+    });
+
+    for (const item of critStats) {
+      const isComplete = item.declCount > 0 && item.evCount > 0;
+      blocks.push({
+        type: 'criterion_card',
+        id: `card-crit-real-${item.cid}`,
+        criterionId: item.cid,
+        criterionNumber: item.cToken.number,
+        criterionName: item.cToken.name,
+        verdict: isComplete ? 'preliminary_meets' : 'insufficient_evidence',
+        summary: isComplete
+          ? `Đã kê khai ${item.declCount} mục · Đính kèm ${item.evCount} tệp minh chứng.`
+          : item.declCount === 0
+          ? 'Chưa có nội dung kê khai cho tiêu chí này.'
+          : `Đã kê khai ${item.declCount} mục nhưng chưa có tệp minh chứng đính kèm.`,
+        findingCount: isComplete ? 0 : 1,
+        primaryActionLabel: 'Xem tiêu chí',
+      });
+    }
+
+    blocks.push({
+      type: 'next_action_card',
+      id: 'block-next-real',
+      title: 'Khuyến nghị cán bộ',
+      description:
+        verdict === 'preliminary_meets'
+          ? 'Tất cả 05 tiêu chí đều có nội dung kê khai và minh chứng đính kèm. Cán bộ vui lòng đối chiếu từng tệp văn bản gốc và ghi nhận kết luận thẩm định.'
+          : 'Một số tiêu chí chưa đủ nội dung kê khai hoặc tệp minh chứng. Cán bộ vui lòng kiểm tra chi tiết và gửi yêu cầu bổ sung nếu cần thiết.',
+      actionType: 'select_criterion',
+      targetCriterionId: preliminaryVerdictState.recommendedStartingCriterionId || 'ethics',
+      actionLabel: 'Bắt đầu thẩm định',
     });
     return;
   }

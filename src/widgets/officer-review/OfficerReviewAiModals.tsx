@@ -167,7 +167,7 @@ export const OfficerReviewAiModals: React.FC<OfficerReviewAiModalsProps> = ({
           customFindings: scenarioConfigFindings,
           studentApp,
           policySeason: '2025–2026',
-          officerName: applicationRecord.assignment?.officerName || 'Trần Hoàng Nam',
+          officerName: applicationRecord.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN',
         }}
         onNavigateToEvidence={(evidenceId, critId, reqId) => {
           onInspectFinding({

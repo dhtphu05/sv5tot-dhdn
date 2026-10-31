@@ -629,6 +629,7 @@ export interface PortalState {
   individualStaffRecords: Array<Record<string, any>>;
   studentApplications: Record<string, Record<string, any>>;
   collectiveApplications: Array<Record<string, any>>;
+  whiteBirdApplications: Array<Record<string, any>>;
   evidenceIndex: Map<string, StoredEvidenceRecord>;
   auditLogs: PortalAuditLogRecord[];
 }
@@ -642,6 +643,7 @@ export const portalState: PortalState = {
   individualStaffRecords: buildSeededIndividualStaffRecords(),
   studentApplications: buildSeededStudentApplications(),
   collectiveApplications: [],
+  whiteBirdApplications: [],
   evidenceIndex: new Map(),
   auditLogs: [
     {
@@ -1054,6 +1056,7 @@ function schedulePortalStateDiskFlush(): void {
         individualStaffRecords: portalState.individualStaffRecords,
         studentApplications: portalState.studentApplications,
         collectiveApplications: portalState.collectiveApplications,
+        whiteBirdApplications: portalState.whiteBirdApplications,
         evidenceIndex: lightweightEvidenceEntries,
         auditLogs: portalState.auditLogs.slice(0, 500),
       };
@@ -1113,6 +1116,7 @@ export function loadPortalStateFromDisk(): boolean {
       individualStaffRecords?: Array<Record<string, any>>;
       studentApplications?: Record<string, Record<string, any>>;
       collectiveApplications?: Array<Record<string, any>>;
+      whiteBirdApplications?: Array<Record<string, any>>;
       evidenceIndex?: Array<[string, StoredEvidenceRecord]>;
       auditLogs?: PortalAuditLogRecord[];
     };
@@ -1184,6 +1188,9 @@ export function loadPortalStateFromDisk(): boolean {
           return col;
         });
     }
+    if (Array.isArray(parsed.whiteBirdApplications)) {
+      portalState.whiteBirdApplications = parsed.whiteBirdApplications;
+    }
     if (Array.isArray(parsed.evidenceIndex)) {
       portalState.evidenceIndex = new Map(parsed.evidenceIndex);
     }
@@ -1211,6 +1218,7 @@ export function clearDomainPortalStateForSeed(): void {
   portalState.individualStaffRecords = [];
   portalState.studentApplications = {};
   portalState.collectiveApplications = [];
+  portalState.whiteBirdApplications = [];
   portalState.evidenceIndex = new Map();
   portalState.auditLogs = [
     {
@@ -1235,6 +1243,7 @@ export function resetDomainPortalState(): void {
   portalState.individualStaffRecords = buildSeededIndividualStaffRecords();
   portalState.studentApplications = buildSeededStudentApplications();
   portalState.collectiveApplications = [];
+  portalState.whiteBirdApplications = [];
   portalState.evidenceIndex = new Map();
   portalState.auditLogs = [
     {

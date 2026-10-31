@@ -18,6 +18,7 @@ import {
   recordCommitteeDecision,
   subscribeToCollectiveStore,
 } from '../../collectiveStore';
+import { isBackendMode } from '../../../shared/config/executionMode';
 import { CollectiveApplication } from '../../collectiveTypes';
 import {
   StaffApplicationRecord,
@@ -90,9 +91,10 @@ export const CommitteeViews: React.FC<CommitteeViewsProps> = ({
 }) => {
   // Shared Filter & Selection State
   const [trackFilter, setTrackFilter] = useState<'all' | 'individual' | 'collective'>('all');
-  const [collectiveApps, setCollectiveApps] = useState<CollectiveApplication[]>(() =>
-    getAllCollectiveApplications()
-  );
+  const [collectiveApps, setCollectiveApps] = useState<CollectiveApplication[]>(() => {
+    const all = getAllCollectiveApplications();
+    return isBackendMode() ? all.filter((a) => a.status !== 'draft') : all;
+  });
   const [decisionTargetCollective, setDecisionTargetCollective] =
     useState<CollectiveApplication | null>(null);
   const [collectiveOutcome, setCollectiveOutcome] =
@@ -109,7 +111,8 @@ export const CommitteeViews: React.FC<CommitteeViewsProps> = ({
 
   useEffect(() => {
     return subscribeToCollectiveStore(() => {
-      setCollectiveApps(getAllCollectiveApplications());
+      const all = getAllCollectiveApplications();
+      setCollectiveApps(isBackendMode() ? all.filter((a) => a.status !== 'draft') : all);
     });
   }, []);
 
@@ -120,8 +123,8 @@ export const CommitteeViews: React.FC<CommitteeViewsProps> = ({
   const [publicationFilter, setPublicationFilter] = useState<string>('all');
   const [officerFilter, setOfficerFilter] = useState<string>('all');
 
-  const [selectedRowAppId, setSelectedRowAppId] = useState<string | null>(
-    'APP-2026-DN-102220123'
+  const [selectedRowAppId, setSelectedRowAppId] = useState<string | null>(() =>
+    isBackendMode() ? null : 'APP-2026-DN-102220123'
   );
   const [resultsTrack, setResultsTrack] = useState<'individual' | 'collective'>('individual');
 

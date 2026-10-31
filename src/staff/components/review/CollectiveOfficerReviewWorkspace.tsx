@@ -76,7 +76,7 @@ export interface CollectiveOfficerReviewWorkspaceProps {
 export const CollectiveOfficerReviewWorkspace: React.FC<CollectiveOfficerReviewWorkspaceProps> = ({
   application: initialApp,
   onBackToQueue,
-  currentOfficerName = 'Trần Hoàng Nam',
+  currentOfficerName = 'Cán bộ xét duyệt cấp ĐHĐN',
   currentOfficerId = 'staff-off-nam',
   currentUserRole = 'Cán bộ xét duyệt',
   isManager = false,

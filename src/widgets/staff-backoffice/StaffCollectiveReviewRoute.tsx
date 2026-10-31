@@ -54,7 +54,10 @@ export const StaffCollectiveReviewRoute: React.FC<
   onSelectRoute,
   activeSeasonLabel,
 }) => {
-  const collectiveApps = getAllCollectiveApplications();
+  const allCollectiveApps = getAllCollectiveApplications();
+  const collectiveApps = isBackendMode()
+    ? allCollectiveApps.filter((a) => a.status !== 'draft')
+    : allCollectiveApps;
   const currentApp =
     collectiveApps.find((a) => a.id === selectedCollectiveId) ||
     collectiveApps.find((a) => a.assignedOfficerId === currentUser.id) ||
@@ -181,10 +184,13 @@ export const StaffCollectiveReviewRoute: React.FC<
             <option value="all">
               Tất cả trạng thái ({assignedCollectiveApps.length})
             </option>
+            <option value="city_unassigned">Mới tiếp nhận (Chờ phân công)</option>
             <option value="city_assigned">Chờ xét</option>
             <option value="city_in_review">Đang xét</option>
             <option value="city_supplement_pending">Cần bổ sung</option>
+            <option value="city_supplement_returned">Đã gửi bổ sung</option>
             <option value="city_review_completed">Đã hoàn tất xét</option>
+            <option value="published">Đã công bố kết quả</option>
           </select>
         </div>
       </div>

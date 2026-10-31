@@ -14,7 +14,7 @@
  * - Edge Cases: Delayed payload ("Kết quả đang được cập nhật"), Load error ("Chưa thể tải kết quả lúc này"), Long school name.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Award,
   CheckCircle2,
@@ -52,9 +52,27 @@ import {
 } from '../../demo/fixtures/resultScenarios';
 import { OfficialCertificateModal } from './OfficialCertificateModal';
 import { ResultDevToolbar } from './ResultDevToolbar';
+import { StudentApplicationData } from '../../entities/application/studentApplicationTypes';
+import { isBackendMode } from '../../shared/config/executionMode';
+
+function formatResultDate(val?: string | null): string | undefined {
+  if (!val) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(val)) {
+    const d = new Date(val);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    }
+  }
+  return val;
+}
 
 export interface FinalResultViewProps {
   hasApplication?: boolean;
+  application?: StudentApplicationData;
   submissionState?: 'draft' | 'submitted' | 'under_review' | 'supplement_required' | 'supplement_sent' | 'all_reviewed' | 'result_published';
   studentIdentity?: {
     fullName: string;
@@ -77,6 +95,7 @@ const LONG_SCHOOL_NAME =
 
 export const FinalResultView: React.FC<FinalResultViewProps> = ({
   hasApplication = true,
+  application,
   submissionState,
   studentIdentity,
   onStartNewApplication,
@@ -93,6 +112,10 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    setScenario(initialScenario);
+  }, [initialScenario]);
+
   // Modal state for Certificate or Official Decision Document preview
   const [docModalState, setDocModalState] = useState<{
     isOpen: boolean;
@@ -107,7 +130,7 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Resolve active FinalResultData based on scenario + QA toggles
+  // Resolve active FinalResultData based on scenario + QA toggles + real application data
   const activeResult: FinalResultData = useMemo(() => {
     let base: FinalResultData;
     switch (scenario) {
@@ -134,23 +157,142 @@ export const FinalResultView: React.FC<FinalResultViewProps> = ({
           fullName: studentIdentity.fullName || base.student.fullName,
           studentId: studentIdentity.studentId || base.student.studentId,
           university: studentIdentity.university || base.student.university,
+          faculty:
+            (application?.applicantProfileSnapshot as any)?.faculty ||
+            application?.student?.faculty ||
+            base.student.faculty,
+          class:
+            application?.applicantProfileSnapshot?.className ||
+            application?.student?.class ||
+            base.student.class,
         }
-      : base.student;
+      : {
+          ...base.student,
+          faculty:
+            (application?.applicantProfileSnapshot as any)?.faculty ||
+            application?.student?.faculty ||
+            base.student.faculty,
+          class:
+            application?.applicantProfileSnapshot?.className ||
+            application?.student?.class ||
+            base.student.class,
+        };
+
+    const isNonDemoApp =
+      isBackendMode() ||
+      (Boolean(resolvedStudent.studentId) &&
+        resolvedStudent.studentId !== '102220123');
+
+    let realDeclaredCount = 0;
+    let realEvidenceCount = 0;
+    const perCriterionCounts: Record<string, { decls: number; evs: number }> = {};
+    if (application?.criteria) {
+      for (const crit of application.criteria) {
+        let cDecls = 0;
+        let cEvs = 0;
+        const reqs =
+          Array.isArray(crit.groups) && crit.groups.length > 0
+            ? crit.groups.flatMap((g) => g.requirements || [])
+            : crit.requirements || [];
+        for (const r of reqs) {
+          for (const d of r.declarations || []) {
+            realDeclaredCount++;
+            cDecls++;
+            const evLen = d.evidenceFiles?.length || 0;
+            realEvidenceCount += evLen;
+            cEvs += evLen;
+          }
+        }
+        perCriterionCounts[crit.id] = { decls: cDecls, evs: cEvs };
+      }
+    }
+    if (Array.isArray(application?.otherAchievements)) {
+      for (const d of application.otherAchievements) {
+        realDeclaredCount++;
+        realEvidenceCount += d.evidenceFiles?.length || 0;
+      }
+    }
+
+    const effectiveDecisionNumber =
+      application?.decisionCode || (showDecisionMeta ? '142/QĐ-HSV' : undefined);
+    const effectivePublishedAt = formatResultDate(
+      application?.awardedAt || (isNonDemoApp ? undefined : base.publishedAt)
+    );
+    const effectiveDecisionDocument = application?.decisionCode
+      ? {
+          ...DEMO_DECISION_DOCUMENT,
+          title: `Quyết định công nhận số ${application.decisionCode}`,
+          fileName: `QD_${application.decisionCode.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`,
+          publishedDate: effectivePublishedAt || DEMO_DECISION_DOCUMENT.publishedDate,
+        }
+      : showDecisionMeta
+      ? DEMO_DECISION_DOCUMENT
+      : undefined;
+
+    const effectiveReason =
+      base.status === 'not_recognized'
+        ? application?.councilFeedback ||
+          (showAuthoritativeReason ? AUTHORITATIVE_DEMO_REASON : undefined)
+        : undefined;
+
+    const realSupplementRequests = application?.supplementRequests || [];
+    const latestSupp = realSupplementRequests[0];
+    const effectiveSupplementRequestedAt = isNonDemoApp
+      ? formatResultDate(latestSupp?.requestedAt)
+      : base.applicationSnapshot.supplementRequestedAt;
+    const effectiveSupplementSentAt = isNonDemoApp
+      ? formatResultDate(latestSupp?.respondedAt)
+      : base.applicationSnapshot.supplementSentAt;
+
+    const effectiveCriterionOutcomes =
+      isNonDemoApp && application?.criteria
+        ? base.criterionOutcomes.map((item) => {
+            const counts = perCriterionCounts[item.criterionId] || { decls: 0, evs: 0 };
+            return {
+              ...item,
+              summaryNote: `${counts.decls} nội dung đã kê khai · ${counts.evs} minh chứng`,
+            };
+          })
+        : base.criterionOutcomes;
 
     return {
       ...base,
-      decisionNumber: showDecisionMeta ? '142/QĐ-HSV' : undefined,
-      decisionDocument: showDecisionMeta ? DEMO_DECISION_DOCUMENT : undefined,
-      studentFacingReason:
-        base.status === 'not_recognized' && showAuthoritativeReason
-          ? AUTHORITATIVE_DEMO_REASON
-          : undefined,
+      publishedAt: effectivePublishedAt,
+      decisionNumber: effectiveDecisionNumber,
+      decisionDocument: effectiveDecisionDocument,
+      studentFacingReason: effectiveReason,
+      criterionOutcomes: effectiveCriterionOutcomes,
+      applicationSnapshot: {
+        ...base.applicationSnapshot,
+        applicationId:
+          application?.applicationId || base.applicationSnapshot.applicationId,
+        submittedAt:
+          formatResultDate(application?.submittedAt) ||
+          (isNonDemoApp ? 'Đã nộp trên hệ thống' : base.applicationSnapshot.submittedAt),
+        supplementRequestedAt: effectiveSupplementRequestedAt,
+        supplementSentAt: effectiveSupplementSentAt,
+        declaredCount:
+          realDeclaredCount > 0 || isNonDemoApp
+            ? realDeclaredCount
+            : base.applicationSnapshot.declaredCount,
+        evidenceCount:
+          realDeclaredCount > 0 || isNonDemoApp
+            ? realEvidenceCount
+            : base.applicationSnapshot.evidenceCount,
+      },
       student: {
         ...resolvedStudent,
         university: isLongSchoolName ? LONG_SCHOOL_NAME : resolvedStudent.university,
       },
     };
-  }, [scenario, showDecisionMeta, showAuthoritativeReason, isLongSchoolName, studentIdentity]);
+  }, [
+    scenario,
+    showDecisionMeta,
+    showAuthoritativeReason,
+    isLongSchoolName,
+    studentIdentity,
+    application,
+  ]);
 
   const handleResetDemo = () => {
     setScenario('recognized_hero');

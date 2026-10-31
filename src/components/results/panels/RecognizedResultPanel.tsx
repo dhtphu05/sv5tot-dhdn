@@ -61,7 +61,7 @@ export const RecognizedResultPanel: React.FC<RecognizedResultPanelProps> = ({
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAFBF1] text-[#136F3A] text-[12px] font-bold">
               <Award size={15} className="text-[#1A934E]" />
-              <span>DANH HIỆU THÀNH PHỐ</span>
+              <span>DANH HIỆU CẤP ĐẠI HỌC ĐÀ NẴNG</span>
             </div>
 
             <div>

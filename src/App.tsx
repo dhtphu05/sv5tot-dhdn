@@ -31,7 +31,11 @@ import { ResultDemoScenarioId } from './components/results/resultTypes';
 import { ApplicationSubmissionState } from './components/submission/submissionTypes';
 import { CollectivePortal } from './components/collective/CollectivePortal';
 import { CollectiveLoginPage } from './components/collective/CollectiveLoginPage';
-import { subscribeToCollectiveStore } from './staff/collectiveStore';
+import {
+  subscribeToCollectiveStore,
+  hydrateCollectiveStore,
+} from './staff/collectiveStore';
+import { hydrateWhiteBirdStore } from './components/white-bird/whiteBirdStore';
 import {
   PublicEntryRoute,
   SafeInternalReturnTarget,
@@ -258,10 +262,9 @@ export default function App() {
         PROTOTYPE_SCENARIO_MAP[DEFAULT_PROTOTYPE_SCENARIO_ID];
       const pristine = clonePristineStoreForScenario(config.id);
       const isNonDemoStudent =
-        (isBackendMode() ||
-          (Boolean(studentIdentity.studentId) &&
-            studentIdentity.studentId !== '102220123')) &&
-        (config.id === 'draft' || config.id === 'new_student');
+        isBackendMode() ||
+        (Boolean(studentIdentity.studentId) &&
+          studentIdentity.studentId !== '102220123');
 
       const shouldNavigate = options?.navigateToDefaultScreen ?? true;
       const targetNavId = shouldNavigate ? config.defaultNavId : activeNavId;
@@ -303,7 +306,9 @@ export default function App() {
           savePersistedDemoSession({
             scenarioId: config.id,
             isDemoActive: true,
-            viewMode: 'student_app',
+            ...(shouldNavigate || !options?.preserveUrl
+              ? { viewMode: 'student_app' as const }
+              : {}),
             navId: targetNavId,
             mutatedApplication: nextApp,
             mutatedNotifications: [],
@@ -325,7 +330,9 @@ export default function App() {
         savePersistedDemoSession({
           scenarioId: config.id,
           isDemoActive: true,
-          viewMode: 'student_app',
+          ...(shouldNavigate || !options?.preserveUrl
+            ? { viewMode: 'student_app' as const }
+            : {}),
           navId: targetNavId,
           mutatedApplication: null,
           mutatedNotifications: null,
@@ -351,7 +358,9 @@ export default function App() {
           );
       setNotifTab(hasActionable ? 'actionable' : 'all');
 
-      setViewMode('student_app');
+      if (shouldNavigate || !options?.preserveUrl) {
+        setViewMode('student_app');
+      }
       setIsDemoActive(true);
       setActiveNavId(targetNavId);
 
@@ -706,36 +715,149 @@ export default function App() {
           });
           return finalApp;
         });
+
+        const synthesizedNotifs: StudentNotificationItem[] = [];
+        const rawSupps = Array.isArray(hydratedApp.supplementRequests)
+          ? hydratedApp.supplementRequests
+          : [];
+        rawSupps.forEach((sr: Record<string, any>, idx: number) => {
+          const isResolved =
+            sr.status === 'completed' ||
+            sr.status === 'resolved' ||
+            sr.staffStatus === 'student_returned' ||
+            st === 'supplement_sent';
+          synthesizedNotifs.push({
+            id: sr.id ? `notif-supp-${sr.id}` : `notif-supp-real-${idx}`,
+            type: isResolved ? 'supplement_received' : 'supplement_requested',
+            isActionable: !isResolved,
+            isActionResolved: isResolved,
+            isRead: isResolved,
+            priority: 1,
+            timeGroup: 'today',
+            title: isResolved
+              ? `Đã gửi bổ sung: ${sr.criterionName || 'Tiêu chí hồ sơ'}`
+              : `Cần bổ sung minh chứng: ${sr.criterionName || 'Tiêu chí hồ sơ'}`,
+            criterionId: sr.criterionId,
+            criterionName: sr.criterionName,
+            contextLabel: sr.targetLabel || sr.requirementName,
+            message:
+              sr.message ||
+              'Cán bộ xét duyệt đề nghị bổ sung hoặc làm rõ minh chứng cho nội dung kê khai này.',
+            timestamp: sr.requestedAt || 'Hôm nay',
+            actionLabel: isResolved ? 'Xem hồ sơ' : 'Thực hiện bổ sung',
+            target: {
+              targetType: 'SUPPLEMENT_REQUEST',
+              applicationId: hydratedApp.applicationId,
+              criterionId: sr.criterionId,
+              requirementId: sr.requirementId,
+              declarationId: sr.declarationId,
+              supplementRequestId: sr.id,
+            },
+          });
+        });
+
+        if (st === 'recognized' || st === 'not_recognized') {
+          synthesizedNotifs.unshift({
+            id: `notif-res-${hydratedApp.applicationId}`,
+            type: 'result_published',
+            isActionable: false,
+            isActionResolved: true,
+            isRead: false,
+            priority: 4,
+            timeGroup: 'today',
+            title:
+              st === 'recognized'
+                ? 'Chúc mừng! Kết quả xét chọn Sinh viên 5 tốt đã được công bố'
+                : 'Thông báo kết quả xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng',
+            message:
+              st === 'recognized'
+                ? `Hồ sơ ${hydratedApp.applicationId} đã được công nhận danh hiệu Sinh viên 5 tốt cấp Đại học Đà Nẵng${
+                    hydratedApp.decisionCode ? ` (Quyết định ${hydratedApp.decisionCode})` : ''
+                  }.`
+                : hydratedApp.councilFeedback ||
+                  `Hội đồng xét chọn đã hoàn tất đợt xét duyệt đối với hồ sơ ${hydratedApp.applicationId}.`,
+            timestamp: hydratedApp.awardedAt || 'Vừa cập nhật',
+            actionLabel: 'Xem kết quả',
+            target: {
+              targetType: 'RESULT',
+              applicationId: hydratedApp.applicationId,
+            },
+          });
+        } else if (!isDraftApp) {
+          synthesizedNotifs.push({
+            id: `notif-sub-${hydratedApp.applicationId}`,
+            type: st === 'all_reviewed' ? 'review_started' : 'submission_received',
+            isActionable: false,
+            isActionResolved: true,
+            isRead: true,
+            priority: 5,
+            timeGroup: 'earlier',
+            title:
+              st === 'all_reviewed'
+                ? 'Đã hoàn tất thẩm định 5 tiêu chí — Chờ Hội đồng xét chọn'
+                : hydratedApp.reviewStage === 'CITY'
+                ? 'Hồ sơ đã được chuyển lên Hội Sinh viên Đại học Đà Nẵng'
+                : 'Hồ sơ đã được nộp về Đơn vị xét sơ tuyển',
+            message:
+              st === 'all_reviewed'
+                ? 'Hồ sơ của bạn đã được thẩm định đủ 5 tiêu chí và chuyển sang Hội đồng xét chọn cấp Đại học Đà Nẵng.'
+                : `Hồ sơ ${hydratedApp.applicationId} đang được xử lý tại ${
+                    hydratedApp.reviewStage === 'CITY'
+                      ? 'Hội Sinh viên Việt Nam Đại học Đà Nẵng'
+                      : hydratedApp.schoolReviewUnitName || studentIdentity.university
+                  }.`,
+            timestamp: hydratedApp.submittedAt || 'Đã ghi nhận',
+            actionLabel: 'Xem hồ sơ',
+            target: {
+              targetType: 'APPLICATION',
+              applicationId: hydratedApp.applicationId,
+            },
+          });
+        }
+
+        setNotifications(synthesizedNotifs);
+        savePersistedDemoSession({
+          mutatedNotifications: synthesizedNotifs,
+          scenarioId: resolvedScenarioId,
+        });
+
         setPrototypeScenarioId(resolvedScenarioId);
         setHomeScenario(resolvedHomeScenario);
         setAppSubmissionState(resolvedSubState);
       })
       .catch(() => {
         setSharedApplication((prev) => {
+          const isSameStudent =
+            prev.student?.studentId === studentIdentity.studentId &&
+            !isDemoFixtureApplication(prev, studentIdentity.studentId);
+          const basePrev = isSameStudent
+            ? prev
+            : buildCleanStudentApplication({
+                fullName: studentIdentity.fullName,
+                studentId: studentIdentity.studentId,
+                university: studentIdentity.university,
+              });
           const cachedProfile = loadPersistedStudentProfile({
             studentId: studentIdentity.studentId,
-            email: prev.student?.email,
+            email: basePrev.student?.email,
           });
           const mergedSnapshot = mergeStudentProfileSnapshots(
-            prev.applicantProfileSnapshot,
+            basePrev.applicantProfileSnapshot,
             cachedProfile
           );
           const nextPrev: StudentApplicationData = {
-            ...prev,
+            ...basePrev,
             applicantProfileSnapshot: mergedSnapshot,
             student: {
-              ...prev.student,
-              fullName: mergedSnapshot.fullName || prev.student.fullName,
-              university: mergedSnapshot.institutionName || prev.student.university,
-              class: mergedSnapshot.className || prev.student.class,
-              email: mergedSnapshot.email || prev.student.email,
+              ...basePrev.student,
+              fullName: mergedSnapshot.fullName || basePrev.student.fullName,
+              university:
+                mergedSnapshot.institutionName || basePrev.student.university,
+              class: mergedSnapshot.className || basePrev.student.class,
+              email: mergedSnapshot.email || basePrev.student.email,
             },
           };
-          const localDecls =
-            nextPrev.student?.studentId === studentIdentity.studentId &&
-            !isDemoFixtureApplication(nextPrev, studentIdentity.studentId)
-              ? countAppDeclarations(nextPrev)
-              : 0;
+          const localDecls = isSameStudent ? countAppDeclarations(nextPrev) : 0;
           if (localDecls > 0 && nextPrev.applicationId) {
             apiRequest(
               `/api/v2/portal/individual/applications/${encodeURIComponent(nextPrev.applicationId)}/student-view`,
@@ -744,10 +866,30 @@ export default function App() {
                 body: { application: nextPrev, isUserMutation: true },
               }
             ).catch(() => {});
+          } else {
+            setNotifications([]);
+            setPrototypeScenarioId('draft');
+            setHomeScenario('state_b_draft_clean');
+            setAppSubmissionState('draft');
+            savePersistedDemoSession({
+              mutatedNotifications: [],
+              scenarioId: 'draft',
+            });
           }
           return nextPrev;
         });
       });
+
+    services.collective
+      .listApplications()
+      .then((colApps) => {
+        if (!cancelled && Array.isArray(colApps)) {
+          hydrateCollectiveStore(colApps);
+        }
+      })
+      .catch(() => {});
+    void hydrateWhiteBirdStore();
+
     return () => {
       cancelled = true;
     };
@@ -804,11 +946,18 @@ export default function App() {
       advisoryCount: isNonDemo ? 0 : base.advisoryCount,
       submissionState: appSubmissionState,
       submissionDeadlineText: configuredDeadline,
+      supplementRequests: effectiveSupplementRequests,
+      reviewStage: effectiveSharedApp.reviewStage || base.reviewStage,
       schoolReviewUnitName:
         effectiveSharedApp.schoolReviewUnitName ||
         studentIdentity.university ||
         base.schoolReviewUnitName,
-      supplementRequests: effectiveSupplementRequests,
+      schoolPreliminaryStatus:
+        effectiveSharedApp.schoolPreliminaryStatus || base.schoolPreliminaryStatus,
+      isSchoolForwarded:
+        effectiveSharedApp.isSchoolForwarded ?? base.isSchoolForwarded,
+      schoolRecommendation:
+        effectiveSharedApp.schoolRecommendation || base.schoolRecommendation,
       application: {
         ...effectiveSharedApp,
         supplementRequests: effectiveSupplementRequests,
@@ -1020,8 +1169,9 @@ export default function App() {
       }
 
       if (pathname === '/collective/login') {
-        setViewMode('collective_login');
-        savePersistedDemoSession({ viewMode: 'collective_login' });
+        setViewMode('public');
+        setPublicRoute('login');
+        savePersistedDemoSession({ viewMode: 'public' });
         return;
       }
 
@@ -1038,8 +1188,9 @@ export default function App() {
       }
 
       if (pathname === '/collective' || pathname.startsWith('/collective')) {
-        setViewMode('collective_portal');
-        savePersistedDemoSession({ viewMode: 'collective_portal' });
+        setViewMode('student_app');
+        setActiveNavId('collective');
+        savePersistedDemoSession({ viewMode: 'student_app', navId: 'collective' });
         return;
       }
 
@@ -1056,6 +1207,9 @@ export default function App() {
           setActiveNavId('notifications');
         else if (pathname === '/app/evidence') setActiveNavId('evidence');
         else if (pathname === '/app/application') setActiveNavId('application');
+        else if (pathname === '/app/collective') setActiveNavId('collective');
+        else if (pathname === '/app/white-bird') setActiveNavId('white-bird');
+        else if (pathname === '/app/profile') setActiveNavId('profile');
         savePersistedDemoSession({ viewMode: 'student_app' });
         return;
       }
@@ -1137,7 +1291,15 @@ export default function App() {
       setResultUnavailableNotice(null);
       setActiveNavId(navId);
       savePersistedDemoSession({ navId });
-      updateBrowserUrl(navId === 'results' ? '/app/results' : '/app');
+      updateBrowserUrl(
+        navId === 'results'
+          ? '/app/results'
+          : navId === 'collective'
+          ? '/app/collective'
+          : navId === 'white-bird'
+          ? '/app/white-bird'
+          : '/app'
+      );
       if (typeof window !== 'undefined') {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
@@ -1293,8 +1455,13 @@ export default function App() {
         onOpenPublicEntry={handleOpenPublicFromDemo}
         onEnterStudentApp={handleEnterStudentAppFromDemo}
         onLaunchCollectivePortal={() => {
-          setViewMode('collective_portal');
-          updateBrowserUrl('/collective');
+          setViewMode('student_app');
+          setActiveNavId('collective');
+          savePersistedDemoSession({
+            viewMode: 'student_app',
+            navId: 'collective',
+          });
+          updateBrowserUrl('/app/collective');
           if (typeof window !== 'undefined')
             window.scrollTo({ top: 0, behavior: 'instant' });
         }}
@@ -1311,14 +1478,18 @@ export default function App() {
               userId: email,
               userName: email,
               userEmail: email,
-              role: 'COLLECTIVE_PREPARER',
+              role: 'STUDENT',
               token: `session-${Date.now()}`,
             });
           }
           setCollectiveUserEmail(email);
-          setViewMode('collective_portal');
-          savePersistedDemoSession({ viewMode: 'collective_portal' });
-          updateBrowserUrl('/collective');
+          setViewMode('student_app');
+          setActiveNavId('collective');
+          savePersistedDemoSession({
+            viewMode: 'student_app',
+            navId: 'collective',
+          });
+          updateBrowserUrl('/app/collective');
           if (typeof window !== 'undefined')
             window.scrollTo({ top: 0, behavior: 'instant' });
         }}
@@ -1483,8 +1654,8 @@ export default function App() {
         handleLoginSuccess={handleLoginSuccess}
         handleSignupSuccess={handleSignupSuccess}
         onNavigateToCollectiveLogin={() => {
-          setViewMode('collective_login');
-          updateBrowserUrl('/collective/login');
+          setPublicRoute('login');
+          updateBrowserUrl('/login');
           window.scrollTo({ top: 0, behavior: 'instant' });
         }}
         onEnterAuthenticatedHome={() => {

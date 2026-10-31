@@ -33,9 +33,27 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
     : resultData.decisionDocument?.title ||
       'Quyết định công bố kết quả xét chọn Sinh viên 5 tốt cấp Đại học Đà Nẵng';
   const docFileName = isCertificate
-    ? `Giay_chung_nhan_SV5T_TP_${resultData.student.studentId}.pdf`
+    ? `Giay_chung_nhan_SV5T_DHDN_${resultData.student.studentId}.pdf`
     : resultData.decisionDocument?.fileName ||
       'Van_ban_cong_bo_ket_qua_SV5T_Da_Nang_2026_2027.pdf';
+
+  const resolvedPublishedDateStr = (() => {
+    const raw = (resultData.publishedAt || '').trim();
+    if (!raw) return '24/10/2026';
+    const dmy = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmy) {
+      return `${dmy[1].padStart(2, '0')}/${dmy[2].padStart(2, '0')}/${dmy[3]}`;
+    }
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const dd = String(parsed.getDate()).padStart(2, '0');
+      const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+      const yyyy = String(parsed.getFullYear());
+      return `${dd}/${mm}/${yyyy}`;
+    }
+    return '24/10/2026';
+  })();
+  const [pubDay, pubMonth, pubYear] = resolvedPublishedDateStr.split('/');
 
   const handlePrint = () => {
     window.print();
@@ -218,9 +236,8 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
 
                   <div className="text-center sm:text-right ml-auto">
                     <p className="italic text-[#466474]">
-                      Đà Nẵng, ngày {resultData.publishedAt?.split('/')[0] || '24'} tháng{' '}
-                      {resultData.publishedAt?.split('/')[1] || '10'} năm{' '}
-                      {resultData.publishedAt?.split('/')[2] || '2026'}
+                      Đà Nẵng, ngày {pubDay || '24'} tháng {pubMonth || '10'} năm{' '}
+                      {pubYear || '2026'}
                     </p>
                     <p className="font-bold text-[#172A3A] uppercase mt-1">
                       TM. BAN THƯ KÝ HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG
@@ -247,7 +264,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                     BCH HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG
                   </p>
                   <p className="text-[12px] text-[#466474] pt-1">
-                    Số: {resultData.decisionNumber || '142/QĐ-HSV'}
+                    Số: {resultData.decisionNumber || '108/QĐ-HSV-ĐHĐN'}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -258,7 +275,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
                     Độc lập - Tự do - Hạnh phúc
                   </p>
                   <p className="text-[12px] italic text-[#466474] pt-1">
-                    Đà Nẵng, ngày {resultData.publishedAt || '24/10/2026'}
+                    Đà Nẵng, ngày {resolvedPublishedDateStr}
                   </p>
                 </div>
               </div>
@@ -326,7 +343,7 @@ export const OfficialCertificateModal: React.FC<OfficialCertificateModalProps> =
               <div className="flex justify-end pt-4">
                 <div className="text-right space-y-1 text-[13px]">
                   <p className="font-bold uppercase text-[#172A3A]">
-                    TM. BAN THƯ KÝ HỘI SINH VIÊN TP. ĐÀ NẴNG
+                    TM. BAN THƯ KÝ HỘI SINH VIÊN ĐẠI HỌC ĐÀ NẴNG
                   </p>
                   <p className="text-[12px] text-[#607483]">
                     (Đã ký và đóng dấu xác thực điện tử)

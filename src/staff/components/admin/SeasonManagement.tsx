@@ -82,7 +82,7 @@ export interface SeasonManagementProps {
 const TRACK_LABELS_VI: Record<string, string> = {
   INDIVIDUAL: 'Cá nhân',
   SCHOOL_UNIT: 'Cấp Trường',
-  COLLECTIVE: 'Tập thể (Nộp thẳng TP)',
+  COLLECTIVE: 'Tập thể (Nộp thẳng ĐHĐN)',
   CITY: 'Cấp Đại học Đà Nẵng',
   COMMITTEE: 'Hội đồng xét chọn',
   SYSTEM: 'Toàn hệ thống',
@@ -330,7 +330,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Hạn Trường gửi TP (T03):</span>
+                  <span>Hạn Trường gửi ĐHĐN (T03):</span>
                   <span className="font-semibold text-[#172A3A] tabular-nums">
                     {forwardingDisplay}
                   </span>
@@ -601,7 +601,7 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                 />
                 <VietnameseDateTimePicker
                   stageBadge="T03 · Cấp Trường"
-                  label="Hạn Trường gửi DS lên TP"
+                  label="Hạn Trường gửi DS lên ĐHĐN"
                   value={timelineDraft.schoolForwardingDeadline}
                   onChange={(val) =>
                     setTimelineDraft({
@@ -639,14 +639,14 @@ export const SeasonManagement: React.FC<SeasonManagementProps> = ({
                   helperText="Hạn cuối cho hồ sơ được yêu cầu bổ sung."
                 />
                 <VietnameseDateTimePicker
-                  stageBadge="T05 · Cấp TP"
-                  label="Hoàn tất thẩm định cấp TP"
+                  stageBadge="T05 · Cấp ĐHĐN"
+                  label="Hoàn tất thẩm định cấp ĐHĐN"
                   value={timelineDraft.reviewDeadline}
                   onChange={(val) =>
                     setTimelineDraft({ ...timelineDraft, reviewDeadline: val })
                   }
                   showQuickShifts
-                  helperText="Mốc hoàn tất rà soát độc lập của Tổ thẩm định TP."
+                  helperText="Mốc hoàn tất rà soát độc lập của Tổ thẩm định ĐHĐN."
                 />
                 <VietnameseDateTimePicker
                   stageBadge="T06 · Hội đồng"

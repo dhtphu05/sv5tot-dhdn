@@ -42,8 +42,35 @@ const EXT_TO_MIME: Record<string, string> = {
 
 export function registerCollectiveAndEvidencePortalRoutes(router: Router): void {
   // =========================================================================
-  // 3. COLLECTIVE APPLICATIONS LIFECYCLE
+  // 3. COLLECTIVE & WHITE BIRD APPLICATIONS LIFECYCLE
   // =========================================================================
+  router.get('/white-bird/applications', (_req: Request, res: Response): void => {
+    res.status(200).json({
+      success: true,
+      count: portalState.whiteBirdApplications.length,
+      data: portalState.whiteBirdApplications,
+    });
+  });
+
+  router.put('/white-bird/applications/:id', (req: Request, res: Response): void => {
+    const { id } = req.params;
+    const incoming = (req.body?.application || req.body || {}) as Record<string, any>;
+    const idx = portalState.whiteBirdApplications.findIndex((w) => w.id === id);
+    const merged: Record<string, any> = {
+      ...(idx >= 0 ? portalState.whiteBirdApplications[idx] : {}),
+      ...incoming,
+      id,
+      updatedAt: incoming.updatedAt || new Date().toISOString(),
+    };
+    if (idx >= 0) {
+      portalState.whiteBirdApplications[idx] = merged;
+    } else {
+      portalState.whiteBirdApplications.unshift(merged);
+    }
+    savePortalStateToDisk();
+    res.status(200).json({ success: true, data: merged });
+  });
+
   router.get('/collective/applications', (_req: Request, res: Response): void => {
     res.status(200).json({
       success: true,
@@ -782,7 +809,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     if (metadataRecord.ownerTrack === 'COLLECTIVE') {
       const colApp = portalState.collectiveApplications.find((c) => c.id === applicationId);
       const reqKey = requirementOrCriterionId.toLowerCase() as 'tt01' | 'tt02' | 'tt03' | 'tt04';
-      if (colApp && colApp.requirements[reqKey]) {
+      if (colApp && colApp.requirements?.[reqKey]) {
         colApp.requirements[reqKey].evidenceFiles = [
           ...(colApp.requirements[reqKey].evidenceFiles || []),
           {
@@ -795,6 +822,28 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
             url: metadataRecord.url,
           },
         ];
+      }
+
+      const wbApp = portalState.whiteBirdApplications.find((w) => w.id === applicationId);
+      const wbReqKey = requirementOrCriterionId.toLowerCase() as 'wb01' | 'wb02' | 'wb03';
+      if (wbApp && wbApp.requirements?.[wbReqKey]) {
+        const existing = Array.isArray(wbApp.requirements[wbReqKey].evidenceFiles)
+          ? wbApp.requirements[wbReqKey].evidenceFiles
+          : [];
+        if (!existing.some((f: Record<string, any>) => f.id === metadataRecord.id)) {
+          wbApp.requirements[wbReqKey].evidenceFiles = [
+            ...existing,
+            {
+              id: metadataRecord.id,
+              name: metadataRecord.name,
+              fileType: metadataRecord.fileType,
+              size: metadataRecord.size,
+              uploadedAt: metadataRecord.uploadedAt,
+              status: 'ready',
+              url: metadataRecord.url,
+            },
+          ];
+        }
       }
     }
 

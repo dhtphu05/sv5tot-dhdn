@@ -70,19 +70,8 @@ export const LandingCallToAction: React.FC<LandingCallToActionProps> = ({
             onClick={onStartApplication}
             className="inline-flex items-center gap-2 h-[50px] px-6 rounded-[12px] border border-[#CBDDEB] bg-white hover:bg-[#F2F7FB] text-[#183247] hover:text-[#0B64A0] text-[15px] font-bold transition-all cursor-pointer shadow-xs"
           >
-            <span>Kê khai hồ sơ cá nhân</span>
+            <span>Kê khai hồ sơ cá nhân & tập thể</span>
           </button>
-
-          {onNavigateToCollectiveLogin && (
-            <button
-              type="button"
-              onClick={onNavigateToCollectiveLogin}
-              className="inline-flex items-center gap-2 h-[50px] px-5 rounded-[12px] border border-[#BDEFE7] bg-[#F2FBF9] hover:bg-[#E5F7F4] text-[#0D9488] text-[14.5px] font-bold transition-colors cursor-pointer"
-            >
-              <Users size={17} />
-              <span>Cổng Tập thể</span>
-            </button>
-          )}
         </div>
 
         {/* Multi-role trust badges */}

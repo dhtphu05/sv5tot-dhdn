@@ -60,6 +60,8 @@ export const AwardProgramContextBar: React.FC<AwardProgramContextBarProps> = ({
         return 'Quản lý yêu cầu bổ sung minh chứng';
       case 'collective_review':
         return 'Hồ sơ tập thể · Thẩm định cấp ĐHĐN (TT01–TT04)';
+      case 'white_bird_review':
+        return 'Giải thưởng Cánh chim trắng · Xét duyệt cấp ĐHĐN (QĐ 1720/QĐ-HSV)';
       case 'deadlines':
         return 'Mốc thời gian quy trình xét chọn';
       case 'committee':

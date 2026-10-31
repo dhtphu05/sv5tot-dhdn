@@ -460,7 +460,9 @@ export function useStudentPortalWorkflow({
                   schoolReviewUnitName: unitName,
                   currentReviewStage: 'SCHOOL' as const,
                   schoolPreliminaryStatus: 'pending_intake' as const,
-                  workflowStatus: 'assigned_not_started' as const,
+                  workflowStatus: (isBackendMode()
+                    ? 'unassigned'
+                    : 'assigned_not_started') as StaffApplicationRecord['workflowStatus'],
                   criteriaReview,
                   totalDeclarations,
                   totalEvidence,
@@ -503,15 +505,19 @@ export function useStudentPortalWorkflow({
           internalDeadline: '10/11/2026',
           eligibilityStatus: 'verified',
           eligibilityLabel: 'Đủ điều kiện nộp hồ sơ',
-          workflowStatus: 'assigned_not_started',
-          assignment: {
-            applicationId: targetAppId,
-            officerId: 'staff-off-nam',
-            officerName: 'Trần Hoàng Nam',
-            assignedAt: 'Vừa xong',
-            assignedBy: 'Hệ thống',
-            status: 'not_started',
-          },
+          workflowStatus: isBackendMode()
+            ? 'unassigned'
+            : 'assigned_not_started',
+          assignment: isBackendMode()
+            ? null
+            : {
+                applicationId: targetAppId,
+                officerId: 'staff-off-nam',
+                officerName: 'Trần Hoàng Nam',
+                assignedAt: 'Vừa xong',
+                assignedBy: 'Hệ thống',
+                status: 'not_started',
+              },
           criteriaReview,
           reviewedCriteriaCount: 0,
           totalCriteriaCount: 5,

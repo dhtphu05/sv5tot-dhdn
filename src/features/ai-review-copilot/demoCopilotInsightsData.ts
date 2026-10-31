@@ -8,6 +8,7 @@ import {
   AiDeclarationInsight,
   AiEvidenceInsight,
 } from "./copilotTypes";
+import { isBackendMode } from "../../shared/config/executionMode";
 
 /**
  * AI-UX3 Level 3: Declaration Card AI Assistance Fixtures (Section 6)
@@ -275,6 +276,9 @@ export const DEMO_EVIDENCE_INSIGHTS: Record<string, AiEvidenceInsight> = {
  * Helper lookups to retrieve declaration and evidence insights safely
  */
 export function getDeclarationAiInsight(declarationId: string): AiDeclarationInsight | undefined {
+  if (isBackendMode()) {
+    return undefined;
+  }
   if (DEMO_DECLARATION_INSIGHTS[declarationId]) {
     return DEMO_DECLARATION_INSIGHTS[declarationId];
   }
@@ -290,6 +294,9 @@ export function getDeclarationAiInsight(declarationId: string): AiDeclarationIns
 }
 
 export function getEvidenceAiInsight(evidenceId: string): AiEvidenceInsight | undefined {
+  if (isBackendMode()) {
+    return undefined;
+  }
   if (DEMO_EVIDENCE_INSIGHTS[evidenceId]) {
     return DEMO_EVIDENCE_INSIGHTS[evidenceId];
   }
@@ -304,4 +311,5 @@ export function getEvidenceAiInsight(evidenceId: string): AiEvidenceInsight | un
   if (lower.includes('ielts') || lower.includes('trf')) return DEMO_EVIDENCE_INSIGHTS['ev-int-ielts-cert'];
   return undefined;
 }
+
 

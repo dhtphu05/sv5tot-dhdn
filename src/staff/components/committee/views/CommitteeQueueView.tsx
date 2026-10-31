@@ -117,7 +117,7 @@ export const CommitteeQueueView: React.FC<CommitteeQueueViewProps> = ({
             {app.institution.officialName}
           </div>
           <div className="text-[11px] text-[#607483] mt-0.5">
-            Cán bộ xét: {app.assignment?.officerName || 'Trần Hoàng Nam'}
+            Cán bộ xét: {app.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
           </div>
         </div>
       ),

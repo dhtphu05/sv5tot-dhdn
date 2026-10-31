@@ -75,7 +75,7 @@ export const CommitteeQueueQuickPreview: React.FC<CommitteeQueueQuickPreviewProp
         <div className="text-[#526B7C]">
           Cán bộ thẩm định:{' '}
           <strong className="text-[#172A3A]">
-            {selectedRowApp.assignment?.officerName || 'Trần Hoàng Nam'}
+            {selectedRowApp.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
           </strong>
         </div>
       </div>

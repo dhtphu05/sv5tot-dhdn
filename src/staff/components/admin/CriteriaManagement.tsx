@@ -364,7 +364,7 @@ export const CriteriaManagement: React.FC<CriteriaManagementProps> = ({
         {/* Pane 1: 5 Criteria Navigation (Left 3 cols) */}
         <div className="lg:col-span-3 bg-white rounded-[12px] border border-[#D4E2EC] p-3 shadow-2xs space-y-1.5">
           <div className="px-2 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-[#526B7C]">
-            Đúng 05 tiêu chuẩn cấp TP
+            Đúng 05 tiêu chuẩn cấp ĐHĐN
           </div>
 
           {[

@@ -30,6 +30,7 @@ import {
   PreparedOfficerQuestion,
 } from './committeeSecretaryTypes';
 import { evaluateApplicationPreliminaryVerdict } from './copilotAggregation';
+import { isBackendMode } from '../../shared/config/executionMode';
 
 export const COMMITTEE_SECRETARY_VERDICT_META: Record<
   CommitteeSecretaryVerdict,
@@ -111,7 +112,8 @@ export function composeCommitteeSecretaryReport({
   mode = 'quick',
 }: ComposeCommitteeSecretaryReportParams): CommitteeSecretaryReportData {
   const assignedOfficerName =
-    application.assignment?.officerName || 'Trần Hoàng Nam';
+    application.assignment?.officerName ||
+    (isBackendMode() ? 'Cán bộ xét duyệt cấp ĐHĐN' : 'Trần Hoàng Nam');
   const resolvedSchoolUnit = resolveSchoolReviewUnit(application.institution.id);
   const schoolUnitName =
     application.schoolReviewSummary?.schoolReviewUnitName ||
@@ -143,12 +145,20 @@ export function composeCommitteeSecretaryReport({
       let declCount = 0;
       let evCount = 0;
       if (critStudent) {
-        for (const req of critStudent.requirements) {
-          declCount += req.declarations.length;
-          for (const d of req.declarations) {
+        const reqs =
+          Array.isArray((critStudent as any).groups) && (critStudent as any).groups.length > 0
+            ? (critStudent as any).groups.flatMap((g: any) => g.requirements || [])
+            : critStudent.requirements || [];
+        for (const req of reqs) {
+          declCount += (req.declarations || []).length;
+          for (const d of req.declarations || []) {
             evCount += (d.evidence?.length || d.evidenceFiles?.length || 0);
           }
         }
+      }
+      if (declCount === 0 && critOfficerSummary) {
+        declCount = critOfficerSummary.declaredCount || 0;
+        evCount = critOfficerSummary.evidenceCount || 0;
       }
 
       // Level 1: School Preliminary Review
@@ -164,7 +174,7 @@ export function composeCommitteeSecretaryReport({
       let schoolTimestamp =
         schoolReview?.forwardedAt ||
         schoolReview?.recommendationDate ||
-        '15/10/2026 · 14:00';
+        (isBackendMode() ? application.submittedAt || 'Theo hồ sơ nộp' : '15/10/2026 · 14:00');
 
       if (schoolReview?.recommendation === 'not_recommended') {
         schoolRecLabel = 'Không đề xuất chuyển cấp ĐHĐN';
@@ -205,7 +215,35 @@ export function composeCommitteeSecretaryReport({
       let aiConfidence = 92;
       let aiKeyFinding = 'Minh chứng hợp lệ, đối chiếu đủ điều kiện quy chế.';
 
-      if (critKey === 'academic') {
+      if (isBackendMode()) {
+        if (isFlagged) {
+          aiVerdict = 'insufficient';
+          aiVerdictLabel = 'CHƯA ĐỦ CĂN CỨ';
+          aiConfidence = 75;
+          aiKeyFinding =
+            escalationReason ||
+            critOfficerSummary?.noteSummary ||
+            `Cần Hội đồng xem xét (${declCount} kê khai, ${evCount} minh chứng).`;
+        } else if (
+          critOfficerSummary?.status === 'needs_supplement' ||
+          declCount === 0 ||
+          evCount === 0
+        ) {
+          aiVerdict = 'insufficient';
+          aiVerdictLabel = 'CHƯA ĐỦ CĂN CỨ';
+          aiConfidence = 70;
+          aiKeyFinding =
+            critOfficerSummary?.noteSummary ||
+            `Cần bổ sung hoặc xác minh minh chứng (${declCount} kê khai, ${evCount} minh chứng).`;
+        } else {
+          aiVerdict = 'pass';
+          aiVerdictLabel = 'Có cơ sở ĐẠT';
+          aiConfidence = 93;
+          aiKeyFinding =
+            critOfficerSummary?.noteSummary ||
+            `Đã ghi nhận ${declCount} nội dung kê khai và ${evCount} tệp minh chứng hợp lệ.`;
+        }
+      } else if (critKey === 'academic') {
         if (isFlagged || (critFlag && critFlag.status === 'pending_consideration')) {
           aiVerdict = 'insufficient';
           aiVerdictLabel = 'CHƯA ĐỦ CĂN CỨ';

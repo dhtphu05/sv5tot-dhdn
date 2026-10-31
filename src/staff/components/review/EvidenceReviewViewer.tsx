@@ -57,6 +57,7 @@ import {
 } from '../../reviewTypes';
 import { ReviewStage } from '../../schoolReviewTypes';
 import { getEvidenceAiInsight } from '../../../features/ai-review-copilot/demoCopilotFixtures';
+import { isBackendMode } from '../../../shared/config/executionMode';
 
 export interface EvidenceReviewViewerProps {
   isOpen: boolean;
@@ -103,6 +104,7 @@ function getOfficerRecognizedFields(
 ): SystemRecognizedInfoRow[] {
   const lower = `${file.name} ${file.url || ''}`.toLowerCase();
 
+  if (!isBackendMode() || lower.includes('minhchung_test')) {
   if (lower.includes('518') || lower.includes('smartcampus')) {
     if (lower.includes('307') || lower.includes('ke_hoach')) {
       return [
@@ -392,23 +394,34 @@ function getOfficerRecognizedFields(
       },
     ];
   }
+  }
 
   return [
     {
       label: 'Tên chứng nhận nhận diện',
-      value: declaration?.value || file.name,
+      value:
+        file.aiSuggestedInfo?.achievementName ||
+        declaration?.value ||
+        file.name,
       highlightRegionId: 'award-name',
     },
     {
       label: 'Ngày ghi nhận / Ngày cấp',
-      value: declaration?.date || file.uploadedAt || '15/06/2026',
+      value:
+        file.aiSuggestedInfo?.date ||
+        declaration?.date ||
+        file.uploadedAt ||
+        (isBackendMode() ? 'Theo thông tin trên văn bản' : '15/06/2026'),
       highlightRegionId: 'date',
     },
     {
       label: 'Đơn vị cấp',
       value:
+        file.aiSuggestedInfo?.issuingAuthority ||
         declaration?.detail ||
-        'Trường Đại học Bách khoa - Đại học Đà Nẵng',
+        (isBackendMode()
+          ? 'Theo thông tin trên văn bản đính kèm'
+          : 'Trường Đại học Bách khoa - Đại học Đà Nẵng'),
       highlightRegionId: 'authority',
     },
   ];

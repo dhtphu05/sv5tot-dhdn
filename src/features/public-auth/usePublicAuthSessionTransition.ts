@@ -164,15 +164,30 @@ export function usePublicAuthSessionTransition({
         const resolvedCollectiveEmail =
           session?.user?.email ||
           matchedCollectiveAccount?.authorizedPreparerEmail ||
-          'mai.nt@dut.udn.vn';
+          lower;
+        const resolvedName =
+          session?.user?.fullName ||
+          matchedCollectiveAccount?.authorizedPreparerName ||
+          resolvedCollectiveEmail;
+        const resolvedUni =
+          session?.user?.institutionName ||
+          matchedCollectiveAccount?.institutionName ||
+          'Trường Đại học Bách khoa – ĐHĐN';
         setCollectiveUserEmail(resolvedCollectiveEmail);
-        setViewMode('collective_portal');
+        setStudentIdentity((prev) => ({
+          fullName: resolvedName || prev.fullName,
+          studentId: session?.user?.studentCode || prev.studentId || '102210099',
+          university: resolvedUni || prev.university,
+        }));
+        setViewMode('student_app');
+        setActiveNavId('collective');
         setIsSessionExpiredNotice(false);
         savePersistedDemoSession({
-          viewMode: 'collective_portal',
+          viewMode: 'student_app',
+          navId: 'collective',
           collectiveUserEmail: resolvedCollectiveEmail,
         });
-        updateBrowserUrl('/collective');
+        updateBrowserUrl('/app/collective');
         if (typeof window !== 'undefined')
           window.scrollTo({ top: 0, behavior: 'instant' });
         return;

@@ -115,7 +115,7 @@ export const CommitteeResultsView: React.FC<CommitteeResultsViewProps> = ({
             {app.institution.officialName}
           </div>
           <div className="text-[11px] text-[#607483] mt-0.5">
-            Cán bộ thẩm định: {app.assignment?.officerName || 'Trần Hoàng Nam'}
+            Cán bộ thẩm định: {app.assignment?.officerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
           </div>
         </div>
       ),
@@ -258,7 +258,7 @@ export const CommitteeResultsView: React.FC<CommitteeResultsViewProps> = ({
             {app.institutionName}
           </div>
           <div className="text-[11px] text-[#607483] mt-0.5">
-            {app.facultyName} · Cán bộ: {app.assignedOfficerName || 'Trần Hoàng Nam'}
+            {app.facultyName} · Cán bộ: {app.assignedOfficerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
           </div>
         </div>
       ),

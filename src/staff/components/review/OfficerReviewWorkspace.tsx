@@ -78,6 +78,7 @@ import {
   CheckCircle2,
   RotateCcw,
 } from 'lucide-react';
+import { isBackendMode } from '../../../shared/config/executionMode';
 
 export interface OfficerReviewWorkspaceProps {
   currentUser: StaffUser;
@@ -207,18 +208,21 @@ export const OfficerReviewWorkspace: React.FC<OfficerReviewWorkspaceProps> = ({
     [activeAiDemoScenarioId]
   );
 
+  const isRealBackend = isBackendMode();
+
   const applicationAiVerdict = useMemo(() => {
     return evaluateApplicationPreliminaryVerdict({
       applicationId: workspaceState.applicationId,
       studentApp,
-      customFindings: scenarioConfig.findings,
-      forcedVerdict: scenarioConfig.expectedVerdict,
+      customFindings: isRealBackend ? [] : scenarioConfig.findings,
+      forcedVerdict: isRealBackend ? undefined : scenarioConfig.expectedVerdict,
       policySeason: '2025–2026',
     });
   }, [
     workspaceState.applicationId,
     studentApp,
     scenarioConfig,
+    isRealBackend,
   ]);
 
   const [evidenceViewerState, setEvidenceViewerState] = useState<{

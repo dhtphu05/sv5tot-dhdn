@@ -10,6 +10,8 @@ import { StudentHomeView } from '../../components/home/StudentHomeView';
 import { StudentApplicationWorkspace } from '../../components/application/StudentApplicationWorkspace';
 import { EvidenceLibraryView } from '../../components/evidence/EvidenceLibraryView';
 import { StudentProfileView } from '../../components/profile/StudentProfileView';
+import { CollectivePortal } from '../../components/collective/CollectivePortal';
+import { WhiteBirdPortal } from '../../components/white-bird/WhiteBirdPortal';
 import { FinalResultView } from '../../components/results/FinalResultView';
 import {
   StudentNotificationsView,
@@ -259,6 +261,23 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
             onOpenProfile={() => handleSidebarNavSelect('profile')}
             onActivateNotification={handleActivateNotification}
           />
+        ) : activeNavId === 'collective' ? (
+          <CollectivePortal
+            embeddedInStudentPortal
+            currentEmail={activeStoreState.application.student.email}
+            studentIdentity={studentIdentity}
+            studentProfileSnapshot={
+              activeStoreState.application.applicantProfileSnapshot
+            }
+          />
+        ) : activeNavId === 'white-bird' ? (
+          <WhiteBirdPortal
+            currentEmail={activeStoreState.application.student.email}
+            studentIdentity={studentIdentity}
+            studentProfileSnapshot={
+              activeStoreState.application.applicantProfileSnapshot
+            }
+          />
         ) : activeNavId === 'evidence' ? (
           <EvidenceLibraryView
             application={activeStoreState.application}
@@ -286,6 +305,7 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
           <FinalResultView
             key={`${derivedResultScenario}-${scenarioResetKey}`}
             hasApplication={activeStoreState.hasApplication}
+            application={activeStoreState.application}
             submissionState={activeStoreState.submissionState}
             studentIdentity={studentIdentity}
             onStartNewApplication={handleStartNewApplication}

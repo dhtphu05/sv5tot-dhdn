@@ -480,7 +480,10 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
         collectivePendingCount={
           getAllCollectiveApplications().filter(
             (a) =>
-              a.status === 'city_assigned' || a.status === 'city_in_review'
+              a.status === 'city_unassigned' ||
+              a.status === 'city_assigned' ||
+              a.status === 'city_in_review' ||
+              a.status === 'city_supplement_returned'
           ).length
         }
       >

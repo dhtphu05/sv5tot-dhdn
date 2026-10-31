@@ -69,6 +69,7 @@ import {
   buildIndividualApplicationTableColumns,
 } from '../../../widgets/staff-backoffice/staffTableColumns';
 import { StaffCollectiveReviewRoute } from '../../../widgets/staff-backoffice/StaffCollectiveReviewRoute';
+import { StaffWhiteBirdReviewRoute } from '../../../widgets/staff-backoffice/StaffWhiteBirdReviewRoute';
 import {
   StaffOverviewDashboard,
   StaffWorkloadView,
@@ -323,11 +324,11 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [institutionFilter, setInstitutionFilter] = useState<string>('all');
-  const [selectedRowKey, setSelectedRowKey] = useState<string | null>(
-    'APP-2026-DN-102220123'
+  const [selectedRowKey, setSelectedRowKey] = useState<string | null>(() =>
+    isBackendMode() ? null : 'APP-2026-DN-102220123'
   );
-  const [selectedCollectiveId, setSelectedCollectiveId] = useState<string>(
-    'COL-2026-DN-22TCLC-KTPM'
+  const [selectedCollectiveId, setSelectedCollectiveId] = useState<string>(() =>
+    isBackendMode() ? '' : 'COL-2026-DN-22TCLC-KTPM'
   );
   const [collectiveWorkspaceOpen, setCollectiveWorkspaceOpen] =
     useState<boolean>(() => !isBackendMode());
@@ -612,6 +613,16 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
         statusFilter={statusFilter}
         onChangeStatusFilter={setStatusFilter}
         collectiveTableColumns={collectiveTableColumns}
+        onSelectRoute={onSelectRoute}
+        activeSeasonLabel={activeSeasonLabel}
+      />
+    );
+  }
+
+  if (activeRouteId === 'white_bird_review') {
+    return (
+      <StaffWhiteBirdReviewRoute
+        currentUser={currentUser}
         onSelectRoute={onSelectRoute}
         activeSeasonLabel={activeSeasonLabel}
       />

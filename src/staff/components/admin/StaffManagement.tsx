@@ -748,12 +748,25 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({
                   </label>
                   <select
                     value={createForm.schoolReviewUnitId}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const nextUnitId = e.target.value;
+                      const unitMap: Record<string, string> = {
+                        'unit-dut': 'Hội Sinh viên Trường Đại học Bách khoa – ĐHĐN',
+                        'unit-due': 'Hội Sinh viên Trường Đại học Kinh tế – ĐHĐN',
+                        'unit-ued': 'Hội Sinh viên Trường Đại học Sư phạm – ĐHĐN',
+                        'unit-ufl': 'Hội Sinh viên Trường Đại học Ngoại ngữ – ĐHĐN',
+                        'unit-ute': 'Hội Sinh viên Trường Đại học Sư phạm Kỹ thuật – ĐHĐN',
+                        'unit-vku': 'Hội Sinh viên Trường ĐH CNTT & Truyền thông Việt – Hàn – ĐHĐN',
+                        'unit-smp': 'Đoàn – Hội Trường Y Dược – ĐHĐN',
+                        'unit-vnuk': 'Đoàn – Hội Viện Nghiên cứu và Đào tạo Việt – Anh – ĐHĐN',
+                        'unit-kontum': 'Đoàn – Hội Phân hiệu Đại học Đà Nẵng tại Kon Tum',
+                      };
                       setCreateForm({
                         ...createForm,
-                        schoolReviewUnitId: e.target.value,
-                      })
-                    }
+                        schoolReviewUnitId: nextUnitId,
+                        unitLabel: unitMap[nextUnitId] || createForm.unitLabel,
+                      });
+                    }}
                     className="w-full h-[38px] px-3 text-[12px] font-semibold bg-white border border-[#86EFAC] rounded-[6px] outline-none text-[#166534] cursor-pointer"
                   >
                     <option value="unit-dut">unit-dut · Trường Đại học Bách khoa – ĐHĐN</option>

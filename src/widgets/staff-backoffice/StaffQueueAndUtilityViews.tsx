@@ -30,6 +30,7 @@ import {
 } from '../../staff/components/shared/SharedOperationalTable';
 import { CollectiveApplication } from '../../staff/collectiveTypes';
 import { getAllCollectiveApplications } from '../../staff/collectiveStore';
+import { isBackendMode } from '../../shared/config/executionMode';
 import { Button } from '../../components/buttons/Button';
 import { DecisionDocumentMetadata } from '../../staff/schoolReviewTypes';
 import {
@@ -526,7 +527,12 @@ export const StaffApplicationQueueRouteView: React.FC<
           <Users size={14} />
           <span>Tập thể Sinh viên 5 tốt</span>
           <span className="px-1.5 py-0.2 rounded-full bg-[#0D78AE]/15 text-[#0D78AE] text-[11px] font-extrabold">
-            {getAllCollectiveApplications().length}
+            {
+              (isBackendMode()
+                ? getAllCollectiveApplications().filter((a) => a.status !== 'draft')
+                : getAllCollectiveApplications()
+              ).length
+            }
           </span>
         </button>
       </div>
@@ -624,7 +630,10 @@ export const StaffApplicationQueueRouteView: React.FC<
           ariaLabel="Danh sách hồ sơ Tập thể Sinh viên 5 tốt"
           columns={collectiveTableColumns}
           data={(() => {
-            const allCol = getAllCollectiveApplications();
+            const rawCol = getAllCollectiveApplications();
+            const allCol = isBackendMode()
+              ? rawCol.filter((a) => a.status !== 'draft')
+              : rawCol;
             return allCol.filter((app) => {
               if (
                 institutionFilter !== 'all' &&

@@ -372,7 +372,7 @@ export const CollectiveCommitteeWorkspace: React.FC<CollectiveCommitteeWorkspace
                 Cán bộ xét duyệt cấp Đại học Đà Nẵng
               </div>
               <div className="font-bold text-[#172A3A]">
-                {appData.assignedOfficerName || 'Trần Hoàng Nam'}
+                {appData.assignedOfficerName || 'Cán bộ xét duyệt cấp ĐHĐN'}
               </div>
               <div className="text-[11.5px] text-[#607483]">
                 {appData.cityReviewCompletedAt
