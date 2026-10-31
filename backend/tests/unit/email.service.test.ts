@@ -5,6 +5,8 @@ import {
   buildPasswordResetPlainTextTemplate,
   buildSupplementRequestHtmlTemplate,
   buildSupplementRequestPlainTextTemplate,
+  buildSubmissionConfirmationHtmlTemplate,
+  buildSubmissionConfirmationPlainTextTemplate,
   resolveCriterionName,
 } from '../../src/shared/email/emailTemplates';
 import { ResendEmailService } from '../../src/shared/email/resendEmail.service';
@@ -316,5 +318,88 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     assert.equal(resolveCriterionName('TC4'), 'Tiêu chuẩn 4: Tình nguyện tốt');
     assert.equal(resolveCriterionName('TC5'), 'Tiêu chuẩn 5: Hội nhập tốt');
     assert.equal(resolveCriterionName('CUSTOM_REQ'), 'Tiêu chuẩn / Tiêu chí: CUSTOM_REQ');
+  });
+
+  // Dịch vụ 2: Xác nhận Nộp Hồ sơ (Submission Confirmation) Tests
+  it('Dịch vụ 2: builds responsive submission confirmation HTML with institutional branding and application details', () => {
+    const html = buildSubmissionConfirmationHtmlTemplate({
+      to: 'student.dut@udn.vn',
+      studentName: 'Nguyễn Văn Minh Anh',
+      applicationCode: 'APP-2026-DN-102240295',
+      seasonName: 'Năm học 2025 - 2026',
+      institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
+      schoolReviewUnitName: 'Đoàn Thanh niên - Hội Sinh viên Trường Đại học Bách khoa',
+      submittedAt: '2026-10-31T08:00:00Z',
+      actionUrl: 'https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295',
+    });
+
+    assert.ok(html.includes('HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG'));
+    assert.ok(html.includes('Hệ thống xét chọn danh hiệu và giải thưởng sinh viên'));
+    assert.ok(html.includes('Đã nộp hồ sơ thành công'));
+    assert.ok(html.includes('Kính gửi Nguyễn Văn Minh Anh,'));
+    assert.ok(html.includes('APP-2026-DN-102240295'));
+    assert.ok(html.includes('Năm học 2025 - 2026'));
+    assert.ok(html.includes('Trường Đại học Bách khoa – ĐHĐN'));
+    assert.ok(html.includes('Đoàn Thanh niên - Hội Sinh viên Trường Đại học Bách khoa'));
+    assert.ok(html.includes('Thẩm định sơ khảo cấp Trường'));
+    assert.ok(html.includes('Theo dõi tiến độ hồ sơ'));
+    assert.ok(html.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295'));
+    assert.ok(html.includes('hoisinhvien@udn.vn'));
+  });
+
+  it('Dịch vụ 2: builds matching plain text alternative template for submission confirmation', () => {
+    const text = buildSubmissionConfirmationPlainTextTemplate({
+      to: 'student.dut@udn.vn',
+      studentName: 'Nguyễn Văn Minh Anh',
+      applicationCode: 'APP-2026-DN-102240295',
+      seasonName: 'Năm học 2025 - 2026',
+      institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
+      schoolReviewUnitName: 'Hội đồng thẩm định cấp Trường',
+      submittedAt: '2026-10-31T08:00:00Z',
+      actionUrl: 'https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295',
+    });
+
+    assert.ok(text.includes('HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG'));
+    assert.ok(text.includes('XÁC NHẬN TIẾP NHẬN HỒ SƠ THÀNH CÔNG'));
+    assert.ok(text.includes('Kính gửi Nguyễn Văn Minh Anh,'));
+    assert.ok(text.includes('APP-2026-DN-102240295'));
+    assert.ok(text.includes('Năm học 2025 - 2026'));
+    assert.ok(text.includes('Trường Đại học Bách khoa – ĐHĐN'));
+    assert.ok(text.includes('Thẩm định sơ khảo cấp Trường'));
+    assert.ok(text.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295'));
+  });
+
+  it('Dịch vụ 2: dispatches submission confirmation email with proper subject, idempotency key, and payload', async () => {
+    const emailService = new ResendEmailService('mock-api-key');
+
+    let captured: any = null;
+    emailService.send = async (options: any) => {
+      captured = options;
+      return {
+        success: true,
+        id: 'mock-subm-confirm-123',
+        originalRecipient: options.to,
+        effectiveRecipient: options.to,
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      };
+    };
+
+    const result = await emailService.sendSubmissionConfirmationEmail({
+      to: 'student.test@dut.udn.vn',
+      studentName: 'Cao Nam Hải',
+      applicationCode: 'APP-2026-DN-102240240',
+      seasonName: '2025 - 2026',
+      institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
+      schoolReviewUnitName: 'Đơn vị xét sơ tuyển DUT',
+    });
+
+    assert.equal(result.success, true);
+    assert.ok(captured);
+    assert.equal(captured.subject, '[5TOT ĐHĐN - 2025 - 2026] Xác nhận tiếp nhận hồ sơ APP-2026-DN-102240240');
+    assert.ok(captured.html.includes('Cao Nam Hải'));
+    assert.ok(captured.html.includes('APP-2026-DN-102240240'));
+    assert.ok(captured.text.includes('XÁC NHẬN TIẾP NHẬN HỒ SƠ THÀNH CÔNG'));
+    assert.ok(captured.idempotencyKey.startsWith('submission-confirmation/'));
   });
 });

@@ -237,7 +237,8 @@ export function createApp(dependencies: AppDependencies = {}): Express {
     seasonService,
     unitService,
     criteriaService,
-    identityRepo
+    identityRepo,
+    emailService
   );
   const applicationController = new IndividualApplicationController(applicationService);
 
@@ -299,7 +300,7 @@ export function createApp(dependencies: AppDependencies = {}): Express {
   v2Router.use('/city-workflow', createCityWorkflowRouter(cityWorkflowController, sessionService));
   v2Router.use('/committee', createCommitteeRouter(committeeController, sessionService));
   v2Router.use('/copilot', createCopilotRouter());
-  v2Router.use('/portal', createDomainPortalRouter({ sessionService, identityRepo }));
+  v2Router.use('/portal', createDomainPortalRouter({ sessionService, identityRepo, emailService }));
   v2Router.use('/', createSchoolForwardingBatchRouter(schoolForwardingBatchController, sessionService));
   v2Router.use('/', createAuditAndAnalyticsRouter(auditAndAnalyticsController, sessionService));
 

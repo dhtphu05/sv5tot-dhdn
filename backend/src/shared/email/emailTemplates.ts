@@ -4,7 +4,7 @@
  * Đơn vị tổ chức / vận hành nghiệp vụ: Hội Sinh viên Việt Nam Đại học Đà Nẵng
  */
 
-import type { SupplementRequestEmailData } from './email.types';
+import type { SupplementRequestEmailData, SubmissionConfirmationEmailData } from './email.types';
 
 export interface PasswordResetTemplateParams {
   userName: string;
@@ -663,6 +663,314 @@ ${actionUrl}
 
 LƯU Ý QUAN TRỌNG:
 Vui lòng đăng nhập hệ thống và hoàn thành việc gửi minh chứng bổ sung trước thời hạn nêu trên. Sau thời hạn này, hồ sơ sẽ được hội đồng thẩm định dựa trên các minh chứng hiện có.
+
+---
+Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng
+Email hỗ trợ: hoisinhvien@udn.vn
+Đây là email tự động. Vui lòng không trả lời trực tiếp.`;
+}
+
+
+export function buildSubmissionConfirmationHtmlTemplate(
+  data: SubmissionConfirmationEmailData
+): string {
+  const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
+  const submittedTimeStr = formatVietnameseDateTime(data.submittedAt || new Date());
+  const seasonDisplayName = data.seasonName || 'Năm học 2025 - 2026';
+  const institutionDisplayName = data.institutionName || 'Đại học Đà Nẵng';
+  const unitDisplayName = data.schoolReviewUnitName || 'Hội đồng thẩm định cấp Trường / Đơn vị thành viên';
+
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Xác nhận tiếp nhận hồ sơ – Sinh viên 5 tốt ĐHĐN</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f8fafc;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background-color: #0D78AE;
+      padding: 24px 24px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .org-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin: 0 0 6px 0;
+      color: #ffffff;
+    }
+    .system-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f9ff;
+    }
+    .content {
+      padding: 32px 24px;
+      font-size: 15px;
+      color: #1e293b;
+    }
+    .status-badge {
+      display: inline-block;
+      background-color: #ecfdf5;
+      color: #047857;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid #a7f3d0;
+      margin-bottom: 16px;
+    }
+    .greeting {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .main-text {
+      margin: 0 0 20px 0;
+      line-height: 1.6;
+    }
+    .detail-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 20px 0;
+    }
+    .detail-row {
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #475569;
+      display: inline-block;
+      min-width: 150px;
+    }
+    .detail-value {
+      color: #0f172a;
+    }
+    .guidance-box {
+      background-color: #f0fdf4;
+      border-left: 3px solid #10b981;
+      padding: 14px 16px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #065f46;
+      border-radius: 0 6px 6px 0;
+    }
+    .guidance-box p {
+      margin: 0 0 8px 0;
+    }
+    .guidance-box p:last-child {
+      margin-bottom: 0;
+    }
+    .cta-container {
+      text-align: center;
+      margin: 28px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #0D78AE;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 6px;
+      min-height: 44px;
+      box-sizing: border-box;
+      line-height: 20px;
+    }
+    .fallback-section {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .fallback-url-box {
+      font-size: 12px;
+      color: #0D78AE;
+      word-break: break-all;
+      overflow-wrap: break-word;
+      background-color: #f8fafc;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      margin-top: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .fallback-url-box a {
+      color: #0D78AE;
+      text-decoration: underline;
+      word-break: break-all;
+      overflow-wrap: break-word;
+    }
+    .footer {
+      background-color: #f8fafc;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12.5px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .footer a {
+      color: #0D78AE;
+      text-decoration: none;
+    }
+    @media only screen and (max-width: 480px) {
+      .wrapper {
+        padding: 12px 8px;
+      }
+      .content {
+        padding: 24px 16px;
+      }
+      .cta-button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+      }
+      .detail-label {
+        display: block;
+        margin-bottom: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="org-title">HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG</div>
+        <div class="system-title">Hệ thống xét chọn danh hiệu và giải thưởng sinh viên</div>
+      </div>
+
+      <div class="content">
+        <div class="status-badge">&#10003; Đã nộp hồ sơ thành công</div>
+        <div class="greeting">Kính gửi ${data.studentName},</div>
+        <p class="main-text">Hệ thống xét chọn danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng xin thông báo: Hồ sơ tham gia xét chọn của bạn đã được ghi nhận và nộp thành công về Đơn vị xét sơ tuyển.</p>
+
+        <div class="detail-card">
+          <div class="detail-row">
+            <span class="detail-label">Mã hồ sơ:</span>
+            <span class="detail-value"><strong style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #0D78AE; font-size: 15px;">${data.applicationCode}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Năm học xét chọn:</span>
+            <span class="detail-value">${seasonDisplayName}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Đơn vị / Trường:</span>
+            <span class="detail-value">${institutionDisplayName}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Đơn vị tiếp nhận:</span>
+            <span class="detail-value">${unitDisplayName}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Thời gian tiếp nhận:</span>
+            <span class="detail-value">${submittedTimeStr}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Giai đoạn xử lý:</span>
+            <span class="detail-value"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12.5px; font-weight: 600; background-color: #e0f2fe; color: #0369a1;">Thẩm định sơ khảo cấp Trường</span></span>
+          </div>
+        </div>
+
+        <div class="guidance-box">
+          <p style="font-weight: 600; margin-bottom: 6px; color: #047857;">Quy trình xử lý tiếp theo:</p>
+          <p>• Hội đồng thẩm định sơ khảo sẽ tiến hành rà soát các tiêu chuẩn và đối chiếu minh chứng bạn đã cung cấp.</p>
+          <p>• Trong trường hợp cần làm rõ hoặc bổ sung minh chứng, Cán bộ phụ trách sẽ gửi thông báo trực tiếp qua email này và trên hệ thống với thời hạn quy định.</p>
+          <p>• Bạn có thể nhấn vào nút bên dưới để theo dõi trạng thái thẩm định hồ sơ bất cứ lúc nào.</p>
+        </div>
+
+        <div class="cta-container">
+          <a href="${actionUrl}" target="_blank" rel="noopener noreferrer" class="cta-button">
+            Theo dõi tiến độ hồ sơ
+          </a>
+        </div>
+
+        <div class="fallback-section">
+          <p style="margin: 0 0 6px 0;">Nếu nút trên không hoạt động, vui lòng sao chép liên kết sau và mở trong trình duyệt:</p>
+          <div class="fallback-url-box">
+            <a href="${actionUrl}" target="_blank" rel="noopener noreferrer">${actionUrl}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p style="margin: 0 0 4px 0; font-weight: 600; color: #334155;">Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng</p>
+        <p style="margin: 0 0 6px 0;">Email hỗ trợ: <a href="mailto:hoisinhvien@udn.vn">hoisinhvien@udn.vn</a></p>
+        <p style="margin: 0; font-size: 11.5px; color: #94a3b8;">Đây là email tự động. Vui lòng không trả lời trực tiếp.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export function buildSubmissionConfirmationPlainTextTemplate(
+  data: SubmissionConfirmationEmailData
+): string {
+  const actionUrl = data.actionUrl || 'https://sinhvien5tot.udn.vn';
+  const submittedTimeStr = formatVietnameseDateTime(data.submittedAt || new Date());
+  const seasonDisplayName = data.seasonName || 'Năm học 2025 - 2026';
+  const institutionDisplayName = data.institutionName || 'Đại học Đà Nẵng';
+  const unitDisplayName = data.schoolReviewUnitName || 'Hội đồng thẩm định cấp Trường / Đơn vị thành viên';
+
+  return `HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG
+Hệ thống xét chọn danh hiệu và giải thưởng sinh viên
+
+XÁC NHẬN TIẾP NHẬN HỒ SƠ THÀNH CÔNG
+
+Kính gửi ${data.studentName},
+
+Hệ thống xét chọn danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng xin thông báo: Hồ sơ tham gia xét chọn của bạn đã được ghi nhận và nộp thành công về Đơn vị xét sơ tuyển.
+
+THÔNG TIN HỒ SƠ TIẾP NHẬN:
+- Mã hồ sơ: ${data.applicationCode}
+- Năm học xét chọn: ${seasonDisplayName}
+- Đơn vị / Trường: ${institutionDisplayName}
+- Đơn vị tiếp nhận: ${unitDisplayName}
+- Thời gian tiếp nhận: ${submittedTimeStr}
+- Giai đoạn xử lý: Thẩm định sơ khảo cấp Trường
+
+QUY TRÌNH TIẾP THEO:
+1. Hội đồng thẩm định sơ khảo sẽ tiến hành rà soát các tiêu chuẩn và đối chiếu minh chứng bạn đã cung cấp.
+2. Trong trường hợp cần làm rõ hoặc bổ sung minh chứng, Cán bộ phụ trách sẽ gửi thông báo trực tiếp qua email này và trên hệ thống với thời hạn quy định.
+3. Bạn có thể truy cập liên kết sau để theo dõi tiến độ hồ sơ:
+${actionUrl}
 
 ---
 Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng

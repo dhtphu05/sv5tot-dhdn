@@ -48,9 +48,21 @@ export interface SupplementRequestEmailData {
   actionUrl?: string;
 }
 
+export interface SubmissionConfirmationEmailData {
+  to: string;
+  studentName: string;
+  applicationCode: string;
+  seasonName?: string;
+  institutionName?: string;
+  schoolReviewUnitName?: string;
+  submittedAt?: Date | string;
+  actionUrl?: string;
+}
+
 export interface IEmailService {
   send(options: SendEmailOptions): Promise<SendEmailResult>;
   sendPasswordResetEmail(data: PasswordResetEmailData): Promise<SendEmailResult>;
   sendSupplementRequestEmail(data: SupplementRequestEmailData): Promise<SendEmailResult>;
+  sendSubmissionConfirmationEmail?(data: SubmissionConfirmationEmailData): Promise<SendEmailResult>;
   canIssuePasswordResetFor?(accountEmail: string): boolean;
 }

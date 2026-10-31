@@ -11,6 +11,9 @@
 import { Router, type Request, type Response } from 'express';
 import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
+import type { IEmailService } from '../../shared/email/email.types';
+import { getEmailService } from '../../shared/email';
+import { logger } from '../../shared/logging/logger';
 import {
   SCHOOL_UNIT_MAP,
   STAFF_SEED_ACCOUNTS,
@@ -46,6 +49,7 @@ export { resetDomainPortalState, clearDomainPortalStateForSeed, appendPortalAudi
 export interface DomainPortalRouterDeps {
   sessionService: SessionService;
   identityRepo: IIdentityRepository;
+  emailService?: IEmailService;
 }
 
 export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
@@ -1938,6 +1942,34 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
       actorRole: actor.role,
       details: `Sinh viên nộp hồ sơ về Đơn vị xét sơ tuyển (${app.schoolReviewUnitName || 'Trường Đại học Bách khoa – ĐHĐN'})`,
     });
+
+    const emailSvc = deps.emailService || getEmailService();
+    const finalStudentEmail = String(
+      app.student?.email || app.applicantProfileSnapshot?.email || actor.email || ''
+    ).trim();
+    const studentFullName = String(
+      app.student?.fullName || app.applicantProfileSnapshot?.fullName || actor.name || 'Sinh viên'
+    ).trim();
+
+    if (emailSvc && typeof emailSvc.sendSubmissionConfirmationEmail === 'function' && finalStudentEmail && finalStudentEmail.includes('@')) {
+      emailSvc
+        .sendSubmissionConfirmationEmail({
+          to: finalStudentEmail,
+          studentName: studentFullName,
+          applicationCode: app.applicationCode || id,
+          seasonName: app.seasonName || 'Năm học 2025 - 2026',
+          institutionName: app.trainingInstitutionName || app.student?.university || mapped.instName || 'Đại học Đà Nẵng',
+          schoolReviewUnitName: app.schoolReviewUnitName || mapped.unitName || 'Đơn vị xét sơ tuyển cấp Trường',
+          submittedAt: new Date(),
+        })
+        .catch((err: unknown) => {
+          logger.error(
+            `[DomainPortal:SUBMIT] Failed to dispatch submission confirmation email: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        });
+    }
 
     res.status(200).json({
       success: true,
