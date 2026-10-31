@@ -28,6 +28,8 @@ import type { SeasonService } from '../seasons/season.service';
 import type { SchoolReviewUnitService } from '../schoolReviewUnits/schoolReviewUnit.service';
 import type { CriteriaService } from '../criteria/criteria.service';
 import type { IIdentityRepository } from '../identity/identity.repository';
+import type { IEmailService } from '../../shared/email/email.types';
+import { logger } from '../../shared/logging/logger';
 import type { AuthenticatedActor } from '../authorization/authorization.types';
 import { ApiError } from '../../shared/errors/apiError';
 import type { IndividualAdvisoryEvaluationResult, DeclarationItemInput } from '../criteria/criteria.types';
@@ -38,7 +40,8 @@ export class IndividualApplicationService {
     private readonly seasonService: SeasonService,
     private readonly unitService: SchoolReviewUnitService,
     private readonly criteriaService: CriteriaService,
-    private readonly identityRepo?: IIdentityRepository
+    private readonly identityRepo?: IIdentityRepository,
+    private readonly emailService?: IEmailService
   ) {}
 
   /**
@@ -568,6 +571,27 @@ export class IndividualApplicationService {
         submittedAt: submitted.submittedToSchoolAt,
       },
     });
+
+    if (this.emailService && typeof this.emailService.sendSubmissionConfirmationEmail === 'function' && profileSnapshot?.email && profileSnapshot.email.includes('@')) {
+      this.emailService
+        .sendSubmissionConfirmationEmail({
+          to: profileSnapshot.email,
+          studentName: profileSnapshot.fullName || app.fullNameSnapshot,
+          applicationCode: app.applicationCode,
+          awardTitle: 'danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng',
+          seasonName: season.name,
+          institutionName: app.institutionId,
+          submittedAt: submitted.submittedToSchoolAt || new Date(),
+          statusName: 'Chờ xét sơ tuyển',
+        })
+        .catch((err: unknown) => {
+          logger.error(
+            `[IndividualApplicationService:SUBMIT] Email dispatch failed: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        });
+    }
 
     // 7. Record Transactional Outbox Event for School Notification
     await this.applicationRepo.recordOutboxEvent({

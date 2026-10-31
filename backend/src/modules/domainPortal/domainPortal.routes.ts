@@ -15,6 +15,7 @@
 import { Router } from 'express';
 import type { IIdentityRepository } from '../identity/identity.repository';
 import type { SessionService } from '../sessions/session.service';
+import type { IEmailService } from '../../shared/email/email.types';
 import {
   resetDomainPortalState,
   clearDomainPortalStateForSeed,
@@ -37,6 +38,7 @@ export {
 export interface DomainPortalRouterDeps {
   sessionService: SessionService;
   identityRepo: IIdentityRepository;
+  emailService?: IEmailService;
 }
 
 export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {

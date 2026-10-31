@@ -68,7 +68,7 @@ export interface SupplementRequestFormModalProps {
   simulateSendError?: boolean;
   initialDraftMessage?: string;
   onClose: () => void;
-  onConfirmSend: (payload: SupplementRequestFormPayload) => boolean;
+  onConfirmSend: (payload: SupplementRequestFormPayload) => boolean | Promise<boolean>;
   onRevokeSupplement?: () => void;
 }
 
@@ -99,6 +99,7 @@ export const SupplementRequestFormModal: React.FC<
   );
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [viewingExistingDetail, setViewingExistingDetail] =
     useState<boolean>(false);
   const [aiDraftNotice, setAiDraftNotice] = useState<string | null>(null);
@@ -199,30 +200,42 @@ export const SupplementRequestFormModal: React.FC<
     setStep('confirm');
   };
 
-  const handleFinalSend = () => {
+  const handleFinalSend = async () => {
     if (simulateSendError) {
       // Section 112: Retain message & allowed actions, show error, do not close form
       setSubmitError('Chưa thể gửi yêu cầu bổ sung. Vui lòng thử lại.');
       return;
     }
 
-    const ok = onConfirmSend({
-      scope,
-      message: message.trim(),
-      allowedActions,
-      requestedDueDate: requestedDueDate.trim() || computePresetDueDate(72),
-      criterionName: criterionToken?.name || scope.criterionId,
-      requirementTitle,
-      declarationTitle,
-    });
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    if (!ok) {
-      setSubmitError('Chưa thể gửi yêu cầu bổ sung. Vui lòng thử lại.');
-      return;
+    try {
+      const ok = await onConfirmSend({
+        scope,
+        message: message.trim(),
+        allowedActions,
+        requestedDueDate: requestedDueDate.trim() || computePresetDueDate(72),
+        criterionName: criterionToken?.name || scope.criterionId,
+        requirementTitle,
+        declarationTitle,
+      });
+
+      if (!ok) {
+        setSubmitError('Chưa thể gửi yêu cầu bổ sung. Vui lòng thử lại.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setStep('form');
+      setIsSubmitting(false);
+      onClose();
+    } catch (err: any) {
+      setSubmitError(
+        err?.message || 'Chưa thể gửi yêu cầu bổ sung. Vui lòng kiểm tra kết nối.'
+      );
+      setIsSubmitting(false);
     }
-
-    setStep('form');
-    onClose();
   };
 
   return (
@@ -668,11 +681,23 @@ export const SupplementRequestFormModal: React.FC<
 
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={handleFinalSend}
-                className="h-[38px] px-4.5 rounded-[12px] bg-[#1680DE] hover:bg-[#1371C4] text-white font-bold text-[13px] inline-flex items-center gap-1.5 cursor-pointer transition-colors border-0 shadow-sm"
+                className={`h-[38px] px-4.5 rounded-[12px] bg-[#1680DE] hover:bg-[#1371C4] text-white font-bold text-[13px] inline-flex items-center gap-1.5 cursor-pointer transition-colors border-0 shadow-sm ${
+                  isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
               >
-                <Send size={14} />
-                <span>Gửi yêu cầu</span>
+                {isSubmitting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Đang gửi yêu cầu...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    <span>Gửi yêu cầu</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

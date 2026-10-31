@@ -236,8 +236,13 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     id: string
   ): Promise<SchoolApplicationDetailDto | null> {
     const prisma = await this.getPrisma();
-    const app = (await prisma.individualApplication.findUnique({
-      where: { id },
+    const app = (await prisma.individualApplication.findFirst({
+      where: {
+        OR: [
+          { id },
+          { applicationCode: id },
+        ],
+      },
       include: {
         institution: true,
         applicant: true,
@@ -405,11 +410,19 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     requestedByRole: SystemRoleCode;
   }): Promise<SupplementRequestDto> {
     const prisma = await this.getPrisma();
+    const targetApp = await prisma.individualApplication.findFirst({
+      where: {
+        OR: [{ id: data.applicationId }, { applicationCode: data.applicationId }],
+      },
+      select: { id: true },
+    });
+    const resolvedAppId = targetApp?.id || data.applicationId;
+
     const created = (await prisma.supplementRequest.create({
       data: {
         track: 'INDIVIDUAL',
         stage: 'SCHOOL',
-        individualApplicationId: data.applicationId,
+        individualApplicationId: resolvedAppId,
         criterionOrReqCode: data.criterionOrReqCode,
         scopeType: data.scopeType,
         targetDeclarationId: data.targetDeclarationId || null,
@@ -429,7 +442,7 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
 
     // Increment openSupplementCount and transition application to SCHOOL_SUPPLEMENT_REQUESTED
     await prisma.individualApplication.update({
-      where: { id: data.applicationId },
+      where: { id: resolvedAppId },
       data: {
         schoolPreliminaryStatus: 'SCHOOL_SUPPLEMENT_REQUESTED',
         openSupplementCount: { increment: 1 },
@@ -454,9 +467,20 @@ export class PrismaSchoolReviewRepository implements ISchoolReviewRepository {
     stage: string = 'SCHOOL'
   ): Promise<SupplementRequestDto[]> {
     const prisma = await this.getPrisma();
+    const targetApp = await prisma.individualApplication.findFirst({
+      where: {
+        OR: [{ id: applicationId }, { applicationCode: applicationId }],
+      },
+      select: { id: true },
+    });
+    const resolvedAppId = targetApp?.id || applicationId;
+
     const list = (await prisma.supplementRequest.findMany({
       where: {
-        individualApplicationId: applicationId,
+        OR: [
+          { individualApplicationId: resolvedAppId },
+          { individualApplicationId: applicationId },
+        ],
         stage,
       },
       orderBy: { requestedAt: 'desc' },

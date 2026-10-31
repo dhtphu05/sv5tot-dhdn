@@ -55,6 +55,8 @@ export interface SupplementRequest {
   isDeadlinePassed?: boolean;
   allowedActions: SupplementAllowedAction[];
   status: 'active' | 'completed' | 'cancelled';
+  studentExplanation?: string;
+  staffStatus?: string;
   requestedBy?: string;
   requestedByRole?: string; // "Cán bộ xét duyệt" or "Cán bộ xét sơ tuyển"
   completedAt?: string;     // e.g. "17/10/2026 · 14:05"
@@ -63,7 +65,6 @@ export interface SupplementRequest {
   requestingReviewUnitName?: string;
   requestingOfficerId?: string;
   requestingOfficerName?: string;
-  studentExplanation?: string;
   respondedAt?: string;
 }
 

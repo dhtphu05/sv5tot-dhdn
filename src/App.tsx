@@ -138,7 +138,7 @@ export default function App() {
       fullName: cleanName,
       studentId:
         (isActorStudent && actorCtx?.studentCode) ||
-        profileSnap?.studentCode ||
+        (profileSnap as any)?.studentCode ||
         initApp?.student?.studentId ||
         (allowMockStudentFallback ? MOCK_STUDENT.studentId : ''),
       university:

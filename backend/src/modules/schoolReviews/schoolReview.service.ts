@@ -185,7 +185,14 @@ export class SchoolReviewService {
     // 0. Synchronize directly into in-memory portalState for instantaneous Student Portal reflection
     try {
       const { portalState, savePortalStateToDisk } = await import('../domainPortal/domainPortal.state');
-      const studentApp = portalState.studentApplications[applicationId];
+      const studentApp =
+        portalState.studentApplications[applicationId] ||
+        Object.values(portalState.studentApplications).find(
+          (a: any) =>
+            a?.id === applicationId ||
+            a?.applicationId === applicationId ||
+            a?.applicationCode === applicationId
+        );
       const normCode = (data.criterionOrReqCode || '').toLowerCase();
       let cId = 'ethics';
       let cNum = 1;
@@ -200,6 +207,23 @@ export class SchoolReviewService {
         cId = 'integration'; cNum = 5; cName = 'Hội nhập tốt';
       }
 
+      const rawActions = (data as any).allowedActions || (data.requiredAction ? [data.requiredAction] : ['addEvidence', 'editDeclaration']);
+      const normActions = Array.isArray(rawActions)
+        ? Array.from(new Set(rawActions.flatMap((a: string) => {
+            const lower = a.toLowerCase();
+            const acts: string[] = [a];
+            if (lower.includes('minh chứng') || lower === 'addevidence') acts.push('addEvidence', 'replaceEvidence', 'confirmEvidence');
+            if (lower.includes('kê khai') || lower.includes('chỉnh sửa') || lower === 'editdeclaration') acts.push('editDeclaration');
+            if (lower.includes('thêm') || lower === 'adddeclaration') acts.push('addDeclaration');
+            return acts;
+          })))
+        : ['addEvidence', 'editDeclaration'];
+
+      let cleanTargetDeclId = data.targetDeclarationId;
+      if (cleanTargetDeclId && cleanTargetDeclId.includes('__')) {
+        cleanTargetDeclId = cleanTargetDeclId.split('__').slice(1).join('__');
+      }
+
       const mappedSup = {
         id: supplement.id,
         criterionId: cId,
@@ -207,13 +231,13 @@ export class SchoolReviewService {
         criterionNumber: cNum,
         requirementId: data.criterionOrReqCode,
         requirementTitle: data.requirementTitle || cName,
-        declarationId: data.targetDeclarationId,
+        declarationId: cleanTargetDeclId,
         declarationTitle: data.declarationTitle,
-        scopeLevel: data.targetDeclarationId ? 'declaration' : 'criterion',
+        scopeLevel: cleanTargetDeclId ? 'declaration' : 'criterion',
         message: data.requestReason,
         requestedAt: supplement.requestedAt ? new Date(supplement.requestedAt).toLocaleDateString('vi-VN') : '',
         deadline: data.deadlineAt ? new Date(data.deadlineAt).toLocaleDateString('vi-VN') : '',
-        allowedActions: data.requiredAction ? [data.requiredAction] : ['addEvidence', 'editText'],
+        allowedActions: normActions,
         status: 'active',
         staffStatus: 'waiting_student',
       };
@@ -234,7 +258,12 @@ export class SchoolReviewService {
         }
       }
 
-      const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === applicationId);
+      const staffRec = portalState.individualStaffRecords.find(
+        (r) =>
+          r.applicationId === applicationId ||
+          (r as any).id === applicationId ||
+          (r as any).applicationCode === applicationId
+      );
       if (staffRec) {
         staffRec.workflowStatus = 'supplement_requested';
         staffRec.schoolPreliminaryStatus = 'supplement_requested';
@@ -290,6 +319,7 @@ export class SchoolReviewService {
     // 2. Authoritative Email Notification via Resend (Dịch vụ 1)
     if (this.emailService && detail.email) {
       try {
+        logger.info(`[SchoolReviewService] Dispatching supplement email to ${detail.email}`);
         await this.emailService.sendSupplementRequestEmail({
           to: detail.email,
           studentName: detail.applicantName || 'Sinh viên',
@@ -348,13 +378,31 @@ export class SchoolReviewService {
     SchoolReviewPolicy.assertOfficerReviewUnitScope(actor, detail as any);
     SchoolReviewPolicy.assertCanMutatePreliminaryJudgment(detail as any);
 
-    const existing = await this.schoolReviewRepo.getSupplementRequestById(supplementId);
-    if (!existing || existing.individualApplicationId !== applicationId) {
+    let existing = await this.schoolReviewRepo.getSupplementRequestById(supplementId);
+    if (!existing) {
+      const allSups = await this.schoolReviewRepo.listSupplementRequests(detail.id);
+      const cleanTarget = supplementId.includes('__')
+        ? supplementId.split('__').slice(1).join('__')
+        : supplementId;
+      existing =
+        allSups.find((s) => {
+          if (s.id === supplementId) return true;
+          const sClean = s.targetDeclarationId?.includes('__')
+            ? s.targetDeclarationId.split('__').slice(1).join('__')
+            : s.targetDeclarationId;
+          return sClean === cleanTarget;
+        }) || null;
+    }
+    if (
+      !existing ||
+      (existing.individualApplicationId !== detail.id &&
+       existing.individualApplicationId !== (detail as any).applicationCode)
+    ) {
       throw ApiError.notFound('Không tìm thấy yêu cầu bổ sung hồ sơ.', 'SUPPLEMENT_NOT_FOUND');
     }
 
     const resolved = await this.schoolReviewRepo.resolveSupplementRequest(
-      supplementId,
+      existing.id,
       status,
       actor.userId,
       note
@@ -373,7 +421,14 @@ export class SchoolReviewService {
     // Synchronize resolution to portalState
     try {
       const { portalState, savePortalStateToDisk } = await import('../domainPortal/domainPortal.state');
-      const studentApp = portalState.studentApplications[applicationId];
+      const studentApp =
+        portalState.studentApplications[applicationId] ||
+        Object.values(portalState.studentApplications).find(
+          (a: any) =>
+            a?.id === applicationId ||
+            a?.applicationId === applicationId ||
+            a?.applicationCode === applicationId
+        );
       if (studentApp && Array.isArray(studentApp.supplementRequests)) {
         const targetReq = studentApp.supplementRequests.find((r: any) => r.id === supplementId);
         if (targetReq) {
@@ -388,7 +443,12 @@ export class SchoolReviewService {
           studentApp.schoolPreliminaryStatus = 'under_review';
         }
       }
-      const staffRec = portalState.individualStaffRecords.find((r) => r.applicationId === applicationId);
+      const staffRec = portalState.individualStaffRecords.find(
+        (r) =>
+          r.applicationId === applicationId ||
+          (r as any).id === applicationId ||
+          (r as any).applicationCode === applicationId
+      );
       if (staffRec?.workspaceState && Array.isArray(staffRec.workspaceState.supplementRequests)) {
         const wsReq = staffRec.workspaceState.supplementRequests.find((r: any) => r.id === supplementId);
         if (wsReq) {

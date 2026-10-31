@@ -32,15 +32,17 @@ export const SupplementActionBanner: React.FC<SupplementActionBannerProps> = ({
   isSubmitting = false,
   className = '',
 }) => {
-  if (!requests || requests.length === 0) return null;
+  const activeRequests = requests.filter((r) => r.status === 'active');
+  const displayRequests = activeRequests.length > 0 ? activeRequests : requests;
+
+  if (!displayRequests || displayRequests.length === 0) return null;
 
   // Find active request or first active
   const activeReq =
-    requests.find((r) => r.id === activeRequestId) ||
-    requests.find((r) => r.status === 'active') ||
-    requests[0];
+    displayRequests.find((r) => r.id === activeRequestId) ||
+    displayRequests[0];
 
-  const hasMultiple = requests.length > 1;
+  const hasMultiple = displayRequests.length > 1;
   const changes = activeReq ? changesMap[activeReq.id] : null;
   const hasPendingChanges = Boolean(
     changes &&
@@ -60,12 +62,12 @@ export const SupplementActionBanner: React.FC<SupplementActionBannerProps> = ({
         <div className="flex items-center justify-between pb-2 border-b border-[#FADDB6] flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-[12.5px] font-bold text-[#8C3A19]">
-              Bạn có {requests.length} yêu cầu bổ sung:
+              Bạn có {displayRequests.length} yêu cầu bổ sung:
             </span>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            {requests.map((req, idx) => {
+            {displayRequests.map((req, idx) => {
               const isSelected = req.id === activeReq.id;
               const reqChanges = changesMap[req.id];
               const isReadyToSend = Boolean(

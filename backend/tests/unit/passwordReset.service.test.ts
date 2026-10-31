@@ -66,6 +66,13 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
         isRerouted: false,
         timestamp: new Date().toISOString(),
       }),
+      sendSupplementRequestEmail: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
       sendPasswordResetEmail: async (data: unknown) => {
         dispatchedEmails.push(data);
         return {
@@ -76,13 +83,6 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
           timestamp: new Date().toISOString(),
         };
       },
-      sendSupplementRequestEmail: async () => ({
-        success: true,
-        originalRecipient: '',
-        effectiveRecipient: '',
-        isRerouted: false,
-        timestamp: new Date().toISOString(),
-      }),
     };
 
     const resetServiceWithEmail = new PasswordResetService(
@@ -113,6 +113,13 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
         isRerouted: false,
         timestamp: new Date().toISOString(),
       }),
+      sendSupplementRequestEmail: async () => ({
+        success: true,
+        originalRecipient: '',
+        effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
       sendPasswordResetEmail: async (data: unknown) => {
         dispatchedEmails.push(data);
         return {
@@ -123,13 +130,6 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
           timestamp: new Date().toISOString(),
         };
       },
-      sendSupplementRequestEmail: async () => ({
-        success: true,
-        originalRecipient: '',
-        effectiveRecipient: '',
-        isRerouted: false,
-        timestamp: new Date().toISOString(),
-      }),
       canIssuePasswordResetFor: (email: string) => {
         return email === 'authorized-tester@udn.vn';
       },
@@ -161,19 +161,19 @@ describe('Backend V2: Password Reset Domain Service Unit Tests', () => {
         isRerouted: false,
         timestamp: new Date().toISOString(),
       }),
-      sendPasswordResetEmail: async () => ({
-        success: false,
-        error: 'Provider rejection',
-        originalRecipient: testUser.email,
-        effectiveRecipient: testUser.email,
-        isRerouted: false,
-        timestamp: new Date().toISOString(),
-      }),
       sendSupplementRequestEmail: async () => ({
         success: false,
         error: 'Provider rejection',
         originalRecipient: '',
         effectiveRecipient: '',
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      }),
+      sendPasswordResetEmail: async () => ({
+        success: false,
+        error: 'Provider rejection',
+        originalRecipient: testUser.email,
+        effectiveRecipient: testUser.email,
         isRerouted: false,
         timestamp: new Date().toISOString(),
       }),

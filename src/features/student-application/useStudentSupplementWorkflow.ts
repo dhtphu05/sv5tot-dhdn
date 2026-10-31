@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId } from '../../components/supplement/supplementHelpers';
 /**
  * 5TOT ĐHĐN — Student Supplement Response & Change-Tracking Feature Hook (FSD Features Layer)
  * Manages active supplement requests, change tracking (declarations/evidence added/removed),
@@ -301,9 +302,20 @@ export function useStudentSupplementWorkflow({
         if (c.id !== targetReq.criterionId) return c;
         const updateReqs = (reqs: typeof c.requirements) =>
           reqs.map((r) => {
-            if (targetReq.requirementId && r.id !== targetReq.requirementId) return r;
+            const isTargetReq =
+              !targetReq.requirementId ||
+              isMatchingRequirementId(targetReq.requirementId, r.id) ||
+              (targetReq.declarationId &&
+                r.declarations.some((d) =>
+                  isMatchingDeclarationId(targetReq.declarationId, d.id)
+                ));
+            if (!isTargetReq) return r;
             const updatedDecls = r.declarations.map((d) => {
-              if (targetReq.declarationId && d.id !== targetReq.declarationId) return d;
+              if (
+                targetReq.declarationId &&
+                !isMatchingDeclarationId(targetReq.declarationId, d.id)
+              )
+                return d;
               const existingFiles = d.evidenceFiles || [];
               const existingIds = new Set(existingFiles.map((ef) => ef.id || ef.name));
               const newFiles = (changeRec?.addedEvidenceFiles || [])

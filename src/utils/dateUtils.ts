@@ -12,7 +12,7 @@ export function parseFlexibleDateTime(input?: string | Date | null): Date | unde
   if (!isNaN(standardParsed)) return new Date(standardParsed);
 
   // Match Vietnamese formats: "20:00 · 31/10/2026", "20:00 31/10/2026", "20:00, 31/10/2026"
-  const vnMatch = s.match(/(\d{1,2}):(\d{2})\s*(?:·|,|-)?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  const vnMatch = s.match(/(\d{1,2}):(\d{2})\s*(?:·|,|-|ngày)?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/i);
   if (vnMatch) {
     const [, hour, min, day, month, year] = vnMatch;
     const isoStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${min.padStart(2, '0')}:00+07:00`;

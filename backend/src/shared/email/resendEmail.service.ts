@@ -18,6 +18,7 @@ import type {
   IEmailService,
   PasswordResetEmailData,
   SupplementRequestEmailData,
+  SubmissionConfirmationEmailData,
   SendEmailOptions,
   SendEmailResult,
 } from './email.types';
@@ -26,6 +27,9 @@ import {
   buildPasswordResetPlainTextTemplate,
   buildSupplementRequestHtmlTemplate,
   buildSupplementRequestPlainTextTemplate,
+  buildSubmissionConfirmationHtmlTemplate,
+  buildSubmissionConfirmationPlainTextTemplate,
+  resolveEmailSubjectTag,
 } from './emailTemplates';
 
 export class ResendEmailService implements IEmailService {
@@ -209,7 +213,7 @@ export class ResendEmailService implements IEmailService {
 
     return this.send({
       to: data.to,
-      subject: 'Yêu cầu đặt lại mật khẩu – Sinh viên 5 tốt ĐHĐN',
+      subject: '[5TOT ĐHĐN] Yêu cầu đặt lại mật khẩu',
       html,
       text,
       idempotencyKey: `password-reset/${tokenDigest}`,
@@ -243,10 +247,45 @@ export class ResendEmailService implements IEmailService {
 
     return this.send({
       to: data.to,
-      subject: `[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ ${data.applicationCode}`,
+      subject: `[${resolveEmailSubjectTag(data.awardTitle)}] Yêu cầu bổ sung minh chứng – ${data.applicationCode}`,
       html,
       text,
       idempotencyKey: `supplement-request/${tokenDigest}`,
+    });
+  }
+
+  public async sendSubmissionConfirmationEmail(
+    data: SubmissionConfirmationEmailData
+  ): Promise<SendEmailResult> {
+    const env = getEnvironment();
+    const baseUrl = env.APP_PUBLIC_URL || env.APP_URL;
+
+    let actionUrl = data.actionUrl;
+    if (!actionUrl) {
+      const parsedBaseUrl = new URL(baseUrl);
+      parsedBaseUrl.searchParams.set('route', 'application_detail');
+      parsedBaseUrl.searchParams.set('code', data.applicationCode);
+      actionUrl = parsedBaseUrl.toString();
+    }
+
+    const emailDataWithUrl: SubmissionConfirmationEmailData = {
+      ...data,
+      actionUrl,
+    };
+
+    const html = buildSubmissionConfirmationHtmlTemplate(emailDataWithUrl);
+    const text = buildSubmissionConfirmationPlainTextTemplate(emailDataWithUrl);
+
+    const idempotencyRaw = `submission-confirmation:${data.applicationCode}:${Date.now()}`;
+    const tokenDigest = crypto.createHash('sha256').update(idempotencyRaw).digest('hex');
+
+    const subjectTag = resolveEmailSubjectTag(data.awardTitle);
+    return this.send({
+      to: data.to,
+      subject: `[${subjectTag}] Xác nhận nộp hồ sơ – ${data.applicationCode}`,
+      html,
+      text,
+      idempotencyKey: `submission-confirmation/${tokenDigest}`,
     });
   }
 }
