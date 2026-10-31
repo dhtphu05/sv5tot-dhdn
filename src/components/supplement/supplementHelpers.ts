@@ -93,6 +93,6 @@ export function isSupplementActionAllowed(
       );
     }
 
-    return a === action.toLowerCase();
+    return a === String(action).toLowerCase();
   });
 }

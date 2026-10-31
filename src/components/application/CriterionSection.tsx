@@ -208,7 +208,7 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 
   // Helper to resolve the specific request and changes for a requirement row
   const getReqSupplementProps = (req: ApplicationRequirement) => {
-    let reqSupplement = criterionRequests.find((r) => {
+    let reqSupplement: SupplementRequest | null | undefined = criterionRequests.find((r) => {
       if (r.status !== 'active') return false;
       if (isMatchingRequirementId(r.requirementId, req.id)) return true;
       if (

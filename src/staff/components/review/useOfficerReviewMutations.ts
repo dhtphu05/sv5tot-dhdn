@@ -298,6 +298,8 @@ export function useOfficerReviewMutations({
         token: targetStaffToken,
       };
 
+      let createdSupplementId: string | undefined = undefined;
+
       if (targetAppId) {
         let parsedDeadline: string | undefined = undefined;
         if (payload.requestedDueDate) {
@@ -331,7 +333,6 @@ export function useOfficerReviewMutations({
           deadlineAt: parsedDeadline,
         };
 
-        let createdSupplementId: string | undefined = undefined;
         try {
           const res = await apiRequest(
             `/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`,

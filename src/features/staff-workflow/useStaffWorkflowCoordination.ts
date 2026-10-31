@@ -252,6 +252,7 @@ export function useStaffWorkflowCoordination({
   setPrototypeScenarioId,
   setHomeScenario,
   setAppSubmissionState,
+  setSharedApplication,
   isActive = true,
 }: StaffWorkflowCoordinationOptions) {
   const [staffUser, setStaffUser] = useState<StaffUser>(

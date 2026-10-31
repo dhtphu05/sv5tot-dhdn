@@ -270,12 +270,13 @@ export const InlineRowReviewControls: React.FC<InlineRowReviewControlsProps> = (
     requestedDueDate?: string;
   }): boolean => {
     if (onSendSupplementRequest) {
-      return onSendSupplementRequest({
+      void onSendSupplementRequest({
         scope: payload.scope,
         message: payload.message,
         allowedActions: payload.allowedActions,
         requestedDueDate: payload.requestedDueDate || 'Theo lịch chung của Đại học Đà Nẵng',
       });
+      return true;
     } else if (onOpenSupplementModal) {
       onOpenSupplementModal(payload.scope);
       return true;

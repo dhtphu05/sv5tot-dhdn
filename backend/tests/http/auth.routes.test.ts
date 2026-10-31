@@ -42,9 +42,9 @@ describe('Backend V2: Authentication HTTP Contract & Security Tests', () => {
       sessionRepo: fakeSessionRepo,
       resetRepo: fakeResetRepo,
       emailService: {
-        sendPasswordResetEmail: async () => ({ success: true, timestamp: new Date().toISOString() }),
-        sendSupplementRequestEmail: async () => ({ success: true, timestamp: new Date().toISOString() }),
-        send: async () => ({ success: true, timestamp: new Date().toISOString() }),
+        sendPasswordResetEmail: async () => ({ success: true, timestamp: new Date().toISOString(), originalRecipient: 'test@example.com', effectiveRecipient: 'test@example.com', isRerouted: false }),
+        sendSupplementRequestEmail: async () => ({ success: true, timestamp: new Date().toISOString(), originalRecipient: 'test@example.com', effectiveRecipient: 'test@example.com', isRerouted: false }),
+        send: async () => ({ success: true, timestamp: new Date().toISOString(), originalRecipient: 'test@example.com', effectiveRecipient: 'test@example.com', isRerouted: false }),
         canIssuePasswordResetFor: () => true,
       },
     });

@@ -641,7 +641,7 @@ export function useStudentPortalWorkflow({
                   isFullyCompleted && app.currentReviewStage === 'SCHOOL'
                     ? ('supplement_returned' as const)
                     : app.schoolPreliminaryStatus,
-                supplementStatus: isFullyCompleted ? ('returned' as const) : app.supplementStatus,
+                supplementStatus: isFullyCompleted ? ('returned' as const) : (app as any).supplementStatus,
                 updatedAt: 'Vừa xong',
                 updatedSortKey: Date.now(),
                 latestOperationalNote: effectiveExplanation,
