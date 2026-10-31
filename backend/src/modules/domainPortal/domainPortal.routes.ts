@@ -1957,10 +1957,12 @@ export function createDomainPortalRouter(deps: DomainPortalRouterDeps): Router {
           to: finalStudentEmail,
           studentName: studentFullName,
           applicationCode: app.applicationCode || id,
-          seasonName: app.seasonName || 'Năm học 2025 - 2026',
+          awardTitle: app.awardTitle || app.title || 'danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng',
+          seasonName: app.seasonName || app.season || 'Năm học 2025 - 2026',
           institutionName: app.trainingInstitutionName || app.student?.university || mapped.instName || 'Đại học Đà Nẵng',
           schoolReviewUnitName: app.schoolReviewUnitName || mapped.unitName || 'Đơn vị xét sơ tuyển cấp Trường',
           submittedAt: new Date(),
+          statusName: 'Chờ xét sơ tuyển',
         })
         .catch((err: unknown) => {
           logger.error(

@@ -35,8 +35,10 @@ export interface SupplementRequestEmailData {
   to: string;
   studentName: string;
   applicationCode: string;
+  awardTitle?: string;
   seasonName?: string;
   institutionName?: string;
+  schoolReviewUnitName?: string;
   criterionOrReqCode: string;
   criterionName?: string;
   requirementTitle?: string;
@@ -52,10 +54,12 @@ export interface SubmissionConfirmationEmailData {
   to: string;
   studentName: string;
   applicationCode: string;
+  awardTitle?: string;
   seasonName?: string;
   institutionName?: string;
   schoolReviewUnitName?: string;
   submittedAt?: Date | string;
+  statusName?: string;
   actionUrl?: string;
 }
 

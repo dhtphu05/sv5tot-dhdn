@@ -578,9 +578,11 @@ export class IndividualApplicationService {
           to: profileSnapshot.email,
           studentName: profileSnapshot.fullName || app.fullNameSnapshot,
           applicationCode: app.applicationCode,
+          awardTitle: 'danh hiệu Sinh viên 5 tốt Đại học Đà Nẵng',
           seasonName: season.name,
           institutionName: app.institutionId,
           submittedAt: submitted.submittedToSchoolAt || new Date(),
+          statusName: 'Chờ xét sơ tuyển',
         })
         .catch((err: unknown) => {
           logger.error(

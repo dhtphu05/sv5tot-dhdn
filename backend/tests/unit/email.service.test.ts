@@ -65,7 +65,7 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     // 6. Footer
     assert.ok(html.includes('Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà NẴng') || html.includes('Ban Thư ký Hội Sinh viên Việt Nam Đại học Đà Nẵng'));
     assert.ok(html.includes('hoisinhvien@udn.vn'));
-    assert.ok(html.includes('Đây là email tự động. Vui lòng không trả lời trực tiếp.'));
+    assert.ok(html.includes('Đây là email được gửi tự động từ hệ thống. Vui lòng không trả lời trực tiếp.'));
 
     // 7. Verify removed obsolete / unwanted phrases
     assert.ok(!html.includes('Cấp Thành phố / Đại học Đà Nẵng'));
@@ -130,7 +130,7 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
       });
 
       assert.ok(interceptedPayload);
-      assert.equal(interceptedPayload.subject, 'Yêu cầu đặt lại mật khẩu – Sinh viên 5 tốt ĐHĐN');
+      assert.equal(interceptedPayload.subject, '[5TOT ĐHĐN] Yêu cầu đặt lại mật khẩu');
 
       // Extract URL from HTML
       const urlMatch = interceptedPayload.html.match(/href="([^"]+)"/);
@@ -272,7 +272,7 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     assert.ok(html.includes('Cần bổ sung minh chứng Giấy chứng nhận hiến máu tình nguyện đợt 2.'));
     assert.ok(html.includes('Tải lên hình ảnh rõ nét của Giấy chứng nhận có mộc đỏ.'));
     assert.ok(html.includes('15/11/2026'));
-    assert.ok(html.includes('Xem chi tiết &amp; Bổ sung minh chứng'));
+    assert.ok(html.includes('Xem yêu cầu và bổ sung minh chứng'));
     assert.ok(html.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=HS-2026-DUT-001'));
     assert.ok(html.includes('word-break: break-all'));
     assert.ok(html.includes('hoisinhvien@udn.vn'));
@@ -304,7 +304,7 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
 
     assert.equal(result.success, true);
     assert.ok(captured);
-    assert.equal(captured.subject, '[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ HS-2026-DUT-002');
+    assert.equal(captured.subject, '[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng – HS-2026-DUT-002');
     assert.ok(captured.html.includes('Trần Thị Thu Thảo'));
     assert.ok(captured.html.includes('Tiêu chuẩn 2: Học tập tốt'));
     assert.ok(captured.text.includes('Bảng điểm chưa có xác nhận'));
@@ -341,8 +341,8 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     assert.ok(html.includes('Năm học 2025 - 2026'));
     assert.ok(html.includes('Trường Đại học Bách khoa – ĐHĐN'));
     assert.ok(html.includes('Đoàn Thanh niên - Hội Sinh viên Trường Đại học Bách khoa'));
-    assert.ok(html.includes('Thẩm định sơ khảo cấp Trường'));
-    assert.ok(html.includes('Theo dõi tiến độ hồ sơ'));
+    assert.ok(html.includes('Chờ xét sơ tuyển'));
+    assert.ok(html.includes('Theo dõi hồ sơ'));
     assert.ok(html.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295'));
     assert.ok(html.includes('hoisinhvien@udn.vn'));
   });
@@ -360,12 +360,12 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
     });
 
     assert.ok(text.includes('HỘI SINH VIÊN VIỆT NAM ĐẠI HỌC ĐÀ NẴNG'));
-    assert.ok(text.includes('XÁC NHẬN TIẾP NHẬN HỒ SƠ THÀNH CÔNG'));
+    assert.ok(text.includes('XÁC NHẬN NỘP HỒ SƠ'));
     assert.ok(text.includes('Kính gửi Nguyễn Văn Minh Anh,'));
     assert.ok(text.includes('APP-2026-DN-102240295'));
     assert.ok(text.includes('Năm học 2025 - 2026'));
     assert.ok(text.includes('Trường Đại học Bách khoa – ĐHĐN'));
-    assert.ok(text.includes('Thẩm định sơ khảo cấp Trường'));
+    assert.ok(text.includes('Chờ xét sơ tuyển'));
     assert.ok(text.includes('https://sinhvien5tot.udn.vn/?route=application_detail&code=APP-2026-DN-102240295'));
   });
 
@@ -396,10 +396,99 @@ describe('Backend V2: Resend Email Domain Service & Templates', () => {
 
     assert.equal(result.success, true);
     assert.ok(captured);
-    assert.equal(captured.subject, '[5TOT ĐHĐN - 2025 - 2026] Xác nhận tiếp nhận hồ sơ APP-2026-DN-102240240');
+    assert.equal(captured.subject, '[5TOT ĐHĐN] Xác nhận nộp hồ sơ – APP-2026-DN-102240240');
     assert.ok(captured.html.includes('Cao Nam Hải'));
     assert.ok(captured.html.includes('APP-2026-DN-102240240'));
-    assert.ok(captured.text.includes('XÁC NHẬN TIẾP NHẬN HỒ SƠ THÀNH CÔNG'));
+    assert.ok(captured.text.includes('XÁC NHẬN NỘP HỒ SƠ'));
     assert.ok(captured.idempotencyKey.startsWith('submission-confirmation/'));
+  });
+
+  it('deduplicates institution and review unit when they represent the same institution', () => {
+    const htmlSame = buildSubmissionConfirmationHtmlTemplate({
+      to: 'student@udn.vn',
+      studentName: 'Trần Thị Thu Thảo',
+      applicationCode: 'APP-2026-DN-102240241',
+      institutionName: 'Trường Đại học Bách khoa – ĐHĐN',
+      schoolReviewUnitName: 'Trường Đại học Bách khoa – ĐHĐN',
+    });
+    // Should NOT contain a separate "Đơn vị tiếp nhận:" line
+    assert.ok(htmlSame.includes('Trường/Đơn vị:'));
+    assert.ok(!htmlSame.includes('Đơn vị tiếp nhận:'));
+
+    const htmlDiff = buildSubmissionConfirmationHtmlTemplate({
+      to: 'student@udn.vn',
+      studentName: 'Trần Thị Thu Thảo',
+      applicationCode: 'APP-2026-DN-102240241',
+      institutionName: 'Khoa Công nghệ Thông tin',
+      schoolReviewUnitName: 'Hội đồng thẩm định Trường Đại học Bách khoa',
+    });
+    // Should show both when actually different
+    assert.ok(htmlDiff.includes('Trường/Đơn vị:'));
+    assert.ok(htmlDiff.includes('Đơn vị tiếp nhận:'));
+  });
+
+  it('escapes user/officer input safely to prevent HTML injection', () => {
+    const maliciousHtml = buildSupplementRequestHtmlTemplate({
+      to: 'student@udn.vn',
+      studentName: '<script>alert("xss")</script>Nguyễn Văn X',
+      applicationCode: 'HS-2026<img src=x onerror=alert(1)>',
+      criterionOrReqCode: 'TC1',
+      requestReason: '<b>Vui lòng bổ sung</b> & xác nhận "mộc đỏ"',
+    });
+
+    assert.ok(!maliciousHtml.includes('<script>alert("xss")</script>'));
+    assert.ok(maliciousHtml.includes('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'));
+    assert.ok(!maliciousHtml.includes('<img src=x'));
+    assert.ok(maliciousHtml.includes('&lt;b&gt;Vui lòng bổ sung&lt;/b&gt; &amp; xác nhận &quot;mộc đỏ&quot;'));
+  });
+
+  it('handles absent deadline without generating fake deadlines or 72-hour text', () => {
+    const htmlNoDeadline = buildSupplementRequestHtmlTemplate({
+      to: 'student@udn.vn',
+      studentName: 'Lê Văn Không Deadline',
+      applicationCode: 'HS-2026-NODL-001',
+      criterionOrReqCode: 'TC3',
+      requestReason: 'Cần giải trình về kết quả rèn luyện thể lực.',
+    });
+
+    assert.ok(!htmlNoDeadline.includes('Thời hạn hoàn thành:'));
+    assert.ok(!htmlNoDeadline.includes('72 giờ'));
+    assert.ok(!htmlNoDeadline.includes('3 ngày'));
+    assert.ok(htmlNoDeadline.includes('Vui lòng truy cập hệ thống để xem yêu cầu và thực hiện bổ sung theo hướng dẫn.'));
+  });
+
+  it('resolves dynamic subject tags for other awards such as Cánh chim trắng and Tập thể', async () => {
+    const emailService = new ResendEmailService('mock-api-key');
+
+    let capturedConfirm: any = null;
+    emailService.send = async (options: any) => {
+      capturedConfirm = options;
+      return {
+        success: true,
+        id: 'mock-123',
+        originalRecipient: options.to,
+        effectiveRecipient: options.to,
+        isRerouted: false,
+        timestamp: new Date().toISOString(),
+      };
+    };
+
+    await emailService.sendSubmissionConfirmationEmail({
+      to: 'student@udn.vn',
+      studentName: 'Phạm Thị Thùy',
+      applicationCode: 'CCT-2026-001',
+      awardTitle: 'Giải thưởng Cánh chim trắng',
+    });
+
+    assert.equal(capturedConfirm.subject, '[Cánh chim trắng ĐHĐN] Xác nhận nộp hồ sơ – CCT-2026-001');
+
+    await emailService.sendSubmissionConfirmationEmail({
+      to: 'collective@udn.vn',
+      studentName: 'Chi đoàn 20TCLC_DT1',
+      applicationCode: 'TT-2026-001',
+      awardTitle: 'danh hiệu Tập thể Sinh viên 5 tốt',
+    });
+
+    assert.equal(capturedConfirm.subject, '[Tập thể 5TOT ĐHĐN] Xác nhận nộp hồ sơ – TT-2026-001');
   });
 });

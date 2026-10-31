@@ -29,6 +29,7 @@ import {
   buildSupplementRequestPlainTextTemplate,
   buildSubmissionConfirmationHtmlTemplate,
   buildSubmissionConfirmationPlainTextTemplate,
+  resolveEmailSubjectTag,
 } from './emailTemplates';
 
 export class ResendEmailService implements IEmailService {
@@ -212,7 +213,7 @@ export class ResendEmailService implements IEmailService {
 
     return this.send({
       to: data.to,
-      subject: 'Yêu cầu đặt lại mật khẩu – Sinh viên 5 tốt ĐHĐN',
+      subject: '[5TOT ĐHĐN] Yêu cầu đặt lại mật khẩu',
       html,
       text,
       idempotencyKey: `password-reset/${tokenDigest}`,
@@ -246,7 +247,7 @@ export class ResendEmailService implements IEmailService {
 
     return this.send({
       to: data.to,
-      subject: `[5TOT ĐHĐN] Yêu cầu bổ sung minh chứng hồ sơ ${data.applicationCode}`,
+      subject: `[${resolveEmailSubjectTag(data.awardTitle)}] Yêu cầu bổ sung minh chứng – ${data.applicationCode}`,
       html,
       text,
       idempotencyKey: `supplement-request/${tokenDigest}`,
@@ -278,10 +279,10 @@ export class ResendEmailService implements IEmailService {
     const idempotencyRaw = `submission-confirmation:${data.applicationCode}:${Date.now()}`;
     const tokenDigest = crypto.createHash('sha256').update(idempotencyRaw).digest('hex');
 
-    const seasonTag = data.seasonName ? ` - ${data.seasonName}` : '';
+    const subjectTag = resolveEmailSubjectTag(data.awardTitle);
     return this.send({
       to: data.to,
-      subject: `[5TOT ĐHĐN${seasonTag}] Xác nhận tiếp nhận hồ sơ ${data.applicationCode}`,
+      subject: `[${subjectTag}] Xác nhận nộp hồ sơ – ${data.applicationCode}`,
       html,
       text,
       idempotencyKey: `submission-confirmation/${tokenDigest}`,
