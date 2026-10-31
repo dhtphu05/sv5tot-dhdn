@@ -1241,22 +1241,62 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
                 } else if (normCode.includes('integration') || normCode.startsWith('tc5') || normCode.includes('tc05')) {
                   cId = 'integration'; cNum = 5; cName = 'Hội nhập tốt';
                 }
+                let cleanDeclId = s.targetDeclarationId || undefined;
+                if (cleanDeclId && cleanDeclId.includes('__')) {
+                  cleanDeclId = cleanDeclId.split('__').slice(1).join('__');
+                }
+
+                let reqId = s.criterionOrReqCode;
+                let reqTitle = cName;
+                const existingAppRef = portalState.studentApplications[code];
+                if (cleanDeclId && existingAppRef && Array.isArray(existingAppRef.criteria)) {
+                  for (const c of existingAppRef.criteria) {
+                    const reqs = Array.isArray(c.groups) && c.groups.length > 0 ? c.groups.flatMap((g: any) => g.requirements || []) : c.requirements || [];
+                    for (const r of reqs) {
+                      if (r.declarations?.some((d: any) => d.id === cleanDeclId || d.id === s.targetDeclarationId)) {
+                        reqId = r.id;
+                        reqTitle = r.title || cName;
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                const rawReqAction = s.requiredAction || '';
+                const rawActions = [rawReqAction, ...(Array.isArray((s as any).allowedActions) ? (s as any).allowedActions : [])].filter(Boolean);
+                const normAllowedActions = Array.from(new Set(rawActions.flatMap((a: string) => {
+                  const lower = a.toLowerCase();
+                  const acts: string[] = [a];
+                  if (lower.includes('minh chứng') || lower === 'addevidence') acts.push('addEvidence', 'replaceEvidence', 'confirmEvidence');
+                  if (lower.includes('kê khai') || lower.includes('chỉnh sửa') || lower === 'editdeclaration') acts.push('editDeclaration');
+                  if (lower.includes('thêm') || lower === 'adddeclaration') acts.push('addDeclaration');
+                  return acts;
+                })));
+                if (normAllowedActions.length === 0) {
+                  normAllowedActions.push('addEvidence', 'editDeclaration');
+                }
+
+                const isReqActive = s.status === 'OPEN';
+                const isResubmitted = s.status === 'RESUBMITTED';
+                const reqStatus = isReqActive ? 'active' : 'completed';
+                const staffStatus = isReqActive ? 'waiting_student' : isResubmitted ? 'student_returned' : 'closed';
+
                 return {
                   id: s.id,
                   criterionId: cId,
                   criterionName: cName,
                   criterionNumber: cNum,
-                  requirementId: s.criterionOrReqCode,
-                  requirementTitle: cName,
-                  declarationId: s.targetDeclarationId || undefined,
+                  requirementId: reqId,
+                  requirementTitle: reqTitle,
+                  declarationId: cleanDeclId,
                   declarationTitle: s.declarationTitle || undefined,
-                  scopeLevel: s.targetDeclarationId ? 'declaration' : 'criterion',
+                  scopeLevel: cleanDeclId ? 'declaration' : 'criterion',
                   message: s.requestReason,
                   requestedAt: s.requestedAt ? new Date(s.requestedAt).toLocaleDateString('vi-VN') : '',
                   deadline: s.deadlineAt ? new Date(s.deadlineAt).toLocaleDateString('vi-VN') : '',
-                  allowedActions: s.requiredAction ? [s.requiredAction] : ['addEvidence', 'editText'],
-                  status: s.status === 'OPEN' ? 'active' : 'completed',
-                  staffStatus: s.status === 'OPEN' ? 'waiting_student' : 'closed',
+                  allowedActions: normAllowedActions,
+                  status: reqStatus,
+                  staffStatus,
                   responses: s.responses || [],
                 };
               })

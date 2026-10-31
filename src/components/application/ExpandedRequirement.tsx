@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId, isSupplementActionAllowed } from '../supplement/supplementHelpers';
 import React from 'react';
 import {
   BookOpen,
@@ -98,8 +99,12 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
   const isTargetRequirement = Boolean(
     isSupplementMode &&
       supplementRequest &&
-      (supplementRequest.requirementId === requirement.id ||
-        supplementRequest.scopeLevel === 'criterion')
+      (isMatchingRequirementId(supplementRequest.requirementId, requirement.id) ||
+        supplementRequest.scopeLevel === 'criterion' ||
+        (supplementRequest.declarationId &&
+          requirement.declarations.some((d) =>
+            isMatchingDeclarationId(supplementRequest.declarationId, d.id)
+          )))
   );
 
   // In supplement mode, adding a NEW declaration is only allowed if explicitly permitted (Section 18)
@@ -107,7 +112,7 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
     ? isTargetRequirement &&
       supplementRequest?.status === 'active' &&
       !isSupplementWindowClosed &&
-      (supplementRequest?.allowedActions.includes('addDeclaration') ?? false)
+      isSupplementActionAllowed(supplementRequest?.allowedActions, 'addDeclaration')
     : !readOnly;
 
   // =========================================================================
@@ -213,7 +218,7 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
               const isTargetDecl = Boolean(
                 isTargetRequirement &&
                   (!supplementRequest?.declarationId ||
-                    supplementRequest.declarationId === decl.id)
+                    isMatchingDeclarationId(supplementRequest.declarationId, decl.id))
               );
 
               const isSupplementActive =
@@ -223,13 +228,13 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
               const canEditThisDecl = isSupplementMode
                 ? isSupplementActive &&
                   !isSupplementWindowClosed &&
-                  (supplementRequest?.allowedActions.includes('editDeclaration') ?? false)
+                  isSupplementActionAllowed(supplementRequest?.allowedActions, 'editDeclaration')
                 : !readOnly;
 
               const canManageThisEvidence = isSupplementMode
                 ? isSupplementActive &&
                   !isSupplementWindowClosed &&
-                  (supplementRequest?.allowedActions.includes('addEvidence') ?? false)
+                  isSupplementActionAllowed(supplementRequest?.allowedActions, 'addEvidence')
                 : !readOnly;
 
               return (
@@ -477,13 +482,13 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
   const canEditSingleDecl = isSupplementMode
     ? isSingleSupplementActive &&
       !isSupplementWindowClosed &&
-      (supplementRequest?.allowedActions.includes('editDeclaration') ?? false)
+      isSupplementActionAllowed(supplementRequest?.allowedActions, 'editDeclaration')
     : !readOnly;
 
   const canManageSingleEvidence = isSupplementMode
     ? isSingleSupplementActive &&
       !isSupplementWindowClosed &&
-      (supplementRequest?.allowedActions.includes('addEvidence') ?? false)
+      isSupplementActionAllowed(supplementRequest?.allowedActions, 'addEvidence')
     : !readOnly;
 
   return (

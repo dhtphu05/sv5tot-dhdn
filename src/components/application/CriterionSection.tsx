@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId } from '../supplement/supplementHelpers';
 import React, { useState } from 'react';
 import { ChevronDown, BookOpen } from 'lucide-react';
 import {
@@ -110,7 +111,14 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
   };
 
   // Find supplement requests targeting this criterion
-  const criterionRequests = supplementRequests.filter((r) => r.criterionId === criterion.id);
+  const criterionRequests = supplementRequests.filter((r) =>
+    r.criterionId === criterion.id ||
+    criterion.requirements.some((req) =>
+      isMatchingRequirementId(r.requirementId, req.id) ||
+      (r.declarationId &&
+        req.declarations?.some((d) => isMatchingDeclarationId(r.declarationId, d.id)))
+    )
+  );
   const hasActiveSupplement = criterionRequests.some((r) => r.status === 'active');
 
   const hasDeclaredItems = criterion.requirements.some(
@@ -200,10 +208,38 @@ export const CriterionSection: React.FC<CriterionSectionProps> = ({
 
   // Helper to resolve the specific request and changes for a requirement row
   const getReqSupplementProps = (req: ApplicationRequirement) => {
-    const reqSupplement =
-      criterionRequests.find((r) => r.requirementId === req.id) ||
-      criterionRequests.find((r) => r.scopeLevel === 'criterion') ||
-      null;
+    let reqSupplement = criterionRequests.find((r) => {
+      if (r.status !== 'active') return false;
+      if (isMatchingRequirementId(r.requirementId, req.id)) return true;
+      if (
+        r.declarationId &&
+        req.declarations?.some((d) => isMatchingDeclarationId(r.declarationId, d.id))
+      )
+        return true;
+      return false;
+    });
+
+    if (!reqSupplement) {
+      reqSupplement = criterionRequests.find(
+        (r) => r.status === 'active' && r.scopeLevel === 'criterion'
+      );
+    }
+
+    if (!reqSupplement) {
+      reqSupplement =
+        criterionRequests.find((r) => {
+          if (isMatchingRequirementId(r.requirementId, req.id)) return true;
+          if (
+            r.declarationId &&
+            req.declarations?.some((d) => isMatchingDeclarationId(r.declarationId, d.id))
+          )
+            return true;
+          return false;
+        }) ||
+        criterionRequests.find((r) => r.scopeLevel === 'criterion') ||
+        null;
+    }
+
     const reqChanges = reqSupplement ? supplementChangesMap[reqSupplement.id] || null : null;
     return { reqSupplement, reqChanges };
   };

@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId } from '../../components/supplement/supplementHelpers';
 /**
  * 5TOT ĐHĐN — Officer Review Pure Domain Mutators (FSD Entities Layer)
  * Pure state transition builders for Individual Officer Review Workspace.
@@ -132,8 +133,8 @@ export function buildUpdateScopeStatusMutation(
 
   const nextSupplementRequests = (prevWs.supplementRequests || []).map((r) => {
     const isTarget =
-      r.declarationId === scope.declarationId ||
-      (!scope.declarationId && r.requirementId === scope.requirementId);
+      isMatchingDeclarationId(r.declarationId, scope.declarationId) ||
+      (!scope.declarationId && (isMatchingRequirementId(r.requirementId, scope.requirementId) || r.criterionId === scope.criterionId));
     if (
       isTarget &&
       (r.status === 'active' ||
@@ -411,7 +412,8 @@ export function buildSendSupplementMutation(
   currentUser: StaffUser,
   effectiveStage: ReviewStage,
   isSchoolStage: boolean,
-  schoolReviewUnitName?: string
+  schoolReviewUnitName?: string,
+  createdSupplementId?: string
 ): OfficerWorkspaceMutationResult {
   const critToken = CRITERIA[payload.scope.criterionId];
   const critDef = CRITERIA_DEFINITIONS[payload.scope.criterionId];
@@ -437,7 +439,7 @@ export function buildSendSupplementMutation(
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
   const nowStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} - ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const newReqId = `sup-req-${Date.now()}`;
+  const newReqId = createdSupplementId || `sup-req-${Date.now()}`;
 
   const key = getScopeKey(
     payload.scope.requirementId,
@@ -477,7 +479,7 @@ export function buildSendSupplementMutation(
     message: payload.message,
     requestedAt: nowStr,
     deadline: payload.requestedDueDate,
-    allowedActions: payload.allowedActions,
+    allowedActions: payload.allowedActions || ['addEvidence'],
     status: 'active' as const,
     requestedByRole: isSchoolStage
       ? 'Cán bộ xét sơ tuyển'

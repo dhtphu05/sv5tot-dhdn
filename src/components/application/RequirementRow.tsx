@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId, isSupplementActionAllowed } from '../supplement/supplementHelpers';
 import React from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { ApplicationRequirement, ApplicationDeclaration, ApplicationEvidence } from '../../demo/fixtures/studentApplication';
@@ -132,8 +133,22 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
   // Check if any attached evidence file requires verification
   const hasFlaggedEvidence = allEvidenceFiles.some((f) => f.status === 'needs_verification');
   const hasActiveSupplementForRow = Boolean(
-    isSupplementMode && supplementRequest && supplementRequest.status === 'active'
+    isSupplementMode &&
+      supplementRequest &&
+      supplementRequest.status === 'active' &&
+      (isMatchingRequirementId(supplementRequest.requirementId, requirement.id) ||
+        supplementRequest.scopeLevel === 'criterion' ||
+        (supplementRequest.declarationId &&
+          requirement.declarations.some((d) =>
+            isMatchingDeclarationId(supplementRequest.declarationId, d.id)
+          )))
   );
+
+  const canManageRowEvidence =
+    !readOnly ||
+    (hasActiveSupplementForRow &&
+      !isSupplementWindowClosed &&
+      isSupplementActionAllowed(supplementRequest?.allowedActions, 'addEvidence'));
 
   // Determine row status in draft vs submitted/under review/supplement mode (Prompt 9 Section 18 & Prompt 10 Section 11, 49)
   const getRowStatus = (): { status: RequirementStatus; customLabel?: string } => {
@@ -397,12 +412,12 @@ export const RequirementRow: React.FC<RequirementRowProps> = ({
         <div className="grid-col-3 px-6 border-l border-[#E3EBF1] min-w-0 flex items-center h-full overflow-hidden">
           <EvidenceCell
             files={allEvidenceFiles}
-            editable={!readOnly}
+            editable={canManageRowEvidence}
             isDeclarationEmpty={declarationCount === 0}
             onFileClick={onInspectEvidence}
             onExpandListClick={onToggleExpand}
             onAddClick={
-              !readOnly && primaryDecl && allEvidenceFiles.length === 0 && onOpenAddEvidenceModal
+              canManageRowEvidence && primaryDecl && onOpenAddEvidenceModal
                 ? () => {
                     onOpenAddEvidenceModal(requirement.id, primaryDecl.id, primaryDecl.value);
                   }

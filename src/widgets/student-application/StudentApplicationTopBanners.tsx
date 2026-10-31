@@ -149,9 +149,9 @@ export const StudentApplicationTopBanners: React.FC<
       )}
 
       {submissionState === 'supplement_required' &&
-        supplementRequests.length > 0 && (
+        supplementRequests.filter((r) => r.status === 'active').length > 0 && (
           <SupplementActionBanner
-            requests={supplementRequests}
+            requests={supplementRequests.filter((r) => r.status === 'active')}
             activeRequestId={activeSupplementRequest?.id || null}
             onSelectRequest={onSelectSupplementRequest}
             onViewSupplement={onViewSupplementRequest}

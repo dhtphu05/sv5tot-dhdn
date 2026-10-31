@@ -1,3 +1,4 @@
+import { isMatchingDeclarationId, isMatchingRequirementId } from '../../../components/supplement/supplementHelpers';
 import { parseFlexibleDateTime } from '../../../utils/dateUtils';
 import { apiRequest } from '../../../shared/api/httpClient';
 /**
@@ -96,21 +97,76 @@ export function useOfficerReviewMutations({
   const handleUpdateScopeStatus = useCallback(
     (scope: SelectedReviewScope, nextStatus: StaffItemReviewStatus) => {
       if (!effectiveCanMutate) return;
-      onMutateWorkspaceState((prevWs) =>
-        buildUpdateScopeStatusMutation(
+
+      const targetAppId = applicationRecord?.applicationId || studentApp.applicationId;
+      const targetStaffToken =
+        (currentUser as any).token ||
+        `staff-token-${currentUser.id || (isSchoolStage ? 'staff-sch-dut' : 'staff-off-nam')}`;
+      const staffActor = {
+        userId: currentUser.id || (isSchoolStage ? 'staff-sch-dut' : 'staff-off-nam'),
+        userName: currentUser.fullName,
+        userEmail: currentUser.email || (isSchoolStage ? 'canbo.dut@udn.vn' : 'canbo.dhdn@udn.vn'),
+        role: currentUser.primaryRole || (isSchoolStage ? 'SCHOOL_OFFICER' : 'CITY_OFFICER'),
+        unitId: currentUser.schoolReviewUnitId || (isSchoolStage ? 'unit-dut' : undefined),
+        token: targetStaffToken,
+      };
+
+      onMutateWorkspaceState((prevWs) => {
+        if (targetAppId && (nextStatus === 'suitable' || nextStatus === 'unsuitable')) {
+          const matchingSupRequests = (prevWs.supplementRequests || []).filter((r) => {
+            const isTarget =
+              isMatchingDeclarationId(r.declarationId, scope.declarationId) ||
+              (!scope.declarationId &&
+                (isMatchingRequirementId(r.requirementId, scope.requirementId) ||
+                  r.criterionId === scope.criterionId));
+            return (
+              isTarget &&
+              (r.status === 'active' ||
+                r.staffStatus === 'waiting_student' ||
+                r.staffStatus === 'student_returned' ||
+                (r.status as string) === 'responded')
+            );
+          });
+
+          for (const sup of matchingSupRequests) {
+            apiRequest(
+              `/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements/${encodeURIComponent(sup.id)}/resolve`,
+              {
+                method: 'PUT',
+                body: {
+                  status:
+                    nextStatus === 'suitable'
+                      ? 'RESOLVED_SATISFIED'
+                      : 'RESOLVED_UNSATISFIED',
+                  resolutionNote:
+                    nextStatus === 'suitable'
+                      ? 'Cán bộ đã thẩm định bổ sung đạt yêu cầu.'
+                      : 'Cán bộ thẩm định bổ sung chưa đạt.',
+                },
+                actor: staffActor,
+              }
+            ).catch((err) => {
+              console.warn('Backend resolve supplement notice:', err);
+            });
+          }
+        }
+
+        return buildUpdateScopeStatusMutation(
           prevWs,
           scope,
           nextStatus,
           currentUser,
           applicationRecord?.workflowStatus
-        )
-      );
+        );
+      });
     },
     [
       effectiveCanMutate,
       onMutateWorkspaceState,
       currentUser,
-      applicationRecord?.workflowStatus,
+      applicationRecord,
+      studentApp.applicationId,
+      isSchoolStage,
     ]
   );
 
@@ -271,11 +327,13 @@ export function useOfficerReviewMutations({
           declarationTitle: payload.declarationTitle,
           requestReason: payload.message,
           requiredAction: friendlyActions,
+          allowedActions: payload.allowedActions || ['addEvidence'],
           deadlineAt: parsedDeadline,
         };
 
+        let createdSupplementId: string | undefined = undefined;
         try {
-          await apiRequest(
+          const res = await apiRequest(
             `/api/v2/school-reviews/${encodeURIComponent(targetAppId)}/supplements`,
             {
               method: 'POST',
@@ -283,6 +341,7 @@ export function useOfficerReviewMutations({
               actor: staffActor,
             }
           );
+          createdSupplementId = (res as any)?.data?.id || (res as any)?.id;
         } catch (err: any) {
           const msg = err?.message || 'Lỗi gửi yêu cầu bổ sung đến máy chủ.';
           console.error('Backend V2 School Review supplement request notice:', err);
@@ -299,7 +358,8 @@ export function useOfficerReviewMutations({
           currentUser,
           effectiveStage,
           isSchoolStage,
-          schoolReviewUnitName
+          schoolReviewUnitName,
+          createdSupplementId
         )
       );
 
