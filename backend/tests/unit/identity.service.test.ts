@@ -225,4 +225,78 @@ describe('Backend V2: Identity Domain Service Unit Tests', () => {
       }
     );
   });
+
+  it('allows updating all profile fields including email', async () => {
+    const student = await identityService.registerStudent({
+      email: 'student.original@dut.udn.vn',
+      passwordHash: 'hash-pw',
+      fullName: 'Võ Minh Toàn',
+      studentCode: '102220777',
+      institutionId: 'inst-dut',
+    });
+
+    const res = await identityService.updateProfile(student.id, {
+      fullName: 'Võ Minh Toàn Cập Nhật',
+      studentCode: '102220666',
+      gender: 'Nam',
+      dateOfBirth: '20/05/2004',
+      ethnicity: 'Kinh',
+      academicYearNumber: 3,
+      educationLevel: 'Đại học',
+      className: '22T_DT1',
+      homeProvince: 'Thành phố Đà Nẵng',
+      institutionId: 'inst-dut',
+      institutionName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
+      facultyDepartmentId: 'fac-dut-cntt',
+      faculty: 'Khoa Công nghệ thông tin',
+      facultyName: 'Khoa Công nghệ thông tin',
+      unionPosition: 'Bí thư Chi đoàn',
+      politicalStatus: 'Đoàn viên',
+      phoneNumber: '0905111222',
+      email: 'student.updated@dut.udn.vn',
+    });
+
+    assert.equal(res.profile.fullName, 'Võ Minh Toàn Cập Nhật');
+    assert.equal(res.profile.studentCode, '102220666');
+    assert.equal(res.profile.email, 'student.updated@dut.udn.vn');
+    assert.equal(res.profile.phoneNumber, '0905111222');
+    assert.equal(res.profile.facultyName, 'Khoa Công nghệ thông tin');
+
+    const updatedUser = await identityService.getById(student.id);
+    assert.equal(updatedUser.email, 'student.updated@dut.udn.vn');
+    assert.equal(updatedUser.studentCode, '102220666');
+  });
+
+  it('rejects updateProfile when email is already taken by another user', async () => {
+    const student1 = await identityService.registerStudent({
+      email: 'taken.email@dut.udn.vn',
+      passwordHash: 'hash-pw',
+      fullName: 'Người Dùng Một',
+      studentCode: 'CODE-TAKEN-1',
+      institutionId: 'inst-dut',
+    });
+
+    const student2 = await identityService.registerStudent({
+      email: 'other.student@dut.udn.vn',
+      passwordHash: 'hash-pw',
+      fullName: 'Người Dùng Hai',
+      studentCode: 'CODE-TAKEN-2',
+      institutionId: 'inst-dut',
+    });
+
+    await assert.rejects(
+      async () => {
+        await identityService.updateProfile(student2.id, {
+          email: 'taken.email@dut.udn.vn',
+        });
+      },
+      (err: any) => {
+        assert.ok(err instanceof ApiError);
+        assert.equal(err.status, 409);
+        assert.equal(err.code, 'EMAIL_CONFLICT');
+        assert.ok(err.message.includes('Địa chỉ email này đã được sử dụng'));
+        return true;
+      }
+    );
+  });
 });

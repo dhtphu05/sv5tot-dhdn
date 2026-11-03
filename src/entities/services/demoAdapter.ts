@@ -561,10 +561,22 @@ export const demoServicesAdapter: DomainServicesBundle = {
           throw err;
         }
       }
+      if (input.email) {
+        const normalizedEmail = input.email.trim().toLowerCase();
+        if (normalizedEmail === 'trung_email@example.com') {
+          const err = new Error('Địa chỉ email này đã được sử dụng cho một tài khoản khác.') as Error & {
+            status?: number;
+            code?: string;
+          };
+          err.status = 409;
+          err.code = 'EMAIL_CONFLICT';
+          throw err;
+        }
+      }
       demoStudentProfile = {
         ...demoStudentProfile,
         ...input,
-        email: demoStudentProfile.email, // email is immutable
+        email: input.email ? input.email.trim().toLowerCase() : demoStudentProfile.email,
       };
       if (demoStudentProfile.email) {
         demoRegisteredProfiles.set(

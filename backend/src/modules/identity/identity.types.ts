@@ -144,6 +144,7 @@ export interface UpdateStudentProfileInput {
   unionPosition?: string;
   politicalStatus?: string;
   phoneNumber?: string;
+  email?: string;
 }
 
 export interface ProfileCompletenessResult {

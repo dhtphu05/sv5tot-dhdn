@@ -212,7 +212,7 @@ export class FakeIdentityRepository implements IIdentityRepository {
       unionPosition: input.unionPosition !== undefined ? input.unionPosition : current.unionPosition,
       politicalStatus: input.politicalStatus !== undefined ? input.politicalStatus : current.politicalStatus,
       phoneNumber: input.phoneNumber !== undefined ? input.phoneNumber : current.phoneNumber,
-      email: current.email, // email is immutable
+      email: input.email !== undefined && input.email.trim() !== '' ? input.email.trim().toLowerCase() : current.email,
     };
 
     this.profiles.set(userId, updated);
@@ -223,6 +223,7 @@ export class FakeIdentityRepository implements IIdentityRepository {
       if (input.fullName) user.fullName = input.fullName;
       if (input.studentCode) user.studentCode = input.studentCode.trim().toUpperCase();
       if (input.phoneNumber) user.phone = input.phoneNumber;
+      if (input.email) user.email = input.email.trim().toLowerCase();
       if (input.institutionId) user.institutionId = input.institutionId;
       if (input.facultyDepartmentId !== undefined) user.facultyDepartmentId = input.facultyDepartmentId;
       user.updatedAt = new Date();

@@ -207,7 +207,7 @@ export class IdentityService {
 
   /**
    * Updates student personal information with strict validation for Vietnamese format.
-   * Email is immutable through this endpoint.
+   * Enforces data sanitization, phone format, studentCode/email uniqueness and returns updated completeness.
    */
   public async updateProfile(
     userId: string,
@@ -296,9 +296,27 @@ export class IdentityService {
       input.studentCode = normalizedCode;
     }
 
+    // 7. Email validation & uniqueness enforcement
+    if (input.email !== undefined && input.email.trim() !== '') {
+      const normalizedEmail = input.email.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail)) {
+        throw ApiError.badRequest('Địa chỉ email không đúng định dạng.', 'INVALID_EMAIL');
+      }
+      // Check if another user owns this email
+      const existingUser = await this.identityRepo.findByEmail(normalizedEmail);
+      if (existingUser && existingUser.id !== userId) {
+        throw ApiError.conflict(
+          'Địa chỉ email này đã được sử dụng cho một tài khoản khác.',
+          'EMAIL_CONFLICT'
+        );
+      }
+      input.email = normalizedEmail;
+    }
+
     const updatedProfile = await this.identityRepo.updateProfile(userId, input);
-    // Email is guaranteed to reflect user's real email
-    updatedProfile.email = user.email;
+    // Reflect latest email
+    updatedProfile.email = input.email || user.email;
 
     const completeness = this.checkProfileCompleteness(updatedProfile);
     return { profile: updatedProfile, completeness };
