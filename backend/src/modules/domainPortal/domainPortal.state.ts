@@ -617,6 +617,7 @@ export interface PortalRegisteredStudent {
   studentCode: string;
   institutionId: string;
   institutionName: string;
+  faculty?: string;
   password?: string;
   passwordHash?: string;
   profile?: Record<string, any>;
@@ -877,6 +878,9 @@ export function mergeStudentProfileObjects(
     institutionId: instId,
     institutionName:
       rawInstName || SCHOOL_UNIT_MAP[instId]?.instName || '',
+    facultyDepartmentId: pickStr('facultyDepartmentId'),
+    faculty: pickStr('faculty') || pickStr('facultyName'),
+    facultyName: pickStr('facultyName') || pickStr('faculty'),
     unionPosition: pickStr('unionPosition'),
     politicalStatus: pickStr('politicalStatus'),
     phoneNumber: pickStr('phoneNumber'),
@@ -954,6 +958,7 @@ export function syncStudentProfileInPortalState(
       reg.fullName = merged.fullName || reg.fullName;
       reg.institutionId = merged.institutionId || reg.institutionId;
       reg.institutionName = merged.institutionName || reg.institutionName;
+      if (merged.faculty || merged.facultyName) reg.faculty = merged.faculty || merged.facultyName;
       reg.profile = merged;
     }
   }
@@ -983,6 +988,7 @@ export function syncStudentProfileInPortalState(
         if (merged.fullName) app.student.fullName = merged.fullName;
         if (merged.className) app.student.class = merged.className;
         if (merged.institutionName) app.student.university = merged.institutionName;
+        if (merged.faculty || merged.facultyName) app.student.faculty = merged.faculty || merged.facultyName;
         if (merged.email) app.student.email = merged.email;
       }
       if (merged.institutionName) {
@@ -1006,8 +1012,9 @@ export function syncStudentProfileInPortalState(
         rec.applicantProfileSnapshot,
         merged
       );
-      if (rec.student && merged.fullName) {
-        rec.student.fullName = merged.fullName;
+      if (rec.student) {
+        if (merged.fullName) rec.student.fullName = merged.fullName;
+        if (merged.faculty || merged.facultyName) rec.student.faculty = merged.faculty || merged.facultyName;
       }
     }
   }

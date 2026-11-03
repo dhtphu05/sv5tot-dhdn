@@ -406,6 +406,7 @@ export const ApplicationInfoModal: React.FC<ApplicationInfoModalProps> = ({
                 fullName: record.student.fullName,
                 studentId: record.student.studentCode,
                 university: record.institution.officialName,
+                faculty: (record.student as any)?.faculty || (record.applicantProfileSnapshot as any)?.faculty || (record.applicantProfileSnapshot as any)?.facultyName,
               }}
               isSnapshot={!!record.applicantProfileSnapshot}
               submittedAt={record.submittedAt}

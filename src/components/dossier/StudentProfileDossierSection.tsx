@@ -11,11 +11,11 @@
  *
  * Architecture & UX Features:
  * - Single outer card with zero nested bordered sub-cards (no visual clutter or duplicate cards)
- * - Compact collapsed state showing 8 essential reviewer fields in a responsive grid
- * - Expandable "Xem đầy đủ thông tin" showing all 13 canonical fields + MSSV organized cleanly
+ * - Compact collapsed state showing 9 essential reviewer fields (including Khoa / Ban đào tạo) in a responsive grid
+ * - Expandable "Xem đầy đủ thông tin" showing all canonical fields + MSSV organized cleanly
  * - Compact inline submission-snapshot indicator (no giant green banner)
  * - Flexible container-friendly width: seamlessly adapts inside multi-pane reviewer workspaces
- * - Natural text wrapping for long Vietnamese institution names
+ * - Natural text wrapping for long Vietnamese institution & faculty names
  */
 
 import React, { useState } from 'react';
@@ -26,11 +26,6 @@ import {
   Lock,
   Calendar,
   CheckCircle2,
-  Mail,
-  Phone,
-  Building2,
-  GraduationCap,
-  Sparkles,
 } from 'lucide-react';
 import { StudentProfileDto } from '../../entities/application/studentApplicationTypes';
 import { evaluateProfileCompleteness } from '../../demo/fixtures/studentProfileFixtures';
@@ -42,6 +37,7 @@ export interface SubmittedStudentInformationCardProps {
     studentId?: string;
     university?: string;
     faculty?: string;
+    facultyName?: string;
     class?: string;
     email?: string;
     academicYear?: string;
@@ -77,7 +73,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
     return def;
   };
 
-  // Derive consolidated 13 canonical fields without fabricating missing values
+  // Derive consolidated fields without fabricating missing values
   const effectiveProfile: StudentProfileDto = hasSuppliedData
     ? {
         fullName: resolveVal(profile?.fullName, fallbackStudent?.fullName, '—'),
@@ -90,6 +86,17 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
         homeProvince: resolveVal(profile?.homeProvince, undefined, '—'),
         institutionId: profile?.institutionId || 'inst-dut',
         institutionName: resolveVal(profile?.institutionName, fallbackStudent?.university, '—'),
+        facultyDepartmentId: profile?.facultyDepartmentId || '',
+        faculty: resolveVal(
+          profile?.faculty || profile?.facultyName,
+          fallbackStudent?.faculty || fallbackStudent?.facultyName,
+          '—'
+        ),
+        facultyName: resolveVal(
+          profile?.facultyName || profile?.faculty,
+          fallbackStudent?.facultyName || fallbackStudent?.faculty,
+          '—'
+        ),
         unionPosition: resolveVal(profile?.unionPosition, undefined, '—'),
         politicalStatus: resolveVal(profile?.politicalStatus, undefined, '—'),
         phoneNumber: resolveVal(profile?.phoneNumber, undefined, '—'),
@@ -106,6 +113,9 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
         homeProvince: 'Thành phố Đà Nẵng',
         institutionId: 'inst-dut',
         institutionName: 'Trường Đại học Bách khoa - Đại học Đà Nẵng',
+        facultyDepartmentId: 'fac-dut-cntt',
+        faculty: 'Khoa Công nghệ thông tin',
+        facultyName: 'Khoa Công nghệ thông tin',
         unionPosition: 'Bí thư Chi đoàn',
         politicalStatus: 'Đoàn viên',
         phoneNumber: '0905123456',
@@ -116,6 +126,13 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
     fallbackStudent?.studentId || (profile as any)?.studentCode || (hasSuppliedData ? '—' : '102220123');
   const effectiveSeason =
     season || fallbackStudent?.academicYear || 'Năm học 2025–2026';
+
+  const effectiveFaculty =
+    effectiveProfile.facultyName && effectiveProfile.facultyName !== '—'
+      ? effectiveProfile.facultyName
+      : effectiveProfile.faculty && effectiveProfile.faculty !== '—'
+      ? effectiveProfile.faculty
+      : fallbackStudent?.faculty || fallbackStudent?.facultyName || '—';
 
   const completeness = evaluateProfileCompleteness(profile || effectiveProfile);
 
@@ -184,7 +201,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
         </div>
       </div>
 
-      {/* --- DEFAULT COLLAPSED VIEW: 8 ESSENTIAL REVIEWER FIELDS (NO BORDERED SUB-CARDS) --- */}
+      {/* --- DEFAULT COLLAPSED VIEW: 9 ESSENTIAL REVIEWER FIELDS (NO BORDERED SUB-CARDS) --- */}
       <div className="p-3.5 sm:p-4.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-5 gap-y-2.5 sm:gap-y-3">
         {/* Field 1: Họ và tên */}
         <div className="min-w-0">
@@ -226,8 +243,8 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
           </div>
         </div>
 
-        {/* Field 5: Trường đào tạo (Spans 2 columns on wide screens, allows natural Vietnamese wrapping) */}
-        <div className="col-span-2 sm:col-span-2 min-w-0">
+        {/* Field 5: Trường đào tạo */}
+        <div className="col-span-2 sm:col-span-2 lg:col-span-2 min-w-0">
           <span className="text-[10.5px] font-semibold text-[#728391] uppercase tracking-wider block">
             Trường đào tạo
           </span>
@@ -244,7 +261,20 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
           </div>
         </div>
 
-        {/* Field 6: Sinh viên năm thứ & Trình độ */}
+        {/* Field 6: Khoa / Ban đào tạo */}
+        <div className="col-span-2 sm:col-span-1 lg:col-span-2 min-w-0">
+          <span className="text-[10.5px] font-semibold text-[#728391] uppercase tracking-wider block">
+            Khoa / Ban đào tạo
+          </span>
+          <div
+            className="text-[13px] font-semibold text-[#0D78AE] leading-snug break-words mt-0.5"
+            title={effectiveFaculty}
+          >
+            {effectiveFaculty}
+          </div>
+        </div>
+
+        {/* Field 7: Sinh viên năm thứ & Trình độ */}
         <div className="min-w-0">
           <span className="text-[10.5px] font-semibold text-[#728391] uppercase tracking-wider block">
             Năm thứ &amp; Trình độ
@@ -254,7 +284,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
           </div>
         </div>
 
-        {/* Field 7: Lớp, khóa */}
+        {/* Field 8: Lớp, khóa */}
         <div className="min-w-0">
           <span className="text-[10.5px] font-semibold text-[#728391] uppercase tracking-wider block">
             Lớp, khóa
@@ -264,7 +294,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
           </div>
         </div>
 
-        {/* Field 8: Chức vụ Đoàn, Hội */}
+        {/* Field 9: Chức vụ Đoàn, Hội */}
         <div className="min-w-0 col-span-2 sm:col-span-1">
           <span className="text-[10.5px] font-semibold text-[#728391] uppercase tracking-wider block">
             Chức vụ Đoàn, Hội
@@ -275,7 +305,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
         </div>
       </div>
 
-      {/* --- EXPANDED VIEW: ALL 13 CANONICAL FIELDS IN A CLEAN, UNIFIED KEY-VALUE GRID --- */}
+      {/* --- EXPANDED VIEW: ALL CANONICAL FIELDS IN A CLEAN, UNIFIED KEY-VALUE GRID --- */}
       {isExpanded && (
         <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3 border-t border-[#EDF3F7] bg-[#FAFCFE] space-y-4 animate-in fade-in duration-150">
           {/* Subtle Category 1: Cá nhân & Nhân thân */}
@@ -334,6 +364,12 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
                   )}
                 </span>
               </div>
+              <div className="col-span-2">
+                <span className="text-[10.5px] text-[#728391] block">Khoa / Ban đào tạo</span>
+                <span className="font-semibold text-[#0D78AE] break-words">
+                  {effectiveFaculty}
+                </span>
+              </div>
               <div>
                 <span className="text-[10.5px] text-[#728391] block">Trình độ đào tạo</span>
                 <span className="font-medium text-[#172A3A]">{effectiveProfile.educationLevel || 'Đại học'}</span>
@@ -342,7 +378,7 @@ export const SubmittedStudentInformationCard: React.FC<SubmittedStudentInformati
                 <span className="text-[10.5px] text-[#728391] block">Sinh viên năm thứ</span>
                 <span className="font-medium text-[#172A3A]">Năm thứ {effectiveProfile.academicYearNumber || 1}</span>
               </div>
-              <div>
+              <div className="col-span-2">
                 <span className="text-[10.5px] text-[#728391] block">Lớp, khóa học</span>
                 <span className="font-medium text-[#172A3A]">{effectiveProfile.className || '—'}</span>
               </div>

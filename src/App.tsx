@@ -122,6 +122,7 @@ export default function App() {
     fullName: string;
     studentId: string;
     university: string;
+    faculty?: string;
   }>(() => {
     const actorCtx = getApiActorContext();
     const isActorStudent = actorCtx?.role === 'STUDENT';
@@ -165,6 +166,7 @@ export default function App() {
         ...prev,
         fullName: updated.fullName || prev.fullName,
         university: updated.institutionName || prev.university,
+        faculty: updated.faculty || updated.facultyName || prev.faculty,
       }));
       setSharedApplication((prev) => {
         const mergedSnapshot = mergeStudentProfileSnapshots(
@@ -182,6 +184,7 @@ export default function App() {
             ...prev.student,
             fullName: mergedSnapshot.fullName || prev.student.fullName,
             university: mergedSnapshot.institutionName || prev.student.university,
+            faculty: mergedSnapshot.faculty || mergedSnapshot.facultyName || prev.student.faculty,
             class: mergedSnapshot.className || prev.student.class,
             email: mergedSnapshot.email || prev.student.email,
           },
