@@ -83,6 +83,7 @@ export function registerIndividualStudentPortalRoutes(
         if (mergedProfile.fullName) app.student.fullName = mergedProfile.fullName;
         if (mergedProfile.className) app.student.class = mergedProfile.className;
         if (mergedProfile.institutionName) app.student.university = mergedProfile.institutionName;
+        if (mergedProfile.faculty || mergedProfile.facultyName) app.student.faculty = mergedProfile.faculty || mergedProfile.facultyName;
         if (mergedProfile.email) app.student.email = mergedProfile.email;
       }
       if (mergedProfile.institutionName) {
@@ -302,6 +303,12 @@ export function registerIndividualStudentPortalRoutes(
           mergedSnapshot.institutionName ||
           incoming.student?.university ||
           existing.student?.university,
+        faculty:
+          mergedSnapshot.faculty ||
+          mergedSnapshot.facultyName ||
+          incoming.student?.faculty ||
+          existing.student?.faculty ||
+          '',
         email:
           mergedSnapshot.email ||
           incoming.student?.email ||
@@ -419,6 +426,9 @@ export function registerIndividualStudentPortalRoutes(
       homeProvince: homeProvince || '',
       institutionId,
       institutionName: institutionName || mapped.instName,
+      facultyDepartmentId: req.body?.facultyDepartmentId || '',
+      faculty: faculty || req.body?.facultyName || '',
+      facultyName: req.body?.facultyName || faculty || '',
       unionPosition: unionPosition || '',
       politicalStatus: politicalStatus || '',
       phoneNumber: phoneNumber || '',
@@ -456,7 +466,7 @@ export function registerIndividualStudentPortalRoutes(
         fullName: resolvedSnapshot.fullName || studentFullName,
         studentId: studentCode,
         university: resolvedSnapshot.institutionName || institutionName || mapped.instName,
-        faculty: faculty || existingApp?.student?.faculty || 'Khoa Đào tạo',
+        faculty: resolvedSnapshot.faculty || resolvedSnapshot.facultyName || faculty || existingApp?.student?.faculty || 'Khoa Đào tạo',
         class: resolvedSnapshot.className || className || existingApp?.student?.class || '',
         email: resolvedSnapshot.email || email || `${studentCode}@sv.udn.vn`,
         academicYear: 'Năm học 2025–2026',

@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 /**
  * 5TOT ĐHĐN — Dual-Mode Architecture & Real Backend E2E Verification Suite
  * Verifies:

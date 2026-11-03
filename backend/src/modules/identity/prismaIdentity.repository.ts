@@ -309,7 +309,10 @@ export class PrismaIdentityRepository implements IIdentityRepository {
           : current?.politicalStatus || '') as any,
       phoneNumber:
         input.phoneNumber !== undefined ? input.phoneNumber : current?.phoneNumber || '',
-      email: current?.email || '',
+      email:
+        input.email !== undefined && input.email.trim() !== ''
+          ? input.email.trim().toLowerCase()
+          : current?.email || '',
     };
 
     const updateData: any = {
@@ -319,6 +322,9 @@ export class PrismaIdentityRepository implements IIdentityRepository {
     if (input.studentCode) updateData.studentCode = input.studentCode.trim().toUpperCase();
     if (input.facultyDepartmentId !== undefined) updateData.facultyDepartmentId = input.facultyDepartmentId || null;
     if (input.phoneNumber !== undefined) updateData.phone = input.phoneNumber || null;
+    if (input.email !== undefined && input.email.trim() !== '') {
+      updateData.email = input.email.trim().toLowerCase();
+    }
     if (input.institutionId) {
       const existingInst = await (prisma as any).institution
         ?.findUnique?.({ where: { id: input.institutionId }, select: { id: true } })

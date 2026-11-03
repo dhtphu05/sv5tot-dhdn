@@ -57,6 +57,8 @@ import { IS_DEMO_MODE_ENABLED } from '../../demo/prototypeDemoMode';
 import {
   hasActiveAuthSession,
   notifySessionExpired,
+  getApiActorContext,
+  setApiActorContext,
 } from '../../shared/api/httpClient';
 
 export interface StudentProfileViewProps {
@@ -292,6 +294,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
   // Field validation states
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [dobError, setDobError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const isDirty = useMemo(() => {
     return JSON.stringify(profile) !== JSON.stringify(initialProfile);
@@ -387,6 +390,21 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
     }
   }, [profile.dateOfBirth]);
 
+  // Real-time email validation
+  useEffect(() => {
+    if (!profile.email) {
+      setEmailError(null);
+      return;
+    }
+    const cleanEmail = profile.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setEmailError('Địa chỉ email không đúng định dạng (VD: student@dut.udn.vn)');
+    } else {
+      setEmailError(null);
+    }
+  }, [profile.email]);
+
   const handleFieldChange = useCallback(
     (field: keyof StudentProfileDto, value: any) => {
       setProfile((prev) => ({
@@ -423,7 +441,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
   );
 
   const handleSave = async () => {
-    if (phoneError || dobError) {
+    if (phoneError || dobError || emailError) {
       setErrorMsg('Vui lòng kiểm tra và sửa các thông tin chưa hợp lệ trước khi lưu.');
       return;
     }
@@ -431,6 +449,12 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
     const normalizedStudentCode = profile.studentCode?.trim().toUpperCase();
     if (!normalizedStudentCode) {
       setErrorMsg('Vui lòng nhập Mã số sinh viên (MSSV).');
+      return;
+    }
+
+    const normalizedEmail = profile.email?.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setErrorMsg('Vui lòng nhập địa chỉ Email xác thực.');
       return;
     }
 
@@ -454,11 +478,12 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       unionPosition: profile.unionPosition?.trim(),
       politicalStatus: profile.politicalStatus ? profile.politicalStatus : undefined,
       phoneNumber: profile.phoneNumber?.trim(),
+      email: normalizedEmail,
     };
 
     const optimisticProfile: StudentProfileDto = mergeStudentProfileSnapshots(profile, {
       ...input,
-      email: profile.email || fallbackStudent?.email || '',
+      email: normalizedEmail,
     });
 
     try {
@@ -472,11 +497,24 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
 
       savePersistedStudentProfile(savedProfile, {
         studentId: normalizedStudentCode,
-        email: fallbackStudent?.email || savedProfile.email,
+        email: savedProfile.email,
       });
       setProfile(savedProfile);
       setInitialProfile(savedProfile);
       setCompleteness(evaluateProfileCompleteness(savedProfile));
+
+      // Synchronize actor session context so current login state reflects updated email/name
+      const currentActor = getApiActorContext();
+      if (currentActor) {
+        setApiActorContext({
+          ...currentActor,
+          userName: savedProfile.fullName || currentActor.userName,
+          studentCode: savedProfile.studentCode || currentActor.studentCode,
+          userEmail: savedProfile.email || currentActor.userEmail,
+          institutionName: savedProfile.institutionName || currentActor.institutionName,
+        });
+      }
+
       setSaveSuccessMsg('Đã lưu thông tin hồ sơ cá nhân thành công!');
       if (onProfileUpdated) {
         onProfileUpdated(savedProfile);
@@ -484,6 +522,8 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
     } catch (err: any) {
       if (err?.code === 'STUDENT_CODE_CONFLICT' || err?.message?.includes('Mã số sinh viên')) {
         setErrorMsg('Mã số sinh viên này đã được sử dụng cho một tài khoản khác.');
+      } else if (err?.code === 'EMAIL_CONFLICT' || err?.message?.includes('email')) {
+        setErrorMsg('Địa chỉ email này đã được sử dụng cho một tài khoản khác.');
       } else {
         setErrorMsg(err.message || 'Không thể lưu hồ sơ cá nhân lúc này. Vui lòng thử lại.');
       }
@@ -989,25 +1029,29 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
 
             {/* Email */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[13px] font-semibold text-[#172A3A]">
-                  Địa chỉ Email xác thực <span className="text-[#E02424]">*</span>
-                </label>
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F0F4F8] text-[#607483]">
-                  <Lock size={10} />
-                  <span>Tài khoản</span>
-                </span>
-              </div>
+              <label className="block text-[13px] font-semibold text-[#172A3A] mb-1">
+                Địa chỉ Email liên hệ &amp; đăng nhập <span className="text-[#E02424]">*</span>
+              </label>
               <input
                 type="email"
                 value={profile.email}
-                readOnly
-                disabled
-                className="w-full px-3.5 py-2 rounded-xl border border-[#DCE7EE] bg-[#F8FBFD] text-[13.5px] text-[#607483] font-medium cursor-not-allowed select-all"
+                onChange={(e) => handleFieldChange('email', e.target.value.toLowerCase())}
+                placeholder="Ví dụ: student@dut.udn.vn hoặc student@gmail.com"
+                className={`w-full px-3.5 py-2 rounded-xl border text-[13.5px] text-[#172A3A] focus:outline-hidden focus:ring-2 transition-all font-medium ${
+                  emailError
+                    ? 'border-[#EF4444] focus:ring-[#EF4444]/20'
+                    : 'border-[#DCE7EE] focus:border-[#18A6E0] focus:ring-[#18A6E0]/20'
+                }`}
               />
-              <span className="text-[11px] text-[#8EA2B0] mt-1 block">
-                Email đồng bộ từ tài khoản đăng nhập.
-              </span>
+              {emailError ? (
+                <span className="text-[11px] text-[#EF4444] mt-1 block font-medium">
+                  {emailError}
+                </span>
+              ) : (
+                <span className="text-[11px] text-[#8EA2B0] mt-1 block">
+                  Email dùng để đăng nhập và nhận thông báo xét chọn hồ sơ.
+                </span>
+              )}
             </div>
           </div>
         </div>

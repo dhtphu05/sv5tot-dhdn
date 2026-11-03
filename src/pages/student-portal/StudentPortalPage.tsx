@@ -49,6 +49,7 @@ export interface StudentPortalPageProps {
     fullName: string;
     studentId: string;
     university: string;
+    faculty?: string;
   };
   activeStoreState: CoherentStudentStoreState;
   notifications: StudentNotificationItem[];
@@ -230,6 +231,9 @@ export const StudentPortalPage: React.FC<StudentPortalPageProps> = ({
               fullName: studentIdentity.fullName,
               studentId: studentIdentity.studentId,
               university: studentIdentity.university,
+              faculty: studentIdentity.faculty || activeStoreState.application.student.faculty || activeStoreState.application.applicantProfileSnapshot?.faculty || activeStoreState.application.applicantProfileSnapshot?.facultyName,
+              facultyName: activeStoreState.application.applicantProfileSnapshot?.facultyName || activeStoreState.application.student.faculty || studentIdentity.faculty,
+              facultyDepartmentId: activeStoreState.application.applicantProfileSnapshot?.facultyDepartmentId,
               email: activeStoreState.application.student.email,
               institutionId:
                 activeStoreState.application.applicantProfileSnapshot?.institutionId,

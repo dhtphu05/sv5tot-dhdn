@@ -261,6 +261,12 @@ export const StudentApplicationWorkspace: React.FC<
           applicantProfileSnapshot: mergedProfileSnapshot,
           student: {
             ...initialData.student,
+            faculty:
+              mergedProfileSnapshot?.faculty ||
+              mergedProfileSnapshot?.facultyName ||
+              initialData.student?.faculty ||
+              prev.student?.faculty ||
+              '',
             class:
               mergedProfileSnapshot?.className ||
               initialData.student?.class ||
@@ -288,6 +294,12 @@ export const StudentApplicationWorkspace: React.FC<
         awardedAt: initialData.awardedAt ?? prev.awardedAt,
         student: {
           ...initialData.student,
+          faculty:
+            mergedProfileSnapshot?.faculty ||
+            mergedProfileSnapshot?.facultyName ||
+            initialData.student?.faculty ||
+            prev.student?.faculty ||
+            '',
           class:
             mergedProfileSnapshot?.className ||
             initialData.student?.class ||
