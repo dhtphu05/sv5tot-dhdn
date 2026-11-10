@@ -270,6 +270,7 @@ export const StaffApplicationQueueRouteView: React.FC<
           a.workflowStatus === 'supplement_returned' ||
           a.workflowStatus === 'needs_recheck' ||
           a.workflowStatus === 'assigned_not_started' ||
+          a.workflowStatus === 'unassigned' ||
           a.isAging
       );
     }
@@ -293,6 +294,16 @@ export const StaffApplicationQueueRouteView: React.FC<
     if (statusFilter !== 'all') {
       if (statusFilter === 'active_queue') {
         if (app.workflowStatus === 'review_completed') return false;
+      } else if (
+        statusFilter === 'assigned_not_started' ||
+        statusFilter === 'unassigned'
+      ) {
+        if (
+          app.workflowStatus !== 'assigned_not_started' &&
+          app.workflowStatus !== 'unassigned'
+        ) {
+          return false;
+        }
       } else if (app.workflowStatus !== statusFilter) {
         return false;
       }

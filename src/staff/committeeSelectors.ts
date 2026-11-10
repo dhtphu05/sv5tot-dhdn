@@ -157,35 +157,16 @@ export function getCommitteeDecisionOutcomeMeta(
 export function isApplicationForwardedToCityScope(
   app: StaffApplicationRecord
 ): boolean {
-  if (
-    app.currentReviewStage === 'CITY' ||
-    (app.currentReviewStage as string) === 'COMMITTEE' ||
-    app.currentReviewStage === 'COMPLETED'
-  ) {
-    return true;
+  if (!app || !app.applicationId) {
+    return false;
   }
   if (
-    app.schoolPreliminaryStatus === 'forwarded_to_city' ||
-    app.schoolReviewSummary?.isForwardedToCity === true ||
-    app.schoolReviewSummary?.status === 'forwarded_to_city'
+    app.schoolPreliminaryStatus === 'not_recommended' ||
+    app.schoolReviewSummary?.recommendation === 'not_recommended'
   ) {
-    return true;
+    return false;
   }
-  if (
-    app.committeeSummary !== null ||
-    app.workflowStatus === 'needs_committee_review' ||
-    app.workflowStatus === 'waiting_decision' ||
-    app.workflowStatus === 'ready_for_finalization' ||
-    app.workflowStatus === 'finalized_recognized' ||
-    app.workflowStatus === 'finalized_not_recognized'
-  ) {
-    return true;
-  }
-  // Legacy / demo fixture records without explicit school stage metadata
-  if (!app.currentReviewStage && !app.schoolPreliminaryStatus) {
-    return true;
-  }
-  return false;
+  return true;
 }
 
 /**

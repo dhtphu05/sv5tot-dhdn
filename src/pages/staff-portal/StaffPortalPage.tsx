@@ -428,6 +428,7 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({
       a.workflowStatus === 'supplement_returned' ||
       a.workflowStatus === 'needs_recheck' ||
       a.workflowStatus === 'assigned_not_started' ||
+      a.workflowStatus === 'unassigned' ||
       a.isAging
   ).length;
   const supplementCount = cityScopedApplications.filter(

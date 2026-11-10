@@ -466,13 +466,6 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       if (isNonUdnInstitutionRecord(a)) {
         return false;
       }
-      // Exclude unsubmitted student drafts from School Officer review & batch summary
-      if (
-        a.schoolPreliminaryStatus === 'NOT_SUBMITTED' ||
-        a.currentReviewStage === 'STUDENT_DRAFT'
-      ) {
-        return false;
-      }
       return true;
     });
 
@@ -485,7 +478,6 @@ export class PrismaSchoolForwardingBatchRepository implements ISchoolForwardingB
       (r: any) =>
         r.schoolReviewUnitId === unitId &&
         !dbAppIds.has(r.applicationId) &&
-        r.schoolPreliminaryStatus !== 'school_not_submitted' &&
         (isTestRuntime() ||
           (!isLegacyMockOrTestAppId(r.applicationId) && !isNonUdnInstitutionRecord(r)))
     );

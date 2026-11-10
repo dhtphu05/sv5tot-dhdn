@@ -484,17 +484,16 @@ export const StaffBackofficeViews: React.FC<StaffBackofficeViewsProps> = ({
   }
 
   const officerAssignedApps = useMemo(
-    () =>
-      applications.filter(
-        (app) => app.assignment?.officerId === currentUser.id
-      ),
-    [applications, currentUser.id]
+    () => applications,
+    [applications]
   );
 
   const officerMetrics = useMemo(() => {
     const totalAssigned = officerAssignedApps.length;
     const notStarted = officerAssignedApps.filter(
-      (a) => a.workflowStatus === 'assigned_not_started'
+      (a) =>
+        a.workflowStatus === 'unassigned' ||
+        a.workflowStatus === 'assigned_not_started'
     ).length;
     const supplementReturned = officerAssignedApps.filter(
       (a) => a.workflowStatus === 'supplement_returned'

@@ -1135,27 +1135,30 @@ export function loadPortalStateFromDisk(): boolean {
         .filter(
           (rec) =>
             !isLegacyMockOrTestAppId(rec?.applicationId) &&
-            !isNonUdnInstitutionRecord(rec) &&
-            rec?.schoolPreliminaryStatus !== 'school_not_submitted'
+            !isNonUdnInstitutionRecord(rec)
         )
         .map((rec) => {
-          if (rec?.assignment?.officerId) {
+          const normalizedRec =
+            rec?.schoolPreliminaryStatus === 'school_not_submitted'
+              ? { ...rec, schoolPreliminaryStatus: 'pending_intake' }
+              : rec;
+          if (normalizedRec?.assignment?.officerId) {
             return {
-              ...rec,
+              ...normalizedRec,
               assignment: {
-                ...rec.assignment,
+                ...normalizedRec.assignment,
                 officerId: 'staff-off-nam',
                 officerName: 'Cán bộ xét duyệt cấp Đại học Đà Nẵng',
                 assignedBy: 'Quản lý xét duyệt cấp Đại học Đà Nẵng',
               },
               latestOperationalNote:
-                typeof rec.latestOperationalNote === 'string' &&
-                rec.latestOperationalNote.includes('Phân công')
+                typeof normalizedRec.latestOperationalNote === 'string' &&
+                normalizedRec.latestOperationalNote.includes('Phân công')
                   ? 'Đã phân công cho Cán bộ xét duyệt cấp Đại học Đà Nẵng'
-                  : rec.latestOperationalNote,
+                  : normalizedRec.latestOperationalNote,
             };
           }
-          return rec;
+          return normalizedRec;
         });
     }
     if (parsed.studentApplications && typeof parsed.studentApplications === 'object') {

@@ -1199,18 +1199,8 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
           ) {
             return false;
           }
-          const matchingStudentApp = portalState.studentApplications[rec.applicationId];
-          if (
-            matchingStudentApp &&
-            isDraftAppStatus(
-              matchingStudentApp.status,
-              matchingStudentApp.schoolPreliminaryStatus
-            )
-          ) {
-            return false;
-          }
           if (rec.schoolPreliminaryStatus === 'school_not_submitted') {
-            return false;
+            rec.schoolPreliminaryStatus = 'pending_intake';
           }
           return true;
         });
@@ -1288,8 +1278,8 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
                   const lower = a.toLowerCase();
                   const acts: string[] = [a];
                   if (lower.includes('minh chứng') || lower === 'addevidence') acts.push('addEvidence', 'replaceEvidence', 'confirmEvidence');
-                  if (lower.includes('kê khai') || lower.includes('chỉnh sửa') || lower === 'editdeclaration') acts.push('editDeclaration');
-                  if (lower.includes('thêm') || lower === 'adddeclaration') acts.push('addDeclaration');
+                  if (lower.includes('kê khai') || lower.includes('chỉnh sửa') || lower === 'editDeclaration') acts.push('editDeclaration');
+                  if (lower.includes('thêm') || lower === 'addDeclaration') acts.push('addDeclaration');
                   return acts;
                 })));
                 if (normAllowedActions.length === 0) {
@@ -1324,6 +1314,13 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
 
           const existingApp = portalState.studentApplications[code];
           if (existingApp) {
+            if (
+              relApp.submittedToSchoolAt &&
+              isDraftAppStatus(existingApp.status, existingApp.schoolPreliminaryStatus)
+            ) {
+              existingApp.status = 'under_review';
+              existingApp.schoolPreliminaryStatus = 'pending_intake';
+            }
             if (mappedSupplementRequests.length > 0) {
               existingApp.supplementRequests = mappedSupplementRequests;
               const hasActive = mappedSupplementRequests.some((s: any) => s.status === 'active');

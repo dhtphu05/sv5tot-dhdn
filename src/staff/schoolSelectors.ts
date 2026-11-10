@@ -171,10 +171,16 @@ export interface SchoolOperationalMetrics {
 export function resolveSchoolPreliminaryStatus(
   app: StaffApplicationRecord
 ): SchoolPreliminaryStatus {
-  if (app.schoolPreliminaryStatus) {
+  if (
+    app.schoolPreliminaryStatus &&
+    (app.schoolPreliminaryStatus as string) !== 'school_not_submitted'
+  ) {
     return app.schoolPreliminaryStatus;
   }
-  if (app.schoolReviewSummary?.status) {
+  if (
+    app.schoolReviewSummary?.status &&
+    (app.schoolReviewSummary.status as string) !== 'school_not_submitted'
+  ) {
     return app.schoolReviewSummary.status;
   }
   if (app.currentReviewStage === 'CITY' || app.currentReviewStage === 'COMPLETED') {
@@ -287,7 +293,10 @@ export function getSchoolPriorityQueue(
 
   const newOrNotStarted = scopedApps.filter((app) => {
     const st = resolveSchoolPreliminaryStatus(app);
-    return st === 'pending_intake';
+    return (
+      st === 'pending_intake' ||
+      (st === 'under_review' && (app.reviewedCriteriaCount || 0) < 5)
+    );
   });
 
   const supplementReturned = scopedApps.filter((app) => {
@@ -325,7 +334,7 @@ export function getSchoolPriorityQueue(
     },
     {
       category: 'not_started',
-      categoryLabel: 'Hồ sơ mới nộp / Chưa bắt đầu xét',
+      categoryLabel: 'Hồ sơ mới nộp / Đang xét sơ tuyển',
       count: newOrNotStarted.length,
       tone: 'brand',
       applications: newOrNotStarted,

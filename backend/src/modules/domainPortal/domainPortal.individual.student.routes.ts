@@ -344,7 +344,7 @@ export function registerIndividualStudentPortalRoutes(
       { skipSaveIfUnchanged: true }
     );
     syncStaffRecordFromStudentApplication(merged, {
-      createIfMissing: !isDraftStudentAppStatus(merged.status, merged.schoolPreliminaryStatus),
+      createIfMissing: true,
     });
     savePortalStateToDisk();
 
@@ -477,7 +477,7 @@ export function registerIndividualStudentPortalRoutes(
       email: created.student.email,
     });
     syncStaffRecordFromStudentApplication(created, {
-      createIfMissing: !isDraftStudentAppStatus(created.status, created.schoolPreliminaryStatus),
+      createIfMissing: true,
     });
     savePortalStateToDisk();
 

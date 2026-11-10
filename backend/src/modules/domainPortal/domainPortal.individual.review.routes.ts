@@ -31,12 +31,14 @@ export function registerIndividualReviewPortalRoutes(router: Router): void {
       .filter(
         (r) =>
           isTestRuntime() ||
-          (!isLegacyMockOrTestAppId(r?.applicationId) &&
-            !isNonUdnInstitutionRecord(r) &&
-            r?.schoolPreliminaryStatus !== 'school_not_submitted')
+          (!isLegacyMockOrTestAppId(r?.applicationId) && !isNonUdnInstitutionRecord(r))
       )
       .map((r) => ({
         ...r,
+        schoolPreliminaryStatus:
+          r.schoolPreliminaryStatus === 'school_not_submitted'
+            ? 'pending_intake'
+            : r.schoolPreliminaryStatus || 'pending_intake',
         studentApplication: portalState.studentApplications[r.applicationId] || undefined,
       }));
     res.status(200).json({
@@ -63,6 +65,10 @@ export function registerIndividualReviewPortalRoutes(router: Router): void {
       success: true,
       data: {
         ...record,
+        schoolPreliminaryStatus:
+          record.schoolPreliminaryStatus === 'school_not_submitted'
+            ? 'pending_intake'
+            : record.schoolPreliminaryStatus || 'pending_intake',
         studentApplication: portalState.studentApplications[record.applicationId] || undefined,
       },
     });
@@ -79,12 +85,14 @@ export function registerIndividualReviewPortalRoutes(router: Router): void {
       .filter(
         (r) =>
           isTestRuntime() ||
-          (!isLegacyMockOrTestAppId(r?.applicationId) &&
-            !isNonUdnInstitutionRecord(r) &&
-            r?.schoolPreliminaryStatus !== 'school_not_submitted')
+          (!isLegacyMockOrTestAppId(r?.applicationId) && !isNonUdnInstitutionRecord(r))
       )
       .map((r) => ({
         ...r,
+        schoolPreliminaryStatus:
+          r.schoolPreliminaryStatus === 'school_not_submitted'
+            ? 'pending_intake'
+            : r.schoolPreliminaryStatus || 'pending_intake',
         studentApplication: portalState.studentApplications[r.applicationId] || undefined,
       }));
     res.status(200).json({ success: true, count: list.length, data: list });

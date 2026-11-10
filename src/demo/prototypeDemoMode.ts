@@ -778,12 +778,17 @@ export function loadPersistedStaffApplications<T>(): T | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (isBackendMode() && Array.isArray(parsed)) {
-      return parsed.filter(
-        (item: Record<string, any>) =>
-          !isLegacyMockOrTestAppId(item?.applicationId) &&
-          !isNonUdnInstitutionRecord(item) &&
-          item?.schoolPreliminaryStatus !== 'school_not_submitted'
-      ) as unknown as T;
+      return parsed
+        .filter(
+          (item: Record<string, any>) =>
+            !isLegacyMockOrTestAppId(item?.applicationId) &&
+            !isNonUdnInstitutionRecord(item)
+        )
+        .map((item: Record<string, any>) =>
+          item?.schoolPreliminaryStatus === 'school_not_submitted'
+            ? { ...item, schoolPreliminaryStatus: 'pending_intake' }
+            : item
+        ) as unknown as T;
     }
     return parsed as T;
   } catch {
