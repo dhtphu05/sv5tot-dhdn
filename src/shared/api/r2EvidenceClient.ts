@@ -297,8 +297,7 @@ export async function executeR2EvidenceUpload(params: {
   for (let attempt = 0; attempt < 2 && !putSucceeded; attempt++) {
     try {
       const isOfflineDevUrl = intent.uploadUrl.includes('offline-dev.r2.cloudflarestorage.com');
-      const useBackendR2Relay = isOfflineDevUrl || typeof window !== 'undefined';
-      const targetPutUrl = useBackendR2Relay
+      const targetPutUrl = isOfflineDevUrl
         ? `${getApiBaseUrl()}/api/v2/evidence/r2-local-object/${encodeURIComponent(intent.evidenceObjectId)}`
         : intent.uploadUrl;
       const putRes = await fetch(targetPutUrl, {
