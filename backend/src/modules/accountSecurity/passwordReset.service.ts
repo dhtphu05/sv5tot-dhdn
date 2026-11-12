@@ -31,7 +31,76 @@ export class PasswordResetService {
     email: string
   ): Promise<{ success: boolean; message: string; devResetToken?: string }> {
     const normalizedEmail = email.toLowerCase().trim();
-    const user = await this.identityRepo.findByEmail(normalizedEmail);
+    const {
+      portalState,
+      STAFF_SEED_ACCOUNTS,
+      COLLECTIVE_PREPARERS,
+      isTestRuntime,
+    } = await import('../domainPortal/domainPortal.state');
+    const { ensurePortalStateHydratedFromNeonDb } = await import('../domainPortal/domainPortal.dbSync');
+    if (!isTestRuntime()) {
+      await ensurePortalStateHydratedFromNeonDb().catch(() => {});
+    }
+
+    let user = await this.identityRepo.findByEmail(normalizedEmail);
+
+    if (!user && !isTestRuntime()) {
+      const regStudent =
+        portalState.registeredStudents.get(normalizedEmail) ||
+        Array.from(portalState.registeredStudents.values()).find(
+          (st) => st.email.toLowerCase() === normalizedEmail
+        );
+      if (regStudent) {
+        const passwordHash =
+          regStudent.passwordHash ||
+          (await this.passwordHasher.hash(regStudent.password || 'MatKhau@2026'));
+        user = await this.identityRepo
+          .createStudent({
+            email: regStudent.email.toLowerCase(),
+            passwordHash,
+            fullName: regStudent.fullName,
+            studentCode: regStudent.studentCode,
+            institutionId: regStudent.institutionId || 'inst-dut',
+          })
+          .catch(() => null);
+      } else {
+        const staffMatch = STAFF_SEED_ACCOUNTS.find(
+          (s) =>
+            s.email.toLowerCase() === normalizedEmail ||
+            Boolean(s.aliases?.some((a) => a.toLowerCase() === normalizedEmail))
+        );
+        const colMatch = COLLECTIVE_PREPARERS.find(
+          (c) => c.email.toLowerCase() === normalizedEmail
+        );
+        if (staffMatch) {
+          const passwordHash = await this.passwordHasher.hash('MatKhau@2026');
+          user = await this.identityRepo
+            .createStaffUser({
+              email: staffMatch.email,
+              passwordHash,
+              fullName: staffMatch.fullName,
+              roleCode: staffMatch.role,
+              institutionId: staffMatch.institutionId,
+              schoolReviewUnitId: staffMatch.unitId,
+              grantedByUserId: 'system-portal',
+            })
+            .catch(() => null);
+        } else if (colMatch) {
+          const passwordHash = await this.passwordHasher.hash('MatKhau@2026');
+          user = await this.identityRepo
+            .createStaffUser({
+              email: colMatch.email,
+              passwordHash,
+              fullName: colMatch.fullName,
+              roleCode: 'COLLECTIVE_PREPARER',
+              institutionId: colMatch.institutionId,
+              schoolReviewUnitId: colMatch.schoolReviewUnitId,
+              grantedByUserId: 'system-portal',
+            })
+            .catch(() => null);
+        }
+      }
+    }
 
     // Generic response regardless of whether email exists to prevent enumeration
     const genericResponse = {
@@ -131,6 +200,14 @@ export class PasswordResetService {
     // 1. Hash new password with Argon2id
     const newPasswordHash = await this.passwordHasher.hash(newPasswordPlain);
     await this.identityRepo.updatePasswordHash(user.id, newPasswordHash);
+
+    const { syncUserPasswordInPortalState } = await import('../domainPortal/domainPortal.state');
+    syncUserPasswordInPortalState({
+      userId: user.id,
+      email: user.email,
+      newPasswordPlain,
+      newPasswordHash,
+    });
 
     // 2. Mark reset token as used (single-use constraint)
     await this.resetRepo.markAsUsed(tokenRecord.id);

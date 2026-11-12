@@ -793,19 +793,14 @@ export async function flushPortalStateToNeonDbNow(): Promise<void> {
                 },
               })
               .catch(() => null);
-          } else if (student.password) {
-            const matches = await defaultPasswordHasher
-              .verify(dbUser.passwordHash, student.password)
-              .catch(() => false);
-            if (!matches) {
-              const nextHash = await defaultPasswordHasher.hash(student.password);
-              await prisma.user
-                .update({
-                  where: { id: dbUser.id },
-                  data: { passwordHash: nextHash },
-                })
-                .catch(() => {});
-            }
+          } else if (!dbUser.passwordHash && student.password) {
+            const nextHash = await defaultPasswordHasher.hash(student.password);
+            await prisma.user
+              .update({
+                where: { id: dbUser.id },
+                data: { passwordHash: nextHash },
+              })
+              .catch(() => {});
           }
           if (dbUser) {
             const existingRole = await prisma.userRoleAssignment
@@ -1476,6 +1471,10 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
             relUser.profile && typeof relUser.profile === 'object'
               ? (relUser.profile as Record<string, any>)
               : existingReg?.profile;
+          const isPasswordHashUpdatedInDb =
+            Boolean(relUser.passwordHash) &&
+            Boolean(existingReg?.passwordHash) &&
+            relUser.passwordHash !== existingReg?.passwordHash;
           const hydratedReg: PortalRegisteredStudent = {
             id: relUser.id,
             fullName: existingReg?.fullName || relUser.fullName,
@@ -1486,7 +1485,7 @@ export async function ensurePortalStateHydratedFromNeonDb(forceRefresh = false):
               existingReg?.institutionName ||
               profileObj?.institutionName ||
               mappedInst.instName,
-            password: existingReg?.password,
+            password: isPasswordHashUpdatedInDb ? undefined : existingReg?.password,
             passwordHash: relUser.passwordHash || existingReg?.passwordHash,
             profile: profileObj,
           };

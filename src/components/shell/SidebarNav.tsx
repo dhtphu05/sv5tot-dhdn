@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LayoutDashboard,
   FileCheck2,
@@ -7,6 +7,7 @@ import {
   Award,
   Layers,
   LogOut,
+  KeyRound,
   UserCircle,
   Users,
   Feather,
@@ -14,6 +15,7 @@ import {
 import { ProductBrandLockup } from '../brand/HsvLogo';
 import { MOCK_STUDENT } from '../../tokens';
 import { useDevQaMode } from '../../demo/useDevQaMode';
+import { ChangePasswordModal } from '../modals/ChangePasswordModal';
 
 export interface NavItem {
   id: string;
@@ -53,6 +55,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   className = '',
 }) => {
   const [isQaMode] = useDevQaMode();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   // Prompt 15 Section 68: Canonical Student Navigation
   const navItems: NavItem[] = [
@@ -210,6 +213,15 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 
         <button
           type="button"
+          onClick={() => setIsChangePasswordOpen(true)}
+          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-[7px] text-[12px] font-semibold text-[#466474] hover:text-[#172A3A] hover:bg-[#EBF4FA] transition-colors cursor-pointer"
+        >
+          <span>Đổi mật khẩu</span>
+          <KeyRound size={13.5} className="text-[#607483] shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleNavClick('public-entry')}
           className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-[7px] text-[12px] font-semibold text-[#466474] hover:text-[#172A3A] hover:bg-[#EBF4FA] transition-colors cursor-pointer"
         >
@@ -217,6 +229,11 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
           <LogOut size={13.5} className="text-[#607483] shrink-0" />
         </button>
       </div>
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        userEmail={studentName}
+      />
     </aside>
   );
 };

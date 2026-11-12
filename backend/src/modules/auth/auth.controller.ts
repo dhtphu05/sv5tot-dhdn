@@ -249,12 +249,13 @@ export class AuthController {
     await this.authService.changePassword(
       req.actor.userId,
       parseResult.data.currentPassword,
-      parseResult.data.newPassword
+      parseResult.data.newPassword,
+      req.actor.sessionId
     );
 
     res.status(200).json({
       success: true,
-      message: 'Đổi mật khẩu thành công. Tất cả phiên làm việc hiện tại đã được thu hồi bảo mật.',
+      message: 'Đổi mật khẩu thành công. Tất cả phiên làm việc khác đã được thu hồi bảo mật.',
     });
   });
 

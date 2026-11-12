@@ -1020,6 +1020,57 @@ export function syncStudentProfileInPortalState(
   return merged;
 }
 
+export function syncUserPasswordInPortalState(params: {
+  userId?: string;
+  email?: string;
+  newPasswordPlain: string;
+  newPasswordHash: string;
+  keepSessionToken?: string;
+}): void {
+  const normEmail = params.email?.trim().toLowerCase();
+  let updated = false;
+
+  if (normEmail && portalState.registeredStudents.has(normEmail)) {
+    const existing = portalState.registeredStudents.get(normEmail)!;
+    portalState.registeredStudents.set(normEmail, {
+      ...existing,
+      password: params.newPasswordPlain,
+      passwordHash: params.newPasswordHash,
+    });
+    updated = true;
+  }
+
+  for (const [key, st] of portalState.registeredStudents.entries()) {
+    if (
+      (params.userId && st.id === params.userId) ||
+      (normEmail && st.email.trim().toLowerCase() === normEmail)
+    ) {
+      portalState.registeredStudents.set(key, {
+        ...st,
+        password: params.newPasswordPlain,
+        passwordHash: params.newPasswordHash,
+      });
+      updated = true;
+    }
+  }
+
+  for (const [tok, sess] of portalState.sessions.entries()) {
+    if (params.keepSessionToken && tok === params.keepSessionToken) continue;
+    const sessEmail = sess.user?.email?.trim().toLowerCase();
+    if (
+      (params.userId && sess.user?.id === params.userId) ||
+      (normEmail && sessEmail === normEmail)
+    ) {
+      portalState.sessions.delete(tok);
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    savePortalStateToDisk();
+  }
+}
+
 let lastSavedPortalStateDiskJson = '';
 let diskSaveTimer: NodeJS.Timeout | null = null;
 let diskWriteInFlight = false;

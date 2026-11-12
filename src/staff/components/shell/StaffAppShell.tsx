@@ -32,6 +32,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
+  KeyRound,
   Feather,
 } from 'lucide-react';
 import { formatAcademicYearLabel } from '@5tot/contracts';
@@ -48,6 +49,7 @@ import {
 import { Season } from '../../adminTypes';
 import { AwardProgramContextBar } from './AwardProgramContextBar';
 import { FeedbackFloatingWidget } from '../../../components/feedback/FeedbackFloatingWidget';
+import { ChangePasswordModal } from '../../../components/modals/ChangePasswordModal';
 
 export interface StaffAppShellProps {
   currentUser: StaffUser;
@@ -304,6 +306,7 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(
     () => typeof window !== 'undefined' && window.innerWidth < 1024
   );
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState<boolean>(false);
 
   const activeSidebarId = resolveActiveSidebarNavId(activeRouteId, currentUser);
 
@@ -558,6 +561,15 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
                   </div>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  className="w-full flex items-center justify-between py-2 px-3 rounded-[9px] bg-white/[0.06] hover:bg-white/[0.12] text-[#9EB3C6] hover:text-white text-[12px] font-semibold transition-colors cursor-pointer"
+                >
+                  <span>Đổi mật khẩu</span>
+                  <KeyRound size={13.5} className="shrink-0" />
+                </button>
+
                 {onLogout && (
                   <button
                     type="button"
@@ -577,6 +589,15 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
                 >
                   {currentUser.fullName.charAt(0)}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  title="Đổi mật khẩu"
+                  aria-label="Đổi mật khẩu"
+                  className="w-9 h-9 rounded-[9px] bg-white/[0.06] hover:bg-white/[0.12] text-[#9EB3C6] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <KeyRound size={14} />
+                </button>
                 {onLogout && (
                   <button
                     type="button"
@@ -607,6 +628,11 @@ export const StaffAppShell: React.FC<StaffAppShellProps> = ({
         </div>
       </div>
       <FeedbackFloatingWidget />
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        userEmail={currentUser.email}
+      />
     </div>
   );
 };
