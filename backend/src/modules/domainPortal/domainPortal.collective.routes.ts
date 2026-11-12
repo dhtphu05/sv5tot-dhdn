@@ -743,15 +743,21 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
         ? clientR2Bucket.trim()
         : undefined;
 
-    // If client uploaded base64Content directly without a pre-uploaded R2 objectKey, push directly to Cloudflare R2 when configured
-    if (!resolvedR2ObjectKey && base64Content && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
+    let verifiedInCloudR2 = Boolean(
+      resolvedR2ObjectKey && !base64Content && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()
+    );
+
+    // If client sent base64Content (fallback or IndexedDB recovery sync), push directly to Cloudflare R2 when configured
+    if (base64Content && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
       try {
         const cleanBase64 = base64Content.includes(',')
           ? base64Content.slice(base64Content.indexOf(',') + 1)
           : base64Content;
         const bodyBuffer = Buffer.from(cleanBase64, 'base64');
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const targetObjectKey = `evidence/${normalizedTrack.toLowerCase()}/${applicationId}/${evidenceId}-${sanitizedFileName}`;
+        const targetObjectKey =
+          resolvedR2ObjectKey ||
+          `evidence/${normalizedTrack.toLowerCase()}/${applicationId}/${evidenceId}-${sanitizedFileName}`;
         const mimeType = EXT_TO_MIME[ext] || 'application/pdf';
         const uploaded = await r2StorageClient.putObjectBuffer({
           objectKey: targetObjectKey,
@@ -760,7 +766,9 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
         });
         resolvedR2ObjectKey = uploaded.objectKey;
         resolvedR2Bucket = uploaded.bucketName;
+        verifiedInCloudR2 = true;
       } catch (err) {
+        verifiedInCloudR2 = false;
         console.warn(
           '[R2 Evidence Upload] Direct R2 upload fallback to PostgreSQL point-record:',
           err instanceof Error ? err.message : String(err)
@@ -795,14 +803,14 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
     if (onlineDbMode) {
       // Never store base64Content in Node.js RAM in online mode
       portalState.evidenceIndex.set(evidenceId, metadataRecord);
-      const dbRecord: StoredEvidenceRecord = resolvedR2ObjectKey
+      const dbRecord: StoredEvidenceRecord = verifiedInCloudR2
         ? metadataRecord
         : { ...metadataRecord, base64Content };
       await persistEvidenceRecordToNeonDb(dbRecord);
     } else {
       portalState.evidenceIndex.set(evidenceId, {
         ...metadataRecord,
-        base64Content: resolvedR2ObjectKey ? undefined : base64Content,
+        base64Content: verifiedInCloudR2 ? undefined : base64Content,
       });
     }
 
@@ -877,7 +885,7 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       }
     }
     if (!record || (!record.r2ObjectKey && !record.base64Content)) {
-      const hydrated = await hydrateEvidenceRecordFromNeonDb(record?.id || targetId);
+      const hydrated = await hydrateEvidenceRecordFromNeonDb(record?.id || targetId, true);
       if (hydrated) {
         record = hydrated;
       }
@@ -891,25 +899,111 @@ export function registerCollectiveAndEvidencePortalRoutes(router: Router): void 
       return;
     }
 
-    if (record.r2ObjectKey && r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
-      try {
-        const presignedGet = await r2StorageClient.createPresignedGetUrl({
-          objectKey: record.r2ObjectKey,
-          fileName: record.name,
-          mimeType: EXT_TO_MIME[record.fileType] || 'application/pdf',
-        });
-        res.status(200).json({
-          success: true,
-          data: {
-            ...record,
-            url: presignedGet.viewUrl,
-            viewUrl: presignedGet.viewUrl,
-          },
-        });
-        return;
-      } catch {
-        // Fall through to returning record
+    const mimeType = EXT_TO_MIME[record.fileType] || 'application/pdf';
+
+    if (r2StorageClient.isConfigured() && isNeonDbSyncEnabled()) {
+      if (record.r2ObjectKey) {
+        try {
+          const inspected = await r2StorageClient.inspectUploadedObject(record.r2ObjectKey);
+          if (!inspected || inspected.exists) {
+            const presignedGet = await r2StorageClient.createPresignedGetUrl({
+              objectKey: record.r2ObjectKey,
+              fileName: record.name,
+              mimeType,
+            });
+            res.status(200).json({
+              success: true,
+              data: {
+                ...record,
+                url: presignedGet.viewUrl,
+                viewUrl: presignedGet.viewUrl,
+              },
+            });
+            return;
+          }
+        } catch {
+          // Fall through to DB / local disk recovery
+        }
       }
+
+      // Object does not exist in R2 yet — try hydrating base64Content from Neon DB or local disk buffer and auto-migrating to R2
+      if (!record.base64Content) {
+        const hydratedWithB64 = await hydrateEvidenceRecordFromNeonDb(record.id, true);
+        if (hydratedWithB64?.base64Content) {
+          record = hydratedWithB64;
+        } else {
+          const candidateLocalIds = [record.remoteEvidenceId, record.id].filter(Boolean) as string[];
+          for (const localId of candidateLocalIds) {
+            const localBinPath = path.resolve(process.cwd(), '.data/r2-local-objects', `${localId}.bin`);
+            if (fs.existsSync(localBinPath)) {
+              try {
+                const buf = fs.readFileSync(localBinPath);
+                record = { ...record, base64Content: buf.toString('base64') };
+                break;
+              } catch {
+                // ignore
+              }
+            }
+          }
+        }
+      }
+
+      if (record.base64Content) {
+        try {
+          const cleanBase64 = record.base64Content.includes(',')
+            ? record.base64Content.slice(record.base64Content.indexOf(',') + 1)
+            : record.base64Content;
+          const bodyBuffer = Buffer.from(cleanBase64, 'base64');
+          const sanitizedFileName = record.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const targetObjectKey =
+            record.r2ObjectKey ||
+            `evidence/${(record.ownerTrack || 'INDIVIDUAL').toLowerCase()}/${record.applicationId || 'APP-2026-DN-00142'}/${record.id}-${sanitizedFileName}`;
+          const uploaded = await r2StorageClient.putObjectBuffer({
+            objectKey: targetObjectKey,
+            mimeType,
+            body: bodyBuffer,
+          });
+          const updatedMeta: StoredEvidenceRecord = {
+            ...record,
+            r2ObjectKey: uploaded.objectKey,
+            r2Bucket: uploaded.bucketName,
+            base64Content: undefined,
+          };
+          portalState.evidenceIndex.set(record.id, updatedMeta);
+          void persistEvidenceRecordToNeonDb(updatedMeta);
+
+          const presignedGet = await r2StorageClient.createPresignedGetUrl({
+            objectKey: uploaded.objectKey,
+            fileName: record.name,
+            mimeType,
+          });
+          res.status(200).json({
+            success: true,
+            data: {
+              ...updatedMeta,
+              url: presignedGet.viewUrl,
+              viewUrl: presignedGet.viewUrl,
+            },
+          });
+          return;
+        } catch {
+          // Fall through and return record with base64Content directly
+          res.status(200).json({ success: true, data: record });
+          return;
+        }
+      }
+
+      // Neither R2 nor DB has binary bytes for this legacy record
+      res.status(200).json({
+        success: true,
+        data: {
+          ...record,
+          url: undefined,
+          viewUrl: undefined,
+          missingCloudBinary: true,
+        },
+      });
+      return;
     }
 
     res.status(200).json({ success: true, data: record });

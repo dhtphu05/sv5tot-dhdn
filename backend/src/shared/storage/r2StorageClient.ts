@@ -243,8 +243,11 @@ export class CloudflareR2StorageClient implements IObjectStorageClient {
       );
     }
 
+    const useOfflineEndpoint =
+      !this.customConfig && cfg.env.BACKEND_DATABASE_MODE === 'offline';
+
     const safeEndpoint =
-      cfg.endpoint && (!cfg.accountId || cfg.accountId.length <= 63)
+      !useOfflineEndpoint && cfg.endpoint && (!cfg.accountId || cfg.accountId.length <= 63)
         ? cfg.endpoint
         : 'https://offline-dev.r2.cloudflarestorage.com';
     const accessKeyId = cfg.accessKeyId || 'offline-dev-r2-access-key';

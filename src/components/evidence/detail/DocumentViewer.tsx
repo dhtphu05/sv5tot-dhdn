@@ -55,6 +55,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 }) => {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [resolvedBlobUrl, setResolvedBlobUrl] = useState<string | null>(null);
+  const [isResolvingBlob, setIsResolvingBlob] = useState(Boolean(fileId || fileName));
   const [blobLoadFailed, setBlobLoadFailed] = useState(false);
   const relinkInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,14 +63,22 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     let cancelled = false;
     setBlobLoadFailed(false);
     setResolvedBlobUrl(null);
+    setIsResolvingBlob(true);
 
     getEvidenceBlobUrlByIdOrName(fileId, fileName)
       .then((storedUrl) => {
-        if (!cancelled && storedUrl) {
-          setResolvedBlobUrl(storedUrl);
+        if (!cancelled) {
+          if (storedUrl) {
+            setResolvedBlobUrl(storedUrl);
+          }
+          setIsResolvingBlob(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) {
+          setIsResolvingBlob(false);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -104,12 +113,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const candidateUrl =
     resolvedBlobUrl || (!blobLoadFailed ? usableExplicitUrl : undefined);
   const effectiveUrl = resolvePreviewUrl(fileName, fileType, candidateUrl, fileId);
-  const isMissingLocalBinary = !effectiveUrl && !isLoading && !isFailed;
+  const effectiveLoading = isLoading || (isResolvingBlob && !effectiveUrl);
+  const isMissingLocalBinary = !effectiveUrl && !effectiveLoading && !isFailed;
 
   return (
     <div className="relative flex-1 h-full bg-[#EEF3F7] overflow-auto flex flex-col min-w-0 select-none">
       {/* Floating Viewer Toolbar for Image files (PDFs use the browser'in built-in native PDF toolbar) */}
-      {!isPdf && !isLoading && !isFailed && !isMissingLocalBinary && (
+      {!isPdf && !effectiveLoading && !isFailed && !isMissingLocalBinary && (
         <div className="sticky top-4 z-20 mx-auto pointer-events-none mt-3">
           <div className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-full shadow-[0_4px_20px_rgba(23,42,58,0.12)] border border-[#DCE7EE] text-[12px] text-[#172A3A]">
             <button
@@ -165,7 +175,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       )}
 
       {/* Loading Skeleton State */}
-      {isLoading && (
+      {effectiveLoading && (
         <div className="flex-1 flex flex-col items-center justify-center p-12">
           <div className="w-[500px] h-[700px] bg-white rounded-[4px] shadow-md border border-[#DCE7EE] p-8 flex flex-col gap-4 animate-pulse">
             <div className="h-6 w-48 bg-gray-200 rounded mx-auto" />
@@ -218,7 +228,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       )}
 
       {/* Preview Failure Fallback */}
-      {!isLoading && isFailed && (
+      {!effectiveLoading && isFailed && (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="p-8 bg-white rounded-[12px] border border-[#DCE7EE] shadow-sm max-w-md flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center mb-3">
@@ -258,7 +268,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       )}
 
       {/* Render Document: Full-bleed Native Browser PDF Viewer for PDFs, Zoomable Card for Images */}
-      {!isLoading && !isFailed && !isMissingLocalBinary && (
+      {!effectiveLoading && !isFailed && !isMissingLocalBinary && (
         isPdf ? (
           <div className="flex-1 w-full h-full min-h-[680px] flex flex-col bg-[#525659]">
             <iframe

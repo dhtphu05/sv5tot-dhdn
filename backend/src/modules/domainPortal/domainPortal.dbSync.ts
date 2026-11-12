@@ -997,10 +997,11 @@ export async function clearPortalPersistentRecordsInNeonDb(): Promise<void> {
 }
 
 export async function hydrateEvidenceRecordFromNeonDb(
-  targetIdOrName: string
+  targetIdOrName: string,
+  forceIncludeBase64 = false
 ): Promise<StoredEvidenceRecord | null> {
   const existing = portalState.evidenceIndex.get(targetIdOrName);
-  if (existing?.base64Content || existing?.r2ObjectKey) {
+  if (existing?.base64Content || (!forceIncludeBase64 && existing?.r2ObjectKey)) {
     return existing;
   }
   if (!isNeonDbSyncEnabled()) {
@@ -1017,7 +1018,7 @@ export async function hydrateEvidenceRecordFromNeonDb(
 
     if ((!rows || rows.length === 0) && !existing) {
       rows = (await prisma.$queryRawUnsafe(
-        `SELECT "record_key", "payload" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "payload"->>'name' = $1 LIMIT 1`,
+        `SELECT "record_key", "payload" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "payload"->>'name' = $1 ORDER BY ("payload"->>'base64Content' IS NOT NULL) DESC LIMIT 1`,
         targetIdOrName
       )) as Array<{ record_key: string; payload: any }>;
     }
@@ -1026,6 +1027,17 @@ export async function hydrateEvidenceRecordFromNeonDb(
     const parsed = (
       typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload
     ) as StoredEvidenceRecord;
+
+    if (!parsed.base64Content && parsed.name) {
+      const fallbackRows = (await prisma.$queryRawUnsafe(
+        `SELECT "payload"->>'base64Content' AS "b64" FROM "portal_persistent_records" WHERE "collection" = 'evidence_record' AND "payload"->>'name' = $1 AND "payload"->>'base64Content' IS NOT NULL LIMIT 1`,
+        parsed.name
+      )) as Array<{ b64?: string }>;
+      if (fallbackRows?.[0]?.b64) {
+        parsed.base64Content = fallbackRows[0].b64;
+      }
+    }
+
     // Keep only lightweight metadata in RAM (never retain multi-megabyte base64Content in Node.js heap in online mode)
     const { base64Content: _omittedFromRam, ...metadataOnly } = parsed;
     portalState.evidenceIndex.set(row.record_key, metadataOnly);

@@ -362,6 +362,7 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
   }
 
   if (isBackendMode()) {
+    let confirmedMissingOnCloud = false;
     // 1. Check portal evidence store first (unauthenticated, safe for student & portal users)
     try {
       const portalRes = await apiRequest<{
@@ -373,9 +374,13 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
           url?: string;
           viewUrl?: string;
           base64Content?: string;
+          missingCloudBinary?: boolean;
         };
       }>(`/api/v2/portal/evidence/${encodeURIComponent(id)}`, { method: 'GET' });
       const evData = portalRes?.data;
+      if (evData?.missingCloudBinary) {
+        confirmedMissingOnCloud = true;
+      }
       if (
         evData?.viewUrl &&
         !evData.viewUrl.includes('offline-dev.r2.cloudflarestorage.com')
@@ -412,8 +417,8 @@ export async function getEvidenceBlobUrl(id: string): Promise<string | null> {
       // Fall through
     }
 
-    // 2. Only query /api/v2/evidence/:id/view-url if an active auth session exists (prevents 401 session-expired logout)
-    if (hasActiveAuthSession()) {
+    // 2. Only query /api/v2/evidence/:id/view-url if an active auth session exists and not confirmed missing on R2
+    if (!confirmedMissingOnCloud && hasActiveAuthSession()) {
       const targetRemoteId = record?.remoteEvidenceId || remoteEvidenceIdMap.get(id) || id;
       try {
         const viewRes = await getCachedEvidenceViewUrl(targetRemoteId);
@@ -560,3 +565,81 @@ export async function downloadEvidenceFile(id: string, fallbackName?: string): P
 
   return false;
 }
+
+let hasTriggeredIndexedDbCloudSync = false;
+
+/**
+ * Automatically checks local browser IndexedDB (`5tot_danang_collective_files`)
+ * and re-uploads any cached student evidence Blobs whose binary is missing on Cloudflare R2 / Backend.
+ */
+export async function syncLocalIndexedDbEvidenceToBackend(): Promise<void> {
+  if (hasTriggeredIndexedDbCloudSync || !isIndexedDBAvailable() || !isBackendMode()) {
+    return;
+  }
+  hasTriggeredIndexedDbCloudSync = true;
+
+  try {
+    const db = await openDatabase();
+    const allRecords = await new Promise<StoredEvidenceRecord[]>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve((req.result as StoredEvidenceRecord[]) || []);
+      req.onerror = () => reject(req.error);
+      tx.oncomplete = () => db.close();
+    });
+
+    for (const rec of allRecords) {
+      if (!rec?.id || !rec.blob || rec.blob.size === 0 || rec.blob.size > 25 * 1024 * 1024) {
+        continue;
+      }
+      try {
+        const checkRes = await apiRequest<{
+          success: boolean;
+          data?: {
+            id: string;
+            viewUrl?: string;
+            base64Content?: string;
+            missingCloudBinary?: boolean;
+          };
+        }>(`/api/v2/portal/evidence/${encodeURIComponent(rec.id)}`, { method: 'GET' });
+        if (checkRes?.data?.viewUrl || (checkRes?.data?.base64Content && !checkRes?.data?.missingCloudBinary)) {
+          continue;
+        }
+      } catch {
+        // 404 or missing -> proceed to re-upload
+      }
+
+      try {
+        const ab = await rec.blob.arrayBuffer();
+        const base64Content = uint8ToBase64(new Uint8Array(ab));
+        const ownerTrack = rec.applicationId?.startsWith('COL-') ? 'COLLECTIVE' : 'INDIVIDUAL';
+        await apiRequest('/api/v2/portal/evidence/upload', {
+          method: 'POST',
+          body: {
+            id: rec.id,
+            ownerTrack,
+            applicationId: rec.applicationId || 'APP-2026-DN-00142',
+            requirementOrCriterionId: rec.reqId || 'general',
+            fileName: rec.name || `${rec.id}.pdf`,
+            fileType: rec.fileType || 'pdf',
+            fileSizeBytes: rec.sizeBytes || rec.blob.size,
+            base64Content,
+            ...(rec.remoteEvidenceId ? { remoteEvidenceId: rec.remoteEvidenceId } : {}),
+          },
+        });
+      } catch {
+        // Ignore individual item errors
+      }
+    }
+  } catch {
+    // Ignore IndexedDB open errors
+  }
+}
+
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    void syncLocalIndexedDbEvidenceToBackend();
+  }, 2000);
+}
+

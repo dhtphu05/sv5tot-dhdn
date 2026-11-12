@@ -297,7 +297,8 @@ export async function executeR2EvidenceUpload(params: {
   for (let attempt = 0; attempt < 2 && !putSucceeded; attempt++) {
     try {
       const isOfflineDevUrl = intent.uploadUrl.includes('offline-dev.r2.cloudflarestorage.com');
-      const targetPutUrl = isOfflineDevUrl
+      const useBackendR2Relay = isOfflineDevUrl || typeof window !== 'undefined';
+      const targetPutUrl = useBackendR2Relay
         ? `${getApiBaseUrl()}/api/v2/evidence/r2-local-object/${encodeURIComponent(intent.evidenceObjectId)}`
         : intent.uploadUrl;
       const putRes = await fetch(targetPutUrl, {
@@ -317,6 +318,24 @@ export async function executeR2EvidenceUpload(params: {
         notify('RETRYING_UPLOAD');
         intent = await retryR2UploadIntent(intent.evidenceObjectId, params.actor);
       } else {
+        // Fallback to backend-proxied upload (/r2-local-object/:id -> server pushes directly to R2) if browser direct PUT is blocked by CORS
+        try {
+          const proxyUrl = `${getApiBaseUrl()}/api/v2/evidence/r2-local-object/${encodeURIComponent(intent.evidenceObjectId)}`;
+          const proxyRes = await fetch(proxyUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': resolvedMime,
+            },
+            body: bytes as unknown as BodyInit,
+          });
+          if (proxyRes.ok) {
+            putSucceeded = true;
+            uploadedDirectToCloudR2 = false;
+            break;
+          }
+        } catch {
+          // Fall through to error below
+        }
         notify('ERROR');
         throw new BackendApiError(
           `Không thể tải tệp lên kho lưu trữ đám mây R2: ${(putErr as Error)?.message || 'Network error'}`,

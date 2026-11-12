@@ -664,6 +664,7 @@ export function isTestRuntime(): boolean {
     process.env.NODE_ENV === 'test' ||
     process.execArgv.includes('--test') ||
     process.argv.includes('--test') ||
+    process.argv.some((arg) => /\.test\.[cm]?[jt]sx?$/.test(arg)) ||
     Boolean(
       process.env.npm_lifecycle_event &&
         process.env.npm_lifecycle_event.includes('test')
