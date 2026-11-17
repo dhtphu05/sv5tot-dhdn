@@ -372,7 +372,8 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
   ) => {
     if (
       !activeApp ||
-      (activeApp.status !== 'draft' && activeApp.status !== 'supplement_requested')
+      activeApp.status === 'recognized' ||
+      activeApp.status === 'not_recognized'
     ) {
       return;
     }
@@ -716,7 +717,8 @@ export const WhiteBirdPortal: React.FC<WhiteBirdPortalProps> = ({
   // ---------------------------------------------------------------------------
   const categoryMeta = WHITE_BIRD_CATEGORIES[activeApp.category];
   const readiness = validateWhiteBirdReadiness(activeApp);
-  const isReadOnly = activeApp.status !== 'draft' && activeApp.status !== 'supplement_requested';
+  const isReadOnly =
+    activeApp.status === 'recognized' || activeApp.status === 'not_recognized';
   const allEvidenceFiles = [
     ...activeApp.requirements.wb01.evidenceFiles.map((f) => ({ ...f, reqId: 'WB01' as const })),
     ...activeApp.requirements.wb02.evidenceFiles.map((f) => ({ ...f, reqId: 'WB02' as const })),

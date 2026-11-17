@@ -176,10 +176,7 @@ export function useCollectiveWorkspace({
   const editingRecognitionRate = calculateRecognitionRate(tt03RecognizedCount, sharedTotalMembers);
 
   const { status } = application;
-  const isReadOnly =
-    status !== 'draft' &&
-    status !== 'city_supplement_pending' &&
-    status !== 'returned_for_correction';
+  const isReadOnly = status === 'published' || status === 'finalized';
 
   const getStatusBadge = () => {
     switch (status) {

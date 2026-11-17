@@ -850,14 +850,22 @@ export function registerIndividualStudentPortalRoutes(
     }
 
     const mapped = resolveSchoolMappingForApp(app);
+    const existingPrelimStatus =
+      baseApp.schoolPreliminaryStatus &&
+      baseApp.schoolPreliminaryStatus !== 'school_not_submitted'
+        ? baseApp.schoolPreliminaryStatus
+        : 'pending_intake';
     app.applicationId = id;
     app.status = 'under_review';
-    app.reviewStage = 'SCHOOL';
-    app.schoolPreliminaryStatus = 'pending_intake';
+    app.reviewStage =
+      baseApp.reviewStage && baseApp.reviewStage !== 'SCHOOL'
+        ? baseApp.reviewStage
+        : 'SCHOOL';
+    app.schoolPreliminaryStatus = existingPrelimStatus;
     app.schoolReviewUnitId = app.schoolReviewUnitId || mapped.unitId;
     app.schoolReviewUnitName = app.schoolReviewUnitName || mapped.unitName;
     app.trainingInstitutionName = app.trainingInstitutionName || mapped.instName;
-    app.submittedAt = app.submittedAt || new Date().toLocaleDateString('vi-VN');
+    app.submittedAt = new Date().toLocaleDateString('vi-VN');
     portalState.studentApplications[id] = app;
 
     syncStaffRecordFromStudentApplication(app, {

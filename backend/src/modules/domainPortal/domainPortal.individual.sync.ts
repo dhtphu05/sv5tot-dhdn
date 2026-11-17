@@ -296,16 +296,24 @@ export function syncStaffRecordFromStudentApplication(
     criteriaReview: updatedCriteriaReview,
     totalDeclarations: totalDecl,
     totalEvidence: totalEv,
+    studentApplication: app,
     updatedAt: 'Vừa cập nhật',
     updatedSortKey: Date.now(),
   };
 
   if (options?.markSubmitted) {
-    staffRec.currentReviewStage = 'SCHOOL';
-    staffRec.schoolPreliminaryStatus = 'pending_intake';
+    staffRec.currentReviewStage =
+      existing?.currentReviewStage && existing.currentReviewStage !== 'SCHOOL'
+        ? existing.currentReviewStage
+        : 'SCHOOL';
+    staffRec.schoolPreliminaryStatus =
+      existing?.schoolPreliminaryStatus &&
+      existing.schoolPreliminaryStatus !== 'school_not_submitted'
+        ? existing.schoolPreliminaryStatus
+        : 'pending_intake';
     staffRec.submittedAt = app.submittedAt || nowFormatted;
     staffRec.submittedDateSortKey = new Date().toISOString();
-    staffRec.latestOperationalNote = `Sinh viên đã nộp hồ sơ chính thức về ${staffRec.schoolReviewUnitName}`;
+    staffRec.latestOperationalNote = `Sinh viên đã cập nhật và gửi hồ sơ về ${staffRec.schoolReviewUnitName}`;
   }
 
   if (existingIdx >= 0) {

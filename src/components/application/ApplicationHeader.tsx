@@ -161,27 +161,38 @@ export const ApplicationHeader: React.FC<ApplicationHeaderProps> = ({
             >
               Xem kết quả
             </Button>
-          ) : isSupplementRequired ? (
-            <Button
-              variant="secondary"
-              size={isCompact ? 'sm' : 'md'}
-              onClick={onViewSupplement}
-              iconLeading={<ArrowDownCircle size={14} className="text-[#B75B00]" />}
-              className="border-[#FADDB6] bg-[#FEF6EB] hover:bg-[#FDEBC8] text-[#8C3A19] font-semibold text-[13px] whitespace-nowrap"
-            >
-              Xem yêu cầu bổ sung
-            </Button>
-          ) : !isPostSubmit ? (
-            <Button
-              variant="primary"
-              size={isCompact ? 'sm' : 'md'}
-              onClick={onSubmitClick}
-              iconLeading={<Send size={isCompact ? 13 : 15} />}
-              className="bg-[#18A6E0] hover:bg-[#1390C5] text-white shadow-none font-semibold whitespace-nowrap"
-            >
-              {isCompact ? 'Kiểm tra & gửi' : 'Kiểm tra & gửi hồ sơ'}
-            </Button>
-          ) : null}
+          ) : (
+            <>
+              {isSupplementRequired && (
+                <Button
+                  variant="secondary"
+                  size={isCompact ? 'sm' : 'md'}
+                  onClick={onViewSupplement}
+                  iconLeading={<ArrowDownCircle size={14} className="text-[#B75B00]" />}
+                  className="border-[#FADDB6] bg-[#FEF6EB] hover:bg-[#FDEBC8] text-[#8C3A19] font-semibold text-[13px] whitespace-nowrap"
+                >
+                  Xem yêu cầu bổ sung
+                </Button>
+              )}
+              {submissionState !== 'all_reviewed' && (
+                <Button
+                  variant="primary"
+                  size={isCompact ? 'sm' : 'md'}
+                  onClick={onSubmitClick}
+                  iconLeading={<Send size={isCompact ? 13 : 15} />}
+                  className="bg-[#18A6E0] hover:bg-[#1390C5] text-white shadow-none font-semibold whitespace-nowrap"
+                >
+                  {isPostSubmit
+                    ? isCompact
+                      ? 'Cập nhật & gửi lại'
+                      : 'Cập nhật & gửi lại hồ sơ'
+                    : isCompact
+                    ? 'Kiểm tra & gửi'
+                    : 'Kiểm tra & gửi hồ sơ'}
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

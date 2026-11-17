@@ -771,19 +771,19 @@ export const StudentHomeHeroBanner: React.FC<StudentHomeHeroBannerProps> = ({
         </h2>
         <p className="text-[13.5px] text-[#466474] leading-relaxed">
           {submissionState === 'submitted'
-            ? `Hồ sơ đã được gửi đến ${unitName} vào ngày 12/10/2026 · 14:32 và đang chờ bắt đầu xét sơ tuyển.`
-            : `${unitName} đang tiếp nhận và xét sơ tuyển hồ sơ của bạn. Nếu có nội dung cần làm rõ, đơn vị sẽ gửi thông báo tại đây.`}
+            ? `Hồ sơ đã được gửi đến ${unitName} (${application.submittedAt || 'vừa xong'}). Bạn vẫn có thể vào rà soát, cập nhật minh chứng và gửi lại hồ sơ.`
+            : `${unitName} đang tiếp nhận và xét sơ tuyển hồ sơ của bạn. Bạn vẫn có thể vào rà soát, cập nhật tệp minh chứng và gửi lại hồ sơ nếu cần.`}
         </p>
       </div>
       <div className="shrink-0">
         <Button
-          variant="secondary"
+          variant="primary"
           size="md"
           iconTrailing={<ArrowRight size={15} />}
           onClick={() => onOpenApplication()}
           className="font-bold"
         >
-          Xem tiến độ hồ sơ
+          Xem & cập nhật hồ sơ
         </Button>
       </div>
     </section>

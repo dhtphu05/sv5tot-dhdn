@@ -31,7 +31,7 @@ export const SubmissionStateBanner: React.FC<SubmissionStateBannerProps> = ({
             Hồ sơ đã được gửi
           </span>
           <span className="text-[12.5px] text-[#466474] mt-0.5 leading-relaxed">
-            Bạn có thể xem lại thông tin trong thời gian hồ sơ được chuyển đến Hội đồng xét chọn Đại học Đà Nẵng.
+            Bạn vẫn có thể chỉnh sửa kê khai, tải lại tệp minh chứng và bấm “Cập nhật & gửi lại hồ sơ” nếu cần cập nhật thông tin.
           </span>
         </div>
       </div>
@@ -49,14 +49,14 @@ export const SubmissionStateBanner: React.FC<SubmissionStateBannerProps> = ({
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[13.5px] font-bold text-[#172A3A] leading-snug">
-              Đang xét hồ sơ
+              Hồ sơ đã gửi · Đang trong đợt xét chọn
             </span>
             <span className="text-[11px] font-semibold text-[#15803D] bg-[#DCFCE7] border border-[#86EFAC] px-2 py-0.5 rounded-[4px]">
-              Đang thụ lý
+              Cho phép cập nhật & gửi lại
             </span>
           </div>
           <span className="text-[12.5px] text-[#335340] mt-0.5 leading-relaxed">
-            Hồ sơ của bạn đang được cán bộ phụ trách xem xét.
+            Bạn vẫn có thể chỉnh sửa nội dung, tải lại tệp minh chứng và bấm “Cập nhật & gửi lại hồ sơ” để lưu phiên bản mới nhất.
           </span>
         </div>
       </div>

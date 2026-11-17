@@ -312,14 +312,15 @@ export const StudentApplicationBodySection: React.FC<
         />
       )}
 
-      {submissionState === 'draft' && (
-        <ApplicationPreSubmitSummary
-          recommendationsCount={advisoriesCount}
-          advisories={advisories}
-          onCheckFurtherClick={onOpenPreSubmitReview}
-          onSubmitClick={onOpenPreSubmitReview}
-        />
-      )}
+      {submissionState !== 'result_published' &&
+        submissionState !== 'all_reviewed' && (
+          <ApplicationPreSubmitSummary
+            recommendationsCount={advisoriesCount}
+            advisories={advisories}
+            onCheckFurtherClick={onOpenPreSubmitReview}
+            onSubmitClick={onOpenPreSubmitReview}
+          />
+        )}
 
       <SupplementDevToolbar
         currentScenarioId={supplementScenarioId}

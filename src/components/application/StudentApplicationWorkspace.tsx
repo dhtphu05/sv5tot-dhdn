@@ -619,13 +619,18 @@ export const StudentApplicationWorkspace: React.FC<
     const resolvedAppId =
       application.applicationId ||
       (cleanStudentId ? `APP-2026-DN-${cleanStudentId}` : '');
+    const preservedPrelimStatus =
+      application.schoolPreliminaryStatus &&
+      application.schoolPreliminaryStatus !== 'school_not_submitted'
+        ? application.schoolPreliminaryStatus
+        : 'pending_intake';
     const submittedApp: StudentApplicationData = {
       ...application,
       applicationId: resolvedAppId,
       status: 'under_review',
-      reviewStage: 'SCHOOL',
-      schoolPreliminaryStatus: 'pending_intake',
-      submittedAt: application.submittedAt || new Date().toLocaleDateString('vi-VN'),
+      reviewStage: application.reviewStage || 'SCHOOL',
+      schoolPreliminaryStatus: preservedPrelimStatus,
+      submittedAt: new Date().toLocaleDateString('vi-VN'),
     };
     setApplicationWithMutation(submittedApp);
     setActivities(HERO_ACTIVITIES);
@@ -634,15 +639,15 @@ export const StudentApplicationWorkspace: React.FC<
     setIsSubmissionSuccessOpen(true);
 
     showToast(
-      'Hồ sơ Sinh viên 5 tốt của bạn đã được gửi thành công đến Hội Sinh viên Đại học Đà Nẵng!',
+      'Hồ sơ Sinh viên 5 tốt của bạn đã được cập nhật và gửi thành công đến Hội Sinh viên Đại học Đà Nẵng!',
       5000
     );
   };
 
-  const isReadOnly = submissionState !== 'draft';
-  const isSupplementMode =
-    submissionState === 'supplement_required' ||
-    submissionState === 'supplement_sent';
+  const isReadOnly =
+    submissionState === 'result_published' ||
+    submissionState === 'all_reviewed';
+  const isSupplementMode = submissionState === 'supplement_required';
 
   const effectiveAdvisories = useMemo(
     () =>

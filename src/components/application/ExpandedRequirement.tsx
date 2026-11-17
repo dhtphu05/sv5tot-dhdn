@@ -107,12 +107,9 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
           )))
   );
 
-  // In supplement mode, adding a NEW declaration is only allowed if explicitly permitted (Section 18)
+  // Allow adding declarations whenever not readOnly
   const canAddDeclaration = isSupplementMode
-    ? isTargetRequirement &&
-      supplementRequest?.status === 'active' &&
-      !isSupplementWindowClosed &&
-      isSupplementActionAllowed(supplementRequest?.allowedActions, 'addDeclaration')
+    ? !isSupplementWindowClosed
     : !readOnly;
 
   // =========================================================================
@@ -224,17 +221,12 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
               const isSupplementActive =
                 isTargetDecl && supplementRequest?.status === 'active';
 
-              // Scoped editability: only the targeted declaration allows operations permitted by request!
               const canEditThisDecl = isSupplementMode
-                ? isSupplementActive &&
-                  !isSupplementWindowClosed &&
-                  isSupplementActionAllowed(supplementRequest?.allowedActions, 'editDeclaration')
+                ? !isSupplementWindowClosed
                 : !readOnly;
 
               const canManageThisEvidence = isSupplementMode
-                ? isSupplementActive &&
-                  !isSupplementWindowClosed &&
-                  isSupplementActionAllowed(supplementRequest?.allowedActions, 'addEvidence')
+                ? !isSupplementWindowClosed
                 : !readOnly;
 
               return (
@@ -480,15 +472,11 @@ export const ExpandedRequirement: React.FC<ExpandedRequirementProps> = ({
     isTargetRequirement && supplementRequest?.status === 'active';
 
   const canEditSingleDecl = isSupplementMode
-    ? isSingleSupplementActive &&
-      !isSupplementWindowClosed &&
-      isSupplementActionAllowed(supplementRequest?.allowedActions, 'editDeclaration')
+    ? !isSupplementWindowClosed
     : !readOnly;
 
   const canManageSingleEvidence = isSupplementMode
-    ? isSingleSupplementActive &&
-      !isSupplementWindowClosed &&
-      isSupplementActionAllowed(supplementRequest?.allowedActions, 'addEvidence')
+    ? !isSupplementWindowClosed
     : !readOnly;
 
   return (
